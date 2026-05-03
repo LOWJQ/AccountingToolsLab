@@ -3,21 +3,12 @@ const footerSections = [
     title: "Tools",
     links: [
       { label: "All Tools", href: "/tools" },
-      { label: "Trial Balance", href: "/tools/trial-balance-calculator" },
-      { label: "Accounting Equation", href: "/tools/accounting-equation-calculator" },
-      { label: "Debit/Credit Checker", href: "/tools/debit-credit-checker" },
-      { label: "Financial Ratios", href: "/tools/financial-ratio-calculator" },
-      { label: "Depreciation Calculator", href: "/tools/depreciation-calculator" }
+      { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" }
     ]
   },
   {
     title: "Guides",
-    links: [
-      { label: "All Guides", href: "/guides" },
-      { label: "Debit vs Credit", href: "/guides/debit-vs-credit" },
-      { label: "Trial Balance Explained", href: "/guides/trial-balance-explained" },
-      { label: "Ratios for Beginners", href: "/guides/financial-ratios-for-beginners" }
-    ]
+    links: [{ label: "All Guides", href: "/guides" }]
   },
   {
     title: "Company",

@@ -165,15 +165,15 @@ export default function GuidesPage() {
                 understand the concept and then check your own numbers.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3">
               <a
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                 href="/tools"
               >
                 Explore Tools
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                 href="/tools/trial-balance-calculator"
               >
                 Try Trial Balance Calculator

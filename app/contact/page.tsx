@@ -61,10 +61,12 @@ export default function ContactPage() {
                 <h3 className="text-base font-semibold text-stone-950">{option.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-600">{option.text}</p>
                 {option.title === "General contact" ? (
-                  // TODO: Replace this placeholder with the real contact email before deployment.
-                  <p className="mt-5 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
+                  <a
+                    className="mt-5 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-600 ring-1 ring-stone-200 transition hover:text-stone-900"
+                    href={`mailto:${option.action}`}
+                  >
                     {option.action}
-                  </p>
+                  </a>
                 ) : (
                   <p className="mt-5 text-sm font-semibold text-slate-700">{option.action}</p>
                 )}
