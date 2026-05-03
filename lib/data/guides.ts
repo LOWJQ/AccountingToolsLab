@@ -3,7 +3,7 @@ export type Guide = {
   title: string;
   description: string;
   category: string;
-  status: "starter";
+  status: "available" | "coming-soon";
   href: string;
 };
 
@@ -14,7 +14,7 @@ export const guides: Guide[] = [
     description:
       "Understand how debit and credit work, which accounts increase with debit, and which accounts increase with credit.",
     category: "Accounting Basics",
-    status: "starter",
+    status: "coming-soon",
     href: "/guides/debit-vs-credit"
   },
   {
@@ -23,7 +23,7 @@ export const guides: Guide[] = [
     description:
       "Learn what a trial balance is, why total debits and total credits should match, and what an unbalanced trial balance means.",
     category: "Bookkeeping Checks",
-    status: "starter",
+    status: "available",
     href: "/guides/trial-balance-explained"
   },
   {
@@ -32,7 +32,7 @@ export const guides: Guide[] = [
     description:
       "Learn basic financial ratios such as current ratio, profit margin, and debt-to-equity ratio in beginner-friendly language.",
     category: "Financial Analysis",
-    status: "starter",
+    status: "coming-soon",
     href: "/guides/financial-ratios-for-beginners"
   }
 ];

@@ -11,7 +11,7 @@ const learningPaths = [
   {
     title: "Accounting Basics",
     steps: [
-      { label: "Debit vs Credit", href: "/guides/debit-vs-credit", status: "Available" },
+      { label: "Debit vs Credit", status: "Coming soon" },
       { label: "Accounting Equation Calculator", status: "Coming soon" },
       {
         label: "Trial Balance Calculator",
@@ -39,11 +39,7 @@ const learningPaths = [
   {
     title: "Financial Analysis",
     steps: [
-      {
-        label: "Financial Ratios for Beginners",
-        href: "/guides/financial-ratios-for-beginners",
-        status: "Available"
-      },
+      { label: "Financial Ratios for Beginners", status: "Coming soon" },
       { label: "Financial Ratio Calculator", status: "Coming soon" },
       { label: "Future Ratio Practice Examples", status: "Coming soon" }
     ]
@@ -74,7 +70,7 @@ export default function GuidesPage() {
             links to practical tools.
           </p>
           <p className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
-            {guides.length} starter guides · more planned
+            1 available guide; {guides.length - 1} coming soon
           </p>
         </section>
 
@@ -87,28 +83,51 @@ export default function GuidesPage() {
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Each starter guide is prepared as a clear entry point for future full articles.
+              The available guide is ready to read. Upcoming guides are shown without linking to
+              placeholder pages.
             </p>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {guides.map((guide) => (
-              <a
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
-                href={guide.href}
-                key={guide.slug}
-              >
-                <div className="flex flex-wrap gap-2">
-                  <StatusBadge>{guide.category}</StatusBadge>
-                  <StatusBadge>Starter guide</StatusBadge>
-                </div>
-                <h3 className="mt-5 text-lg font-semibold tracking-tight text-stone-950">
-                  {guide.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{guide.description}</p>
-                <p className="mt-6 text-sm font-semibold text-slate-700">Read guide</p>
-              </a>
-            ))}
+            {guides.map((guide) => {
+              const isAvailable = guide.status === "available";
+              const content = (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    <StatusBadge>{guide.category}</StatusBadge>
+                    <StatusBadge>{isAvailable ? "Available guide" : "Coming soon"}</StatusBadge>
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold tracking-tight text-stone-950">
+                    {guide.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-stone-600">{guide.description}</p>
+                  <p
+                    className={`mt-6 text-sm font-semibold ${
+                      isAvailable ? "text-slate-700" : "text-stone-400"
+                    }`}
+                  >
+                    {isAvailable ? "Read guide" : "Guide coming soon"}
+                  </p>
+                </>
+              );
+
+              return isAvailable ? (
+                <a
+                  className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+                  href={guide.href}
+                  key={guide.slug}
+                >
+                  {content}
+                </a>
+              ) : (
+                <article
+                  className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
+                  key={guide.slug}
+                >
+                  {content}
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -135,7 +154,10 @@ export default function GuidesPage() {
                       </span>
                       <span>
                         {step.href ? (
-                          <a className="font-semibold text-stone-800 hover:text-slate-700" href={step.href}>
+                          <a
+                            className="font-semibold text-stone-800 hover:text-slate-700"
+                            href={step.href}
+                          >
                             {step.label}
                           </a>
                         ) : (

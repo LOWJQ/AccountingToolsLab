@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools",
     "/tools/trial-balance-calculator",
     "/guides",
+    "/guides/trial-balance-explained",
     "/about",
     "/contact",
     "/privacy-policy",
