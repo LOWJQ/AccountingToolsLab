@@ -1,7 +1,34 @@
-export type TrialBalanceInput = unknown;
-export type TrialBalanceOutput = unknown;
+export type TrialBalanceRow = {
+  accountName: string;
+  debit: number;
+  credit: number;
+};
 
-export function calculateTrialBalance(_input: TrialBalanceInput): TrialBalanceOutput {
-  // Real trial balance logic will be implemented here later.
-  throw new Error("Not implemented yet");
+export type TrialBalanceResult = {
+  totalDebit: number;
+  totalCredit: number;
+  difference: number;
+  isBalanced: boolean;
+};
+
+export function calculateTrialBalance(rows: TrialBalanceRow[]): TrialBalanceResult {
+  const totals = rows.reduce(
+    (accumulator, row) => ({
+      totalDebit: accumulator.totalDebit + row.debit,
+      totalCredit: accumulator.totalCredit + row.credit
+    }),
+    {
+      totalDebit: 0,
+      totalCredit: 0
+    }
+  );
+
+  const difference = Math.abs(totals.totalDebit - totals.totalCredit);
+
+  return {
+    totalDebit: totals.totalDebit,
+    totalCredit: totals.totalCredit,
+    difference,
+    isBalanced: difference === 0
+  };
 }
