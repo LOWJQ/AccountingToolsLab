@@ -1,8 +1,18 @@
-const trialBalanceRows = [
-  { accountName: "Cash", debit: "12,500.00", credit: "" },
-  { accountName: "Accounts Receivable", debit: "4,200.00", credit: "" },
-  { accountName: "Service Revenue", debit: "", credit: "10,800.00" },
-  { accountName: "Owner's Capital", debit: "", credit: "5,900.00" }
+"use client";
+
+import { useMemo, useState } from "react";
+import { calculateTrialBalance } from "@/lib/calculators/trial-balance";
+import type { TrialBalanceRow } from "@/lib/calculators/trial-balance";
+
+type EditableTrialBalanceRow = {
+  id: string;
+  accountName: string;
+  debit: string;
+  credit: string;
+};
+
+const initialRows: EditableTrialBalanceRow[] = [
+  { id: "row-1", accountName: "", debit: "", credit: "" }
 ];
 
 const facts = [
@@ -47,6 +57,22 @@ const mistakes = [
   }
 ];
 
+function parseAmount(value: string): number {
+  if (value.trim() === "") {
+    return 0;
+  }
+
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount >= 0 ? amount : 0;
+}
+
+function formatMoney(value: number): string {
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: "USD"
+  }).format(value);
+}
+
 function SummaryCard({
   label,
   value,
@@ -71,7 +97,114 @@ function SummaryCard({
   );
 }
 
+function getStatus({
+  totalDebit,
+  totalCredit,
+  isBalanced
+}: {
+  totalDebit: number;
+  totalCredit: number;
+  isBalanced: boolean;
+}) {
+  if (totalDebit === 0 && totalCredit === 0) {
+    return {
+      label: "Waiting for entries",
+      cardClass: "border-stone-200 bg-stone-50",
+      labelClass: "text-stone-600",
+      badgeClass: "bg-white text-stone-600 ring-stone-200"
+    };
+  }
+
+  if (isBalanced) {
+    return {
+      label: "Balanced",
+      cardClass: "border-emerald-100 bg-emerald-50",
+      labelClass: "text-emerald-700",
+      badgeClass: "bg-white text-emerald-700 ring-emerald-100"
+    };
+  }
+
+  return {
+    label: "Unbalanced",
+    cardClass: "border-rose-100 bg-rose-50",
+    labelClass: "text-rose-700",
+    badgeClass: "bg-white text-rose-700 ring-rose-100"
+  };
+}
+
 export function TrialBalanceCalculator() {
+  const [rows, setRows] = useState<EditableTrialBalanceRow[]>(initialRows);
+
+  const calculationRows = useMemo<TrialBalanceRow[]>(
+    () =>
+      rows.map((row) => ({
+        id: row.id,
+        accountName: row.accountName,
+        debit: parseAmount(row.debit),
+        credit: parseAmount(row.credit)
+      })),
+    [rows]
+  );
+
+  const result = useMemo(() => calculateTrialBalance(calculationRows), [calculationRows]);
+  const status = getStatus(result);
+
+  function updateRow(
+    id: string,
+    field: keyof Omit<EditableTrialBalanceRow, "id">,
+    value: string
+  ) {
+    if ((field === "debit" || field === "credit") && value.includes("-")) {
+      return;
+    }
+
+    setRows((currentRows) =>
+      currentRows.map((row) => {
+        if (row.id !== id) {
+          return row;
+        }
+
+        if (field === "debit") {
+          return {
+            ...row,
+            debit: value,
+            credit: value === "" ? row.credit : ""
+          };
+        }
+
+        if (field === "credit") {
+          return {
+            ...row,
+            credit: value,
+            debit: value === "" ? row.debit : ""
+          };
+        }
+
+        return {
+          ...row,
+          accountName: value
+        };
+      })
+    );
+  }
+
+  function addRow() {
+    const id = `row-${Date.now()}`;
+    setRows((currentRows) => [
+      ...currentRows,
+      {
+        id,
+        accountName: "",
+        debit: "",
+        credit: ""
+      }
+    ]);
+  }
+
+  function removeRow(id: string) {
+    setRows((currentRows) => currentRows.filter((row) => row.id !== id));
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <section className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
@@ -88,60 +221,93 @@ export function TrialBalanceCalculator() {
           <button
             type="button"
             className="inline-flex h-11 items-center justify-center rounded-full bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            onClick={addRow}
           >
             Add Row
           </button>
         </div>
 
         <div className="mt-8 overflow-x-auto">
-          <div className="min-w-[720px]">
-            <div className="grid grid-cols-[1.4fr_1fr_1fr] gap-3 px-1 pb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">
+          <div className="min-w-[780px]">
+            <div className="grid grid-cols-[1.4fr_1fr_1fr_3rem] gap-3 px-1 pb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">
               <span>Account Name</span>
               <span>Debit</span>
               <span>Credit</span>
+              <span className="sr-only">Actions</span>
             </div>
             <div className="flex flex-col gap-3">
-              {trialBalanceRows.map((row) => (
-                <div
-                  className="grid grid-cols-[1.4fr_1fr_1fr] gap-3"
-                  key={row.accountName}
-                >
-                  <input
-                    aria-label={`${row.accountName} account name`}
-                    className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none"
-                    defaultValue={row.accountName}
-                    readOnly
-                  />
-                  <input
-                    aria-label={`${row.accountName} debit amount`}
-                    className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none"
-                    defaultValue={row.debit}
-                    placeholder="0.00"
-                    readOnly
-                  />
-                  <input
-                    aria-label={`${row.accountName} credit amount`}
-                    className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none"
-                    defaultValue={row.credit}
-                    placeholder="0.00"
-                    readOnly
-                  />
-                </div>
-              ))}
+              {rows.map((row, index) => {
+                const hasDebit = parseAmount(row.debit) > 0;
+                const hasCredit = parseAmount(row.credit) > 0;
+
+                return (
+                  <div
+                    className="grid grid-cols-[1.4fr_1fr_1fr_3rem] gap-3"
+                    key={row.id}
+                  >
+                    <input
+                      aria-label={`Row ${index + 1} account name`}
+                      className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      onChange={(event) => updateRow(row.id, "accountName", event.target.value)}
+                      placeholder="Account name"
+                      value={row.accountName}
+                    />
+                    <input
+                      aria-label={`Row ${index + 1} debit amount`}
+                      className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      disabled={hasCredit}
+                      inputMode="decimal"
+                      min="0"
+                      onChange={(event) => updateRow(row.id, "debit", event.target.value)}
+                      placeholder="0.00"
+                      step="0.01"
+                      type="number"
+                      value={row.debit}
+                    />
+                    <input
+                      aria-label={`Row ${index + 1} credit amount`}
+                      className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      disabled={hasDebit}
+                      inputMode="decimal"
+                      min="0"
+                      onChange={(event) => updateRow(row.id, "credit", event.target.value)}
+                      placeholder="0.00"
+                      step="0.01"
+                      type="number"
+                      value={row.credit}
+                    />
+                    <button
+                      aria-label={`Remove row ${index + 1}`}
+                      className="flex h-12 items-center justify-center rounded-2xl border border-stone-200 text-sm font-semibold text-stone-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={rows.length === 1}
+                      onClick={() => removeRow(row.id)}
+                      type="button"
+                    >
+                      X
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard label="Total Debit" value="$16,700.00" />
-          <SummaryCard label="Total Credit" value="$16,700.00" />
-          <SummaryCard label="Difference" value="$0.00" />
-          <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+          <SummaryCard label="Total Debit" value={formatMoney(result.totalDebit)} />
+          <SummaryCard label="Total Credit" value={formatMoney(result.totalCredit)} />
+          <SummaryCard
+            label="Difference"
+            tone={result.difference > 0 ? "error" : "neutral"}
+            value={formatMoney(result.difference)}
+          />
+          <div className={`rounded-2xl border px-4 py-4 shadow-sm ${status.cardClass}`}>
+            <p className={`text-xs font-medium uppercase tracking-wide ${status.labelClass}`}>
               Status
             </p>
-            <div className="mt-2 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-100">
-              Balanced
+            <div
+              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ring-1 ${status.badgeClass}`}
+            >
+              {status.label}
             </div>
           </div>
         </div>
@@ -157,14 +323,14 @@ export function TrialBalanceCalculator() {
             <h2 className="text-xl font-semibold tracking-tight text-stone-950">
               About Trial Balance
             </h2>
-            <div className="mt-5 divide-y divide-stone-100">
+            <dl className="mt-5 divide-y divide-stone-100">
               {facts.map((fact) => (
                 <div className="grid gap-2 py-4 sm:grid-cols-[9rem_1fr]" key={fact.label}>
                   <dt className="text-sm font-semibold text-stone-800">{fact.label}</dt>
                   <dd className="text-sm leading-6 text-stone-600">{fact.value}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </article>
 
           <article className="overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-sm">
