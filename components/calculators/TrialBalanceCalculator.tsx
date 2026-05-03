@@ -90,7 +90,7 @@ function SummaryCard({
         : "text-stone-950";
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white px-4 py-4 shadow-sm">
+    <div className="rounded-xl border border-stone-200 bg-white px-4 py-4 shadow-sm">
       <p className="text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
       <p className={`mt-2 text-2xl font-semibold tracking-tight ${toneClass}`}>{value}</p>
     </div>
@@ -207,7 +207,7 @@ export function TrialBalanceCalculator() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-2xl">
             <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
@@ -220,7 +220,7 @@ export function TrialBalanceCalculator() {
           </div>
           <button
             type="button"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             onClick={addRow}
           >
             Add Row
@@ -247,14 +247,14 @@ export function TrialBalanceCalculator() {
                   >
                     <input
                       aria-label={`Row ${index + 1} account name`}
-                      className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                       onChange={(event) => updateRow(row.id, "accountName", event.target.value)}
                       placeholder="Account name"
                       value={row.accountName}
                     />
                     <input
                       aria-label={`Row ${index + 1} debit amount`}
-                      className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                       disabled={hasCredit}
                       inputMode="decimal"
                       min="0"
@@ -266,7 +266,7 @@ export function TrialBalanceCalculator() {
                     />
                     <input
                       aria-label={`Row ${index + 1} credit amount`}
-                      className="h-12 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                      className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                       disabled={hasDebit}
                       inputMode="decimal"
                       min="0"
@@ -278,7 +278,7 @@ export function TrialBalanceCalculator() {
                     />
                     <button
                       aria-label={`Remove row ${index + 1}`}
-                      className="flex h-12 items-center justify-center rounded-2xl border border-stone-200 text-sm font-semibold text-stone-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-12 items-center justify-center rounded-xl border border-stone-200 text-sm font-semibold text-stone-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={rows.length === 1}
                       onClick={() => removeRow(row.id)}
                       type="button"
@@ -300,7 +300,7 @@ export function TrialBalanceCalculator() {
             tone={result.difference > 0 ? "error" : "neutral"}
             value={formatMoney(result.difference)}
           />
-          <div className={`rounded-2xl border px-4 py-4 shadow-sm ${status.cardClass}`}>
+          <div className={`rounded-xl border px-4 py-4 shadow-sm ${status.cardClass}`}>
             <p className={`text-xs font-medium uppercase tracking-wide ${status.labelClass}`}>
               Status
             </p>
@@ -319,7 +319,7 @@ export function TrialBalanceCalculator() {
 
       <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="flex flex-col gap-6">
-          <article className="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm">
+          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-semibold tracking-tight text-stone-950">
               About Trial Balance
             </h2>
@@ -333,7 +333,7 @@ export function TrialBalanceCalculator() {
             </dl>
           </article>
 
-          <article className="overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-sm">
+          <article className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
             <div className="grid gap-6 p-6 sm:grid-cols-[1fr_12rem] sm:items-center">
               <div>
                 <h2 className="text-xl font-semibold tracking-tight text-stone-950">
@@ -345,13 +345,13 @@ export function TrialBalanceCalculator() {
                 </p>
                 <button
                   type="button"
-                  className="mt-5 inline-flex h-10 items-center rounded-full border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                  className="mt-5 inline-flex h-10 items-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                 >
                   Learn More
                 </button>
               </div>
-              <div className="min-h-40 rounded-[1.5rem] bg-[linear-gradient(135deg,#eef2f3,#dfe7df_55%,#f8f6f1)] p-4">
-                <div className="h-full rounded-2xl border border-white/70 bg-white/45 p-4">
+              <div className="min-h-40 rounded-2xl bg-[linear-gradient(135deg,#eef2f3,#dfe7df_55%,#f8f6f1)] p-4">
+                <div className="h-full rounded-xl border border-white/70 bg-white/45 p-4">
                   <div className="h-3 w-20 rounded-full bg-slate-300" />
                   <div className="mt-6 space-y-3">
                     <div className="h-2 rounded-full bg-white" />
@@ -364,7 +364,7 @@ export function TrialBalanceCalculator() {
           </article>
         </div>
 
-        <article className="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm">
+        <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold tracking-tight text-stone-950">
             Common Mistakes
           </h2>
@@ -379,7 +379,7 @@ export function TrialBalanceCalculator() {
         </article>
       </section>
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+      <section className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
         <div className="absolute right-0 top-0 hidden h-full w-1/2 bg-[radial-gradient(circle_at_70%_35%,rgba(101,116,139,0.18),transparent_34%),linear-gradient(135deg,transparent,#edf1ed)] lg:block" />
         <div className="relative max-w-2xl">
           <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
@@ -391,7 +391,7 @@ export function TrialBalanceCalculator() {
           </p>
           <button
             type="button"
-            className="mt-6 inline-flex h-11 items-center rounded-full bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
+            className="mt-6 inline-flex h-11 items-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
           >
             Explore Guides
           </button>
