@@ -17,7 +17,7 @@ export const tools: Tool[] = [
     category: "Accounting Basics",
     bestFor: "Understanding how assets, liabilities, and equity relate.",
     href: "/tools/accounting-equation-calculator",
-    status: "planned"
+    status: "mvp"
   },
   {
     slug: "debit-credit-checker",

@@ -9,6 +9,8 @@
   },
   "include": [
     "tests/trial-balance.test.ts",
-    "lib/calculators/trial-balance.ts"
+    "tests/accounting-equation.test.ts",
+    "lib/calculators/trial-balance.ts",
+    "lib/calculators/accounting-equation.ts"
   ]
 }
