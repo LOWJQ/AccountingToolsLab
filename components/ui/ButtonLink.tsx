@@ -1,10 +1,11 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 type ButtonLinkProps = {
   children: ReactNode;
-  href: string;
   className?: string;
+  href: string;
   variant?: "primary" | "secondary" | "dark";
 };
 
@@ -21,7 +22,7 @@ export function ButtonLink({
   variant = "primary"
 }: ButtonLinkProps) {
   return (
-    <a
+    <Link
       className={cn(
         "inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold transition",
         buttonVariants[variant],
@@ -30,6 +31,6 @@ export function ButtonLink({
       href={href}
     >
       {children}
-    </a>
+    </Link>
   );
 }
