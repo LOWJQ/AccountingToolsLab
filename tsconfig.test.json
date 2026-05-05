@@ -10,7 +10,9 @@
   "include": [
     "tests/trial-balance.test.ts",
     "tests/accounting-equation.test.ts",
+    "tests/debit-credit.test.ts",
     "lib/calculators/trial-balance.ts",
-    "lib/calculators/accounting-equation.ts"
+    "lib/calculators/accounting-equation.ts",
+    "lib/calculators/debit-credit.ts"
   ]
 }

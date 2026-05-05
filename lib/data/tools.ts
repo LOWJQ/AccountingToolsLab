@@ -26,7 +26,7 @@ export const tools: Tool[] = [
     category: "Accounting Basics",
     bestFor: "Learning normal balances and basic journal entry direction.",
     href: "/tools/debit-credit-checker",
-    status: "planned"
+    status: "mvp"
   },
   {
     slug: "financial-ratio-calculator",
