@@ -1,34 +1,89 @@
 # AccountingToolsLab
 
-AccountingToolsLab is planned as a free, SEO-focused accounting tools website for accounting students, beginners, and small business owners.
+AccountingToolsLab is a free accounting tools website for accounting students, beginners, and small business owners. It provides simple calculators and beginner-friendly explanations for core accounting topics.
+
+Production domain:
+
+```text
+https://www.accountingtoolslab.com
+```
 
 ## Current Status
 
-This repository is an architecture scaffold only. It contains the initial Next.js App Router structure, placeholder routes, placeholder components, basic metadata helpers, placeholder data files, placeholder calculator logic files, and starter TypeScript types.
+The project is an early-stage Next.js App Router site.
+
+Currently available:
+
+- Homepage
+- Tools directory
+- Guides directory
+- About page
+- Contact page
+- Privacy Policy
+- Terms of Use
+- Trial Balance Calculator
+- Trial Balance Explained guide
+
+The Trial Balance Calculator is the first working calculator. It supports editable rows, live debit and credit totals, balanced/unbalanced status, empty-state handling, decimal values, and validation for negative or invalid row values.
 
 ## Not Implemented Yet
 
-- Frontend tool interfaces
-- Calculator formulas
-- AI-powered journal entry generation
+- Other calculator logic
+- Full guide articles for every planned guide
 - Backend APIs
 - Database
 - Login or authentication
 - Payments
 - Ads
+- AI features
 - Dashboard features
-- Full SEO articles or polished page content
+- Working contact form submission
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Vercel Analytics
+- Vercel Speed Insights
+- Vercel deployment target
 
 ## Folder Structure
 
 ```text
 app/                Next.js App Router routes, root layout, sitemap, and robots files.
-components/         Placeholder layout, tool, calculator, SEO, and shadcn/ui-compatible component folders.
-lib/                Placeholder calculator logic, data, SEO helpers, utilities, and validation files.
+components/         Layout, calculator, tool, SEO, and UI component folders.
+lib/                Calculator logic, shared data, SEO helpers, utilities, and validation placeholders.
 types/              Shared TypeScript types for tools, calculators, SEO, and accounting concepts.
-public/             Static assets such as the placeholder logo, OG image, and icons folder.
-tests/              Placeholder calculator test files.
+public/             Static assets such as logo, OG image placeholder, and icons folder.
+tests/              Trial balance calculation tests.
 ```
+
+## Key Routes
+
+```text
+/                                  Homepage
+/tools                             Tools directory
+/tools/trial-balance-calculator    Working Trial Balance Calculator
+/guides                            Guides directory
+/guides/trial-balance-explained    Finished beginner guide
+/about                             About page
+/contact                           Contact page
+/privacy-policy                    Privacy Policy
+/terms                             Terms of Use
+```
+
+Unfinished guide pages use `noindex` metadata and are not included in the sitemap.
+
+## Environment
+
+Create a local `.env.local` if needed:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://www.accountingtoolslab.com
+```
+
+The default fallback site URL is configured in `lib/seo/site.ts`.
 
 ## Development
 
@@ -44,7 +99,13 @@ Run the development server:
 npm run dev
 ```
 
-## Build
+Run tests:
+
+```bash
+npm test
+```
+
+Build for production:
 
 ```bash
 npm run build
@@ -52,13 +113,22 @@ npm run build
 
 ## Deployment
 
-The project is intended to be Vercel-ready.
+The project is prepared for Vercel deployment.
+
+Before deploying, check:
+
+- `NEXT_PUBLIC_SITE_URL` is set to `https://www.accountingtoolslab.com`
+- The custom domain is configured in Vercel
+- Footer and navigation links work
+- Sitemap and robots output use the production domain
+- Contact email is correct
+- Vercel Analytics and Speed Insights are enabled in the Vercel project dashboard
 
 ## Next Steps
 
-1. Replace placeholder route content with simple SEO-friendly page layouts.
-2. Build calculator UI components in `components/calculators/`.
-3. Implement calculator formulas in `lib/calculators/`.
-4. Add validation schemas in `lib/validations/`.
-5. Add real tests in `tests/` as calculator logic is implemented.
-6. Expand SEO metadata and schema helpers after the real content structure is ready.
+1. Build the next calculator, likely Accounting Equation Calculator.
+2. Add real guide content for Debit vs Credit.
+3. Add real guide content for Financial Ratios for Beginners.
+4. Replace placeholder OG image with a production-ready image.
+5. Review Privacy Policy and Terms before public launch.
+6. Add more focused tests as new calculator logic is implemented.
