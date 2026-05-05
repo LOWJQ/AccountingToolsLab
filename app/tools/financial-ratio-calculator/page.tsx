@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Financial Ratio Calculator"
+  title: "Financial Ratio Calculator Coming Soon | AccountingToolsLab",
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 export default function FinancialRatioCalculatorPage() {

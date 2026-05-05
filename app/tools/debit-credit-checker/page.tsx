@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Debit/Credit Checker"
+  title: "Debit/Credit Checker Coming Soon | AccountingToolsLab",
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 export default function DebitCreditCheckerPage() {
