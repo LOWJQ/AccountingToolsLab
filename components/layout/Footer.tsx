@@ -5,7 +5,11 @@ const footerSections = [
     title: "Tools",
     links: [
       { label: "All Tools", href: "/tools" },
-      { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" }
+      { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" },
+      { label: "Accounting Equation Calculator", href: "/tools/accounting-equation-calculator" },
+      { label: "Debit/Credit Checker", href: "/tools/debit-credit-checker" },
+      { label: "Financial Ratio Calculator", href: "/tools/financial-ratio-calculator" },
+      { label: "Depreciation Calculator", href: "/tools/depreciation-calculator" }
     ]
   },
   {

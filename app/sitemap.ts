@@ -19,7 +19,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   return routes.map((route) => ({
-    url: `${siteConfig.url}${route}`,
-    lastModified: new Date()
+    url: `${siteConfig.url}${route}`
   }));
 }

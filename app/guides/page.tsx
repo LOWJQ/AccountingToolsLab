@@ -12,7 +12,16 @@ const learningPaths = [
     title: "Accounting Basics",
     steps: [
       { label: "Debit vs Credit", status: "Coming soon" },
-      { label: "Accounting Equation Calculator", status: "Coming soon" },
+      {
+        label: "Debit/Credit Checker",
+        href: "/tools/debit-credit-checker",
+        status: "Available"
+      },
+      {
+        label: "Accounting Equation Calculator",
+        href: "/tools/accounting-equation-calculator",
+        status: "Available"
+      },
       {
         label: "Trial Balance Calculator",
         href: "/tools/trial-balance-calculator",
@@ -40,8 +49,24 @@ const learningPaths = [
     title: "Financial Analysis",
     steps: [
       { label: "Financial Ratios for Beginners", status: "Coming soon" },
-      { label: "Financial Ratio Calculator", status: "Coming soon" },
+      {
+        label: "Financial Ratio Calculator",
+        href: "/tools/financial-ratio-calculator",
+        status: "Available"
+      },
       { label: "Future Ratio Practice Examples", status: "Coming soon" }
+    ]
+  },
+  {
+    title: "Depreciation & Adjustments",
+    steps: [
+      {
+        label: "Depreciation Calculator",
+        href: "/tools/depreciation-calculator",
+        status: "Available"
+      },
+      { label: "Future Depreciation Methods Guide", status: "Coming soon" },
+      { label: "Future Adjusting Entries Guide", status: "Coming soon" }
     ]
   }
 ];
