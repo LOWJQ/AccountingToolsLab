@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/trial-balance-calculator",
     "/tools/accounting-equation-calculator",
     "/tools/debit-credit-checker",
+    "/tools/financial-ratio-calculator",
     "/guides",
     "/guides/trial-balance-explained",
     "/about",

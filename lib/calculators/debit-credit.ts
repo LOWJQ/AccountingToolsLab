@@ -80,7 +80,7 @@ export function checkDebitCredit(input: DebitCreditInput): DebitCreditResult {
     effect: input.effect,
     answer,
     normalBalance,
-    explanation: `${accountLabel} have a normal ${normalBalance.toLowerCase()} balance, so ${effectLabel.toLowerCase()} this account means recording a ${answer.toLowerCase()}.`
+    explanation: `${accountLabel} has a normal ${normalBalance.toLowerCase()} balance, so ${effectLabel.toLowerCase()} this account means recording a ${answer.toLowerCase()}.`
   };
 }
 

@@ -35,7 +35,7 @@ export const tools: Tool[] = [
     category: "Financial Analysis",
     bestFor: "Reviewing financial statement performance and position.",
     href: "/tools/financial-ratio-calculator",
-    status: "planned"
+    status: "mvp"
   },
   {
     slug: "depreciation-calculator",

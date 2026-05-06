@@ -11,8 +11,10 @@
     "tests/trial-balance.test.ts",
     "tests/accounting-equation.test.ts",
     "tests/debit-credit.test.ts",
+    "tests/financial-ratios.test.ts",
     "lib/calculators/trial-balance.ts",
     "lib/calculators/accounting-equation.ts",
-    "lib/calculators/debit-credit.ts"
+    "lib/calculators/debit-credit.ts",
+    "lib/calculators/financial-ratios.ts"
   ]
 }
