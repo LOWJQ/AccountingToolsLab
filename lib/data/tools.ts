@@ -55,5 +55,15 @@ export const tools: Tool[] = [
     bestFor: "Estimating how many units a business needs to sell to cover costs.",
     href: "/tools/break-even-calculator",
     status: "mvp"
+  },
+  {
+    slug: "cash-flow-calculator",
+    name: "Cash Flow Calculator",
+    description:
+      "Calculate net cash flow and ending cash balance from cash inflows and outflows.",
+    category: "Business Planning",
+    bestFor: "Reviewing whether cash increased or decreased during a period.",
+    href: "/tools/cash-flow-calculator",
+    status: "mvp"
   }
 ];

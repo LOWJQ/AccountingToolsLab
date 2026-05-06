@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/financial-ratio-calculator",
     "/tools/depreciation-calculator",
     "/tools/break-even-calculator",
+    "/tools/cash-flow-calculator",
     "/guides",
     "/guides/trial-balance-explained",
     "/about",

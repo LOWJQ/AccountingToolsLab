@@ -10,7 +10,8 @@ const footerSections = [
       { label: "Debit/Credit Checker", href: "/tools/debit-credit-checker" },
       { label: "Financial Ratio Calculator", href: "/tools/financial-ratio-calculator" },
       { label: "Depreciation Calculator", href: "/tools/depreciation-calculator" },
-      { label: "Break-even Calculator", href: "/tools/break-even-calculator" }
+      { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
+      { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" }
     ]
   },
   {

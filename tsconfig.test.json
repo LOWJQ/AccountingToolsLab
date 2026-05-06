@@ -14,11 +14,13 @@
     "tests/financial-ratios.test.ts",
     "tests/depreciation.test.ts",
     "tests/break-even.test.ts",
+    "tests/cash-flow.test.ts",
     "lib/calculators/trial-balance.ts",
     "lib/calculators/accounting-equation.ts",
     "lib/calculators/debit-credit.ts",
     "lib/calculators/financial-ratios.ts",
     "lib/calculators/depreciation.ts",
-    "lib/calculators/break-even.ts"
+    "lib/calculators/break-even.ts",
+    "lib/calculators/cash-flow.ts"
   ]
 }

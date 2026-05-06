@@ -48,6 +48,13 @@ const featuredTools = [
     status: "Available",
     href: "/tools/break-even-calculator",
     isAvailable: true
+  },
+  {
+    name: "Cash Flow Calculator",
+    description: "Calculate net cash flow and ending cash balance for a simple period.",
+    status: "Available",
+    href: "/tools/cash-flow-calculator",
+    isAvailable: true
   }
 ];
 
@@ -62,7 +69,8 @@ const reasons = [
   },
   {
     title: "Built for learning basics",
-    description: "Check trial balances, debits, credits, ratios, depreciation, and break-even points."
+    description:
+      "Check trial balances, debits, credits, ratios, depreciation, break-even points, and cash flow."
   }
 ];
 
