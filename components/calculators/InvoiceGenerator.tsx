@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateInvoice } from "@/lib/calculators/invoice";
@@ -11,6 +11,26 @@ type EditableLineItem = {
   quantity: string;
   unitPrice: string;
 };
+
+type InvoiceView = "details" | "preview";
+
+type InvoiceCurrency = {
+  code: string;
+  name: string;
+  symbol: string;
+};
+
+const currencyOptions: InvoiceCurrency[] = [
+  { code: "MYR", name: "Malaysia Ringgit", symbol: "RM" },
+  { code: "SGD", name: "Singapore Dollar", symbol: "S$" },
+  { code: "USD", name: "US Dollar", symbol: "$" },
+  { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
+  { code: "TWD", name: "New Taiwan Dollar", symbol: "NT$" },
+  { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
+  { code: "THB", name: "Thai Baht", symbol: "฿" },
+  { code: "JPY", name: "Japanese Yen", symbol: "¥" },
+  { code: "KRW", name: "South Korean Won", symbol: "₩" }
+];
 
 const mistakes = [
   "Forgetting invoice number",
@@ -56,8 +76,14 @@ function formatAmount(value: number): string {
   });
 }
 
+function formatMoney(value: number, currencySymbol: string): string {
+  return `${currencySymbol} ${formatAmount(value)}`;
+}
+
 export function InvoiceGenerator() {
   const today = new Date().toISOString().slice(0, 10);
+  const invoiceGeneratorTopRef = useRef<HTMLDivElement>(null);
+  const invoicePreviewRef = useRef<HTMLDivElement>(null);
   const [businessName, setBusinessName] = useState("");
   const [businessContact, setBusinessContact] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
@@ -69,6 +95,8 @@ export function InvoiceGenerator() {
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
   const [lineItems, setLineItems] = useState<EditableLineItem[]>([createLineItem(1)]);
+  const [activeView, setActiveView] = useState<InvoiceView>("details");
+  const [currencyCode, setCurrencyCode] = useState("MYR");
 
   const calculation = useMemo(() => {
     try {
@@ -89,6 +117,21 @@ export function InvoiceGenerator() {
       };
     }
   }, [lineItems]);
+
+  const lineItemPreviewTotals = useMemo(
+    () =>
+      lineItems.map((item) => {
+        const quantity = parseAmount(item.quantity);
+        const unitPrice = parseAmount(item.unitPrice);
+
+        if (quantity === null || unitPrice === null || quantity <= 0 || unitPrice < 0) {
+          return 0;
+        }
+
+        return quantity * unitPrice;
+      }),
+    [lineItems]
+  );
 
   function updateLineItem(id: string, key: keyof EditableLineItem, value: string) {
     setLineItems((currentItems) =>
@@ -118,10 +161,199 @@ export function InvoiceGenerator() {
     setDueDate("");
     setNotes("");
     setLineItems([createLineItem(1)]);
+    setCurrencyCode("MYR");
+  }
+
+  function switchInvoiceView(view: InvoiceView) {
+    setActiveView(view);
+    window.requestAnimationFrame(() => {
+      invoiceGeneratorTopRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
   }
 
   function printInvoice() {
-    window.print();
+    const invoiceHtml = invoicePreviewRef.current?.innerHTML;
+
+    if (!invoiceHtml) {
+      return;
+    }
+
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+
+    if (!printWindow) {
+      return;
+    }
+
+    const printTitle = `Invoice ${invoiceNumber || "Preview"}`;
+
+    printWindow.document.write(`<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${printTitle}</title>
+    <style>
+      @page {
+        margin: 0.5in;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #ffffff;
+        color: #1c1917;
+        font-family: Inter, Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .invoice-print-document {
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      .invoice-print-document * {
+        box-shadow: none !important;
+      }
+
+      .invoice-print-document > div {
+        border: 0 !important;
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+
+      .invoice-print-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        border-bottom: 1px solid #e7e5e4;
+        padding-bottom: 24px;
+      }
+
+      .invoice-print-muted {
+        color: #57534e;
+      }
+
+      .invoice-preview-lines {
+        margin-top: 24px;
+        border: 1px solid #e7e5e4;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .invoice-preview-line {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) 44px 76px 84px;
+        gap: 8px;
+        align-items: start;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e7e5e4;
+      }
+
+      .invoice-preview-line:last-child {
+        border-bottom: 0;
+      }
+
+      .invoice-preview-line > * {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .invoice-preview-heading {
+        background: #fafaf9;
+        color: #78716c;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .font-semibold {
+        font-weight: 600;
+      }
+
+      .invoice-totals-wrap {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+      }
+
+      .invoice-totals-box {
+        width: 100%;
+        max-width: 280px;
+        border: 1px solid #e7e5e4;
+        border-radius: 8px;
+        background: #fafaf9;
+        padding: 14px;
+      }
+
+      .invoice-total-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 32px;
+        color: #57534e;
+      }
+
+      .invoice-total-row + .invoice-total-row {
+        margin-top: 10px;
+        border-top: 1px solid #e7e5e4;
+        padding-top: 10px;
+      }
+
+      .invoice-total-label {
+        white-space: nowrap;
+      }
+
+      .invoice-total-label::after {
+        content: ":";
+      }
+
+      .invoice-total-amount {
+        color: #1c1917;
+        font-weight: 600;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .invoice-grand-total {
+        color: #1c1917;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      @media print {
+        body {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="invoice-print-document">${invoiceHtml}</div>
+    <script>
+      window.onload = function () {
+        window.focus();
+        window.print();
+        setTimeout(function () {
+          window.close();
+        }, 250);
+      };
+    </script>
+  </body>
+</html>`);
+    printWindow.document.close();
   }
 
   const previewItems =
@@ -135,10 +367,13 @@ export function InvoiceGenerator() {
 
   const subtotal = calculation.result?.subtotal ?? 0;
   const total = calculation.result?.total ?? 0;
+  const selectedCurrency =
+    currencyOptions.find((currency) => currency.code === currencyCode) ?? currencyOptions[0];
 
   return (
     <div className="flex flex-col gap-8">
-      <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
+      <div className="scroll-mt-24" ref={invoiceGeneratorTopRef}>
+        <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
         <div className="max-w-3xl">
           <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
             Invoice Generator
@@ -149,8 +384,34 @@ export function InvoiceGenerator() {
           </p>
         </div>
 
-        <div className="mt-8 grid min-w-0 gap-8 2xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <div className="grid min-w-0 gap-6">
+        <div className="mt-8 inline-grid rounded-xl border border-stone-200 bg-stone-50 p-1 sm:grid-cols-2">
+          <button
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              activeView === "details"
+                ? "bg-white text-stone-950 shadow-sm"
+                : "text-stone-600 hover:text-stone-950"
+            }`}
+            onClick={() => switchInvoiceView("details")}
+            type="button"
+          >
+            Enter invoice details
+          </button>
+          <button
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              activeView === "preview"
+                ? "bg-white text-stone-950 shadow-sm"
+                : "text-stone-600 hover:text-stone-950"
+            }`}
+            onClick={() => switchInvoiceView("preview")}
+            type="button"
+          >
+            Preview & print
+          </button>
+        </div>
+
+        <div className="mt-8 grid min-w-0 gap-8">
+          {activeView === "details" ? (
+            <div className="grid min-w-0 gap-6">
             <section className="grid gap-4">
               <h2 className="text-base font-semibold text-stone-950">Business details</h2>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -223,28 +484,42 @@ export function InvoiceGenerator() {
 
             <section className="grid gap-4">
               <h2 className="text-base font-semibold text-stone-950">Invoice details</h2>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <label className="grid gap-2">
+              <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <label className="grid min-w-0 gap-2">
                   <span className="text-sm font-semibold text-stone-800">Invoice number</span>
                   <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                     onChange={(event) => setInvoiceNumber(event.target.value)}
                     value={invoiceNumber}
                   />
                 </label>
-                <label className="grid gap-2">
+                <label className="grid min-w-0 gap-2">
+                  <span className="text-sm font-semibold text-stone-800">Currency</span>
+                  <select
+                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                    onChange={(event) => setCurrencyCode(event.target.value)}
+                    value={currencyCode}
+                  >
+                    {currencyOptions.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.name} — {currency.symbol}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="grid min-w-0 gap-2">
                   <span className="text-sm font-semibold text-stone-800">Invoice date</span>
                   <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                     onChange={(event) => setInvoiceDate(event.target.value)}
                     type="date"
                     value={invoiceDate}
                   />
                 </label>
-                <label className="grid gap-2">
+                <label className="grid min-w-0 gap-2">
                   <span className="text-sm font-semibold text-stone-800">Due date</span>
                   <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                     onChange={(event) => setDueDate(event.target.value)}
                     type="date"
                     value={dueDate}
@@ -271,13 +546,13 @@ export function InvoiceGenerator() {
                     className="rounded-xl border border-stone-200 bg-stone-50 p-4"
                     key={item.id}
                   >
-                    <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1.5fr)_minmax(7rem,0.7fr)_minmax(8rem,0.8fr)_auto]">
-                      <label className="grid gap-2">
+                    <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_8.5rem_auto]">
+                      <label className="grid min-w-0 gap-2">
                         <span className="text-sm font-semibold text-stone-800">
                           Description
                         </span>
                         <input
-                          className="h-12 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                          className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
                           onChange={(event) =>
                             updateLineItem(item.id, "description", event.target.value)
                           }
@@ -285,10 +560,10 @@ export function InvoiceGenerator() {
                           value={item.description}
                         />
                       </label>
-                      <label className="grid gap-2">
+                      <label className="grid min-w-0 gap-2">
                         <span className="text-sm font-semibold text-stone-800">Quantity</span>
                         <input
-                          className="h-12 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                          className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
                           inputMode="decimal"
                           onChange={(event) =>
                             updateLineItem(item.id, "quantity", event.target.value)
@@ -298,10 +573,12 @@ export function InvoiceGenerator() {
                           value={item.quantity}
                         />
                       </label>
-                      <label className="grid gap-2">
-                        <span className="text-sm font-semibold text-stone-800">Unit price</span>
+                      <label className="grid min-w-0 gap-2">
+                        <span className="text-sm font-semibold text-stone-800">
+                          Unit price ({selectedCurrency.symbol})
+                        </span>
                         <input
-                          className="h-12 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                          className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
                           inputMode="decimal"
                           onChange={(event) =>
                             updateLineItem(item.id, "unitPrice", event.target.value)
@@ -311,9 +588,15 @@ export function InvoiceGenerator() {
                           value={item.unitPrice}
                         />
                       </label>
-                      <div className="flex items-end">
+                      <div className="grid min-w-0 gap-2">
+                        <span className="text-sm font-semibold text-stone-800">Line total</span>
+                        <div className="flex h-12 w-full min-w-0 items-center rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-950">
+                          {formatMoney(lineItemPreviewTotals[index] ?? 0, selectedCurrency.symbol)}
+                        </div>
+                      </div>
+                      <div className="flex min-w-0 items-end">
                         <button
-                          className="h-12 rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                          className="h-12 w-full rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 xl:w-auto"
                           disabled={lineItems.length === 1}
                           onClick={() => removeLineItem(item.id)}
                           type="button"
@@ -342,28 +625,53 @@ export function InvoiceGenerator() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                onClick={printInvoice}
-                type="button"
-              >
-                Print invoice
-              </button>
-              <button
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                 onClick={resetInvoice}
                 type="button"
               >
                 Reset
               </button>
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                onClick={() => switchInvoiceView("preview")}
+                type="button"
+              >
+                Preview invoice
+              </button>
             </div>
-          </div>
+            </div>
+          ) : (
+            <div className="grid min-w-0 gap-4">
+              <div className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm leading-6 text-stone-600">
+                  Review your invoice before printing. The preview updates from the details you
+                  entered.
+                </p>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-white"
+                    onClick={() => switchInvoiceView("details")}
+                    type="button"
+                  >
+                    Back to details
+                  </button>
+                  <button
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                    onClick={printInvoice}
+                    type="button"
+                  >
+                    Print invoice
+                  </button>
+                </div>
+              </div>
 
-          <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+              <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
             <div
               className="invoice-print-area min-w-0 rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6"
               id="invoice-print-area"
+              ref={invoicePreviewRef}
             >
-              <div className="flex flex-col gap-6 border-b border-stone-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
+              <div className="invoice-print-header flex flex-col gap-6 border-b border-stone-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                     Invoice from
@@ -372,10 +680,12 @@ export function InvoiceGenerator() {
                     {businessName || "Business name"}
                   </h2>
                   {businessContact ? (
-                    <p className="mt-2 text-sm text-stone-600">{businessContact}</p>
+                    <p className="invoice-print-muted mt-2 text-sm text-stone-600">
+                      {businessContact}
+                    </p>
                   ) : null}
                   {businessAddress ? (
-                    <p className="mt-1 whitespace-pre-line text-sm text-stone-600">
+                    <p className="invoice-print-muted mt-1 whitespace-pre-line text-sm text-stone-600">
                       {businessAddress}
                     </p>
                   ) : null}
@@ -407,46 +717,49 @@ export function InvoiceGenerator() {
                 ) : null}
               </div>
 
-              <div className="invoice-table-wrap mt-6 max-w-full overflow-x-auto">
-                <table className="w-full min-w-[460px] text-left text-sm">
-                  <thead className="border-b border-stone-200 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                    <tr>
-                      <th className="py-3 pr-4">Description</th>
-                      <th className="px-4 py-3 text-right">Qty</th>
-                      <th className="px-4 py-3 text-right">Unit price</th>
-                      <th className="py-3 pl-4 text-right">Line total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-100">
-                    {previewItems.map((item, index) => (
-                      <tr key={`${item.description}-${index}`}>
-                        <td className="py-3 pr-4 font-medium text-stone-900">
-                          {item.description}
-                        </td>
-                        <td className="px-4 py-3 text-right text-stone-600">
-                          {formatAmount(item.quantity)}
-                        </td>
-                        <td className="px-4 py-3 text-right text-stone-600">
-                          {formatAmount(item.unitPrice)}
-                        </td>
-                        <td className="py-3 pl-4 text-right font-semibold text-stone-950">
-                          {formatAmount(item.lineTotal)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="invoice-preview-lines mt-6 overflow-hidden rounded-xl border border-stone-200">
+                <div className="invoice-preview-line invoice-preview-heading grid grid-cols-[minmax(0,1.4fr)_3rem_4.75rem_5.25rem] gap-2 bg-stone-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-stone-500 sm:grid-cols-[minmax(0,1.6fr)_4rem_6rem_6.5rem] sm:px-4">
+                  <span>Description</span>
+                  <span className="text-right">Qty</span>
+                  <span className="text-right leading-4">Unit Price</span>
+                  <span className="text-right leading-4">Line Total</span>
+                </div>
+                <div className="divide-y divide-stone-100 bg-white">
+                  {previewItems.map((item, index) => (
+                    <div
+                      className="invoice-preview-line grid grid-cols-[minmax(0,1.4fr)_3rem_4.75rem_5.25rem] gap-2 px-3 py-3 text-xs sm:grid-cols-[minmax(0,1.6fr)_4rem_6rem_6.5rem] sm:px-4 sm:text-sm"
+                      key={`${item.description}-${index}`}
+                    >
+                      <span className="min-w-0 break-words font-medium text-stone-900">
+                        {item.description}
+                      </span>
+                      <span className="text-right tabular-nums text-stone-600">
+                        {formatAmount(item.quantity)}
+                      </span>
+                      <span className="text-right tabular-nums text-stone-600">
+                        {formatMoney(item.unitPrice, selectedCurrency.symbol)}
+                      </span>
+                      <span className="text-right font-semibold tabular-nums text-stone-950">
+                        {formatMoney(item.lineTotal, selectedCurrency.symbol)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-6 flex justify-end">
-                <div className="w-full max-w-xs rounded-xl border border-stone-200 bg-stone-50 p-4">
-                  <div className="flex justify-between gap-4 text-sm text-stone-600">
-                    <span>Subtotal</span>
-                    <span className="font-semibold text-stone-950">{formatAmount(subtotal)}</span>
+              <div className="invoice-totals-wrap mt-6 flex justify-end">
+                <div className="invoice-totals-box w-full max-w-xs rounded-xl border border-stone-200 bg-stone-50 p-4">
+                  <div className="invoice-total-row flex justify-between gap-4 text-sm text-stone-600">
+                    <span className="invoice-total-label">Subtotal</span>
+                    <span className="invoice-total-amount font-semibold text-stone-950">
+                      {formatMoney(subtotal, selectedCurrency.symbol)}
+                    </span>
                   </div>
-                  <div className="mt-3 flex justify-between gap-4 border-t border-stone-200 pt-3 text-base font-semibold text-stone-950">
-                    <span>Total</span>
-                    <span>{formatAmount(total)}</span>
+                  <div className="invoice-total-row invoice-grand-total mt-3 flex justify-between gap-4 border-t border-stone-200 pt-3 text-base font-semibold text-stone-950">
+                    <span className="invoice-total-label">Total</span>
+                    <span className="invoice-total-amount">
+                      {formatMoney(total, selectedCurrency.symbol)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -462,9 +775,12 @@ export function InvoiceGenerator() {
                 </div>
               ) : null}
             </div>
-          </div>
+              </div>
+            </div>
+          )}
         </div>
-      </Card>
+        </Card>
+      </div>
 
       <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <Card className="p-6 sm:p-8">
