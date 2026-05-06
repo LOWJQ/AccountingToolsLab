@@ -52,7 +52,7 @@ export function calculateSstMalaysia(input: SstMalaysiaInput): SstMalaysiaResult
       sstRate,
       sstAmount,
       totalIncludingSst,
-      explanation: `Adding ${sstRate}% SST gives an estimated total including SST of RM${totalIncludingSst.toFixed(
+      explanation: `Adding ${sstRate}% SST gives an estimated total including SST of ${totalIncludingSst.toFixed(
         2
       )}.`
     };
@@ -69,7 +69,7 @@ export function calculateSstMalaysia(input: SstMalaysiaInput): SstMalaysiaResult
       sstRate,
       sstAmount,
       totalIncludingSst,
-      explanation: `Removing ${sstRate}% SST gives an estimated amount before SST of RM${amountBeforeSst.toFixed(
+      explanation: `Removing ${sstRate}% SST gives an estimated amount before SST of ${amountBeforeSst.toFixed(
         2
       )}.`
     };

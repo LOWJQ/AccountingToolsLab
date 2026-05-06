@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateDepreciation } from "@/lib/calculators/depreciation";
@@ -22,15 +23,9 @@ function parseAmount(value: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
-function formatAmount(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
 export function DepreciationCalculator() {
   const [assetCost, setAssetCost] = useState("");
+  const { formatCurrency } = useCurrency();
   const [salvageValue, setSalvageValue] = useState("");
   const [usefulLifeYears, setUsefulLifeYears] = useState("");
 
@@ -143,7 +138,7 @@ export function DepreciationCalculator() {
                     Annual depreciation expense
                   </p>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
-                    {formatAmount(calculation.result.annualDepreciation)}
+                    {formatCurrency(calculation.result.annualDepreciation)}
                   </p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -152,7 +147,7 @@ export function DepreciationCalculator() {
                       Depreciable amount
                     </p>
                     <p className="mt-2 text-xl font-semibold text-stone-950">
-                      {formatAmount(calculation.result.depreciableAmount)}
+                      {formatCurrency(calculation.result.depreciableAmount)}
                     </p>
                   </div>
                   <div className="rounded-xl border border-stone-200 bg-white p-4">
@@ -160,12 +155,14 @@ export function DepreciationCalculator() {
                       Monthly depreciation
                     </p>
                     <p className="mt-2 text-xl font-semibold text-stone-950">
-                      {formatAmount(calculation.result.monthlyDepreciation)}
+                      {formatCurrency(calculation.result.monthlyDepreciation)}
                     </p>
                   </div>
                 </div>
                 <p className="text-sm leading-6 text-stone-600">
-                  {calculation.result.explanation}
+                  The depreciable amount is {formatCurrency(calculation.result.depreciableAmount)},
+                  spread evenly over {calculation.result.usefulLifeYears} year
+                  {calculation.result.usefulLifeYears === 1 ? "" : "s"}.
                 </p>
               </div>
             ) : (
@@ -211,11 +208,11 @@ export function DepreciationCalculator() {
           </h2>
           <div className="mt-5 grid gap-3">
             {[
-              ["Cost", "10,000"],
-              ["Salvage value", "1,000"],
+              ["Cost", formatCurrency(10000)],
+              ["Salvage value", formatCurrency(1000)],
               ["Useful life", "5 years"],
-              ["Depreciable amount", "9,000"],
-              ["Annual depreciation", "1,800"]
+              ["Depreciable amount", formatCurrency(9000)],
+              ["Annual depreciation", formatCurrency(1800)]
             ].map(([label, value]) => (
               <div
                 className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-b-0"
@@ -227,8 +224,9 @@ export function DepreciationCalculator() {
             ))}
           </div>
           <p className="mt-4 text-sm leading-6 text-stone-600">
-            The asset has 9,000 of depreciable amount. Dividing 9,000 by 5 years gives
-            1,800 of depreciation expense per year.
+            The asset has {formatCurrency(9000)} of depreciable amount. Dividing{" "}
+            {formatCurrency(9000)} by 5 years gives {formatCurrency(1800)} of depreciation
+            expense per year.
           </p>
         </Card>
       </section>

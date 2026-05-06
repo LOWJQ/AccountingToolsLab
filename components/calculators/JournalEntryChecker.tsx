@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { checkJournalEntry, type JournalEntryLine } from "@/lib/calculators/journal-entry";
@@ -38,19 +39,13 @@ function parseAmount(value: string): number {
   return Number.isFinite(amount) && amount >= 0 ? amount : 0;
 }
 
-function formatAmount(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
 function isBlankLine(line: EditableJournalEntryLine): boolean {
   return !line.accountName.trim() && !line.debit.trim() && !line.credit.trim();
 }
 
 export function JournalEntryChecker() {
   const [lines, setLines] = useState<EditableJournalEntryLine[]>([createLine(1), createLine(2)]);
+  const { formatCurrency } = useCurrency();
 
   const calculation = useMemo(() => {
     const activeLines = lines.filter((line) => !isBlankLine(line));
@@ -236,7 +231,7 @@ export function JournalEntryChecker() {
               Total debits
             </p>
             <p className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
-              {formatAmount(totalDebit)}
+              {formatCurrency(totalDebit)}
             </p>
           </Card>
           <Card className="rounded-xl px-4 py-4">
@@ -244,7 +239,7 @@ export function JournalEntryChecker() {
               Total credits
             </p>
             <p className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
-              {formatAmount(totalCredit)}
+              {formatCurrency(totalCredit)}
             </p>
           </Card>
           <Card className="rounded-xl px-4 py-4">
@@ -256,7 +251,7 @@ export function JournalEntryChecker() {
                 difference > 0 ? "text-rose-700" : "text-stone-950"
               }`}
             >
-              {formatAmount(difference)}
+              {formatCurrency(difference)}
             </p>
           </Card>
           <div
@@ -289,7 +284,11 @@ export function JournalEntryChecker() {
 
         <p className="mt-5 text-sm leading-6 text-stone-600">
           {calculation.result
-            ? calculation.result.explanation
+            ? calculation.result.isBalanced
+              ? "Your journal entry balances. Total debits equal total credits."
+              : `Your journal entry does not balance. ${
+                  totalDebit > totalCredit ? "Debits" : "Credits"
+                } are higher by ${formatCurrency(difference)}.`
             : "This checker confirms the math balance only. It does not verify whether every account choice is correct."}
         </p>
 
@@ -336,10 +335,10 @@ export function JournalEntryChecker() {
           </h2>
           <div className="mt-5 grid gap-3">
             {[
-              ["Debit Cash", "1,000"],
-              ["Credit Service Revenue", "1,000"],
-              ["Total debits", "1,000"],
-              ["Total credits", "1,000"],
+              ["Debit Cash", formatCurrency(1000)],
+              ["Credit Service Revenue", formatCurrency(1000)],
+              ["Total debits", formatCurrency(1000)],
+              ["Total credits", formatCurrency(1000)],
               ["Status", "Entry balances"]
             ].map(([label, value]) => (
               <div

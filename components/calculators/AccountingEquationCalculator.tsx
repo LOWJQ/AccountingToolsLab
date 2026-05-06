@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import {
@@ -46,15 +47,9 @@ function parseAmount(value: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
-function formatAmount(value: number): string {
-  return new Intl.NumberFormat("en", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value);
-}
-
 export function AccountingEquationCalculator() {
   const [solveFor, setSolveFor] = useState<AccountingEquationSolveFor>("assets");
+  const { formatCurrency } = useCurrency();
   const [values, setValues] = useState<Record<FieldName, string>>({
     assets: "",
     liabilities: "",
@@ -198,7 +193,7 @@ export function AccountingEquationCalculator() {
               Calculated {fieldLabels[solveFor]}
             </p>
             <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
-              {calculation.result ? formatAmount(calculation.result.value) : "-"}
+              {calculation.result ? formatCurrency(calculation.result.value) : "-"}
             </p>
             <p className="mt-2 text-sm leading-6 text-stone-600">
               {calculation.result ? calculation.result.formula : calculation.message}
@@ -237,8 +232,9 @@ export function AccountingEquationCalculator() {
           <div className="mt-6 rounded-xl border border-stone-200 bg-stone-50 p-5">
             <p className="text-sm font-semibold text-stone-950">Worked example</p>
             <p className="mt-2 text-sm leading-6 text-stone-600">
-              If liabilities are 400 and equity is 600, assets are 1,000 because
-              400 + 600 = 1,000.
+              If liabilities are {formatCurrency(400)} and equity is {formatCurrency(600)},
+              assets are {formatCurrency(1000)} because {formatCurrency(400)} +{" "}
+              {formatCurrency(600)} = {formatCurrency(1000)}.
             </p>
           </div>
         </Card>

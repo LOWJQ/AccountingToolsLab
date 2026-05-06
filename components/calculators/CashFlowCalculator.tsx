@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateCashFlow, type CashFlowStatus } from "@/lib/calculators/cash-flow";
@@ -34,15 +35,9 @@ function parseAmount(value: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
-function formatAmount(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
 export function CashFlowCalculator() {
   const [beginningCashBalance, setBeginningCashBalance] = useState("");
+  const { formatCurrency } = useCurrency();
   const [cashInflows, setCashInflows] = useState("");
   const [cashOutflows, setCashOutflows] = useState("");
 
@@ -164,7 +159,7 @@ export function CashFlowCalculator() {
                     Ending cash balance
                   </p>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
-                    {formatAmount(calculation.result.endingCashBalance)}
+                    {formatCurrency(calculation.result.endingCashBalance)}
                   </p>
                 </div>
                 <div className="rounded-xl border border-stone-200 bg-white p-4">
@@ -172,11 +167,12 @@ export function CashFlowCalculator() {
                     Net cash flow
                   </p>
                   <p className="mt-2 text-xl font-semibold text-stone-950">
-                    {formatAmount(calculation.result.netCashFlow)}
+                    {formatCurrency(calculation.result.netCashFlow)}
                   </p>
                 </div>
                 <p className="text-sm leading-6 text-stone-600">
-                  {calculation.result.explanation}
+                  Net cash flow is {calculation.result.status}, so the ending cash balance is{" "}
+                  {formatCurrency(calculation.result.endingCashBalance)}.
                 </p>
               </div>
             ) : (
@@ -224,11 +220,11 @@ export function CashFlowCalculator() {
           </h2>
           <div className="mt-5 grid gap-3">
             {[
-              ["Beginning cash", "5,000"],
-              ["Cash inflows", "12,000"],
-              ["Cash outflows", "9,000"],
-              ["Net cash flow", "3,000"],
-              ["Ending cash balance", "8,000"]
+              ["Beginning cash", formatCurrency(5000)],
+              ["Cash inflows", formatCurrency(12000)],
+              ["Cash outflows", formatCurrency(9000)],
+              ["Net cash flow", formatCurrency(3000)],
+              ["Ending cash balance", formatCurrency(8000)]
             ].map(([label, value]) => (
               <div
                 className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-b-0"
@@ -240,8 +236,10 @@ export function CashFlowCalculator() {
             ))}
           </div>
           <p className="mt-4 text-sm leading-6 text-stone-600">
-            Cash inflows of 12,000 minus cash outflows of 9,000 gives positive net cash flow
-            of 3,000. Adding that to 5,000 beginning cash gives 8,000 ending cash.
+            Cash inflows of {formatCurrency(12000)} minus cash outflows of{" "}
+            {formatCurrency(9000)} gives positive net cash flow of {formatCurrency(3000)}.
+            Adding that to {formatCurrency(5000)} beginning cash gives {formatCurrency(8000)}{" "}
+            ending cash.
           </p>
         </Card>
       </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateInvoice } from "@/lib/calculators/invoice";
@@ -13,24 +14,6 @@ type EditableLineItem = {
 };
 
 type InvoiceView = "details" | "preview";
-
-type InvoiceCurrency = {
-  code: string;
-  name: string;
-  symbol: string;
-};
-
-const currencyOptions: InvoiceCurrency[] = [
-  { code: "MYR", name: "Malaysia Ringgit", symbol: "RM" },
-  { code: "SGD", name: "Singapore Dollar", symbol: "S$" },
-  { code: "USD", name: "US Dollar", symbol: "$" },
-  { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
-  { code: "TWD", name: "New Taiwan Dollar", symbol: "NT$" },
-  { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
-  { code: "THB", name: "Thai Baht", symbol: "฿" },
-  { code: "JPY", name: "Japanese Yen", symbol: "¥" },
-  { code: "KRW", name: "South Korean Won", symbol: "₩" }
-];
 
 const mistakes = [
   "Forgetting invoice number",
@@ -76,12 +59,9 @@ function formatAmount(value: number): string {
   });
 }
 
-function formatMoney(value: number, currencySymbol: string): string {
-  return `${currencySymbol} ${formatAmount(value)}`;
-}
-
 export function InvoiceGenerator() {
   const today = new Date().toISOString().slice(0, 10);
+  const { currency, formatCurrency } = useCurrency();
   const invoiceGeneratorTopRef = useRef<HTMLDivElement>(null);
   const invoicePreviewRef = useRef<HTMLDivElement>(null);
   const [businessName, setBusinessName] = useState("");
@@ -96,7 +76,6 @@ export function InvoiceGenerator() {
   const [notes, setNotes] = useState("");
   const [lineItems, setLineItems] = useState<EditableLineItem[]>([createLineItem(1)]);
   const [activeView, setActiveView] = useState<InvoiceView>("details");
-  const [currencyCode, setCurrencyCode] = useState("MYR");
 
   const calculation = useMemo(() => {
     try {
@@ -161,7 +140,6 @@ export function InvoiceGenerator() {
     setDueDate("");
     setNotes("");
     setLineItems([createLineItem(1)]);
-    setCurrencyCode("MYR");
   }
 
   function switchInvoiceView(view: InvoiceView) {
@@ -367,8 +345,6 @@ export function InvoiceGenerator() {
 
   const subtotal = calculation.result?.subtotal ?? 0;
   const total = calculation.result?.total ?? 0;
-  const selectedCurrency =
-    currencyOptions.find((currency) => currency.code === currencyCode) ?? currencyOptions[0];
 
   return (
     <div className="flex flex-col gap-8">
@@ -484,7 +460,7 @@ export function InvoiceGenerator() {
 
             <section className="grid gap-4">
               <h2 className="text-base font-semibold text-stone-950">Invoice details</h2>
-              <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid min-w-0 gap-4 md:grid-cols-3">
                 <label className="grid min-w-0 gap-2">
                   <span className="text-sm font-semibold text-stone-800">Invoice number</span>
                   <input
@@ -492,20 +468,6 @@ export function InvoiceGenerator() {
                     onChange={(event) => setInvoiceNumber(event.target.value)}
                     value={invoiceNumber}
                   />
-                </label>
-                <label className="grid min-w-0 gap-2">
-                  <span className="text-sm font-semibold text-stone-800">Currency</span>
-                  <select
-                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setCurrencyCode(event.target.value)}
-                    value={currencyCode}
-                  >
-                    {currencyOptions.map((currency) => (
-                      <option key={currency.code} value={currency.code}>
-                        {currency.name} — {currency.symbol}
-                      </option>
-                    ))}
-                  </select>
                 </label>
                 <label className="grid min-w-0 gap-2">
                   <span className="text-sm font-semibold text-stone-800">Invoice date</span>
@@ -575,7 +537,7 @@ export function InvoiceGenerator() {
                       </label>
                       <label className="grid min-w-0 gap-2">
                         <span className="text-sm font-semibold text-stone-800">
-                          Unit price ({selectedCurrency.symbol})
+                          Unit price ({currency})
                         </span>
                         <input
                           className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
@@ -591,7 +553,7 @@ export function InvoiceGenerator() {
                       <div className="grid min-w-0 gap-2">
                         <span className="text-sm font-semibold text-stone-800">Line total</span>
                         <div className="flex h-12 w-full min-w-0 items-center rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-950">
-                          {formatMoney(lineItemPreviewTotals[index] ?? 0, selectedCurrency.symbol)}
+                          {formatCurrency(lineItemPreviewTotals[index] ?? 0)}
                         </div>
                       </div>
                       <div className="flex min-w-0 items-end">
@@ -737,10 +699,10 @@ export function InvoiceGenerator() {
                         {formatAmount(item.quantity)}
                       </span>
                       <span className="text-right tabular-nums text-stone-600">
-                        {formatMoney(item.unitPrice, selectedCurrency.symbol)}
+                        {formatCurrency(item.unitPrice)}
                       </span>
                       <span className="text-right font-semibold tabular-nums text-stone-950">
-                        {formatMoney(item.lineTotal, selectedCurrency.symbol)}
+                        {formatCurrency(item.lineTotal)}
                       </span>
                     </div>
                   ))}
@@ -752,13 +714,13 @@ export function InvoiceGenerator() {
                   <div className="invoice-total-row flex justify-between gap-4 text-sm text-stone-600">
                     <span className="invoice-total-label">Subtotal</span>
                     <span className="invoice-total-amount font-semibold text-stone-950">
-                      {formatMoney(subtotal, selectedCurrency.symbol)}
+                      {formatCurrency(subtotal)}
                     </span>
                   </div>
                   <div className="invoice-total-row invoice-grand-total mt-3 flex justify-between gap-4 border-t border-stone-200 pt-3 text-base font-semibold text-stone-950">
                     <span className="invoice-total-label">Total</span>
                     <span className="invoice-total-amount">
-                      {formatMoney(total, selectedCurrency.symbol)}
+                      {formatCurrency(total)}
                     </span>
                   </div>
                 </div>

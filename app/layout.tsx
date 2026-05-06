@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import { CurrencyProvider } from "@/components/currency/CurrencyProvider";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { siteConfig } from "@/lib/seo/site";
@@ -28,9 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        {children}
-        <Footer />
+        <CurrencyProvider>
+          <Header />
+          {children}
+          <Footer />
+        </CurrencyProvider>
         <Analytics />
         <SpeedInsights />
       </body>

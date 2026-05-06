@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateTrialBalance } from "@/lib/calculators/trial-balance";
@@ -68,13 +69,6 @@ function parseAmount(value: string): number {
   return Number.isFinite(amount) && amount >= 0 ? amount : 0;
 }
 
-function formatMoney(value: number): string {
-  return new Intl.NumberFormat("en", {
-    style: "currency",
-    currency: "USD"
-  }).format(value);
-}
-
 function SummaryCard({
   label,
   value,
@@ -136,6 +130,7 @@ function getStatus({
 
 export function TrialBalanceCalculator() {
   const [rows, setRows] = useState<EditableTrialBalanceRow[]>(initialRows);
+  const { formatCurrency } = useCurrency();
 
   const calculationRows = useMemo<TrialBalanceRow[]>(
     () =>
@@ -295,12 +290,12 @@ export function TrialBalanceCalculator() {
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard label="Total Debit" value={formatMoney(result.totalDebit)} />
-          <SummaryCard label="Total Credit" value={formatMoney(result.totalCredit)} />
+          <SummaryCard label="Total Debit" value={formatCurrency(result.totalDebit)} />
+          <SummaryCard label="Total Credit" value={formatCurrency(result.totalCredit)} />
           <SummaryCard
             label="Difference"
             tone={result.difference > 0 ? "error" : "neutral"}
-            value={formatMoney(result.difference)}
+            value={formatCurrency(result.difference)}
           />
           <div className={`rounded-xl border px-4 py-4 shadow-sm ${status.cardClass}`}>
             <p className={`text-xs font-medium uppercase tracking-wide ${status.labelClass}`}>

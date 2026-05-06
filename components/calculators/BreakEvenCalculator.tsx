@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateBreakEven } from "@/lib/calculators/break-even";
@@ -31,6 +32,7 @@ function formatAmount(value: number): string {
 
 export function BreakEvenCalculator() {
   const [fixedCosts, setFixedCosts] = useState("");
+  const { formatCurrency } = useCurrency();
   const [sellingPricePerUnit, setSellingPricePerUnit] = useState("");
   const [variableCostPerUnit, setVariableCostPerUnit] = useState("");
 
@@ -156,7 +158,7 @@ export function BreakEvenCalculator() {
                       Contribution margin per unit
                     </p>
                     <p className="mt-2 text-xl font-semibold text-stone-950">
-                      {formatAmount(calculation.result.contributionMarginPerUnit)}
+                      {formatCurrency(calculation.result.contributionMarginPerUnit)}
                     </p>
                   </div>
                   <div className="rounded-xl border border-stone-200 bg-white p-4">
@@ -164,12 +166,14 @@ export function BreakEvenCalculator() {
                       Break-even sales
                     </p>
                     <p className="mt-2 text-xl font-semibold text-stone-950">
-                      {formatAmount(calculation.result.breakEvenSales)}
+                      {formatCurrency(calculation.result.breakEvenSales)}
                     </p>
                   </div>
                 </div>
                 <p className="text-sm leading-6 text-stone-600">
-                  {calculation.result.explanation}
+                  The business needs to sell {formatAmount(calculation.result.breakEvenUnits)}{" "}
+                  unit{calculation.result.breakEvenUnits === 1 ? "" : "s"} to cover fixed and
+                  variable costs.
                 </p>
               </div>
             ) : (
@@ -220,12 +224,12 @@ export function BreakEvenCalculator() {
           </h2>
           <div className="mt-5 grid gap-3">
             {[
-              ["Fixed costs", "10,000"],
-              ["Selling price per unit", "50"],
-              ["Variable cost per unit", "30"],
-              ["Contribution margin", "20"],
+              ["Fixed costs", formatCurrency(10000)],
+              ["Selling price per unit", formatCurrency(50)],
+              ["Variable cost per unit", formatCurrency(30)],
+              ["Contribution margin", formatCurrency(20)],
               ["Break-even units", "500"],
-              ["Break-even sales", "25,000"]
+              ["Break-even sales", formatCurrency(25000)]
             ].map(([label, value]) => (
               <div
                 className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-b-0"
@@ -237,8 +241,9 @@ export function BreakEvenCalculator() {
             ))}
           </div>
           <p className="mt-4 text-sm leading-6 text-stone-600">
-            The contribution margin is 20 per unit. Dividing 10,000 of fixed costs by 20
-            gives 500 break-even units, or 25,000 of break-even sales.
+            The contribution margin is {formatCurrency(20)} per unit. Dividing{" "}
+            {formatCurrency(10000)} of fixed costs by {formatCurrency(20)} gives 500
+            break-even units, or {formatCurrency(25000)} of break-even sales.
           </p>
         </Card>
       </section>

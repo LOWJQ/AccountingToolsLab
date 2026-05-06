@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import {
@@ -34,15 +35,9 @@ function parseAmount(value: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
-function formatCurrency(value: number): string {
-  return `RM${value.toLocaleString("en-MY", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
-}
-
 export function SstCalculatorMalaysia() {
   const [mode, setMode] = useState<SstCalculationMode>("add");
+  const { formatCurrency } = useCurrency();
   const [amount, setAmount] = useState("");
   const [rateOption, setRateOption] = useState("8");
   const [customRate, setCustomRate] = useState("");
@@ -221,7 +216,13 @@ export function SstCalculatorMalaysia() {
                 </div>
 
                 <p className="text-sm leading-6 text-stone-600">
-                  {calculation.result.explanation}
+                  {mode === "add"
+                    ? `Adding ${calculation.result.sstRate}% SST gives an estimated total including SST of ${formatCurrency(
+                        calculation.result.totalIncludingSst
+                      )}.`
+                    : `Removing ${calculation.result.sstRate}% SST gives an estimated amount before SST of ${formatCurrency(
+                        calculation.result.amountBeforeSst
+                      )}.`}
                 </p>
               </div>
             ) : (
@@ -288,15 +289,15 @@ export function SstCalculatorMalaysia() {
             <div>
               <h3 className="text-base font-semibold text-stone-950">Add SST</h3>
               <p className="mt-2 text-sm leading-6 text-stone-600">
-                Amount before SST RM100 at 8% gives SST amount RM8 and total including SST
-                RM108.
+                Amount before SST {formatCurrency(100)} at 8% gives SST amount{" "}
+                {formatCurrency(8)} and total including SST {formatCurrency(108)}.
               </p>
             </div>
             <div className="border-t border-stone-100 pt-5">
               <h3 className="text-base font-semibold text-stone-950">Remove SST</h3>
               <p className="mt-2 text-sm leading-6 text-stone-600">
-                Total including SST RM108 at 8% gives amount before SST RM100 and SST amount
-                RM8.
+                Total including SST {formatCurrency(108)} at 8% gives amount before SST{" "}
+                {formatCurrency(100)} and SST amount {formatCurrency(8)}.
               </p>
             </div>
           </div>
