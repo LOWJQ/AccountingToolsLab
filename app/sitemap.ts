@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/sst-calculator-malaysia",
     "/tools/journal-entry-checker",
     "/guides",
+    "/guides/debit-vs-credit",
+    "/guides/financial-ratios-for-beginners",
     "/guides/trial-balance-explained",
     "/about",
     "/contact",
