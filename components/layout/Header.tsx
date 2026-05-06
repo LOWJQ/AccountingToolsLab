@@ -1,4 +1,8 @@
+"use client";
+
 import Image from "next/image";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
 
 const navItems = [
   { label: "Tools", href: "/tools" },
@@ -7,8 +11,10 @@ const navItems = [
 ];
 
 export function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <header className="border-b border-stone-200 bg-white/90 backdrop-blur">
+    <header className="relative border-b border-stone-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <a className="flex items-center" href="/" aria-label="AccountingToolsLab home">
           <Image
@@ -29,13 +35,42 @@ export function Header() {
           ))}
         </nav>
 
-        <a
-          className="inline-flex h-10 items-center justify-center rounded-full bg-slate-700 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-          href="/tools"
-        >
-          Start
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            className="inline-flex h-10 items-center justify-center rounded-full bg-slate-700 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+            href="/tools"
+          >
+            Start
+          </a>
+
+          <button
+            aria-expanded={isMenuOpen}
+            aria-label="Toggle navigation menu"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-stone-700 transition hover:border-stone-300 hover:text-stone-950 sm:hidden"
+            onClick={() => setIsMenuOpen((current) => !current)}
+            type="button"
+          >
+            {isMenuOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
+          </button>
+        </div>
       </div>
+
+      {isMenuOpen ? (
+        <nav className="absolute inset-x-0 top-16 z-20 border-b border-stone-200 bg-white px-4 py-3 shadow-sm sm:hidden">
+          <div className="mx-auto flex max-w-6xl flex-col text-sm font-medium text-stone-600">
+            {navItems.map((item) => (
+              <a
+                className="py-3 transition hover:text-stone-950"
+                href={item.href}
+                key={item.href}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </nav>
+      ) : null}
     </header>
   );
 }
