@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const footerSections = [
   {
     title: "Tools",
@@ -32,11 +34,14 @@ export function Footer() {
     <footer className="border-t border-stone-200 bg-white">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8 lg:py-16">
         <div>
-          <a className="flex items-center gap-3 text-sm font-semibold text-stone-950" href="/">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-white">
-              ATL
-            </span>
-            <span>AccountingToolsLab</span>
+          <a className="inline-flex items-center" href="/" aria-label="AccountingToolsLab home">
+            <Image
+              alt="AccountingToolsLab"
+              className="h-auto w-[220px]"
+              height={52}
+              src="/logo.png"
+              width={220}
+            />
           </a>
           <p className="mt-4 max-w-sm text-sm leading-6 text-stone-600">
             Free accounting tools and beginner-friendly guides for students, new founders,

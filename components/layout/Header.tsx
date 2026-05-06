@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const navItems = [
   { label: "Tools", href: "/tools" },
   { label: "Guides", href: "/guides" },
@@ -8,11 +10,15 @@ export function Header() {
   return (
     <header className="border-b border-stone-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <a className="flex items-center gap-3 text-sm font-semibold text-stone-950" href="/">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-white">
-            ATL
-          </span>
-          <span>AccountingToolsLab</span>
+        <a className="flex items-center" href="/" aria-label="AccountingToolsLab home">
+          <Image
+            alt="AccountingToolsLab"
+            className="h-auto w-[185px] sm:w-[220px]"
+            height={52}
+            priority
+            src="/logo.png"
+            width={220}
+          />
         </a>
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-stone-600 sm:flex">
