@@ -17,30 +17,30 @@ const featuredTools = [
   {
     name: "Accounting Equation Calculator",
     description: "Review assets, liabilities, and equity in a simple accounting equation format.",
-    status: "Coming Soon",
-    href: "#",
-    isAvailable: false
+    status: "Available",
+    href: "/tools/accounting-equation-calculator",
+    isAvailable: true
   },
   {
     name: "Debit/Credit Checker",
     description: "Practice whether an account should increase with a debit or a credit.",
-    status: "Coming Soon",
-    href: "#",
-    isAvailable: false
+    status: "Available",
+    href: "/tools/debit-credit-checker",
+    isAvailable: true
   },
   {
     name: "Financial Ratio Calculator",
     description: "Calculate common ratios for liquidity, profitability, and solvency checks.",
-    status: "Coming Soon",
-    href: "#",
-    isAvailable: false
+    status: "Available",
+    href: "/tools/financial-ratio-calculator",
+    isAvailable: true
   },
   {
     name: "Depreciation Calculator",
     description: "Estimate depreciation with beginner-friendly inputs and explanations.",
-    status: "Coming Soon",
-    href: "#",
-    isAvailable: false
+    status: "Available",
+    href: "/tools/depreciation-calculator",
+    isAvailable: true
   }
 ];
 

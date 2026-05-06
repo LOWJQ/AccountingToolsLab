@@ -40,10 +40,10 @@ export const tools: Tool[] = [
   {
     slug: "depreciation-calculator",
     name: "Depreciation Calculator",
-    description: "Estimate depreciation for simple fixed asset examples and adjustments.",
+    description: "Calculate straight-line depreciation from cost, salvage value, and useful life.",
     category: "Depreciation & Adjustments",
     bestFor: "Understanding asset cost allocation over time.",
     href: "/tools/depreciation-calculator",
-    status: "planned"
+    status: "mvp"
   }
 ];

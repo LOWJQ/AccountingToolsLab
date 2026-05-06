@@ -1,7 +1,67 @@
-export type DepreciationInput = unknown;
-export type DepreciationOutput = unknown;
+export type DepreciationInput = {
+  assetCost: number | null | undefined;
+  salvageValue: number | null | undefined;
+  usefulLifeYears: number | null | undefined;
+};
 
-export function calculateDepreciation(_input: DepreciationInput): DepreciationOutput {
-  // Real depreciation formulas will be implemented here later.
-  throw new Error("Not implemented yet");
+export type DepreciationResult = {
+  assetCost: number;
+  salvageValue: number;
+  usefulLifeYears: number;
+  depreciableAmount: number;
+  annualDepreciation: number;
+  monthlyDepreciation: number;
+  explanation: string;
+};
+
+function assertValidNumber(value: number | null | undefined, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`${label} is required.`);
+  }
+
+  return value;
+}
+
+function roundAmount(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+export function calculateDepreciation(input: DepreciationInput): DepreciationResult {
+  const assetCost = assertValidNumber(input.assetCost, "Asset cost");
+  const salvageValue = assertValidNumber(input.salvageValue, "Salvage value");
+  const usefulLifeYears = assertValidNumber(input.usefulLifeYears, "Useful life");
+
+  if (assetCost <= 0) {
+    throw new Error("Asset cost must be greater than zero.");
+  }
+
+  if (salvageValue < 0) {
+    throw new Error("Salvage value cannot be negative.");
+  }
+
+  if (usefulLifeYears <= 0) {
+    throw new Error("Useful life must be greater than zero.");
+  }
+
+  if (salvageValue > assetCost) {
+    throw new Error("Salvage value cannot be greater than asset cost.");
+  }
+
+  const depreciableAmount = roundAmount(assetCost - salvageValue);
+  const annualDepreciation = roundAmount(depreciableAmount / usefulLifeYears);
+  const monthlyDepreciation = roundAmount(annualDepreciation / 12);
+
+  return {
+    assetCost,
+    salvageValue,
+    usefulLifeYears,
+    depreciableAmount,
+    annualDepreciation,
+    monthlyDepreciation,
+    explanation: `The depreciable amount is ${depreciableAmount.toFixed(
+      2
+    )}, spread evenly over ${usefulLifeYears} year${
+      usefulLifeYears === 1 ? "" : "s"
+    } using straight-line depreciation.`
+  };
 }
