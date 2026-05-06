@@ -88,7 +88,7 @@ export default function TermsPage() {
             Terms for using AccountingToolsLab
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            These Terms explain the basic rules for using AccountingToolsLab's free accounting
+            These Terms explain the basic rules for using AccountingToolsLab&apos;s free accounting
             tools and educational content.
           </p>
           <p className="mt-6 inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">

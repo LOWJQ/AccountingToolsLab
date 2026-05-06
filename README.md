@@ -10,7 +10,7 @@ https://www.accountingtoolslab.com
 
 ## Current Status
 
-The project is an early-stage Next.js App Router site.
+The project is a Next.js App Router site with multiple working calculators, guide pages, SEO routes, and shared site layout.
 
 Currently available:
 
@@ -22,14 +22,21 @@ Currently available:
 - Privacy Policy
 - Terms of Use
 - Trial Balance Calculator
+- Accounting Equation Calculator
+- Debit/Credit Helper
+- Financial Ratio Calculator
+- Depreciation Calculator
+- Break-even Calculator
+- Cash Flow Calculator
+- Invoice Generator
+- Malaysia SST Calculator
+- Journal Entry Checker
 - Trial Balance Explained guide
-
-The Trial Balance Calculator is the first working calculator. It supports editable rows, live debit and credit totals, balanced/unbalanced status, empty-state handling, decimal values, and validation for negative or invalid row values.
+- Debit vs Credit guide
+- Financial Ratios for Beginners guide
 
 ## Not Implemented Yet
 
-- Other calculator logic
-- Full guide articles for every planned guide
 - Backend APIs
 - Database
 - Login or authentication
@@ -37,7 +44,7 @@ The Trial Balance Calculator is the first working calculator. It supports editab
 - Ads
 - AI features
 - Dashboard features
-- Working contact form submission
+- Contact form submission
 
 ## Tech Stack
 
@@ -55,35 +62,42 @@ app/                Next.js App Router routes, root layout, sitemap, and robots 
 components/         Layout, calculator, tool, SEO, and UI component folders.
 lib/                Calculator logic, shared data, SEO helpers, utilities, and validation placeholders.
 types/              Shared TypeScript types for tools, calculators, SEO, and accounting concepts.
-public/             Static assets such as logo, OG image placeholder, and icons folder.
-tests/              Trial balance calculation tests.
+public/             Static assets such as logo and favicon assets.
+tests/              Calculator logic tests.
 ```
 
 ## Key Routes
 
 ```text
-/                                  Homepage
-/tools                             Tools directory
-/tools/trial-balance-calculator    Working Trial Balance Calculator
-/guides                            Guides directory
-/guides/trial-balance-explained    Finished beginner guide
-/about                             About page
-/contact                           Contact page
-/privacy-policy                    Privacy Policy
-/terms                             Terms of Use
+/                                             Homepage
+/tools                                        Tools directory
+/tools/trial-balance-calculator               Trial Balance Calculator
+/tools/accounting-equation-calculator         Accounting Equation Calculator
+/tools/debit-credit-checker                   Debit/Credit Helper
+/tools/financial-ratio-calculator             Financial Ratio Calculator
+/tools/depreciation-calculator                Depreciation Calculator
+/tools/break-even-calculator                  Break-even Calculator
+/tools/cash-flow-calculator                   Cash Flow Calculator
+/tools/invoice-generator                      Invoice Generator
+/tools/sst-calculator-malaysia                Malaysia SST Calculator
+/tools/journal-entry-checker                  Journal Entry Checker
+/guides                                       Guides directory
+/guides/trial-balance-explained               Trial Balance Explained guide
+/guides/debit-vs-credit                       Debit vs Credit guide
+/guides/financial-ratios-for-beginners        Financial Ratios for Beginners guide
+/about                                        About page
+/contact                                      Contact page
+/privacy-policy                               Privacy Policy
+/terms                                        Terms of Use
 ```
-
-Unfinished guide pages use `noindex` metadata and are not included in the sitemap.
 
 ## Environment
 
-Create a local `.env.local` if needed:
+The canonical production URL is configured in `lib/seo/site.ts`:
 
-```bash
-NEXT_PUBLIC_SITE_URL=https://www.accountingtoolslab.com
+```text
+https://www.accountingtoolslab.com
 ```
-
-The default fallback site URL is configured in `lib/seo/site.ts`.
 
 ## Development
 
@@ -111,24 +125,28 @@ Build for production:
 npm run build
 ```
 
+Run linting:
+
+```bash
+npm run lint
+```
+
 ## Deployment
 
 The project is prepared for Vercel deployment.
 
 Before deploying, check:
 
-- `NEXT_PUBLIC_SITE_URL` is set to `https://www.accountingtoolslab.com`
 - The custom domain is configured in Vercel
+- Apex and HTTP traffic redirect to `https://www.accountingtoolslab.com`
 - Footer and navigation links work
 - Sitemap and robots output use the production domain
 - Contact email is correct
-- Vercel Analytics and Speed Insights are enabled in the Vercel project dashboard
+- Vercel Analytics and Speed Insights are enabled
 
 ## Next Steps
 
-1. Build the next calculator, likely Accounting Equation Calculator.
-2. Add real guide content for Debit vs Credit.
-3. Add real guide content for Financial Ratios for Beginners.
-4. Replace placeholder OG image with a production-ready image.
-5. Review Privacy Policy and Terms before public launch.
-6. Add more focused tests as new calculator logic is implemented.
+1. Add more guide content for accounting topics.
+2. Replace placeholder OG image with a production-ready image.
+3. Review Privacy Policy and Terms before major public launch updates.
+4. Add more focused tests as calculator behavior expands.

@@ -227,7 +227,7 @@ export function AccountingEquationCalculator() {
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
             Assets are resources owned by a business. Liabilities are amounts the business owes.
-            Equity is the owner's remaining claim after liabilities are subtracted from assets.
+            Equity is the owner&apos;s remaining claim after liabilities are subtracted from assets.
           </p>
           <div className="mt-6 rounded-xl border border-stone-200 bg-stone-50 p-5">
             <p className="text-sm font-semibold text-stone-950">Worked example</p>

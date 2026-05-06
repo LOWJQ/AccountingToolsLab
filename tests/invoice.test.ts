@@ -83,6 +83,45 @@ test("handles decimals", () => {
   assert.equal(result.subtotal, 200.63);
 });
 
+test("handles large invoice values", () => {
+  const result = calculateInvoice([
+    {
+      description: "Enterprise implementation",
+      quantity: 1000000,
+      unitPrice: 1234.56
+    },
+    {
+      description: "Support package",
+      quantity: 250000,
+      unitPrice: 78.9
+    }
+  ]);
+
+  assert.equal(result.items[0].lineTotal, 1234560000);
+  assert.equal(result.items[1].lineTotal, 19725000);
+  assert.equal(result.subtotal, 1254285000);
+  assert.equal(result.total, 1254285000);
+});
+
+test("rounds each invoice line before subtotal", () => {
+  const result = calculateInvoice([
+    {
+      description: "Rounded line one",
+      quantity: 3,
+      unitPrice: 0.335
+    },
+    {
+      description: "Rounded line two",
+      quantity: 3,
+      unitPrice: 0.335
+    }
+  ]);
+
+  assert.equal(result.items[0].lineTotal, 1.01);
+  assert.equal(result.items[1].lineTotal, 1.01);
+  assert.equal(result.subtotal, 2.02);
+});
+
 test("rejects quantity of zero or less", () => {
   assert.throws(
     () =>

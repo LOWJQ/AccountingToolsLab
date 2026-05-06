@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import { tools } from "@/lib/data/tools";
+﻿import { tools } from "@/lib/data/tools";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Accounting Tools | AccountingToolsLab",
   description:
-    "Explore free accounting calculators and learning tools for students, beginners, and small business owners."
-};
+    "Explore free accounting calculators and learning tools for students, beginners, and small business owners.",
+  path: "/tools"
+});
 
 const categories = [
   {
@@ -39,7 +40,6 @@ const categories = [
 ];
 
 const availableTools = tools.filter((tool) => tool.status === "mvp");
-const plannedTools = tools.filter((tool) => tool.status === "planned");
 
 function StatusBadge({ status }: { status: "mvp" | "planned" }) {
   const isAvailable = status === "mvp";
@@ -71,11 +71,11 @@ export default function ToolsPage() {
             </h1>
             <p className="mt-5 text-base leading-7 text-stone-600">
               Explore simple accounting tools built for students, beginners, and small business
-              owners. Start with trial balance checking, then use more calculators as they are
-              released.
+              owners. Use calculators for trial balances, debit and credit checks, ratios,
+              depreciation, invoices, SST estimates, journal entries, and more.
             </p>
             <div className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
-              {availableTools.length} available tool · {plannedTools.length} coming soon
+              {availableTools.length} available tools
             </div>
           </div>
         </section>
@@ -89,8 +89,7 @@ export default function ToolsPage() {
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Available tools open directly. Planned tools are shown so the product roadmap stays
-              easy to understand.
+              Available tools open directly and focus on one accounting task at a time.
             </p>
           </div>
 
@@ -191,10 +190,11 @@ export default function ToolsPage() {
         </section>
 
         <aside className="rounded-xl border border-stone-200 bg-white/80 p-5 text-sm leading-6 text-stone-600 shadow-sm">
-          More accounting tools are planned, including journal entry support, bank reconciliation,
-          and beginner practice tools.
+          More accounting learning resources may be added over time, but every listed available
+          tool can be opened and used today.
         </aside>
       </main>
     </div>
   );
 }
+

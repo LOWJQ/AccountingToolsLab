@@ -153,185 +153,32 @@ export function InvoiceGenerator() {
   }
 
   function printInvoice() {
-    const invoiceHtml = invoicePreviewRef.current?.innerHTML;
-
-    if (!invoiceHtml) {
+    if (typeof window === "undefined" || !invoicePreviewRef.current) {
       return;
     }
 
-    const printWindow = window.open("", "_blank", "width=900,height=700");
+    document.getElementById("invoice-print-clone")?.remove();
 
-    if (!printWindow) {
-      return;
-    }
+    const printClone = invoicePreviewRef.current.cloneNode(true) as HTMLElement;
+    printClone.id = "invoice-print-clone";
+    document.body.appendChild(printClone);
+    document.body.classList.add("printing-invoice");
 
-    const printTitle = `Invoice ${invoiceNumber || "Preview"}`;
+    let cleanupTimeout: number | undefined;
 
-    printWindow.document.write(`<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>${printTitle}</title>
-    <style>
-      @page {
-        margin: 0.5in;
+    const cleanup = () => {
+      document.body.classList.remove("printing-invoice");
+      printClone.remove();
+      window.removeEventListener("afterprint", cleanup);
+
+      if (cleanupTimeout) {
+        window.clearTimeout(cleanupTimeout);
       }
+    };
 
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        background: #ffffff;
-        color: #1c1917;
-        font-family: Inter, Arial, sans-serif;
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .invoice-print-document {
-        width: 100%;
-        max-width: 760px;
-        margin: 0 auto;
-      }
-
-      .invoice-print-document * {
-        box-shadow: none !important;
-      }
-
-      .invoice-print-document > div {
-        border: 0 !important;
-        background: #ffffff !important;
-        padding: 0 !important;
-      }
-
-      .invoice-print-header {
-        display: flex;
-        justify-content: space-between;
-        gap: 24px;
-        border-bottom: 1px solid #e7e5e4;
-        padding-bottom: 24px;
-      }
-
-      .invoice-print-muted {
-        color: #57534e;
-      }
-
-      .invoice-preview-lines {
-        margin-top: 24px;
-        border: 1px solid #e7e5e4;
-        border-radius: 8px;
-        overflow: hidden;
-      }
-
-      .invoice-preview-line {
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) 44px 76px 84px;
-        gap: 8px;
-        align-items: start;
-        padding: 10px 12px;
-        border-bottom: 1px solid #e7e5e4;
-      }
-
-      .invoice-preview-line:last-child {
-        border-bottom: 0;
-      }
-
-      .invoice-preview-line > * {
-        min-width: 0;
-        overflow-wrap: anywhere;
-      }
-
-      .invoice-preview-heading {
-        background: #fafaf9;
-        color: #78716c;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-      }
-
-      .text-right {
-        text-align: right;
-      }
-
-      .font-semibold {
-        font-weight: 600;
-      }
-
-      .invoice-totals-wrap {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 24px;
-      }
-
-      .invoice-totals-box {
-        width: 100%;
-        max-width: 280px;
-        border: 1px solid #e7e5e4;
-        border-radius: 8px;
-        background: #fafaf9;
-        padding: 14px;
-      }
-
-      .invoice-total-row {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 32px;
-        color: #57534e;
-      }
-
-      .invoice-total-row + .invoice-total-row {
-        margin-top: 10px;
-        border-top: 1px solid #e7e5e4;
-        padding-top: 10px;
-      }
-
-      .invoice-total-label {
-        white-space: nowrap;
-      }
-
-      .invoice-total-label::after {
-        content: ":";
-      }
-
-      .invoice-total-amount {
-        color: #1c1917;
-        font-weight: 600;
-        text-align: right;
-        white-space: nowrap;
-      }
-
-      .invoice-grand-total {
-        color: #1c1917;
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      @media print {
-        body {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="invoice-print-document">${invoiceHtml}</div>
-    <script>
-      window.onload = function () {
-        window.focus();
-        window.print();
-        setTimeout(function () {
-          window.close();
-        }, 250);
-      };
-    </script>
-  </body>
-</html>`);
-    printWindow.document.close();
+    window.addEventListener("afterprint", cleanup);
+    window.print();
+    cleanupTimeout = window.setTimeout(cleanup, 1500);
   }
 
   const previewItems =

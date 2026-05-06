@@ -1,26 +1,32 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Contact AccountingToolsLab",
   description:
-    "Contact AccountingToolsLab with feedback, issue reports, or suggestions for future accounting tools."
-};
+    "Contact AccountingToolsLab with feedback, issue reports, or suggestions for future accounting tools.",
+  path: "/contact"
+});
+
+const contactEmail = "accttoolslab@gmail.com";
 
 const contactOptions = [
   {
     title: "Feedback and suggestions",
     text: "Share ideas for new accounting calculators, page improvements, or beginner-friendly explanations.",
-    action: "Send feedback"
+    action: "Send feedback",
+    href: `mailto:${contactEmail}?subject=AccountingToolsLab%20Feedback`
   },
   {
     title: "Report an issue",
     text: "Found a calculation problem, broken page, or confusing explanation? Report it so it can be reviewed.",
-    action: "Report issue"
+    action: "Report issue",
+    href: `mailto:${contactEmail}?subject=AccountingToolsLab%20Issue%20Report`
   },
   {
     title: "General contact",
     text: "For general questions about AccountingToolsLab.",
-    action: "accttoolslab@gmail.com"
+    action: contactEmail,
+    href: `mailto:${contactEmail}`
   }
 ];
 
@@ -60,16 +66,12 @@ export default function ContactPage() {
               >
                 <h3 className="text-base font-semibold text-stone-950">{option.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-600">{option.text}</p>
-                {option.title === "General contact" ? (
-                  <a
-                    className="mt-5 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-600 ring-1 ring-stone-200 transition hover:text-stone-900"
-                    href={`mailto:${option.action}`}
-                  >
-                    {option.action}
-                  </a>
-                ) : (
-                  <p className="mt-5 text-sm font-semibold text-slate-700">{option.action}</p>
-                )}
+                <a
+                  className="mt-5 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-600 ring-1 ring-stone-200 transition hover:text-stone-900"
+                  href={option.href}
+                >
+                  {option.action}
+                </a>
               </article>
             ))}
           </div>
@@ -77,47 +79,20 @@ export default function ContactPage() {
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">UI preview</p>
+            <p className="text-sm font-medium tracking-wide text-slate-500">Email tips</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Contact form
+              What to include
             </h2>
             <p className="mt-3 text-sm leading-6 text-stone-600">
-              Form submission is not active yet. Please use the email contact option for now.
+              If you are reporting a calculator issue, include the tool name, the values you
+              entered, the result you expected, and the result shown.
             </p>
-
-            {/* UI-only form preview. Do not wire submission until backend handling is added. */}
-            <form className="mt-6 grid gap-4">
-              <label className="grid gap-2 text-sm font-semibold text-stone-800">
-                Name
-                <input
-                  className="h-11 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm font-normal text-stone-800 outline-none"
-                  placeholder="Your name"
-                  type="text"
-                />
-              </label>
-              <label className="grid gap-2 text-sm font-semibold text-stone-800">
-                Email
-                <input
-                  className="h-11 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm font-normal text-stone-800 outline-none"
-                  placeholder="you@example.com"
-                  type="email"
-                />
-              </label>
-              <label className="grid gap-2 text-sm font-semibold text-stone-800">
-                Message
-                <textarea
-                  className="min-h-32 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-normal text-stone-800 outline-none"
-                  placeholder="How can AccountingToolsLab improve?"
-                />
-              </label>
-              <button
-                className="inline-flex h-11 w-fit items-center justify-center rounded-xl border border-stone-200 bg-stone-100 px-5 text-sm font-semibold text-stone-500"
-                disabled
-                type="button"
-              >
-                Form coming soon
-              </button>
-            </form>
+            <a
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              href={`mailto:${contactEmail}?subject=AccountingToolsLab%20Issue%20Report`}
+            >
+              Email an issue report
+            </a>
           </article>
 
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
@@ -126,8 +101,8 @@ export default function ContactPage() {
               Before you contact
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              If you are reporting a calculator issue, include the tool name, the values you
-              entered, the result you expected, and the result shown.
+              AccountingToolsLab is a free educational tools site. Please avoid sending
+              sensitive personal, financial, or confidential business information by email.
             </p>
           </article>
         </section>
@@ -140,7 +115,7 @@ export default function ContactPage() {
                 Explore the tools
               </h2>
               <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Try the available calculator or browse upcoming accounting tools.
+                Try the calculators or browse accounting guides.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">

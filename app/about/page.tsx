@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "About AccountingToolsLab",
   description:
-    "Learn about AccountingToolsLab, a free accounting tools website for students, beginners, and small business owners."
-};
+    "Learn about AccountingToolsLab, a free accounting tools website for students, beginners, and small business owners.",
+  path: "/about"
+});
 
 const audiences = [
   {
@@ -33,11 +34,17 @@ const provides = [
   "Beginner-friendly explanations"
 ];
 
-const plannedTools = [
+const currentTools = [
+  "Trial Balance Calculator",
   "Accounting Equation Calculator",
   "Debit/Credit Checker",
   "Financial Ratio Calculator",
-  "Depreciation Calculator"
+  "Depreciation Calculator",
+  "Break-even Calculator",
+  "Cash Flow Calculator",
+  "Invoice Generator",
+  "Malaysia SST Calculator",
+  "Journal Entry Checker"
 ];
 
 export default function AboutPage() {
@@ -118,11 +125,12 @@ export default function AboutPage() {
               Current project status
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              AccountingToolsLab is currently in its early version. The Trial Balance Calculator
-              is available first, with more accounting tools planned over time.
+              AccountingToolsLab already includes multiple focused calculators for common
+              accounting checks, simple business planning, invoices, and Malaysia SST arithmetic.
+              New guides and refinements continue to be added over time.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {plannedTools.map((tool) => (
+              {currentTools.map((tool) => (
                 <span
                   className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200"
                   key={tool}
@@ -155,7 +163,7 @@ export default function AboutPage() {
                 Start with the tools
               </h2>
               <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Try the available calculator or explore upcoming tools.
+                Try the calculators or explore beginner-friendly guides.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">

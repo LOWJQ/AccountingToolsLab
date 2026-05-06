@@ -58,6 +58,30 @@ test("handles decimals", () => {
   assert.equal(result.value, 200);
 });
 
+test("allows negative equity when liabilities exceed assets", () => {
+  const result = calculateAccountingEquation({
+    solveFor: "equity",
+    assets: 250,
+    liabilities: 400
+  });
+
+  assert.deepEqual(result, {
+    solveFor: "equity",
+    value: -150,
+    formula: "Equity = Assets - Liabilities"
+  });
+});
+
+test("handles large accounting equation values", () => {
+  const result = calculateAccountingEquation({
+    solveFor: "assets",
+    liabilities: 987654321.12,
+    equity: 123456789.98
+  });
+
+  assert.equal(result.value, 1111111111.1);
+});
+
 test("rejects empty or invalid required input", () => {
   assert.throws(
     () =>

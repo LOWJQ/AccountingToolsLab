@@ -1,52 +1,53 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Privacy Policy | AccountingToolsLab",
   description:
-    "Read the starter Privacy Policy for AccountingToolsLab, including how privacy may be handled as the site develops."
-};
+    "Read the Privacy Policy for AccountingToolsLab, including analytics, local preferences, and calculator input handling.",
+  path: "/privacy-policy"
+});
 
 const privacySections = [
   {
     title: "Current status",
     content: [
-      "AccountingToolsLab is currently an early-stage educational tools website.",
-      "The site currently provides free accounting tools and informational content.",
-      "The site does not currently require user accounts, process payments, or store calculator entries in a user account."
+      "AccountingToolsLab provides free accounting tools and informational content.",
+      "No account is required to use the site.",
+      "The site does not process payments or store calculator entries in a user account."
     ]
   },
   {
     title: "Information you provide",
     content: [
-      "If you contact the site by email or through a future contact form, AccountingToolsLab may receive the name, email address, and message content you provide.",
-      "Calculator inputs are used to show results in the browser. The current site should not be treated as permanently storing calculator inputs unless a future feature clearly explains that storage."
+      "If you contact the site by email, AccountingToolsLab may receive the email address, subject, and message content you provide.",
+      "Calculator inputs are processed in the browser where applicable to show results. Do not enter sensitive personal, financial, or confidential business information into calculators."
     ]
   },
   {
     title: "Automatically collected information",
     content: [
       "The site may collect basic technical information through hosting logs, such as browser type, device type, pages visited, and approximate technical usage data.",
-      "If analytics tools such as Google Analytics are added later, this Privacy Policy should be updated to explain that use."
+      "AccountingToolsLab uses Vercel Analytics to understand general page usage and Vercel Speed Insights to understand site performance."
     ]
   },
   {
-    title: "Cookies and similar technologies",
+    title: "Local storage and similar technologies",
     content: [
-      "The current version may use only essential technologies needed for the website to function.",
-      "If analytics, advertising, or affiliate tools are added later, cookies or similar technologies may be used and this policy should be updated."
+      "The site may save your selected currency preference in the browser using localStorage so the same currency remains selected after refresh.",
+      "Analytics and performance services may use privacy-conscious technical signals to measure site usage and speed."
     ]
   },
   {
     title: "How information is used",
     content: [
-      "Information may be used to operate and improve the website, respond to messages, fix bugs, improve tools, and understand general site performance if analytics are added later."
+      "Information may be used to operate and improve the website, respond to messages, fix bugs, improve tools, and understand general site performance."
     ]
   },
   {
     title: "Third-party services",
     content: [
-      "The site may use third-party services for hosting and deployment, such as Vercel or similar hosting providers.",
-      "If analytics, advertising, AI APIs, payment processors, or affiliate services are added later, this section should be updated."
+      "The site uses Vercel for hosting and deployment.",
+      "The site uses Vercel Analytics and Vercel Speed Insights for aggregate usage and performance information."
     ]
   },
   {
@@ -83,10 +84,10 @@ export default function PrivacyPolicyPage() {
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
             This Privacy Policy explains what information AccountingToolsLab may collect, how it
-            is used, and what may change as the site develops.
+            is used, and how browser-based preferences and analytics are handled.
           </p>
           <p className="mt-6 inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">
-            Last updated: May 4, 2026
+            Last updated: May 7, 2026
           </p>
         </section>
 
@@ -116,8 +117,7 @@ export default function PrivacyPolicyPage() {
             Questions about privacy?
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use the contact page for questions about this starter Privacy Policy or future privacy
-            updates.
+            Use the contact page for questions about this Privacy Policy.
           </p>
           <a
             className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"

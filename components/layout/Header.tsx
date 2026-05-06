@@ -109,7 +109,7 @@ export function Header() {
             className="h-auto w-[185px] sm:w-[220px]"
             height={52}
             priority
-            src="/logo.png"
+            src="/logo-optimized.png"
             width={220}
           />
         </Link>

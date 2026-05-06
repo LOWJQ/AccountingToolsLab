@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   description: "Free accounting tools and guides for learners and small businesses.",
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }
     ],

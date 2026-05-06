@@ -48,6 +48,29 @@ test("handles decimals", () => {
   assert.equal(result.breakEvenSales, 2908.9);
 });
 
+test("handles zero fixed costs", () => {
+  const result = calculateBreakEven({
+    fixedCosts: 0,
+    sellingPricePerUnit: 50,
+    variableCostPerUnit: 30
+  });
+
+  assert.equal(result.breakEvenUnits, 0);
+  assert.equal(result.breakEvenSales, 0);
+});
+
+test("handles large break-even values", () => {
+  const result = calculateBreakEven({
+    fixedCosts: 1000000000,
+    sellingPricePerUnit: 1250,
+    variableCostPerUnit: 750
+  });
+
+  assert.equal(result.contributionMarginPerUnit, 500);
+  assert.equal(result.breakEvenUnits, 2000000);
+  assert.equal(result.breakEvenSales, 2500000000);
+});
+
 test("rejects selling price equal to variable cost", () => {
   assert.throws(
     () =>

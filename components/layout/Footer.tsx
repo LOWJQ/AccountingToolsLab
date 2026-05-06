@@ -49,7 +49,7 @@ export function Footer() {
               alt="AccountingToolsLab"
               className="h-auto w-[220px]"
               height={52}
-              src="/logo.png"
+              src="/logo-optimized.png"
               width={220}
             />
           </Link>
