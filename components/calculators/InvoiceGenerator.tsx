@@ -149,8 +149,8 @@ export function InvoiceGenerator() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-          <div className="grid gap-6">
+        <div className="mt-8 grid min-w-0 gap-8 2xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <div className="grid min-w-0 gap-6">
             <section className="grid gap-4">
               <h2 className="text-base font-semibold text-stone-950">Business details</h2>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -271,7 +271,7 @@ export function InvoiceGenerator() {
                     className="rounded-xl border border-stone-200 bg-stone-50 p-4"
                     key={item.id}
                   >
-                    <div className="grid gap-3 lg:grid-cols-[1.5fr_0.7fr_0.8fr_auto]">
+                    <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1.5fr)_minmax(7rem,0.7fr)_minmax(8rem,0.8fr)_auto]">
                       <label className="grid gap-2">
                         <span className="text-sm font-semibold text-stone-800">
                           Description
@@ -358,8 +358,11 @@ export function InvoiceGenerator() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-            <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+            <div
+              className="invoice-print-area min-w-0 rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6"
+              id="invoice-print-area"
+            >
               <div className="flex flex-col gap-6 border-b border-stone-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
@@ -404,8 +407,8 @@ export function InvoiceGenerator() {
                 ) : null}
               </div>
 
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full min-w-[520px] text-left text-sm">
+              <div className="invoice-table-wrap mt-6 max-w-full overflow-x-auto">
+                <table className="w-full min-w-[460px] text-left text-sm">
                   <thead className="border-b border-stone-200 text-xs font-semibold uppercase tracking-wide text-stone-500">
                     <tr>
                       <th className="py-3 pr-4">Description</th>
