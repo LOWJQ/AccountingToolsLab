@@ -24,17 +24,19 @@ export function Header() {
   }
 
   const currencySelector = (
-    <label className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600">
-      <span className="sr-only">Currency</span>
+    <label className="inline-flex w-full items-center gap-2 rounded-full border border-stone-200 bg-stone-50/80 px-3 py-1 shadow-sm transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100 hover:border-stone-300 sm:w-auto">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+        Currency
+      </span>
       <select
         aria-label="Currency"
-        className="h-10 rounded-full border border-stone-200 bg-white px-3 text-xs font-semibold text-stone-700 outline-none transition hover:border-stone-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+        className="h-8 min-w-0 flex-1 appearance-none bg-transparent text-sm font-semibold text-stone-800 outline-none sm:w-36 sm:flex-none"
         onChange={(event) => handleCurrencyChange(event.target.value)}
         value={currency}
       >
         {currencyOptions.map((option) => (
-          <option key={option} value={option}>
-            {option}
+          <option key={option.code} value={option.code}>
+            {option.label}
           </option>
         ))}
       </select>
