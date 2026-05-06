@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const footerSections = [
   {
@@ -41,9 +42,9 @@ const footerSections = [
 export function Footer() {
   return (
     <footer className="border-t border-stone-200 bg-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8 lg:py-16">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8 lg:py-16">
         <div>
-          <a className="inline-flex items-center" href="/" aria-label="AccountingToolsLab home">
+          <Link className="inline-flex items-center" href="/" aria-label="AccountingToolsLab home">
             <Image
               alt="AccountingToolsLab"
               className="h-auto w-[220px]"
@@ -51,7 +52,7 @@ export function Footer() {
               src="/logo.png"
               width={220}
             />
-          </a>
+          </Link>
           <p className="mt-4 max-w-sm text-sm leading-6 text-stone-600">
             Free accounting tools and beginner-friendly guides for students, new founders,
             and small business owners.
@@ -62,15 +63,21 @@ export function Footer() {
           {footerSections.map((section) => (
             <div key={section.title}>
               <h2 className="text-sm font-semibold text-stone-950">{section.title}</h2>
-              <ul className="mt-4 space-y-3">
+              <ul
+                className={
+                  section.title === "Tools"
+                    ? "mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:block sm:space-y-3"
+                    : "mt-4 space-y-3"
+                }
+              >
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <a
+                    <Link
                       className="text-sm text-stone-500 transition hover:text-stone-900"
                       href={link.href}
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
