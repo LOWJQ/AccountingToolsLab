@@ -680,7 +680,7 @@ export function InvoiceGenerator() {
               </div>
 
               <div className="invoice-preview-lines mt-6 overflow-hidden rounded-xl border border-stone-200">
-                <div className="invoice-preview-line invoice-preview-heading grid grid-cols-[minmax(0,1.4fr)_3rem_4.75rem_5.25rem] gap-2 bg-stone-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-stone-500 sm:grid-cols-[minmax(0,1.6fr)_4rem_6rem_6.5rem] sm:px-4">
+                <div className="invoice-preview-line invoice-preview-heading hidden bg-stone-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-stone-500 sm:grid sm:grid-cols-[minmax(0,1.6fr)_4rem_6rem_6.5rem] sm:gap-2 sm:px-4">
                   <span>Description</span>
                   <span className="text-right">Qty</span>
                   <span className="text-right leading-4">Unit Price</span>
@@ -689,21 +689,43 @@ export function InvoiceGenerator() {
                 <div className="divide-y divide-stone-100 bg-white">
                   {previewItems.map((item, index) => (
                     <div
-                      className="invoice-preview-line grid grid-cols-[minmax(0,1.4fr)_3rem_4.75rem_5.25rem] gap-2 px-3 py-3 text-xs sm:grid-cols-[minmax(0,1.6fr)_4rem_6rem_6.5rem] sm:px-4 sm:text-sm"
+                      className="invoice-preview-line grid min-w-0 gap-3 px-3 py-4 text-sm sm:grid-cols-[minmax(0,1.6fr)_4rem_6rem_6.5rem] sm:gap-2 sm:px-4 sm:py-3"
                       key={`${item.description}-${index}`}
                     >
-                      <span className="min-w-0 break-words font-medium text-stone-900">
-                        {item.description}
-                      </span>
-                      <span className="text-right tabular-nums text-stone-600">
-                        {formatAmount(item.quantity)}
-                      </span>
-                      <span className="text-right tabular-nums text-stone-600">
-                        {formatCurrency(item.unitPrice)}
-                      </span>
-                      <span className="text-right font-semibold tabular-nums text-stone-950">
-                        {formatCurrency(item.lineTotal)}
-                      </span>
+                      <div className="min-w-0 sm:contents">
+                        <span className="block text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                          Description
+                        </span>
+                        <span className="mt-1 block min-w-0 break-words font-medium text-stone-900 sm:mt-0">
+                          {item.description}
+                        </span>
+                      </div>
+                      <div className="grid min-w-0 grid-cols-3 gap-3 sm:contents">
+                        <div className="min-w-0">
+                          <span className="block text-[11px] font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                            Qty
+                          </span>
+                          <span className="mt-1 block text-left tabular-nums text-stone-600 sm:mt-0 sm:text-right">
+                            {formatAmount(item.quantity)}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="block text-[11px] font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                            Unit Price
+                          </span>
+                          <span className="mt-1 block text-left tabular-nums text-stone-600 sm:mt-0 sm:text-right">
+                            {formatCurrency(item.unitPrice)}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="block text-[11px] font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                            Line Total
+                          </span>
+                          <span className="mt-1 block text-left font-semibold tabular-nums text-stone-950 sm:mt-0 sm:text-right">
+                            {formatCurrency(item.lineTotal)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
