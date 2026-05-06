@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/cash-flow-calculator",
     "/tools/invoice-generator",
     "/tools/sst-calculator-malaysia",
+    "/tools/journal-entry-checker",
     "/guides",
     "/guides/trial-balance-explained",
     "/about",

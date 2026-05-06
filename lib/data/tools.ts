@@ -85,5 +85,15 @@ export const tools: Tool[] = [
     bestFor: "Learning how to add or remove SST from a simple amount.",
     href: "/tools/sst-calculator-malaysia",
     status: "mvp"
+  },
+  {
+    slug: "journal-entry-checker",
+    name: "Journal Entry Checker",
+    description:
+      "Total debits and credits to check whether a basic journal entry balances.",
+    category: "Accounting Basics",
+    bestFor: "Checking the math balance of debit and credit lines.",
+    href: "/tools/journal-entry-checker",
+    status: "mvp"
   }
 ];

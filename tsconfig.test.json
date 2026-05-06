@@ -17,6 +17,7 @@
     "tests/cash-flow.test.ts",
     "tests/invoice.test.ts",
     "tests/sst-malaysia.test.ts",
+    "tests/journal-entry.test.ts",
     "lib/calculators/trial-balance.ts",
     "lib/calculators/accounting-equation.ts",
     "lib/calculators/debit-credit.ts",
@@ -25,6 +26,7 @@
     "lib/calculators/break-even.ts",
     "lib/calculators/cash-flow.ts",
     "lib/calculators/invoice.ts",
-    "lib/calculators/sst-malaysia.ts"
+    "lib/calculators/sst-malaysia.ts",
+    "lib/calculators/journal-entry.ts"
   ]
 }

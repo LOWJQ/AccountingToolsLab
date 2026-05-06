@@ -18,6 +18,11 @@ const learningPaths = [
         status: "Available"
       },
       {
+        label: "Journal Entry Checker",
+        href: "/tools/journal-entry-checker",
+        status: "Available"
+      },
+      {
         label: "Accounting Equation Calculator",
         href: "/tools/accounting-equation-calculator",
         status: "Available"

@@ -69,6 +69,13 @@ const featuredTools = [
     status: "Available",
     href: "/tools/sst-calculator-malaysia",
     isAvailable: true
+  },
+  {
+    name: "Journal Entry Checker",
+    description: "Check whether debit and credit lines balance in a journal entry.",
+    status: "Available",
+    href: "/tools/journal-entry-checker",
+    isAvailable: true
   }
 ];
 
@@ -84,7 +91,7 @@ const reasons = [
   {
     title: "Built for learning basics",
     description:
-      "Check trial balances, debits, credits, ratios, depreciation, break-even points, cash flow, invoices, and SST estimates."
+      "Check trial balances, debits, credits, journal entries, ratios, depreciation, break-even points, cash flow, invoices, and SST estimates."
   }
 ];
 
