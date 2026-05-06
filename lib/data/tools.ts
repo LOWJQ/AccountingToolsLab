@@ -45,5 +45,15 @@ export const tools: Tool[] = [
     bestFor: "Understanding asset cost allocation over time.",
     href: "/tools/depreciation-calculator",
     status: "mvp"
+  },
+  {
+    slug: "break-even-calculator",
+    name: "Break-even Calculator",
+    description:
+      "Calculate contribution margin, break-even units, and break-even sales for a simple business scenario.",
+    category: "Business Planning",
+    bestFor: "Estimating how many units a business needs to sell to cover costs.",
+    href: "/tools/break-even-calculator",
+    status: "mvp"
   }
 ];

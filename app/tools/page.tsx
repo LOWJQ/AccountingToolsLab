@@ -21,6 +21,10 @@ const categories = [
     description: "Ratio and statement checks for understanding business performance."
   },
   {
+    title: "Business Planning",
+    description: "Simple planning tools for sales, costs, and break-even decisions."
+  },
+  {
     title: "Depreciation & Adjustments",
     description: "Support for common adjusting entries and fixed asset calculations."
   }
@@ -144,7 +148,7 @@ export default function ToolsPage() {
               Accounting tool categories
             </h2>
           </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {categories.map((category) => (
               <article
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"

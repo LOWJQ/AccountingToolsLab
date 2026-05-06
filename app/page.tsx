@@ -41,6 +41,13 @@ const featuredTools = [
     status: "Available",
     href: "/tools/depreciation-calculator",
     isAvailable: true
+  },
+  {
+    name: "Break-even Calculator",
+    description: "Find contribution margin, break-even units, and break-even sales.",
+    status: "Available",
+    href: "/tools/break-even-calculator",
+    isAvailable: true
   }
 ];
 
@@ -55,7 +62,7 @@ const reasons = [
   },
   {
     title: "Built for learning basics",
-    description: "Check trial balances, debits, credits, ratios, and depreciation as you study or review."
+    description: "Check trial balances, debits, credits, ratios, depreciation, and break-even points."
   }
 ];
 

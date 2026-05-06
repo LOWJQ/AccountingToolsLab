@@ -58,6 +58,22 @@ const learningPaths = [
     ]
   },
   {
+    title: "Business Planning",
+    steps: [
+      {
+        label: "Break-even Calculator",
+        href: "/tools/break-even-calculator",
+        status: "Available"
+      },
+      {
+        label: "Financial Ratio Calculator",
+        href: "/tools/financial-ratio-calculator",
+        status: "Available"
+      },
+      { label: "Future Cash Flow Calculator", status: "Coming soon" }
+    ]
+  },
+  {
     title: "Depreciation & Adjustments",
     steps: [
       {

@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/debit-credit-checker",
     "/tools/financial-ratio-calculator",
     "/tools/depreciation-calculator",
+    "/tools/break-even-calculator",
     "/guides",
     "/guides/trial-balance-explained",
     "/about",
