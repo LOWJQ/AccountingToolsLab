@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/depreciation-calculator",
     "/tools/break-even-calculator",
     "/tools/cash-flow-calculator",
+    "/tools/invoice-generator",
     "/guides",
     "/guides/trial-balance-explained",
     "/about",

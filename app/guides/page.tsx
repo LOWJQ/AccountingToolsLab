@@ -74,6 +74,22 @@ const learningPaths = [
     ]
   },
   {
+    title: "Business Documents",
+    steps: [
+      {
+        label: "Invoice Generator",
+        href: "/tools/invoice-generator",
+        status: "Available"
+      },
+      {
+        label: "Cash Flow Calculator",
+        href: "/tools/cash-flow-calculator",
+        status: "Available"
+      },
+      { label: "Future Invoice Basics Guide", status: "Coming soon" }
+    ]
+  },
+  {
     title: "Depreciation & Adjustments",
     steps: [
       {

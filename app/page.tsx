@@ -55,6 +55,13 @@ const featuredTools = [
     status: "Available",
     href: "/tools/cash-flow-calculator",
     isAvailable: true
+  },
+  {
+    name: "Invoice Generator",
+    description: "Create a simple invoice with line items, subtotal, and total.",
+    status: "Available",
+    href: "/tools/invoice-generator",
+    isAvailable: true
   }
 ];
 
@@ -70,7 +77,7 @@ const reasons = [
   {
     title: "Built for learning basics",
     description:
-      "Check trial balances, debits, credits, ratios, depreciation, break-even points, and cash flow."
+      "Check trial balances, debits, credits, ratios, depreciation, break-even points, cash flow, and invoices."
   }
 ];
 

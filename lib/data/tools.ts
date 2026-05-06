@@ -65,5 +65,15 @@ export const tools: Tool[] = [
     bestFor: "Reviewing whether cash increased or decreased during a period.",
     href: "/tools/cash-flow-calculator",
     status: "mvp"
+  },
+  {
+    slug: "invoice-generator",
+    name: "Invoice Generator",
+    description:
+      "Create a simple invoice with line items, subtotal, total, customer details, and business details.",
+    category: "Business Documents",
+    bestFor: "Preparing a basic invoice preview for goods or services.",
+    href: "/tools/invoice-generator",
+    status: "mvp"
   }
 ];
