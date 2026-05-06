@@ -16,6 +16,10 @@ body {
     margin: 0.5in;
   }
 
+  * {
+    box-sizing: border-box;
+  }
+
   body.printing-invoice {
     margin: 0 !important;
     background: #ffffff !important;
@@ -24,11 +28,11 @@ body {
     -webkit-print-color-adjust: exact;
   }
 
-  body.printing-invoice > :not(#invoice-print-clone) {
+  body.printing-invoice > :not(#invoice-print-area) {
     display: none !important;
   }
 
-  body.printing-invoice #invoice-print-clone {
+  body.printing-invoice #invoice-print-area {
     display: block !important;
     width: 100% !important;
     max-width: 760px !important;
@@ -44,7 +48,28 @@ body {
     page-break-after: avoid !important;
   }
 
-  body.printing-invoice #invoice-print-clone * {
+  body.printing-invoice #invoice-print-area * {
     box-shadow: none !important;
+  }
+
+  body.printing-invoice #invoice-print-area > div {
+    border: 0 !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  body.printing-invoice .invoice-preview-lines {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  body.printing-invoice .invoice-preview-line {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  body.printing-invoice .invoice-totals-wrap {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }

@@ -157,18 +157,28 @@ export function InvoiceGenerator() {
       return;
     }
 
-    document.getElementById("invoice-print-clone")?.remove();
+    const invoicePrintArea = invoicePreviewRef.current;
+    const originalParent = invoicePrintArea.parentNode;
+    const placeholder = document.createComment("invoice-print-placeholder");
 
-    const printClone = invoicePreviewRef.current.cloneNode(true) as HTMLElement;
-    printClone.id = "invoice-print-clone";
-    document.body.appendChild(printClone);
+    if (!originalParent) {
+      return;
+    }
+
+    originalParent.insertBefore(placeholder, invoicePrintArea);
+    document.body.appendChild(invoicePrintArea);
     document.body.classList.add("printing-invoice");
 
     let cleanupTimeout: number | undefined;
 
     const cleanup = () => {
       document.body.classList.remove("printing-invoice");
-      printClone.remove();
+
+      if (placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(invoicePrintArea, placeholder);
+        placeholder.remove();
+      }
+
       window.removeEventListener("afterprint", cleanup);
 
       if (cleanupTimeout) {
@@ -178,7 +188,7 @@ export function InvoiceGenerator() {
 
     window.addEventListener("afterprint", cleanup);
     window.print();
-    cleanupTimeout = window.setTimeout(cleanup, 1500);
+    cleanupTimeout = window.setTimeout(cleanup, 3000);
   }
 
   const previewItems =
