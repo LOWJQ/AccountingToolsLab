@@ -24,18 +24,6 @@ export const currencyOptions = [
     symbol: "€"
   },
   {
-    code: "GBP",
-    label: "British Pound (£)",
-    locale: "en-GB",
-    symbol: "£"
-  },
-  {
-    code: "AUD",
-    label: "Australia (A$)",
-    locale: "en-AU",
-    symbol: "A$"
-  },
-  {
     code: "CNY",
     label: "China Yuan (¥)",
     locale: "zh-CN",

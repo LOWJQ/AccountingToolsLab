@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Check, ChevronDown, Menu, X } from "lucide-react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { currencyOptions, isCurrencyCode } from "@/lib/currency";
+import { currencyOptions } from "@/lib/currency";
 
 const navItems = [
   { label: "Tools", href: "/tools" },
@@ -13,35 +13,92 @@ const navItems = [
   { label: "About", href: "/about" }
 ];
 
-export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currency, setCurrency } = useCurrency();
+function getCompactCurrencyLabel(code: string) {
+  const option = currencyOptions.find((currencyOption) => currencyOption.code === code);
 
-  function handleCurrencyChange(value: string) {
-    if (isCurrencyCode(value)) {
-      setCurrency(value);
+  return option ? `${option.code} (${option.symbol})` : code;
+}
+
+function CurrencySelector() {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const { currency, setCurrency } = useCurrency();
+  const selectedLabel = getCompactCurrencyLabel(currency);
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, []);
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") {
+      setIsOpen(false);
     }
   }
 
-  const currencySelector = (
-    <label className="inline-flex w-full items-center gap-2 rounded-full border border-stone-200 bg-stone-50/80 px-3 py-1 shadow-sm transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100 hover:border-stone-300 sm:w-auto">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
-        Currency
-      </span>
-      <select
-        aria-label="Currency"
-        className="h-8 min-w-0 flex-1 appearance-none bg-transparent text-sm font-semibold text-stone-800 outline-none sm:w-36 sm:flex-none"
-        onChange={(event) => handleCurrencyChange(event.target.value)}
-        value={currency}
+  return (
+    <div className="relative inline-flex" onKeyDown={handleKeyDown} ref={rootRef}>
+      <button
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label="Select currency"
+        className="inline-flex h-10 w-32 items-center justify-between gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        onClick={() => setIsOpen((current) => !current)}
+        type="button"
       >
-        {currencyOptions.map((option) => (
-          <option key={option.code} value={option.code}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        <span className="whitespace-nowrap">{selectedLabel}</span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`h-4 w-4 text-stone-500 transition ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isOpen ? (
+        <div
+          className="absolute right-0 top-full z-40 mt-2 w-32 overflow-hidden rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
+          role="listbox"
+        >
+          {currencyOptions.map((option) => {
+            const isSelected = option.code === currency;
+
+            return (
+              <button
+                aria-selected={isSelected}
+                className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition ${
+                  isSelected
+                    ? "bg-slate-50 font-semibold text-slate-800"
+                    : "font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                }`}
+                key={option.code}
+                onClick={() => {
+                  setCurrency(option.code);
+                  setIsOpen(false);
+                }}
+                role="option"
+                type="button"
+              >
+                <span>{getCompactCurrencyLabel(option.code)}</span>
+                {isSelected ? <Check aria-hidden="true" className="h-4 w-4" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
+}
+
+export function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <header className="relative border-b border-stone-200 bg-white/90 backdrop-blur">
@@ -66,7 +123,9 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="hidden sm:block">{currencySelector}</div>
+          <div className="hidden sm:block">
+            <CurrencySelector />
+          </div>
 
           <Link
             className="inline-flex h-10 items-center justify-center rounded-full bg-slate-700 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
@@ -90,7 +149,9 @@ export function Header() {
       {isMenuOpen ? (
         <nav className="absolute inset-x-0 top-16 z-20 border-b border-stone-200 bg-white px-4 py-3 shadow-sm sm:hidden">
           <div className="mx-auto flex max-w-6xl flex-col text-sm font-medium text-stone-600">
-            <div className="border-b border-stone-100 pb-3">{currencySelector}</div>
+            <div className="border-b border-stone-100 pb-3">
+              <CurrencySelector />
+            </div>
             {navItems.map((item) => (
               <Link
                 className="py-3 transition hover:text-stone-950"
