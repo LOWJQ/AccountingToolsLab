@@ -29,6 +29,10 @@ const categories = [
     description: "Simple document tools for invoices and basic business records."
   },
   {
+    title: "Malaysia Tax Tools",
+    description: "Simple estimation tools for Malaysian SST arithmetic and learning."
+  },
+  {
     title: "Depreciation & Adjustments",
     description: "Support for common adjusting entries and fixed asset calculations."
   }
@@ -152,7 +156,7 @@ export default function ToolsPage() {
               Accounting tool categories
             </h2>
           </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {categories.map((category) => (
               <article
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"

@@ -90,6 +90,22 @@ const learningPaths = [
     ]
   },
   {
+    title: "Malaysia Tax Basics",
+    steps: [
+      {
+        label: "SST Calculator Malaysia",
+        href: "/tools/sst-calculator-malaysia",
+        status: "Available"
+      },
+      {
+        label: "Invoice Generator",
+        href: "/tools/invoice-generator",
+        status: "Available"
+      },
+      { label: "Future SST Basics Guide", status: "Coming soon" }
+    ]
+  },
+  {
     title: "Depreciation & Adjustments",
     steps: [
       {

@@ -62,6 +62,13 @@ const featuredTools = [
     status: "Available",
     href: "/tools/invoice-generator",
     isAvailable: true
+  },
+  {
+    name: "SST Calculator Malaysia",
+    description: "Estimate SST amount, total including SST, or amount before SST.",
+    status: "Available",
+    href: "/tools/sst-calculator-malaysia",
+    isAvailable: true
   }
 ];
 
@@ -77,7 +84,7 @@ const reasons = [
   {
     title: "Built for learning basics",
     description:
-      "Check trial balances, debits, credits, ratios, depreciation, break-even points, cash flow, and invoices."
+      "Check trial balances, debits, credits, ratios, depreciation, break-even points, cash flow, invoices, and SST estimates."
   }
 ];
 

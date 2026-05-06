@@ -75,5 +75,15 @@ export const tools: Tool[] = [
     bestFor: "Preparing a basic invoice preview for goods or services.",
     href: "/tools/invoice-generator",
     status: "mvp"
+  },
+  {
+    slug: "sst-calculator-malaysia",
+    name: "SST Calculator Malaysia",
+    description:
+      "Estimate Malaysian SST amount, total including SST, or amount before SST using a selected rate.",
+    category: "Malaysia Tax Tools",
+    bestFor: "Learning how to add or remove SST from a simple amount.",
+    href: "/tools/sst-calculator-malaysia",
+    status: "mvp"
   }
 ];

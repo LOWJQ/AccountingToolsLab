@@ -12,7 +12,8 @@ const footerSections = [
       { label: "Depreciation Calculator", href: "/tools/depreciation-calculator" },
       { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
       { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
-      { label: "Invoice Generator", href: "/tools/invoice-generator" }
+      { label: "Invoice Generator", href: "/tools/invoice-generator" },
+      { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" }
     ]
   },
   {

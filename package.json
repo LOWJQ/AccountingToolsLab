@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "test": "tsc -p tsconfig.test.json && node .test-dist/tests/trial-balance.test.js && node .test-dist/tests/accounting-equation.test.js && node .test-dist/tests/debit-credit.test.js && node .test-dist/tests/financial-ratios.test.js && node .test-dist/tests/depreciation.test.js && node .test-dist/tests/break-even.test.js && node .test-dist/tests/cash-flow.test.js && node .test-dist/tests/invoice.test.js",
+    "test": "tsc -p tsconfig.test.json && node .test-dist/tests/trial-balance.test.js && node .test-dist/tests/accounting-equation.test.js && node .test-dist/tests/debit-credit.test.js && node .test-dist/tests/financial-ratios.test.js && node .test-dist/tests/depreciation.test.js && node .test-dist/tests/break-even.test.js && node .test-dist/tests/cash-flow.test.js && node .test-dist/tests/invoice.test.js && node .test-dist/tests/sst-malaysia.test.js",
     "start": "next start",
     "lint": "next lint"
   },

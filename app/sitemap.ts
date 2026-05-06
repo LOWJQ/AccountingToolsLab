@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools/break-even-calculator",
     "/tools/cash-flow-calculator",
     "/tools/invoice-generator",
+    "/tools/sst-calculator-malaysia",
     "/guides",
     "/guides/trial-balance-explained",
     "/about",
