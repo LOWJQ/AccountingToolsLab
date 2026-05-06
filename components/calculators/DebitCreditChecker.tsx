@@ -154,8 +154,28 @@ export function DebitCreditChecker() {
             the account type and its normal balance.
           </p>
 
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[420px] border-separate border-spacing-y-2 text-left text-sm">
+          <div className="mt-6 grid gap-3 sm:hidden">
+            {accountOptions.map((option) => (
+              <div
+                className="rounded-xl border border-stone-200 bg-stone-50 p-4"
+                key={option.value}
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  Account type
+                </p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">{option.label}</p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  Normal balance
+                </p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">
+                  {normalBalances[option.value]}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 hidden sm:block">
+            <table className="w-full border-separate border-spacing-y-2 text-left text-sm">
               <thead className="text-xs font-semibold uppercase tracking-wide text-stone-500">
                 <tr>
                   <th className="px-4 py-2">Account type</th>
