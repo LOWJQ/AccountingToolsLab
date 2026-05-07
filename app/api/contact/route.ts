@@ -94,6 +94,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!isValidSenderValue(from)) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Invalid CONTACT_FROM_EMAIL. Use an email address or Name <email> format.");
+    } else {
+      console.error("Invalid CONTACT_FROM_EMAIL.");
+    }
+
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Message could not be sent. Please email accttoolslab@gmail.com directly."
+      },
+      { status: 500 }
+    );
+  }
+
   const userAgent = normalizeString(request.headers.get("user-agent"), 500);
   const timestamp = new Date().toISOString();
   const safeTopic = stripHeaderUnsafeChars(result.data.topic);
@@ -124,6 +140,10 @@ export async function POST(request: NextRequest) {
         console.error("Resend contact email failed", {
           status: response.status,
           body: errorText
+        });
+      } else {
+        console.error("Resend contact email failed", {
+          status: response.status
         });
       }
 
@@ -338,6 +358,25 @@ function parseRecipientEmails(value: string | undefined): string[] {
     .filter((email) => email.length > 0 && isValidEmail(email));
 
   return recipients.length > 0 ? recipients : ["accttoolslab@gmail.com"];
+}
+
+function isValidSenderValue(value: string): boolean {
+  if (
+    !value ||
+    value.includes("your_verified_resend_sender") ||
+    value.includes("email@example.com")
+  ) {
+    return false;
+  }
+
+  const trimmedValue = stripHeaderUnsafeChars(value);
+  const namedEmailMatch = trimmedValue.match(/^.+<([^<>]+)>$/);
+
+  if (namedEmailMatch) {
+    return isValidEmail(namedEmailMatch[1].trim());
+  }
+
+  return isValidEmail(trimmedValue);
 }
 
 function isStringWithinLimit(value: unknown, maxLength: number): boolean {
