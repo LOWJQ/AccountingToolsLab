@@ -83,6 +83,44 @@ test("handles decimals", () => {
   assert.equal(result.subtotal, 200.63);
 });
 
+test("trims line item descriptions", () => {
+  const result = calculateInvoice([
+    {
+      description: "  Bookkeeping support  ",
+      quantity: 1,
+      unitPrice: 75
+    }
+  ]);
+
+  assert.equal(result.items[0].description, "Bookkeeping support");
+});
+
+test("uses a fallback description for empty line item names", () => {
+  const result = calculateInvoice([
+    {
+      description: "   ",
+      quantity: 1,
+      unitPrice: 75
+    }
+  ]);
+
+  assert.equal(result.items[0].description, "Item 1");
+});
+
+test("handles zero-total invoice lines when unit price is zero", () => {
+  const result = calculateInvoice([
+    {
+      description: "No charge item",
+      quantity: 3,
+      unitPrice: 0
+    }
+  ]);
+
+  assert.equal(result.items[0].lineTotal, 0);
+  assert.equal(result.subtotal, 0);
+  assert.equal(result.total, 0);
+});
+
 test("handles large invoice values", () => {
   const result = calculateInvoice([
     {
@@ -134,6 +172,18 @@ test("rejects quantity of zero or less", () => {
       ]),
     /quantity must be greater than zero/
   );
+
+  assert.throws(
+    () =>
+      calculateInvoice([
+        {
+          description: "Service",
+          quantity: -1,
+          unitPrice: 100
+        }
+      ]),
+    /quantity must be greater than zero/
+  );
 });
 
 test("rejects negative unit price", () => {
@@ -174,4 +224,23 @@ test("handles empty or invalid input safely", () => {
       ]),
     /unit price is required/
   );
+});
+
+test("rounds awkward decimal quantities and prices per line", () => {
+  const result = calculateInvoice([
+    {
+      description: "Fractional hours",
+      quantity: 1.333,
+      unitPrice: 19.995
+    },
+    {
+      description: "Fractional add-on",
+      quantity: 2.667,
+      unitPrice: 4.335
+    }
+  ]);
+
+  assert.equal(result.items[0].lineTotal, 26.65);
+  assert.equal(result.items[1].lineTotal, 11.56);
+  assert.equal(result.subtotal, 38.21);
 });

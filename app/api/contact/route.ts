@@ -17,6 +17,7 @@ type ContactPayload = {
   message?: unknown;
   pageUrl?: unknown;
   companyWebsite?: unknown;
+  "cf-turnstile-response"?: unknown;
 };
 
 type NormalizedContact = {
@@ -32,12 +33,27 @@ type ValidationResult =
   | { ok: true; data: NormalizedContact; isSpam: boolean }
   | { ok: false; errors: Record<string, string> };
 
+type RateLimitEntry = {
+  count: number;
+  resetAt: number;
+};
+
+type TurnstileVerificationResponse = {
+  success?: boolean;
+  "error-codes"?: string[];
+};
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const unsafeControlPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+const rateLimitWindowMs = 15 * 60 * 1000;
+const rateLimitMaxRequests = 5;
+const rateLimitEntries = new Map<string, RateLimitEntry>();
 
 // Contact submissions are email-only. If database storage is added later,
 // use parameterized queries and never concatenate user input into SQL.
-// TODO: Add production-grade rate limiting or CAPTCHA if spam becomes a problem.
+// This in-memory limiter is basic abuse reduction for the MVP. On serverless
+// deployments, use a shared store such as Upstash Redis or Vercel KV for
+// stronger high-traffic protection.
 export async function POST(request: NextRequest) {
   const contentLength = Number(request.headers.get("content-length") || 0);
 
@@ -74,6 +90,33 @@ export async function POST(request: NextRequest) {
 
   if (result.isSpam) {
     return NextResponse.json({ ok: true, sent: false }, { status: 200 });
+  }
+
+  if (isRateLimited(request)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Too many requests. Please try again later.",
+        message: "Too many requests. Please try again later."
+      },
+      { status: 429 }
+    );
+  }
+
+  const turnstileToken = getString(payload["cf-turnstile-response"]).trim();
+  const turnstileVerification = await verifyTurnstileToken(turnstileToken, request);
+
+  if (!turnstileVerification.success) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          turnstileVerification.isConfigError && process.env.NODE_ENV === "development"
+            ? "Turnstile is not configured. Set TURNSTILE_SECRET_KEY."
+            : "Verification failed. Please try again."
+      },
+      { status: 400 }
+    );
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -166,6 +209,104 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function isRateLimited(request: NextRequest): boolean {
+  const now = Date.now();
+  cleanupExpiredRateLimitEntries(now);
+
+  const key = getRateLimitKey(request);
+  const currentEntry = rateLimitEntries.get(key);
+
+  if (!currentEntry || currentEntry.resetAt <= now) {
+    rateLimitEntries.set(key, {
+      count: 1,
+      resetAt: now + rateLimitWindowMs
+    });
+    return false;
+  }
+
+  if (currentEntry.count >= rateLimitMaxRequests) {
+    return true;
+  }
+
+  currentEntry.count += 1;
+  return false;
+}
+
+function getRateLimitKey(request: NextRequest): string {
+  const forwardedFor = request.headers.get("x-forwarded-for") || "";
+  const ip =
+    forwardedFor
+      .split(",")
+      .map((value) => value.trim())
+      .find(Boolean) ||
+    request.headers.get("x-real-ip") ||
+    "unknown-ip";
+  const userAgent = normalizeString(request.headers.get("user-agent"), 160) || "unknown-agent";
+
+  return `${stripHeaderUnsafeChars(ip)}:${stripHeaderUnsafeChars(userAgent)}`;
+}
+
+function cleanupExpiredRateLimitEntries(now: number) {
+  for (const [key, entry] of rateLimitEntries.entries()) {
+    if (entry.resetAt <= now) {
+      rateLimitEntries.delete(key);
+    }
+  }
+}
+
+async function verifyTurnstileToken(
+  token: string,
+  request: NextRequest
+): Promise<{ success: boolean; isConfigError?: boolean }> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secret) {
+    return { success: false, isConfigError: true };
+  }
+
+  if (!token) {
+    return { success: false };
+  }
+
+  const formData = new URLSearchParams();
+  formData.set("secret", secret);
+  formData.set("response", token);
+
+  const remoteIp = getRequestIp(request);
+
+  if (remoteIp) {
+    formData.set("remoteip", remoteIp);
+  }
+
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formData
+    });
+    const data = (await response.json()) as TurnstileVerificationResponse;
+
+    return { success: response.ok && data.success === true };
+  } catch {
+    return { success: false };
+  }
+}
+
+function getRequestIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get("x-forwarded-for") || "";
+
+  return (
+    forwardedFor
+      .split(",")
+      .map((value) => value.trim())
+      .find(Boolean) ||
+    request.headers.get("x-real-ip") ||
+    ""
+  );
 }
 
 function validatePayload(payload: ContactPayload): ValidationResult {

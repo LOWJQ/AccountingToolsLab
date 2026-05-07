@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { guides } from "@/lib/data/guides";
+import { tools } from "@/lib/data/tools";
 
 type FooterLink = {
   label: string;
@@ -68,16 +69,10 @@ const footerSections = [
     title: "Tools",
     links: [
       { label: "All Tools", href: "/tools" },
-      { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" },
-      { label: "Accounting Equation Calculator", href: "/tools/accounting-equation-calculator" },
-      { label: "Debit/Credit Checker", href: "/tools/debit-credit-checker" },
-      { label: "Financial Ratio Calculator", href: "/tools/financial-ratio-calculator" },
-      { label: "Depreciation Calculator", href: "/tools/depreciation-calculator" },
-      { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
-      { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
-      { label: "Invoice Generator", href: "/tools/invoice-generator" },
-      { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" },
-      { label: "Journal Entry Checker", href: "/tools/journal-entry-checker" }
+      ...tools.map((tool) => ({
+        label: tool.name,
+        href: tool.href
+      }))
     ]
   },
   {

@@ -60,14 +60,16 @@ const mistakes = [
   }
 ];
 
-function parseAmount(value: string): number {
+function parseAmount(value: string): number | null {
   if (value.trim() === "") {
     return 0;
   }
 
   const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? amount : 0;
+  return Number.isFinite(amount) && amount >= 0 ? amount : null;
 }
+
+const invalidAmountMessage = "Please enter valid numeric debit and credit amounts.";
 
 function SummaryCard({
   label,
@@ -132,18 +134,34 @@ export function TrialBalanceCalculator() {
   const [rows, setRows] = useState<EditableTrialBalanceRow[]>(initialRows);
   const { formatCurrency } = useCurrency();
 
-  const calculationRows = useMemo<TrialBalanceRow[]>(
-    () =>
-      rows.map((row) => ({
-        id: row.id,
-        accountName: row.accountName,
-        debit: parseAmount(row.debit),
-        credit: parseAmount(row.credit)
-      })),
-    [rows]
-  );
+  const calculation = useMemo(() => {
+    const parsedRows = rows.map((row) => ({
+      row,
+      debit: parseAmount(row.debit),
+      credit: parseAmount(row.credit)
+    }));
 
-  const result = useMemo(() => calculateTrialBalance(calculationRows), [calculationRows]);
+    if (parsedRows.some((row) => row.debit === null || row.credit === null)) {
+      return {
+        result: calculateTrialBalance([]),
+        message: invalidAmountMessage
+      };
+    }
+
+    const calculationRows: TrialBalanceRow[] = parsedRows.map(({ row, debit, credit }) => ({
+      id: row.id,
+      accountName: row.accountName,
+      debit: debit ?? 0,
+      credit: credit ?? 0
+    }));
+
+    return {
+      result: calculateTrialBalance(calculationRows),
+      message: ""
+    };
+  }, [rows]);
+
+  const result = calculation.result;
   const status = getStatus(result);
 
   function updateRow(
@@ -234,8 +252,10 @@ export function TrialBalanceCalculator() {
             </div>
             <div className="flex flex-col gap-3">
               {rows.map((row, index) => {
-                const hasDebit = parseAmount(row.debit) > 0;
-                const hasCredit = parseAmount(row.credit) > 0;
+                const parsedDebit = parseAmount(row.debit);
+                const parsedCredit = parseAmount(row.credit);
+                const hasDebit = parsedDebit !== null && parsedDebit > 0;
+                const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
                 return (
                   <div
@@ -287,6 +307,10 @@ export function TrialBalanceCalculator() {
             </div>
           </div>
         </div>
+
+        {calculation.message ? (
+          <p className="mt-5 text-sm font-medium text-rose-700">{calculation.message}</p>
+        ) : null}
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCard label="Total Debit" value={formatCurrency(result.totalDebit)} />

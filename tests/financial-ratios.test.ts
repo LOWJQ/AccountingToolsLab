@@ -84,6 +84,32 @@ test("handles decimals", () => {
   assert.equal(result.displayValue, "2.50 : 1");
 });
 
+test("rounds repeating decimal ratio results", () => {
+  const result = calculateFinancialRatio({
+    ratioType: "current-ratio",
+    values: {
+      currentAssets: 10,
+      currentLiabilities: 3
+    }
+  });
+
+  assert.equal(result.value, 3.33);
+  assert.equal(result.displayValue, "3.33 : 1");
+});
+
+test("rounds repeating decimal percentage results", () => {
+  const result = calculateFinancialRatio({
+    ratioType: "return-on-assets",
+    values: {
+      netIncome: 1,
+      totalAssets: 3
+    }
+  });
+
+  assert.equal(result.value, 33.33);
+  assert.equal(result.displayValue, "33.33%");
+});
+
 test("rejects denominator zero safely", () => {
   assert.throws(
     () =>
@@ -96,6 +122,32 @@ test("rejects denominator zero safely", () => {
       }),
     /cannot be zero/
   );
+});
+
+test("allows negative numerator values when the ratio can represent a loss", () => {
+  const result = calculateFinancialRatio({
+    ratioType: "net-profit-margin",
+    values: {
+      netIncome: -250,
+      revenue: 1000
+    }
+  });
+
+  assert.equal(result.value, -25);
+  assert.equal(result.displayValue, "-25.00%");
+});
+
+test("allows negative denominator values but preserves the calculated sign", () => {
+  const result = calculateFinancialRatio({
+    ratioType: "debt-to-equity",
+    values: {
+      totalLiabilities: 1000,
+      totalEquity: -500
+    }
+  });
+
+  assert.equal(result.value, -2);
+  assert.equal(result.displayValue, "-2.00 : 1");
 });
 
 test("rejects empty or invalid input safely", () => {

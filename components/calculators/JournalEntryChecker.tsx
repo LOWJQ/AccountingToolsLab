@@ -30,14 +30,16 @@ function createLine(index: number): EditableJournalEntryLine {
   };
 }
 
-function parseAmount(value: string): number {
+function parseAmount(value: string): number | null {
   if (value.trim() === "") {
     return 0;
   }
 
   const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? amount : 0;
+  return Number.isFinite(amount) && amount >= 0 ? amount : null;
 }
+
+const invalidAmountMessage = "Please enter valid numeric debit and credit amounts.";
 
 function isBlankLine(line: EditableJournalEntryLine): boolean {
   return !line.accountName.trim() && !line.debit.trim() && !line.credit.trim();
@@ -57,11 +59,24 @@ export function JournalEntryChecker() {
       };
     }
 
-    const calculationLines: JournalEntryLine[] = activeLines.map((line) => ({
-      id: line.id,
-      accountName: line.accountName,
+    const parsedLines = activeLines.map((line) => ({
+      line,
       debit: parseAmount(line.debit),
       credit: parseAmount(line.credit)
+    }));
+
+    if (parsedLines.some((line) => line.debit === null || line.credit === null)) {
+      return {
+        result: null,
+        message: invalidAmountMessage
+      };
+    }
+
+    const calculationLines: JournalEntryLine[] = parsedLines.map(({ line, debit, credit }) => ({
+      id: line.id,
+      accountName: line.accountName,
+      debit: debit ?? 0,
+      credit: credit ?? 0
     }));
 
     try {
@@ -166,8 +181,10 @@ export function JournalEntryChecker() {
             </div>
             <div className="grid gap-3">
               {lines.map((line, index) => {
-                const hasDebit = parseAmount(line.debit) > 0;
-                const hasCredit = parseAmount(line.credit) > 0;
+                const parsedDebit = parseAmount(line.debit);
+                const parsedCredit = parseAmount(line.credit);
+                const hasDebit = parsedDebit !== null && parsedDebit > 0;
+                const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
                 return (
                   <div

@@ -75,6 +75,17 @@ test("handles custom rates", () => {
   assert.equal(result.totalIncludingSst, 215);
 });
 
+test("handles custom rates with awkward decimals", () => {
+  const result = calculateSstMalaysia({
+    mode: "add",
+    amount: 123.45,
+    sstRate: 7.25
+  });
+
+  assert.equal(result.sstAmount, 8.95);
+  assert.equal(result.totalIncludingSst, 132.4);
+});
+
 test("handles decimals", () => {
   const result = calculateSstMalaysia({
     mode: "add",
@@ -84,6 +95,42 @@ test("handles decimals", () => {
 
   assert.equal(result.sstAmount, 8);
   assert.equal(result.totalIncludingSst, 107.99);
+});
+
+test("add SST mode rounds awkward decimals", () => {
+  const result = calculateSstMalaysia({
+    mode: "add",
+    amount: 123.456,
+    sstRate: 8
+  });
+
+  assert.equal(result.amountBeforeSst, 123.46);
+  assert.equal(result.sstAmount, 9.88);
+  assert.equal(result.totalIncludingSst, 133.34);
+});
+
+test("remove SST mode rounds awkward decimals", () => {
+  const result = calculateSstMalaysia({
+    mode: "remove",
+    amount: 133.34,
+    sstRate: 8
+  });
+
+  assert.equal(result.amountBeforeSst, 123.46);
+  assert.equal(result.sstAmount, 9.88);
+  assert.equal(result.totalIncludingSst, 133.34);
+});
+
+test("handles zero amount", () => {
+  const result = calculateSstMalaysia({
+    mode: "remove",
+    amount: 0,
+    sstRate: 8
+  });
+
+  assert.equal(result.amountBeforeSst, 0);
+  assert.equal(result.sstAmount, 0);
+  assert.equal(result.totalIncludingSst, 0);
 });
 
 test("rejects invalid amount", () => {

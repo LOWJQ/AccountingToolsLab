@@ -34,6 +34,13 @@ Currently available:
 - Trial Balance Explained guide
 - Debit vs Credit guide
 - Financial Ratios for Beginners guide
+- Why Trial Balance Is Not Balancing guide
+- Journal Entries for Beginners guide
+- Cash Flow vs Profit guide
+- Break-even Point Explained guide
+- Straight-Line Depreciation Explained guide
+- How to Create a Simple Invoice guide
+- SST Calculator Malaysia guide
 
 ## Not Implemented Yet
 
@@ -83,6 +90,13 @@ tests/              Calculator logic tests.
 /guides/trial-balance-explained               Trial Balance Explained guide
 /guides/debit-vs-credit                       Debit vs Credit guide
 /guides/financial-ratios-for-beginners        Financial Ratios for Beginners guide
+/guides/why-trial-balance-not-balancing       Why Trial Balance Is Not Balancing guide
+/guides/journal-entries-for-beginners         Journal Entries for Beginners guide
+/guides/cash-flow-vs-profit                   Cash Flow vs Profit guide
+/guides/break-even-point-explained            Break-even Point Explained guide
+/guides/straight-line-depreciation-explained  Straight-Line Depreciation Explained guide
+/guides/how-to-create-a-simple-invoice        How to Create a Simple Invoice guide
+/guides/sst-calculator-malaysia-add-remove-sst SST Calculator Malaysia guide
 /about                                        About page
 /contact                                      Contact page
 /privacy-policy                               Privacy Policy

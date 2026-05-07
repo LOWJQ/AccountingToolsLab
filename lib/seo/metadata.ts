@@ -35,7 +35,21 @@ export function createMetadata({
       description,
       url: canonicalUrl,
       siteName: siteConfig.name,
-      type: "website"
+      type: "website",
+      images: [
+        {
+          url: siteConfig.ogImage.url,
+          width: siteConfig.ogImage.width,
+          height: siteConfig.ogImage.height,
+          alt: siteConfig.ogImage.alt
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [siteConfig.ogImage.url]
     }
   };
 }

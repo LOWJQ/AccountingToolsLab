@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import { FormEvent, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -35,6 +36,15 @@ const initialFormState: FormState = {
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const turnstileSiteKey = "0x4AAAAAADK16LHmJMDKkl6s";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      reset: () => void;
+    };
+  }
+}
 
 function validateForm(form: FormState): FieldErrors {
   const errors: FieldErrors = {};
@@ -104,9 +114,15 @@ export function ContactForm() {
     setErrors((current) => ({ ...current, [field]: undefined }));
   }
 
+  function resetTurnstile() {
+    window.turnstile?.reset();
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus(null);
+    const formData = new FormData(event.currentTarget);
+    const turnstileToken = formData.get("cf-turnstile-response");
 
     const nextErrors = validateForm(form);
     setErrors(nextErrors);
@@ -119,6 +135,14 @@ export function ContactForm() {
       return;
     }
 
+    if (typeof turnstileToken !== "string" || !turnstileToken) {
+      setStatus({
+        type: "error",
+        message: "Complete the verification before sending your message."
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -127,7 +151,10 @@ export function ContactForm() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          ...form,
+          "cf-turnstile-response": turnstileToken
+        })
       });
 
       const data = (await response.json()) as {
@@ -147,6 +174,7 @@ export function ContactForm() {
             data.message ||
             "Something went wrong while sending your message. Please try again or email directly."
         });
+        resetTurnstile();
         return;
       }
 
@@ -154,6 +182,7 @@ export function ContactForm() {
         setForm(initialFormState);
         setErrors({});
         setStatus(null);
+        resetTurnstile();
         return;
       }
 
@@ -163,19 +192,26 @@ export function ContactForm() {
         type: "success",
         message: "Thanks — your message was sent."
       });
+      resetTurnstile();
     } catch {
       setStatus({
         type: "error",
         message:
           "The message could not be sent right now. Please try again or email accttoolslab@gmail.com."
       });
+      resetTurnstile();
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <form className="mt-6 grid gap-5" onSubmit={handleSubmit} noValidate>
+    <>
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="afterInteractive"
+      />
+      <form className="mt-6 grid gap-5" onSubmit={handleSubmit} noValidate>
       <div className="hidden" aria-hidden="true">
         <label htmlFor="companyWebsite">Company website</label>
         <input
@@ -312,6 +348,8 @@ export function ContactForm() {
         </div>
       ) : null}
 
+      <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+
       <button
         className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
         type="submit"
@@ -319,7 +357,8 @@ export function ContactForm() {
       >
         {isSubmitting ? "Sending..." : "Send message"}
       </button>
-    </form>
+      </form>
+    </>
   );
 }
 

@@ -1,4 +1,5 @@
 import { TrialBalancePreview } from "@/components/home/TrialBalancePreview";
+import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -8,78 +9,13 @@ export const metadata = createMetadata({
   path: "/"
 });
 
-const featuredTools = [
-  {
-    name: "Trial Balance Calculator",
-    description: "Check whether total debits equal total credits and review the difference.",
-    status: "Available",
-    href: "/tools/trial-balance-calculator",
-    isAvailable: true
-  },
-  {
-    name: "Accounting Equation Calculator",
-    description: "Review assets, liabilities, and equity in a simple accounting equation format.",
-    status: "Available",
-    href: "/tools/accounting-equation-calculator",
-    isAvailable: true
-  },
-  {
-    name: "Debit/Credit Checker",
-    description: "Practice whether an account should increase with a debit or a credit.",
-    status: "Available",
-    href: "/tools/debit-credit-checker",
-    isAvailable: true
-  },
-  {
-    name: "Financial Ratio Calculator",
-    description: "Calculate common ratios for liquidity, profitability, and solvency checks.",
-    status: "Available",
-    href: "/tools/financial-ratio-calculator",
-    isAvailable: true
-  },
-  {
-    name: "Depreciation Calculator",
-    description: "Estimate depreciation with beginner-friendly inputs and explanations.",
-    status: "Available",
-    href: "/tools/depreciation-calculator",
-    isAvailable: true
-  },
-  {
-    name: "Break-even Calculator",
-    description: "Find contribution margin, break-even units, and break-even sales.",
-    status: "Available",
-    href: "/tools/break-even-calculator",
-    isAvailable: true
-  },
-  {
-    name: "Cash Flow Calculator",
-    description: "Calculate net cash flow and ending cash balance for a simple period.",
-    status: "Available",
-    href: "/tools/cash-flow-calculator",
-    isAvailable: true
-  },
-  {
-    name: "Invoice Generator",
-    description: "Create a simple invoice with line items, subtotal, and total.",
-    status: "Available",
-    href: "/tools/invoice-generator",
-    isAvailable: true
-  },
-  {
-    name: "SST Calculator Malaysia",
-    description: "Estimate SST amount, total including SST, or amount before SST.",
-    status: "Available",
-    href: "/tools/sst-calculator-malaysia",
-    isAvailable: true
-  },
-  {
-    name: "Journal Entry Checker",
-    description: "Check whether debit and credit lines balance in a journal entry.",
-    status: "Available",
-    href: "/tools/journal-entry-checker",
-    isAvailable: true
-  }
-];
+const featuredTools = tools.map((tool) => ({
+  name: tool.name,
+  description: tool.description,
+  status: tool.status === "mvp" ? "Available" : "Planned",
+  href: tool.href,
+  isAvailable: tool.status === "mvp"
+}));
 
 const reasons = [
   {

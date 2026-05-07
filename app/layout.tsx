@@ -20,7 +20,21 @@ export const metadata: Metadata = {
     description: "Free accounting tools and guides for learners and small businesses.",
     url: `${siteConfig.url}/`,
     siteName: siteConfig.name,
-    type: "website"
+    type: "website",
+    images: [
+      {
+        url: siteConfig.ogImage.url,
+        width: siteConfig.ogImage.width,
+        height: siteConfig.ogImage.height,
+        alt: siteConfig.ogImage.alt
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AccountingToolsLab",
+    description: "Free accounting tools and guides for learners and small businesses.",
+    images: [siteConfig.ogImage.url]
   },
   icons: {
     icon: [

@@ -118,6 +118,8 @@ export function InvoiceGenerator() {
     [lineItems]
   );
 
+  const hasValidInvoice = calculation.result !== null;
+
   useEffect(() => {
     if (!isDownloadModalOpen) {
       return;
@@ -137,6 +139,18 @@ export function InvoiceGenerator() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isDownloadModalOpen, isGeneratingPdf]);
+
+  useEffect(() => {
+    if (hasValidInvoice) {
+      return;
+    }
+
+    setIsDownloadModalOpen(false);
+
+    if (activeView === "preview") {
+      setActiveView("details");
+    }
+  }, [activeView, hasValidInvoice]);
 
   function updateLineItem(id: string, key: keyof EditableLineItem, value: string) {
     setLineItems((currentItems) =>
@@ -169,6 +183,10 @@ export function InvoiceGenerator() {
   }
 
   function switchInvoiceView(view: InvoiceView) {
+    if (view === "preview" && !hasValidInvoice) {
+      return;
+    }
+
     setActiveView(view);
     window.requestAnimationFrame(() => {
       invoiceGeneratorTopRef.current?.scrollIntoView({
@@ -179,7 +197,7 @@ export function InvoiceGenerator() {
   }
 
   async function downloadInvoicePdf() {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || !hasValidInvoice) {
       return;
     }
 
@@ -547,14 +565,23 @@ export function InvoiceGenerator() {
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
               activeView === "preview"
                 ? "bg-white text-stone-950 shadow-sm"
-                : "text-stone-600 hover:text-stone-950"
+                : hasValidInvoice
+                  ? "text-stone-600 hover:text-stone-950"
+                  : "cursor-not-allowed text-stone-400"
             }`}
+            aria-describedby={!hasValidInvoice ? "invoice-preview-disabled-note" : undefined}
+            disabled={!hasValidInvoice}
             onClick={() => switchInvoiceView("preview")}
             type="button"
           >
             Preview Invoice
           </button>
         </div>
+        {!hasValidInvoice ? (
+          <p className="mt-3 text-sm font-medium text-red-700" id="invoice-preview-disabled-note">
+            Fix invoice errors before previewing or downloading.
+          </p>
+        ) : null}
 
         <div className="mt-8 grid min-w-0 gap-8">
           {activeView === "details" ? (
@@ -765,13 +792,23 @@ export function InvoiceGenerator() {
                 Reset
               </button>
               <button
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-describedby={!hasValidInvoice ? "invoice-details-preview-disabled-note" : undefined}
+                disabled={!hasValidInvoice}
                 onClick={() => switchInvoiceView("preview")}
                 type="button"
               >
                 Preview invoice
               </button>
             </div>
+            {!hasValidInvoice ? (
+              <p
+                className="text-sm font-medium text-red-700"
+                id="invoice-details-preview-disabled-note"
+              >
+                Fix invoice errors before previewing or downloading.
+              </p>
+            ) : null}
             </div>
           ) : (
             <div className="grid min-w-0 gap-4">
@@ -789,7 +826,9 @@ export function InvoiceGenerator() {
                     Back to details
                   </button>
                   <button
-                    className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-describedby={!hasValidInvoice ? "invoice-download-disabled-note" : undefined}
+                    disabled={!hasValidInvoice}
                     onClick={() => setIsDownloadModalOpen(true)}
                     type="button"
                   >
@@ -797,6 +836,11 @@ export function InvoiceGenerator() {
                   </button>
                 </div>
               </div>
+              {!hasValidInvoice ? (
+                <p className="text-sm font-medium text-red-700" id="invoice-download-disabled-note">
+                  Fix invoice errors before downloading.
+                </p>
+              ) : null}
 
               <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
             <div
@@ -1055,7 +1099,7 @@ export function InvoiceGenerator() {
               </button>
               <button
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-80"
-                disabled={isGeneratingPdf}
+                disabled={isGeneratingPdf || !hasValidInvoice}
                 onClick={downloadInvoicePdf}
                 ref={confirmDownloadButtonRef}
                 type="button"

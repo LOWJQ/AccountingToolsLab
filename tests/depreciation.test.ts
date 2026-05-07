@@ -48,6 +48,30 @@ test("handles decimals", () => {
   assert.equal(result.monthlyDepreciation, 25.01);
 });
 
+test("rounds repeating annual and monthly depreciation", () => {
+  const result = calculateDepreciation({
+    assetCost: 1000,
+    salvageValue: 1,
+    usefulLifeYears: 3
+  });
+
+  assert.equal(result.depreciableAmount, 999);
+  assert.equal(result.annualDepreciation, 333);
+  assert.equal(result.monthlyDepreciation, 27.75);
+});
+
+test("allows salvage value equal to asset cost", () => {
+  const result = calculateDepreciation({
+    assetCost: 5000,
+    salvageValue: 5000,
+    usefulLifeYears: 5
+  });
+
+  assert.equal(result.depreciableAmount, 0);
+  assert.equal(result.annualDepreciation, 0);
+  assert.equal(result.monthlyDepreciation, 0);
+});
+
 test("rejects useful life of zero", () => {
   assert.throws(
     () =>
@@ -91,5 +115,27 @@ test("handles empty or invalid input safely", () => {
         usefulLifeYears: 5
       }),
     /Salvage value is required/
+  );
+});
+
+test("rejects negative asset cost and salvage value", () => {
+  assert.throws(
+    () =>
+      calculateDepreciation({
+        assetCost: -1,
+        salvageValue: 0,
+        usefulLifeYears: 5
+      }),
+    /Asset cost must be greater than zero/
+  );
+
+  assert.throws(
+    () =>
+      calculateDepreciation({
+        assetCost: 1000,
+        salvageValue: -1,
+        usefulLifeYears: 5
+      }),
+    /Salvage value cannot be negative/
   );
 });

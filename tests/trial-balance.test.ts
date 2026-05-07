@@ -59,6 +59,31 @@ test("handles decimal values", () => {
   });
 });
 
+test("rounds decimal totals to two places", () => {
+  const result = calculateTrialBalance([
+    { id: "1", accountName: "Cash", debit: 10.335, credit: 0 },
+    { id: "2", accountName: "Revenue", debit: 0, credit: 10.335 }
+  ]);
+
+  assert.deepEqual(result, {
+    totalDebit: 10.34,
+    totalCredit: 10.34,
+    difference: 0,
+    isBalanced: true
+  });
+});
+
+test("allows empty account names without changing totals", () => {
+  const result = calculateTrialBalance([
+    { id: "1", accountName: "", debit: 100, credit: 0 },
+    { id: "2", accountName: "Capital", debit: 0, credit: 100 }
+  ]);
+
+  assert.equal(result.totalDebit, 100);
+  assert.equal(result.totalCredit, 100);
+  assert.equal(result.isBalanced, true);
+});
+
 test("handles rows with only debit values", () => {
   const result = calculateTrialBalance([
     { id: "1", accountName: "Cash", debit: 125, credit: 0 },
@@ -127,4 +152,24 @@ test("uses tolerance for floating point precision", () => {
     difference: 0,
     isBalanced: true
   });
+});
+
+test("treats tiny rounding differences as balanced", () => {
+  const result = calculateTrialBalance([
+    { id: "1", accountName: "Debit", debit: 100.0000001, credit: 0 },
+    { id: "2", accountName: "Credit", debit: 0, credit: 100.0000002 }
+  ]);
+
+  assert.equal(result.difference, 0);
+  assert.equal(result.isBalanced, true);
+});
+
+test("reports small differences outside tolerance", () => {
+  const result = calculateTrialBalance([
+    { id: "1", accountName: "Debit", debit: 100.01, credit: 0 },
+    { id: "2", accountName: "Credit", debit: 0, credit: 100 }
+  ]);
+
+  assert.equal(result.difference, 0.01);
+  assert.equal(result.isBalanced, false);
 });

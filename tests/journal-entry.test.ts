@@ -63,6 +63,28 @@ test("handles decimals", () => {
   assert.equal(result.isBalanced, true);
 });
 
+test("rounds decimal totals to two places", () => {
+  const result = checkJournalEntry([
+    { accountName: "Cash", debit: 10.335, credit: 0 },
+    { accountName: "Revenue", debit: 0, credit: 10.335 }
+  ]);
+
+  assert.equal(result.totalDebit, 10.34);
+  assert.equal(result.totalCredit, 10.34);
+  assert.equal(result.difference, 0);
+  assert.equal(result.isBalanced, true);
+});
+
+test("allows blank account names when debit or credit amount is present", () => {
+  const result = checkJournalEntry([
+    { accountName: "   ", debit: 250, credit: 0 },
+    { accountName: "Capital", debit: 0, credit: 250 }
+  ]);
+
+  assert.equal(result.isBalanced, true);
+  assert.equal(result.totalDebit, 250);
+});
+
 test("treats empty debit or credit fields as zero", () => {
   const result = checkJournalEntry([
     { accountName: "Cash", debit: 1000, credit: 0 },
@@ -110,4 +132,24 @@ test("handles empty or invalid input safely", () => {
       ]),
     /must be a valid number/
   );
+});
+
+test("uses tolerance for tiny balanced decimal differences", () => {
+  const result = checkJournalEntry([
+    { accountName: "Cash", debit: 0.1 + 0.2, credit: 0 },
+    { accountName: "Revenue", debit: 0, credit: 0.3 }
+  ]);
+
+  assert.equal(result.difference, 0);
+  assert.equal(result.isBalanced, true);
+});
+
+test("reports small unbalanced decimal differences", () => {
+  const result = checkJournalEntry([
+    { accountName: "Cash", debit: 100.01, credit: 0 },
+    { accountName: "Revenue", debit: 0, credit: 100 }
+  ]);
+
+  assert.equal(result.difference, 0.01);
+  assert.equal(result.isBalanced, false);
 });
