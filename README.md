@@ -106,8 +106,28 @@ CONTACT_TO_EMAIL=accttoolslab@gmail.com
 CONTACT_FROM_EMAIL=AccountingToolsLab <onboarding@resend.dev>
 ```
 
-Do not prefix `RESEND_API_KEY` with `NEXT_PUBLIC_`. For production,
-`CONTACT_FROM_EMAIL` should be a verified sender or domain in Resend.
+Do not prefix `RESEND_API_KEY` with `NEXT_PUBLIC_`. Add the variables to
+`.env.local` for local development and to Vercel Environment Variables for
+production. For production, `CONTACT_FROM_EMAIL` should use a verified sender
+or domain in Resend. `onboarding@resend.dev` is mainly for testing.
+
+After changing local environment variables, restart `npm run dev`. After
+changing Vercel environment variables, redeploy the project.
+
+To test the contact form locally:
+
+1. Create `.env.local`.
+2. Add `RESEND_API_KEY`.
+3. Add `CONTACT_FROM_EMAIL`.
+4. Add `CONTACT_TO_EMAIL`.
+5. Restart the dev server.
+6. Submit the form from `/contact`.
+7. If it fails, check the dev terminal for the safe Resend status summary.
+8. Check the Resend dashboard logs.
+
+The YouTube tutorial stores contacts in Neon with Drizzle and server actions.
+This project currently sends contact submissions by email through a Next.js API
+route and Resend.
 
 ## Development
 

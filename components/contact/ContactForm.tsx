@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import type { ReactNode } from "react";
 
 const topics = [
@@ -98,7 +98,6 @@ export function ContactForm() {
     type: "success" | "error";
     message: string;
   } | null>(null);
-  const formStartedAt = useMemo(() => Date.now(), []);
 
   function updateField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -128,14 +127,12 @@ export function ContactForm() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          ...form,
-          formStartedAt
-        })
+        body: JSON.stringify(form)
       });
 
       const data = (await response.json()) as {
         ok?: boolean;
+        sent?: boolean;
         message?: string;
         errors?: FieldErrors;
       };
@@ -153,11 +150,18 @@ export function ContactForm() {
         return;
       }
 
+      if (data.sent === false) {
+        setForm(initialFormState);
+        setErrors({});
+        setStatus(null);
+        return;
+      }
+
       setForm(initialFormState);
       setErrors({});
       setStatus({
         type: "success",
-        message: "Thanks, your message has been sent."
+        message: "Thanks — your message was sent."
       });
     } catch {
       setStatus({

@@ -17,7 +17,6 @@ type ContactPayload = {
   message?: unknown;
   pageUrl?: unknown;
   companyWebsite?: unknown;
-  formStartedAt?: unknown;
 };
 
 type NormalizedContact = {
@@ -74,13 +73,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (result.isSpam) {
-    return NextResponse.json({ ok: true }, { status: 200 });
+    return NextResponse.json({ ok: true, sent: false }, { status: 200 });
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   const from =
     process.env.CONTACT_FROM_EMAIL || "AccountingToolsLab <onboarding@resend.dev>";
-  const to = process.env.CONTACT_TO_EMAIL || "accttoolslab@gmail.com";
+  const to = parseRecipientEmails(process.env.CONTACT_TO_EMAIL);
 
   if (!apiKey) {
     return NextResponse.json(
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
         message:
           process.env.NODE_ENV === "development"
             ? "Contact form email is not configured. Set RESEND_API_KEY."
-            : "Message could not be sent yet. Please email accttoolslab@gmail.com directly while the form is being configured."
+            : "Message could not be sent. Please email accttoolslab@gmail.com directly."
       },
       { status: 500 }
     );
@@ -119,11 +118,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Resend contact email failed", {
+          status: response.status,
+          body: errorText
+        });
+      }
+
       return NextResponse.json(
         {
           ok: false,
-          message:
-            "Message could not be sent yet. Please email accttoolslab@gmail.com directly while the form is being configured."
+          message: "Message could not be sent. Please email accttoolslab@gmail.com directly."
         },
         { status: 500 }
       );
@@ -134,8 +141,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        message:
-          "Message could not be sent yet. Please email accttoolslab@gmail.com directly while the form is being configured."
+        message: "Message could not be sent. Please email accttoolslab@gmail.com directly."
       },
       { status: 500 }
     );
@@ -162,24 +168,6 @@ function validatePayload(payload: ContactPayload): ValidationResult {
   }
 
   if (rawHoneypot.length > 200) {
-    return {
-      ok: true,
-      isSpam: true,
-      data: {
-        name: "",
-        email: "",
-        topic: "",
-        subject: "",
-        message: "",
-        pageUrl: ""
-      }
-    };
-  }
-
-  const formStartedAt =
-    typeof payload.formStartedAt === "number" ? payload.formStartedAt : 0;
-
-  if (formStartedAt > 0 && Date.now() - formStartedAt < 1500) {
     return {
       ok: true,
       isSpam: true,
@@ -341,6 +329,15 @@ function isSafeOptionalUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+function parseRecipientEmails(value: string | undefined): string[] {
+  const recipients = (value || "accttoolslab@gmail.com")
+    .split(",")
+    .map((email) => stripHeaderUnsafeChars(email).trim())
+    .filter((email) => email.length > 0 && isValidEmail(email));
+
+  return recipients.length > 0 ? recipients : ["accttoolslab@gmail.com"];
 }
 
 function isStringWithinLimit(value: unknown, maxLength: number): boolean {
