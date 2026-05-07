@@ -2,13 +2,116 @@ import { guides } from "@/lib/data/guides";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
-  title: "Accounting Guides | AccountingToolsLab",
+  title: "Invoice and Accounting Guides | AccountingToolsLab",
   description:
-    "Beginner-friendly accounting guides with clear explanations, formulas, examples, and links to practical tools.",
+    "Read simple guides about invoices, SST, cash flow, break-even points, financial ratios, and accounting basics for small businesses, freelancers, beginners, and students.",
   path: "/guides"
 });
 
+const guideOrder = [
+  "how-to-create-a-simple-invoice",
+  "sst-calculator-malaysia-add-remove-sst",
+  "cash-flow-vs-profit",
+  "break-even-point-explained",
+  "financial-ratios-for-beginners",
+  "straight-line-depreciation-explained",
+  "trial-balance-explained",
+  "why-trial-balance-not-balancing",
+  "journal-entries-for-beginners",
+  "debit-vs-credit"
+];
+
+const orderedGuides = [...guides].sort(
+  (firstGuide, secondGuide) =>
+    guideOrder.indexOf(firstGuide.slug) - guideOrder.indexOf(secondGuide.slug)
+);
+
 const learningPaths = [
+  {
+    title: "Business Documents",
+    steps: [
+      {
+        label: "How to Create a Simple Invoice",
+        href: "/guides/how-to-create-a-simple-invoice",
+        status: "Available"
+      },
+      {
+        label: "Invoice Generator",
+        href: "/tools/invoice-generator",
+        status: "Available"
+      },
+      {
+        label: "SST Calculator Malaysia",
+        href: "/tools/sst-calculator-malaysia",
+        status: "Available"
+      },
+      {
+        label: "Cash Flow Calculator",
+        href: "/tools/cash-flow-calculator",
+        status: "Available"
+      }
+    ]
+  },
+  {
+    title: "Malaysia Tax Basics",
+    steps: [
+      {
+        label: "SST Calculator Malaysia",
+        href: "/tools/sst-calculator-malaysia",
+        status: "Available"
+      },
+      {
+        label: "SST Calculator Malaysia: Add or Remove SST",
+        href: "/guides/sst-calculator-malaysia-add-remove-sst",
+        status: "Available"
+      },
+      {
+        label: "Invoice Generator",
+        href: "/tools/invoice-generator",
+        status: "Available"
+      }
+    ]
+  },
+  {
+    title: "Business Planning",
+    steps: [
+      {
+        label: "Break-even Point Explained",
+        href: "/guides/break-even-point-explained",
+        status: "Available"
+      },
+      {
+        label: "Break-even Calculator",
+        href: "/tools/break-even-calculator",
+        status: "Available"
+      },
+      {
+        label: "Cash Flow vs Profit",
+        href: "/guides/cash-flow-vs-profit",
+        status: "Available"
+      },
+      {
+        label: "Cash Flow Calculator",
+        href: "/tools/cash-flow-calculator",
+        status: "Available"
+      }
+    ]
+  },
+  {
+    title: "Financial Analysis",
+    steps: [
+      {
+        label: "Financial Ratios for Beginners",
+        href: "/guides/financial-ratios-for-beginners",
+        status: "Available"
+      },
+      {
+        label: "Financial Ratio Calculator",
+        href: "/tools/financial-ratio-calculator",
+        status: "Available"
+      }
+    ]
+  },
   {
     title: "Accounting Basics",
     steps: [
@@ -36,11 +139,6 @@ const learningPaths = [
         label: "Accounting Equation Calculator",
         href: "/tools/accounting-equation-calculator",
         status: "Available"
-      },
-      {
-        label: "Trial Balance Calculator",
-        href: "/tools/trial-balance-calculator",
-        status: "Available"
       }
     ]
   },
@@ -61,90 +159,6 @@ const learningPaths = [
         label: "Trial Balance Calculator",
         href: "/tools/trial-balance-calculator",
         status: "Available"
-      },
-      { label: "Future Bank Reconciliation Tool", status: "Coming soon" }
-    ]
-  },
-  {
-    title: "Financial Analysis",
-    steps: [
-      {
-        label: "Financial Ratios for Beginners",
-        href: "/guides/financial-ratios-for-beginners",
-        status: "Available"
-      },
-      {
-        label: "Financial Ratio Calculator",
-        href: "/tools/financial-ratio-calculator",
-        status: "Available"
-      },
-      { label: "Future Ratio Practice Examples", status: "Coming soon" }
-    ]
-  },
-  {
-    title: "Business Planning",
-    steps: [
-      {
-        label: "Break-even Point Explained",
-        href: "/guides/break-even-point-explained",
-        status: "Available"
-      },
-      {
-        label: "Cash Flow vs Profit",
-        href: "/guides/cash-flow-vs-profit",
-        status: "Available"
-      },
-      {
-        label: "Cash Flow Calculator",
-        href: "/tools/cash-flow-calculator",
-        status: "Available"
-      },
-      {
-        label: "Break-even Calculator",
-        href: "/tools/break-even-calculator",
-        status: "Available"
-      },
-      { label: "Future Cash Flow Planning Guide", status: "Coming soon" }
-    ]
-  },
-  {
-    title: "Business Documents",
-    steps: [
-      {
-        label: "How to Create a Simple Invoice",
-        href: "/guides/how-to-create-a-simple-invoice",
-        status: "Available"
-      },
-      {
-        label: "Invoice Generator",
-        href: "/tools/invoice-generator",
-        status: "Available"
-      },
-      {
-        label: "Cash Flow Calculator",
-        href: "/tools/cash-flow-calculator",
-        status: "Available"
-      },
-      { label: "Future Payment Terms Guide", status: "Coming soon" }
-    ]
-  },
-  {
-    title: "Malaysia Tax Basics",
-    steps: [
-      {
-        label: "SST Calculator Malaysia",
-        href: "/tools/sst-calculator-malaysia",
-        status: "Available"
-      },
-      {
-        label: "SST Calculator Malaysia: Add or Remove SST",
-        href: "/guides/sst-calculator-malaysia-add-remove-sst",
-        status: "Available"
-      },
-      {
-        label: "Invoice Generator",
-        href: "/tools/invoice-generator",
-        status: "Available"
       }
     ]
   },
@@ -160,9 +174,7 @@ const learningPaths = [
         label: "Depreciation Calculator",
         href: "/tools/depreciation-calculator",
         status: "Available"
-      },
-      { label: "Future Depreciation Methods Guide", status: "Coming soon" },
-      { label: "Future Adjusting Entries Guide", status: "Coming soon" }
+      }
     ]
   }
 ];
@@ -184,18 +196,47 @@ export default function GuidesPage() {
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">
-            Accounting Guides
+            Invoice and Accounting Guides
           </p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Beginner-friendly accounting guides
+            Invoice and accounting guides for small businesses
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            Learn core accounting concepts with clear explanations, formulas, examples, and
-            links to practical tools.
+            Learn how to create simple invoices, understand SST, check cash flow, estimate
+            break-even points, and review beginner-friendly accounting concepts.
           </p>
           <p className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
             {availableGuideCount} available guides; {comingSoonGuideCount} coming soon
           </p>
+        </section>
+
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium tracking-wide text-slate-500">Invoice Generator</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+                Need to create an invoice now?
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+                Use the free Invoice Generator to add business details, customer details, line
+                items, optional SST or tax, and download a PDF invoice.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <a
+                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                href="/tools/invoice-generator"
+              >
+                Create Free Invoice
+              </a>
+              <a
+                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                href="/guides/how-to-create-a-simple-invoice"
+              >
+                Read Simple Invoice Guide
+              </a>
+            </div>
+          </div>
         </section>
 
         <section>
@@ -203,17 +244,17 @@ export default function GuidesPage() {
             <div>
               <p className="text-sm font-medium tracking-wide text-slate-500">Featured guides</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Start with core accounting concepts
+                Start with practical business guides
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Available guides are ready to read. Upcoming guides are shown without linking to
-              placeholder pages.
+              Begin with invoice, SST, cash flow, and break-even topics, then explore accounting
+              basics when you need them.
             </p>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {guides.map((guide) => {
+            {orderedGuides.map((guide) => {
               const isAvailable = guide.status === "available";
               const content = (
                 <>
@@ -304,35 +345,35 @@ export default function GuidesPage() {
             <div className="max-w-2xl">
               <p className="text-sm font-medium tracking-wide text-slate-500">Guides and tools</p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Learn the concept, then use the tool
+                Create an invoice, then explore the tools
               </h2>
               <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Each guide is designed to connect with a practical accounting tool, so you can
-                understand the concept and then check your own numbers.
+                Start with the free Invoice Generator, or explore calculators for SST, cash flow,
+                break-even, and accounting basics.
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <a
                 className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools"
+                href="/tools/invoice-generator"
               >
-                Explore Tools
+                Create Free Invoice
               </a>
               <a
                 className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/tools/trial-balance-calculator"
+                href="/tools"
               >
-                Try Trial Balance Calculator
+                Explore Tools
               </a>
             </div>
           </div>
         </section>
 
         <aside className="rounded-xl border border-stone-200 bg-white/80 p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-stone-950">More guides are planned</h2>
+          <h2 className="text-base font-semibold text-stone-950">More guides may be added</h2>
           <p className="mt-2 text-sm leading-6 text-stone-600">
-            Future guides may cover journal entries, bank reconciliation, depreciation methods,
-            adjusting entries, and beginner bookkeeping workflows.
+            The current guide library starts with practical business topics and keeps accounting
+            basics available for students, beginners, and self-learners.
           </p>
         </aside>
       </main>

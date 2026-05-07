@@ -135,24 +135,25 @@ export default function ContactPage() {
             <div className="max-w-2xl">
               <p className="text-sm font-medium tracking-wide text-slate-500">Keep exploring</p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Explore the tools
+                Create an invoice first
               </h2>
               <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Try the calculators or browse accounting guides.
+                Start with the free Invoice Generator, or explore the full set of accounting
+                tools.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools"
+                href="/tools/invoice-generator"
               >
-                Explore Tools
+                Create Free Invoice
               </a>
               <a
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/tools/trial-balance-calculator"
+                href="/tools"
               >
-                Try Trial Balance Calculator
+                Explore Tools
               </a>
             </div>
           </div>
