@@ -12,7 +12,11 @@ const learningPaths = [
   {
     title: "Accounting Basics",
     steps: [
-      { label: "Debit vs Credit", status: "Coming soon" },
+      {
+        label: "Debit vs Credit",
+        href: "/guides/debit-vs-credit",
+        status: "Available"
+      },
       {
         label: "Debit/Credit Checker",
         href: "/tools/debit-credit-checker",
@@ -54,7 +58,11 @@ const learningPaths = [
   {
     title: "Financial Analysis",
     steps: [
-      { label: "Financial Ratios for Beginners", status: "Coming soon" },
+      {
+        label: "Financial Ratios for Beginners",
+        href: "/guides/financial-ratios-for-beginners",
+        status: "Available"
+      },
       {
         label: "Financial Ratio Calculator",
         href: "/tools/financial-ratio-calculator",
@@ -134,6 +142,9 @@ function StatusBadge({ children }: { children: string }) {
 }
 
 export default function GuidesPage() {
+  const availableGuideCount = guides.filter((guide) => guide.status === "available").length;
+  const comingSoonGuideCount = guides.length - availableGuideCount;
+
   return (
     <div className="bg-stone-50 text-stone-950">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
@@ -149,7 +160,7 @@ export default function GuidesPage() {
             links to practical tools.
           </p>
           <p className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
-            1 available guide; {guides.length - 1} coming soon
+            {availableGuideCount} available guides; {comingSoonGuideCount} coming soon
           </p>
         </section>
 
@@ -162,7 +173,7 @@ export default function GuidesPage() {
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              The available guide is ready to read. Upcoming guides are shown without linking to
+              Available guides are ready to read. Upcoming guides are shown without linking to
               placeholder pages.
             </p>
           </div>
