@@ -1,95 +1,40 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { guides } from "@/lib/data/guides";
-import { tools } from "@/lib/data/tools";
-
 type FooterLink = {
   label: string;
   href: string;
-  shortLabel?: string;
 };
 
-const footerGuideLabels: Record<string, { label: string; shortLabel: string }> = {
-  "debit-vs-credit": {
-    label: "Debit vs Credit",
-    shortLabel: "Debit vs Credit"
-  },
-  "trial-balance-explained": {
-    label: "Trial Balance Explained",
-    shortLabel: "Trial Balance"
-  },
-  "why-trial-balance-not-balancing": {
-    label: "Why Trial Balance Does Not Balance",
-    shortLabel: "Trial Balance Errors"
-  },
-  "journal-entries-for-beginners": {
-    label: "Journal Entries for Beginners",
-    shortLabel: "Journal Entries"
-  },
-  "financial-ratios-for-beginners": {
-    label: "Financial Ratios for Beginners",
-    shortLabel: "Financial Ratios"
-  },
-  "cash-flow-vs-profit": {
-    label: "Cash Flow vs Profit",
-    shortLabel: "Cash Flow vs Profit"
-  },
-  "break-even-point-explained": {
-    label: "Break-even Point Explained",
-    shortLabel: "Break-even Point"
-  },
-  "straight-line-depreciation-explained": {
-    label: "Straight-Line Depreciation",
-    shortLabel: "Depreciation"
-  },
-  "how-to-create-a-simple-invoice": {
-    label: "Simple Invoice Guide",
-    shortLabel: "Simple Invoice"
-  },
-  "sst-calculator-malaysia-add-remove-sst": {
-    label: "SST Calculator Malaysia Guide",
-    shortLabel: "SST Malaysia"
-  }
-};
-
-const footerGuideLinks: FooterLink[] = [
-  { label: "All Guides", href: "/guides" },
-  ...guides
-    .filter((guide) => guide.status === "available" && footerGuideLabels[guide.slug])
-    .map((guide) => ({
-      href: guide.href,
-      label: footerGuideLabels[guide.slug].label,
-      shortLabel: footerGuideLabels[guide.slug].shortLabel
-    }))
-];
-
-const footerSections = [
+const footerSections: { title: string; links: FooterLink[] }[] = [
   {
     title: "Tools",
     links: [
-      { label: "All Tools", href: "/tools" },
-      ...tools.map((tool) => ({
-        label: tool.name,
-        href: tool.href
-      }))
+      { label: "Invoice Generator", href: "/tools/invoice-generator" },
+      { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" },
+      { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
+      { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
+      { label: "All Tools", href: "/tools" }
     ]
   },
   {
     title: "Guides",
-    links: footerGuideLinks
+    links: [
+      { label: "Simple Invoice Guide", href: "/guides/how-to-create-a-simple-invoice" },
+      {
+        label: "SST Calculator Malaysia Guide",
+        href: "/guides/sst-calculator-malaysia-add-remove-sst"
+      },
+      { label: "Cash Flow vs Profit", href: "/guides/cash-flow-vs-profit" },
+      { label: "Break-even Point Explained", href: "/guides/break-even-point-explained" },
+      { label: "All Guides", href: "/guides" }
+    ]
   },
   {
     title: "Company",
     links: [
-      { label: "Home", href: "/" },
       { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" }
-    ]
-  },
-  {
-    title: "Legal",
-    links: [
+      { label: "Contact", href: "/contact" },
       { label: "Privacy Policy", href: "/privacy-policy" },
       { label: "Terms", href: "/terms" }
     ]
@@ -111,36 +56,23 @@ export function Footer() {
             />
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-6 text-stone-600">
-            Free accounting tools and beginner-friendly guides for students, new founders,
-            and small business owners.
+            Free invoice generator and accounting tools for freelancers, small businesses,
+            students, and beginners.
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-3">
           {footerSections.map((section) => (
             <div key={section.title}>
               <h2 className="text-sm font-semibold text-stone-950">{section.title}</h2>
-              <ul
-                className={
-                  section.title === "Tools" || section.title === "Guides"
-                    ? "mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:block sm:space-y-3"
-                    : "mt-4 space-y-3"
-                }
-              >
+              <ul className="mt-4 space-y-3">
                 {section.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       className="text-sm text-stone-500 transition hover:text-stone-900"
                       href={link.href}
                     >
-                      {link.shortLabel ? (
-                        <>
-                          <span className="sm:hidden">{link.shortLabel}</span>
-                          <span className="hidden sm:inline">{link.label}</span>
-                        </>
-                      ) : (
-                        link.label
-                      )}
+                      {link.label}
                     </Link>
                   </li>
                 ))}
@@ -151,7 +83,7 @@ export function Footer() {
       </div>
       <div className="mx-auto flex max-w-6xl flex-col gap-3 border-t border-stone-100 px-4 py-6 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p>Copyright 2026 AccountingToolsLab. All rights reserved.</p>
-        <p>Built for simple accounting education.</p>
+        <p>Built for simple invoices, business checks, and accounting learning.</p>
       </div>
     </footer>
   );

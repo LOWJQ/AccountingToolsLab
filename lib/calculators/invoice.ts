@@ -14,7 +14,13 @@ export type InvoiceLineItemResult = {
 export type InvoiceResult = {
   items: InvoiceLineItemResult[];
   subtotal: number;
+  taxRate: number;
+  taxAmount: number;
   total: number;
+};
+
+export type InvoiceOptions = {
+  taxRate?: number;
 };
 
 function assertValidNumber(value: number | null | undefined, label: string): number {
@@ -29,11 +35,30 @@ function roundAmount(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-export function calculateInvoice(items: InvoiceLineItemInput[]): InvoiceResult {
+export function calculateInvoice(
+  items: InvoiceLineItemInput[],
+  options: InvoiceOptions = {}
+): InvoiceResult {
+  const taxRate = options.taxRate ?? 0;
+
+  if (typeof taxRate !== "number" || !Number.isFinite(taxRate)) {
+    throw new Error("Tax rate must be a valid number.");
+  }
+
+  if (taxRate < 0) {
+    throw new Error("Tax rate cannot be negative.");
+  }
+
+  if (taxRate > 100) {
+    throw new Error("Tax rate cannot be above 100.");
+  }
+
   if (items.length === 0) {
     return {
       items: [],
       subtotal: 0,
+      taxRate,
+      taxAmount: 0,
       total: 0
     };
   }
@@ -61,10 +86,13 @@ export function calculateInvoice(items: InvoiceLineItemInput[]): InvoiceResult {
   const subtotal = roundAmount(
     calculatedItems.reduce((total, item) => total + item.lineTotal, 0)
   );
+  const taxAmount = roundAmount(subtotal * (taxRate / 100));
 
   return {
     items: calculatedItems,
     subtotal,
-    total: subtotal
+    taxRate,
+    taxAmount,
+    total: roundAmount(subtotal + taxAmount)
   };
 }

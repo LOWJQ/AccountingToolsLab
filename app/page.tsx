@@ -1,42 +1,61 @@
-import { TrialBalancePreview } from "@/components/home/TrialBalancePreview";
+import { InvoicePreview } from "@/components/home/InvoicePreview";
 import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
-  title: "AccountingToolsLab | Free Accounting Tools",
+  title: "Free Invoice Generator and Accounting Tools | AccountingToolsLab",
   description:
-    "Free accounting calculators and beginner-friendly explanations for students, beginners, and small business owners.",
+    "Create simple invoices, download PDFs, choose from 10 supported currencies including MYR, calculate SST, and use free accounting tools for small businesses, freelancers, and learners.",
   path: "/"
 });
 
-const featuredTools = tools.map((tool) => ({
-  name: tool.name,
-  description: tool.description,
-  status: tool.status === "mvp" ? "Available" : "Planned",
-  href: tool.href,
-  isAvailable: tool.status === "mvp"
-}));
+const featuredToolOrder = [
+  "invoice-generator",
+  "sst-calculator-malaysia",
+  "cash-flow-calculator",
+  "break-even-calculator",
+  "trial-balance-calculator"
+];
+
+const featuredTools = [...tools]
+  .sort((firstTool, secondTool) => {
+    const firstIndex = featuredToolOrder.indexOf(firstTool.slug);
+    const secondIndex = featuredToolOrder.indexOf(secondTool.slug);
+    const firstRank = firstIndex === -1 ? featuredToolOrder.length : firstIndex;
+    const secondRank = secondIndex === -1 ? featuredToolOrder.length : secondIndex;
+
+    return firstRank - secondRank;
+  })
+  .map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    status: tool.status === "mvp" ? "Available" : "Planned",
+    href: tool.href,
+    isAvailable: tool.status === "mvp"
+  }));
 
 const reasons = [
   {
-    title: "Simple accounting calculators",
-    description: "Use focused tools that solve one accounting task at a time without extra clutter."
+    title: "Invoices first",
+    description:
+      "Create a simple invoice, then use supporting calculators when you need accounting checks."
   },
   {
     title: "Beginner-friendly explanations",
     description: "Read plain-English notes that connect each result back to the accounting concept."
   },
   {
-    title: "Built for learning basics",
+    title: "Built for small business basics",
     description:
-      "Check trial balances, debits, credits, journal entries, ratios, depreciation, break-even points, cash flow, invoices, and SST estimates."
+      "Work with invoices, SST estimates, cash flow, break-even points, ratios, debit and credit, journal entries, depreciation, and trial balances."
   }
 ];
 
 const spotlightBenefits = [
-  "Check whether total debits equal total credits",
-  "Find the difference instantly",
-  "Learn what an unbalanced trial balance means"
+  "Create a simple invoice quickly",
+  "Add business and customer details",
+  "Add line items, subtotal, and total",
+  "Download the invoice as a PDF"
 ];
 
 function StatusBadge({
@@ -67,32 +86,33 @@ export default function HomePage() {
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               <p className="text-sm font-medium tracking-wide text-slate-500">
-                Accounting Tools
+                Invoice Generator
               </p>
               <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-                Free accounting tools for students, beginners, and small business owners
+                Free Invoice Generator and Accounting Tools for Small Businesses
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-stone-600">
-                Use simple calculators and beginner-friendly explanations to check accounting
-                basics like trial balances, debit and credit, financial ratios, and depreciation.
+                Create simple invoices with business and customer details, line items, totals,
+                and currency formatting for 10 supported currencies including MYR, then use
+                beginner-friendly accounting tools for everyday business checks.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                  href="/tools/trial-balance-calculator"
+                  href="/tools/invoice-generator"
                 >
-                  Try Trial Balance Calculator
+                  Create Free Invoice
                 </a>
                 <a
                   className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                   href="/tools"
                 >
-                  Explore Tools
+                  Explore Accounting Tools
                 </a>
               </div>
             </div>
 
-            <TrialBalancePreview />
+            <InvoicePreview />
           </div>
         </section>
 
@@ -105,7 +125,8 @@ export default function HomePage() {
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Start with the essentials, then add more calculators as the toolkit grows.
+              Start with invoices, then use tax and accounting calculators as your business
+              questions get more specific.
             </p>
           </div>
 
@@ -176,14 +197,15 @@ export default function HomePage() {
           <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-center">
             <div>
               <p className="text-sm font-medium tracking-wide text-slate-500">
-                Calculator spotlight
+                Tool spotlight
               </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Start with the Trial Balance Calculator
+                Start with the Invoice Generator
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
-                Enter account names and amounts, then see whether the debit and credit sides
-                agree. It is a simple first check before moving into deeper accounting review.
+                Build a clean invoice for a customer in a few minutes. Add business details,
+                customer details, line items, quantities, unit prices, and totals, then download
+                a PDF when the invoice is ready.
               </p>
               <ul className="mt-6 space-y-3">
                 {spotlightBenefits.map((benefit) => (
@@ -195,29 +217,30 @@ export default function HomePage() {
               </ul>
               <a
                 className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
-                href="/tools/trial-balance-calculator"
+                href="/tools/invoice-generator"
               >
-                Open Calculator
+                Create Free Invoice
               </a>
             </div>
 
             <div className="rounded-xl border border-stone-200 bg-stone-50 p-5">
-              <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                <span>Account</span>
-                <span>Debit</span>
-                <span>Credit</span>
+              <div className="grid grid-cols-[1.4fr_0.6fr_1fr] gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                <span>Description</span>
+                <span className="text-right">Qty</span>
+                <span className="text-right">Amount</span>
               </div>
               <div className="mt-4 space-y-3">
-                <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-2">
+                <div className="grid grid-cols-[1.4fr_0.6fr_1fr] gap-2">
                   <div className="h-10 rounded-xl bg-white ring-1 ring-stone-200" />
                   <div className="h-10 rounded-xl bg-white ring-1 ring-stone-200" />
                   <div className="h-10 rounded-xl bg-white ring-1 ring-stone-200" />
                 </div>
-                <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-2">
+                <div className="grid grid-cols-[1.4fr_0.6fr_1fr] gap-2">
                   <div className="h-10 rounded-xl bg-white ring-1 ring-stone-200" />
                   <div className="h-10 rounded-xl bg-white ring-1 ring-stone-200" />
                   <div className="h-10 rounded-xl bg-white ring-1 ring-stone-200" />
                 </div>
+                <div className="ml-auto mt-5 h-16 w-full max-w-xs rounded-xl bg-white ring-1 ring-stone-200" />
               </div>
             </div>
           </div>

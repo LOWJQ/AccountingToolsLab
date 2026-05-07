@@ -8,9 +8,9 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "Invoice Generator | Create a Simple Invoice",
+  title: "Free Invoice Generator | Download PDF Invoices",
   description:
-    "Use this free invoice generator to create a simple invoice with line items, subtotal, total, customer details, and business details.",
+    "Create a simple invoice with line items, business and customer details, optional SST or tax, PDF download, and 10 supported currencies including MYR.",
   path: "/tools/invoice-generator"
 });
 
@@ -23,7 +23,7 @@ const invoiceFaqs = [
   {
     question: "What should an invoice include?",
     answer:
-      "A simple invoice usually includes seller details, customer details, invoice number, dates, line items, subtotal, total, and notes."
+      "A simple invoice usually includes seller details, customer details, invoice number, dates, line items, subtotal, optional SST or tax, total, payment details, and notes."
   },
   {
     question: "Can I download the invoice as a PDF?",
@@ -33,7 +33,7 @@ const invoiceFaqs = [
   {
     question: "Does this invoice generator include tax?",
     answer:
-      "No. This simple invoice generator does not include tax, SST, VAT, or sales tax calculations."
+      "Yes. You can add an optional SST or custom tax rate for simple invoice math, but this tool does not provide accounting or tax advice."
   },
   {
     question: "Is an invoice the same as a receipt?",

@@ -1,50 +1,53 @@
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
-  title: "About AccountingToolsLab",
+  title: "About AccountingToolsLab | Free Invoice and Accounting Tools",
   description:
-    "Learn about AccountingToolsLab, a free accounting tools website for students, beginners, and small business owners.",
+    "Learn about AccountingToolsLab, a free invoice generator and accounting tools site for freelancers, small businesses, beginners, and students.",
   path: "/about"
 });
 
 const audiences = [
   {
-    title: "Accounting students",
-    description: "Practice core concepts and check simple accounting exercises while studying."
+    title: "Small business owners",
+    description:
+      "Create simple invoices and use lightweight tools to check basic business numbers."
+  },
+  {
+    title: "Freelancers",
+    description:
+      "Generate invoices, add customer details, and prepare simple totals without complicated software."
   },
   {
     title: "Business beginners",
-    description: "Understand the basics behind common accounting terms and calculations."
+    description:
+      "Understand invoices, SST, cash flow, break-even points, and common accounting terms."
   },
   {
-    title: "Small business owners",
-    description: "Use lightweight tools to review basic bookkeeping and accounting checks."
-  },
-  {
-    title: "Self-learners",
-    description: "Learn accounting step by step with clear explanations and practical examples."
+    title: "Accounting students",
+    description: "Practice concepts and check simple accounting exercises while studying."
   }
 ];
 
 const provides = [
-  "Simple calculators",
-  "Clear formulas",
-  "Worked examples",
-  "Common mistakes",
+  "Free invoice generator",
+  "PDF invoice download",
+  "SST and tax math",
+  "Business calculators",
   "Beginner-friendly explanations"
 ];
 
 const currentTools = [
-  "Trial Balance Calculator",
-  "Accounting Equation Calculator",
-  "Debit/Credit Checker",
-  "Financial Ratio Calculator",
-  "Depreciation Calculator",
-  "Break-even Calculator",
-  "Cash Flow Calculator",
   "Invoice Generator",
   "Malaysia SST Calculator",
-  "Journal Entry Checker"
+  "Cash Flow Calculator",
+  "Break-even Calculator",
+  "Financial Ratio Calculator",
+  "Depreciation Calculator",
+  "Trial Balance Calculator",
+  "Journal Entry Checker",
+  "Debit/Credit Checker",
+  "Accounting Equation Calculator"
 ];
 
 export default function AboutPage() {
@@ -56,12 +59,12 @@ export default function AboutPage() {
             About AccountingToolsLab
           </p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Accounting tools built for learning and checking the basics
+            Free invoice and accounting tools for small businesses
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            AccountingToolsLab provides simple calculators and beginner-friendly explanations to
-            help students, beginners, and small business owners understand core accounting
-            concepts.
+            AccountingToolsLab helps freelancers, small business owners, students, and beginners
+            create simple invoices, calculate SST, check cash flow, and understand basic
+            accounting concepts with free online tools.
           </p>
         </section>
 
@@ -72,8 +75,8 @@ export default function AboutPage() {
               Our mission
             </h2>
             <p className="mt-4 text-base leading-7 text-stone-600">
-              To make basic accounting easier to learn, check, and apply through simple,
-              accessible online tools.
+              Our mission is to make everyday accounting tasks easier with free tools for
+              invoices, SST, cash flow, break-even checks, and accounting basics.
             </p>
           </article>
 
@@ -102,14 +105,15 @@ export default function AboutPage() {
               Practical support for accounting basics
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              The site focuses on useful learning aids rather than complicated software features.
-              Each tool is intended to make a specific accounting check easier to understand.
+              The site focuses on useful business tools and learning aids rather than complicated
+              software features. Each tool is intended to make a specific invoice, tax, planning,
+              or accounting check easier to complete.
             </p>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {provides.map((item) => (
               <div
-                className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-sm font-semibold text-stone-700"
+                className="flex min-h-24 items-center justify-center rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-center text-sm font-semibold text-stone-700"
                 key={item}
               >
                 {item}
@@ -125,9 +129,9 @@ export default function AboutPage() {
               Current project status
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              AccountingToolsLab already includes multiple focused calculators for common
-              accounting checks, simple business planning, invoices, and Malaysia SST arithmetic.
-              New guides and refinements continue to be added over time.
+              AccountingToolsLab includes a free invoice generator, Malaysia SST calculator, cash
+              flow calculator, break-even calculator, and focused accounting learning tools. New
+              guide content and practical tool improvements continue to be added over time.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {currentTools.map((tool) => (
@@ -146,11 +150,12 @@ export default function AboutPage() {
               Educational note
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Educational use
+              Simple tools, not professional advice
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              The tools are designed for learning and basic checking. They should not replace
-              advice from a qualified accountant or professional financial adviser.
+              These tools are designed for simple business tasks, learning, and basic checking.
+              They do not replace advice from a qualified accountant, tax professional, or
+              financial adviser.
             </p>
           </article>
         </section>
@@ -160,24 +165,25 @@ export default function AboutPage() {
             <div className="max-w-2xl">
               <p className="text-sm font-medium tracking-wide text-slate-500">Start here</p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Start with the tools
+                Start with a free invoice
               </h2>
               <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Try the calculators or explore beginner-friendly guides.
+                Create a simple invoice first, or explore the full set of accounting tools and
+                guides.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools"
+                href="/tools/invoice-generator"
               >
-                Explore Tools
+                Create Free Invoice
               </a>
               <a
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/tools/trial-balance-calculator"
+                href="/tools"
               >
-                Try Trial Balance Calculator
+                Explore Tools
               </a>
             </div>
           </div>

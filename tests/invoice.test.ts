@@ -70,6 +70,124 @@ test("calculates total", () => {
   assert.equal(result.total, 450);
 });
 
+test("invoice without tax still calculates total as subtotal", () => {
+  const result = calculateInvoice([
+    {
+      description: "Design",
+      quantity: 2,
+      unitPrice: 150
+    }
+  ]);
+
+  assert.equal(result.subtotal, 300);
+  assert.equal(result.taxRate, 0);
+  assert.equal(result.taxAmount, 0);
+  assert.equal(result.total, 300);
+});
+
+test("calculates invoice with 6 percent tax", () => {
+  const result = calculateInvoice(
+    [
+      {
+        description: "Service",
+        quantity: 1,
+        unitPrice: 100
+      }
+    ],
+    { taxRate: 6 }
+  );
+
+  assert.equal(result.taxRate, 6);
+  assert.equal(result.taxAmount, 6);
+  assert.equal(result.total, 106);
+});
+
+test("calculates invoice with 8 percent tax", () => {
+  const result = calculateInvoice(
+    [
+      {
+        description: "Service",
+        quantity: 1,
+        unitPrice: 250
+      }
+    ],
+    { taxRate: 8 }
+  );
+
+  assert.equal(result.taxRate, 8);
+  assert.equal(result.taxAmount, 20);
+  assert.equal(result.total, 270);
+});
+
+test("calculates invoice with custom tax rate", () => {
+  const result = calculateInvoice(
+    [
+      {
+        description: "Service",
+        quantity: 3,
+        unitPrice: 99.99
+      }
+    ],
+    { taxRate: 7.5 }
+  );
+
+  assert.equal(result.subtotal, 299.97);
+  assert.equal(result.taxRate, 7.5);
+  assert.equal(result.taxAmount, 22.5);
+  assert.equal(result.total, 322.47);
+});
+
+test("tax rate 0 keeps tax amount at zero", () => {
+  const result = calculateInvoice(
+    [
+      {
+        description: "Service",
+        quantity: 1,
+        unitPrice: 100
+      }
+    ],
+    { taxRate: 0 }
+  );
+
+  assert.equal(result.taxRate, 0);
+  assert.equal(result.taxAmount, 0);
+  assert.equal(result.total, 100);
+});
+
+test("negative tax rate throws an error", () => {
+  assert.throws(
+    () =>
+      calculateInvoice(
+        [
+          {
+            description: "Service",
+            quantity: 1,
+            unitPrice: 100
+          }
+        ],
+        { taxRate: -1 }
+      ),
+    /Tax rate cannot be negative/
+  );
+});
+
+test("tax rate above 100 throws an error", () => {
+  assert.throws(
+    () =>
+      calculateInvoice(
+        [
+          {
+            description: "Service",
+            quantity: 1,
+            unitPrice: 100
+          }
+        ],
+        { taxRate: 101 }
+      ),
+    /Tax rate cannot be above 100/
+  );
+});
+
 test("handles decimals", () => {
   const result = calculateInvoice([
     {

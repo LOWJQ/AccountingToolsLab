@@ -1,45 +1,55 @@
 ﻿import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
+import { InvoiceMockPreview } from "@/components/tools/InvoiceMockPreview";
 
 export const metadata = createMetadata({
-  title: "Accounting Tools | AccountingToolsLab",
+  title: "Free Invoice Generator and Accounting Tools | AccountingToolsLab",
   description:
-    "Explore free accounting calculators and learning tools for students, beginners, and small business owners.",
+    "Create invoices, calculate SST, check cash flow, estimate break-even points, and use free accounting calculators for small businesses, freelancers, and learners.",
   path: "/tools"
 });
 
 const categories = [
   {
-    title: "Accounting Basics",
-    description: "Core concepts such as the accounting equation, debits, and credits."
+    title: "Main Business Tool",
+    description: "Start with the invoice generator for practical small business documents."
   },
   {
-    title: "Bookkeeping Checks",
-    description: "Practical tools for checking whether accounting records agree."
+    title: "Business Calculators",
+    description: "Estimate SST, review cash flow, calculate break-even points, and check ratios."
   },
   {
-    title: "Financial Analysis",
-    description: "Ratio and statement checks for understanding business performance."
-  },
-  {
-    title: "Business Planning",
-    description: "Simple planning tools for sales, costs, and break-even decisions."
-  },
-  {
-    title: "Business Documents",
-    description: "Simple document tools for invoices and basic business records."
-  },
-  {
-    title: "Malaysia Tax Tools",
-    description: "Simple estimation tools for Malaysian SST arithmetic and learning."
-  },
-  {
-    title: "Depreciation & Adjustments",
-    description: "Support for common adjusting entries and fixed asset calculations."
+    title: "Accounting Learning Tools",
+    description: "Practice trial balances, journal entries, debits, credits, and core concepts."
   }
 ];
 
 const availableTools = tools.filter((tool) => tool.status === "mvp");
+const invoiceTool = tools.find((tool) => tool.slug === "invoice-generator");
+
+const businessToolSlugs = [
+  "sst-calculator-malaysia",
+  "cash-flow-calculator",
+  "break-even-calculator",
+  "financial-ratio-calculator",
+  "depreciation-calculator"
+];
+
+const learningToolSlugs = [
+  "trial-balance-calculator",
+  "journal-entry-checker",
+  "debit-credit-checker",
+  "accounting-equation-calculator"
+];
+
+function getToolsBySlugOrder(slugs: string[]) {
+  return slugs
+    .map((slug) => tools.find((tool) => tool.slug === slug))
+    .filter((tool): tool is NonNullable<typeof tool> => Boolean(tool));
+}
+
+const businessTools = getToolsBySlugOrder(businessToolSlugs);
+const learningTools = getToolsBySlugOrder(learningToolSlugs);
 
 function StatusBadge({ status }: { status: "mvp" | "planned" }) {
   const isAvailable = status === "mvp";
@@ -57,6 +67,55 @@ function StatusBadge({ status }: { status: "mvp" | "planned" }) {
   );
 }
 
+function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
+  const isAvailable = tool.status === "mvp";
+  const content = (
+    <>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+            {tool.category}
+          </p>
+          <h3 className="mt-2 text-base font-semibold text-stone-950">{tool.name}</h3>
+        </div>
+        <StatusBadge status={tool.status} />
+      </div>
+      <p className="mt-4 text-sm leading-6 text-stone-600">{tool.description}</p>
+      {tool.bestFor ? (
+        <p className="mt-4 text-sm leading-6 text-stone-500">
+          <span className="font-semibold text-stone-700">Best for:</span> {tool.bestFor}
+        </p>
+      ) : null}
+      <div
+        className={`mt-6 inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold ${
+          isAvailable
+            ? "bg-slate-700 text-white"
+            : "border border-stone-200 bg-stone-50 text-stone-400"
+        }`}
+      >
+        {isAvailable ? "Open tool" : "Coming soon"}
+      </div>
+    </>
+  );
+
+  return isAvailable ? (
+    <a
+      className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+      href={tool.href}
+      key={tool.slug}
+    >
+      {content}
+    </a>
+  ) : (
+    <article
+      className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
+      key={tool.slug}
+    >
+      {content}
+    </article>
+  );
+}
+
 export default function ToolsPage() {
   return (
     <div className="bg-stone-50 text-stone-950">
@@ -64,15 +123,14 @@ export default function ToolsPage() {
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <div className="max-w-3xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">
-              Accounting Tools
+              Invoice and Accounting Tools
             </p>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-              Free accounting calculators and learning tools
+              Free Invoice Generator and Accounting Tools
             </h1>
             <p className="mt-5 text-base leading-7 text-stone-600">
-              Explore simple accounting tools built for students, beginners, and small business
-              owners. Use calculators for trial balances, debit and credit checks, ratios,
-              depreciation, invoices, SST estimates, journal entries, and more.
+              Create simple invoices, calculate SST, check cash flow, estimate break-even points,
+              and use beginner-friendly accounting calculators for small business and learning.
             </p>
             <div className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
               {availableTools.length} available tools
@@ -80,71 +138,74 @@ export default function ToolsPage() {
           </div>
         </section>
 
+        {invoiceTool ? (
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
+            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div>
+                <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                  Most Useful for Small Businesses
+                </span>
+                <h2 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+                  Invoice Generator
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
+                  Create simple invoices with business and customer details, line items,
+                  subtotal, optional SST / tax, total, and 10 supported currencies including MYR.
+                  Preview your invoice and download it as a PDF when it is ready.
+                </p>
+                <a
+                  className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  href="/tools/invoice-generator"
+                >
+                  Create Free Invoice
+                </a>
+              </div>
+              <InvoiceMockPreview />
+            </div>
+          </section>
+        ) : null}
+
         <section>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-medium tracking-wide text-slate-500">Directory</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Tool directory
+                Business calculators
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Available tools open directly and focus on one accounting task at a time.
+              After invoices, use these calculators to estimate tax, cash flow, break-even
+              points, performance, and depreciation.
             </p>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {tools.map((tool) => {
-              const isAvailable = tool.status === "mvp";
-              const content = (
-                <>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                        {tool.category}
-                      </p>
-                      <h3 className="mt-2 text-base font-semibold text-stone-950">
-                        {tool.name}
-                      </h3>
-                    </div>
-                    <StatusBadge status={tool.status} />
-                  </div>
-                  <p className="mt-4 text-sm leading-6 text-stone-600">{tool.description}</p>
-                  {tool.bestFor ? (
-                    <p className="mt-4 text-sm leading-6 text-stone-500">
-                      <span className="font-semibold text-stone-700">Best for:</span>{" "}
-                      {tool.bestFor}
-                    </p>
-                  ) : null}
-                  <div
-                    className={`mt-6 inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold ${
-                      isAvailable
-                        ? "bg-slate-700 text-white"
-                        : "border border-stone-200 bg-stone-50 text-stone-400"
-                    }`}
-                  >
-                    {isAvailable ? "Open tool" : "Coming soon"}
-                  </div>
-                </>
-              );
+            {businessTools.map((tool) => (
+              <ToolCard key={tool.slug} tool={tool} />
+            ))}
+          </div>
+        </section>
 
-              return isAvailable ? (
-                <a
-                  className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
-                  href={tool.href}
-                  key={tool.slug}
-                >
-                  {content}
-                </a>
-              ) : (
-                <article
-                  className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
-                  key={tool.slug}
-                >
-                  {content}
-                </article>
-              );
-            })}
+        <section>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-medium tracking-wide text-slate-500">
+                Accounting learning
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+                Beginner-friendly accounting tools
+              </h2>
+            </div>
+            <p className="max-w-xl text-sm leading-6 text-stone-600">
+              Keep learning with practical checks for trial balances, journals, debits, credits,
+              and the accounting equation.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {learningTools.map((tool) => (
+              <ToolCard key={tool.slug} tool={tool} />
+            ))}
           </div>
         </section>
 
@@ -155,7 +216,7 @@ export default function ToolsPage() {
               Accounting tool categories
             </h2>
           </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
               <article
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
@@ -174,24 +235,24 @@ export default function ToolsPage() {
               Recommended starting point
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              New to accounting? Start with the Trial Balance Calculator.
+              Need to bill a customer? Start with the Invoice Generator.
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use it to check whether total debits equal total credits and understand what an
-              unbalanced trial balance means.
+              It gives small businesses and freelancers a simple path from customer details and
+              line items to a clean downloadable PDF invoice.
             </p>
             <a
               className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
-              href="/tools/trial-balance-calculator"
+              href="/tools/invoice-generator"
             >
-              Open Trial Balance Calculator
+              Open Invoice Generator
             </a>
           </div>
         </section>
 
         <aside className="rounded-xl border border-stone-200 bg-white/80 p-5 text-sm leading-6 text-stone-600 shadow-sm">
-          More accounting learning resources may be added over time, but every listed available
-          tool can be opened and used today.
+          Accounting learning resources still matter here. Start with invoices for business tasks,
+          then use the calculators when you need tax, cash, planning, or bookkeeping checks.
         </aside>
       </main>
     </div>

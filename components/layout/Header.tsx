@@ -127,13 +127,6 @@ export function Header() {
             <CurrencySelector />
           </div>
 
-          <Link
-            className="inline-flex h-10 items-center justify-center rounded-full bg-slate-700 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-            href="/tools"
-          >
-            Start
-          </Link>
-
           <button
             aria-expanded={isMenuOpen}
             aria-label="Toggle navigation menu"
