@@ -12,6 +12,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: "AccountingToolsLab",
   description: "Free accounting tools and guides for learners and small businesses.",
+  alternates: {
+    canonical: `${siteConfig.url}/`
+  },
+  openGraph: {
+    title: "AccountingToolsLab",
+    description: "Free accounting tools and guides for learners and small businesses.",
+    url: `${siteConfig.url}/`,
+    siteName: siteConfig.name,
+    type: "website"
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },

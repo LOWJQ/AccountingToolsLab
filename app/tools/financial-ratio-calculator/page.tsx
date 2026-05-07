@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { FinancialRatioCalculator } from "@/components/calculators/FinancialRatioCalculator";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Financial Ratio Calculator | Calculate Common Accounting Ratios",
   description:
-    "Use this free financial ratio calculator to calculate current ratio, debt-to-equity ratio, profit margins, and return on assets."
-};
+    "Use this free financial ratio calculator to calculate current ratio, debt-to-equity ratio, profit margins, and return on assets.",
+  path: "/tools/financial-ratio-calculator"
+});
 
 const financialRatioFaqs = [
   {

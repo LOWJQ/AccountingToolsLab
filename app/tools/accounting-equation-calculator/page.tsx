@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { AccountingEquationCalculator } from "@/components/calculators/AccountingEquationCalculator";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Accounting Equation Calculator | Assets, Liabilities and Equity",
   description:
-    "Use this free accounting equation calculator to solve for assets, liabilities, or equity using Assets = Liabilities + Equity."
-};
+    "Use this free accounting equation calculator to solve for assets, liabilities, or equity using Assets = Liabilities + Equity.",
+  path: "/tools/accounting-equation-calculator"
+});
 
 const accountingEquationFaqs = [
   {

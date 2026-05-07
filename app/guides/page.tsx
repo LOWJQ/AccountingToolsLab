@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import { guides } from "@/lib/data/guides";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Accounting Guides | AccountingToolsLab",
   description:
-    "Beginner-friendly accounting guides with clear explanations, formulas, examples, and links to practical tools."
-};
+    "Beginner-friendly accounting guides with clear explanations, formulas, examples, and links to practical tools.",
+  path: "/guides"
+});
 
 const learningPaths = [
   {

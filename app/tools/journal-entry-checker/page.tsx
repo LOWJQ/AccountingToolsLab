@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { JournalEntryChecker } from "@/components/calculators/JournalEntryChecker";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Journal Entry Checker | Check Debits and Credits",
   description:
-    "Use this free journal entry checker to total debits and credits, check whether a journal entry balances, and find the difference."
-};
+    "Use this free journal entry checker to total debits and credits, check whether a journal entry balances, and find the difference.",
+  path: "/tools/journal-entry-checker"
+});
 
 const journalEntryFaqs = [
   {

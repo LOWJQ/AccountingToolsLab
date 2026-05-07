@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import { TrialBalancePreview } from "@/components/home/TrialBalancePreview";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "AccountingToolsLab | Free Accounting Tools",
   description:
-    "Free accounting calculators and beginner-friendly explanations for students, beginners, and small business owners."
-};
+    "Free accounting calculators and beginner-friendly explanations for students, beginners, and small business owners.",
+  path: "/"
+});
 
 const featuredTools = [
   {

@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { InvoiceGenerator } from "@/components/calculators/InvoiceGenerator";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Invoice Generator | Create a Simple Invoice",
   description:
-    "Use this free invoice generator to create a simple invoice with line items, subtotal, total, customer details, and business details."
-};
+    "Use this free invoice generator to create a simple invoice with line items, subtotal, total, customer details, and business details.",
+  path: "/tools/invoice-generator"
+});
 
 const invoiceFaqs = [
   {

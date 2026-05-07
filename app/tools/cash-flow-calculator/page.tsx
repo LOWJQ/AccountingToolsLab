@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { CashFlowCalculator } from "@/components/calculators/CashFlowCalculator";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Cash Flow Calculator | Calculate Net Cash Flow",
   description:
-    "Use this free cash flow calculator to calculate net cash flow and ending cash balance from cash inflows, cash outflows, and beginning cash."
-};
+    "Use this free cash flow calculator to calculate net cash flow and ending cash balance from cash inflows, cash outflows, and beginning cash.",
+  path: "/tools/cash-flow-calculator"
+});
 
 const cashFlowFaqs = [
   {

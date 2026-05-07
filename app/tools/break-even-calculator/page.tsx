@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { BreakEvenCalculator } from "@/components/calculators/BreakEvenCalculator";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Break-even Calculator | Calculate Break-even Units and Sales",
   description:
-    "Use this free break-even calculator to calculate contribution margin, break-even units, and break-even sales from fixed costs, selling price, and variable cost."
-};
+    "Use this free break-even calculator to calculate contribution margin, break-even units, and break-even sales from fixed costs, selling price, and variable cost.",
+  path: "/tools/break-even-calculator"
+});
 
 const breakEvenFaqs = [
   {

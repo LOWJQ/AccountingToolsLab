@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import { DebitCreditChecker } from "@/components/calculators/DebitCreditChecker";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Debit/Credit Checker | Know Whether to Debit or Credit",
   description:
-    "Use this free debit and credit checker to find out whether to debit or credit an account based on the account type and whether it increases or decreases."
-};
+    "Use this free debit and credit checker to find out whether to debit or credit an account based on the account type and whether it increases or decreases.",
+  path: "/tools/debit-credit-checker"
+});
 
 const debitCreditFaqs = [
   {

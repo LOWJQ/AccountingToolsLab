@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
@@ -59,11 +59,14 @@ function formatAmount(value: number): string {
   });
 }
 
+function sanitizePdfFileName(value: string): string {
+  return value.trim().replace(/[^a-zA-Z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "invoice";
+}
+
 export function InvoiceGenerator() {
   const today = new Date().toISOString().slice(0, 10);
   const { currency, formatCurrency } = useCurrency();
   const invoiceGeneratorTopRef = useRef<HTMLDivElement>(null);
-  const invoicePreviewRef = useRef<HTMLDivElement>(null);
   const [businessName, setBusinessName] = useState("");
   const [businessContact, setBusinessContact] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
@@ -76,6 +79,9 @@ export function InvoiceGenerator() {
   const [notes, setNotes] = useState("");
   const [lineItems, setLineItems] = useState<EditableLineItem[]>([createLineItem(1)]);
   const [activeView, setActiveView] = useState<InvoiceView>("details");
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const confirmDownloadButtonRef = useRef<HTMLButtonElement>(null);
 
   const calculation = useMemo(() => {
     try {
@@ -111,6 +117,26 @@ export function InvoiceGenerator() {
       }),
     [lineItems]
   );
+
+  useEffect(() => {
+    if (!isDownloadModalOpen) {
+      return;
+    }
+
+    confirmDownloadButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !isGeneratingPdf) {
+        setIsDownloadModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isDownloadModalOpen, isGeneratingPdf]);
 
   function updateLineItem(id: string, key: keyof EditableLineItem, value: string) {
     setLineItems((currentItems) =>
@@ -152,43 +178,331 @@ export function InvoiceGenerator() {
     });
   }
 
-  function printInvoice() {
-    if (typeof window === "undefined" || !invoicePreviewRef.current) {
+  async function downloadInvoicePdf() {
+    if (typeof window === "undefined") {
       return;
     }
 
-    const invoicePrintArea = invoicePreviewRef.current;
-    const originalParent = invoicePrintArea.parentNode;
-    const placeholder = document.createComment("invoice-print-placeholder");
+    setIsGeneratingPdf(true);
 
-    if (!originalParent) {
-      return;
+    try {
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const pageMargin = 36;
+      const cardX = pageMargin;
+      const cardY = pageMargin;
+      const cardWidth = pageWidth - pageMargin * 2;
+      const cardBottom = pageHeight - pageMargin;
+      const innerPadding = 28;
+      const contentX = cardX + innerPadding;
+      const contentWidth = cardWidth - innerPadding * 2;
+      const contentRight = contentX + contentWidth;
+      const stone950: [number, number, number] = [28, 25, 23];
+      const stone600: [number, number, number] = [87, 83, 78];
+      const stone500: [number, number, number] = [120, 113, 108];
+      const stone200: [number, number, number] = [231, 229, 228];
+      const stone100: [number, number, number] = [245, 245, 244];
+      const white: [number, number, number] = [255, 255, 255];
+      let y = cardY + innerPadding;
+
+      const applyFill = (color: [number, number, number]) => {
+        doc.setFillColor(color[0], color[1], color[2]);
+      };
+
+      const applyStroke = (color: [number, number, number]) => {
+        doc.setDrawColor(color[0], color[1], color[2]);
+      };
+
+      const applyText = (color: [number, number, number]) => {
+        doc.setTextColor(color[0], color[1], color[2]);
+      };
+
+      const drawInvoiceCard = () => {
+        applyFill([250, 250, 249]);
+        doc.rect(0, 0, pageWidth, pageHeight, "F");
+        applyFill(white);
+        applyStroke(stone200);
+        doc.roundedRect(cardX, cardY, cardWidth, pageHeight - pageMargin * 2, 12, 12, "FD");
+      };
+
+      const addPageIfNeeded = (neededHeight: number) => {
+        if (y + neededHeight <= cardBottom - innerPadding) {
+          return;
+        }
+
+        doc.addPage();
+        drawInvoiceCard();
+        y = cardY + innerPadding;
+      };
+
+      const lineHeightFor = (fontSize: number) => fontSize + 4;
+
+      const textLines = (text: string, maxWidth: number) =>
+        doc.splitTextToSize(text, maxWidth) as string[];
+
+      const measureTextBlock = (text: string, maxWidth: number, fontSize = 10) =>
+        Math.max(textLines(text, maxWidth).length, 1) * lineHeightFor(fontSize);
+
+      const writeTextAt = (
+        text: string,
+        x: number,
+        top: number,
+        options: {
+          align?: "left" | "right";
+          bold?: boolean;
+          color?: [number, number, number];
+          fontSize?: number;
+          maxWidth?: number;
+        } = {}
+      ) => {
+        const fontSize = options.fontSize ?? 10;
+        const lines = textLines(text, options.maxWidth ?? contentWidth);
+
+        doc.setFont("helvetica", options.bold ? "bold" : "normal");
+        doc.setFontSize(fontSize);
+        applyText(options.color ?? stone950);
+        doc.text(lines, x, top, { align: options.align ?? "left" });
+        return lines.length * lineHeightFor(fontSize);
+      };
+
+      const writeText = (
+        text: string,
+        x: number,
+        options: {
+          bold?: boolean;
+          color?: [number, number, number];
+          fontSize?: number;
+          lineGap?: number;
+          maxWidth?: number;
+        } = {}
+      ) => {
+        const fontSize = options.fontSize ?? 10;
+        const lineGap = options.lineGap ?? fontSize + 4;
+        const lines = textLines(text, options.maxWidth ?? contentWidth);
+
+        addPageIfNeeded(lines.length * lineGap);
+        doc.setFont("helvetica", options.bold ? "bold" : "normal");
+        doc.setFontSize(fontSize);
+        applyText(options.color ?? stone950);
+        doc.text(lines, x, y);
+        y += lines.length * lineGap;
+      };
+
+      const drawDivider = (top = y) => {
+        applyStroke(stone200);
+        doc.line(contentX, top, contentRight, top);
+      };
+
+      doc.setProperties({
+        title: `Invoice ${invoiceNumber || "Preview"}`,
+        subject: "Invoice",
+        creator: "AccountingToolsLab"
+      });
+
+      drawInvoiceCard();
+
+      const columnGap = 32;
+      const columnWidth = (contentWidth - columnGap) / 2;
+      const headerTop = y;
+
+      let leftY = headerTop;
+      leftY += writeTextAt("Invoice from", contentX, leftY, {
+        bold: true,
+        color: stone500,
+        fontSize: 9,
+        maxWidth: columnWidth
+      });
+      leftY += 6;
+      leftY += writeTextAt(businessName || "Business name", contentX, leftY, {
+        bold: true,
+        fontSize: 16,
+        maxWidth: columnWidth
+      });
+      if (businessContact) {
+        leftY += 4;
+        leftY += writeTextAt(businessContact, contentX, leftY, {
+          color: stone600,
+          maxWidth: columnWidth
+        });
+      }
+      if (businessAddress) {
+        leftY += 2;
+        leftY += writeTextAt(businessAddress, contentX, leftY, {
+          color: stone600,
+          maxWidth: columnWidth
+        });
+      }
+
+      let rightY = headerTop;
+      rightY += writeTextAt("Invoice", contentRight, rightY, {
+        align: "right",
+        bold: true,
+        fontSize: 22,
+        maxWidth: columnWidth
+      });
+      rightY += 7;
+      rightY += writeTextAt(`#${invoiceNumber || "Invoice number"}`, contentRight, rightY, {
+        align: "right",
+        color: stone600,
+        maxWidth: columnWidth
+      });
+      rightY += 3;
+      rightY += writeTextAt(`Date: ${invoiceDate || "Invoice date"}`, contentRight, rightY, {
+        align: "right",
+        color: stone600,
+        maxWidth: columnWidth
+      });
+      if (dueDate) {
+        rightY += 3;
+        rightY += writeTextAt(`Due: ${dueDate}`, contentRight, rightY, {
+          align: "right",
+          color: stone600,
+          maxWidth: columnWidth
+        });
+      }
+
+      y = Math.max(leftY, rightY) + 22;
+      drawDivider();
+      y += 26;
+
+      const billToHeight =
+        12 +
+        6 +
+        measureTextBlock(customerName || "Customer name", contentWidth, 13) +
+        (customerContact ? 4 + measureTextBlock(customerContact, contentWidth) : 0) +
+        (customerAddress ? 2 + measureTextBlock(customerAddress, contentWidth) : 0);
+
+      addPageIfNeeded(billToHeight + 28);
+      writeText("Bill to", contentX, {
+        bold: true,
+        color: stone500,
+        fontSize: 9,
+        lineGap: 12,
+        maxWidth: contentWidth
+      });
+      y += 6;
+      writeText(customerName || "Customer name", contentX, {
+        bold: true,
+        fontSize: 13,
+        lineGap: 17,
+        maxWidth: contentWidth
+      });
+      if (customerContact) {
+        y += 4;
+        writeText(customerContact, contentX, { color: stone600, maxWidth: contentWidth });
+      }
+      if (customerAddress) {
+        y += 2;
+        writeText(customerAddress, contentX, { color: stone600, maxWidth: contentWidth });
+      }
+      y += 20;
+      drawDivider();
+      y += 28;
+
+      const tableX = contentX;
+      const tableWidth = contentWidth;
+      const descriptionWidth = 260;
+      const qtyWidth = 52;
+      const unitWidth = 82;
+      const qtyRight = tableX + descriptionWidth + qtyWidth - 14;
+      const unitRight = tableX + descriptionWidth + qtyWidth + unitWidth - 14;
+      const totalRight = tableX + tableWidth - 16;
+      const headerHeight = 30;
+
+      const drawTableHeader = () => {
+        addPageIfNeeded(headerHeight + 22);
+        applyFill(stone100);
+        applyStroke(stone200);
+        doc.roundedRect(tableX, y, tableWidth, headerHeight, 8, 8, "FD");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.5);
+        applyText(stone500);
+        doc.text("Description", tableX + 14, y + 19);
+        doc.text("Qty", qtyRight, y + 19, { align: "right" });
+        doc.text("Unit Price", unitRight, y + 19, { align: "right" });
+        doc.text("Line Total", totalRight, y + 19, { align: "right" });
+        y += headerHeight;
+      };
+
+      drawTableHeader();
+
+      previewItems.forEach((item, index) => {
+        const descriptionLines = textLines(item.description, descriptionWidth - 24);
+        const rowHeight = Math.max(descriptionLines.length * 14 + 18, 40);
+
+        if (y + rowHeight > cardBottom - innerPadding) {
+          doc.addPage();
+          drawInvoiceCard();
+          y = cardY + innerPadding;
+          drawTableHeader();
+        }
+
+        applyFill(white);
+        applyStroke(stone200);
+        doc.rect(tableX, y, tableWidth, rowHeight, "S");
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        applyText(stone950);
+        doc.text(descriptionLines, tableX + 14, y + 18);
+        applyText(stone600);
+        doc.text(formatAmount(item.quantity), qtyRight, y + 18, { align: "right" });
+        doc.text(formatCurrency(item.unitPrice), unitRight, y + 18, { align: "right" });
+        doc.setFont("helvetica", "bold");
+        applyText(stone950);
+        doc.text(formatCurrency(item.lineTotal), totalRight, y + 18, { align: "right" });
+        y += rowHeight;
+
+        if (index === previewItems.length - 1) {
+          y += 24;
+        }
+      });
+
+      const totalsWidth = 220;
+      const totalsX = contentRight - totalsWidth;
+      addPageIfNeeded(86);
+      applyFill(stone100);
+      applyStroke(stone200);
+      doc.roundedRect(totalsX, y, totalsWidth, 76, 10, 10, "FD");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      applyText(stone600);
+      doc.setFont("helvetica", "normal");
+      doc.text("Subtotal", totalsX + 16, y + 24);
+      doc.setFont("helvetica", "bold");
+      applyText(stone950);
+      doc.text(formatCurrency(subtotal), totalsX + totalsWidth - 16, y + 24, { align: "right" });
+      applyStroke(stone200);
+      doc.line(totalsX + 16, y + 40, totalsX + totalsWidth - 16, y + 40);
+      doc.setFontSize(12);
+      doc.text("Total", totalsX + 16, y + 60);
+      doc.text(formatCurrency(total), totalsX + totalsWidth - 16, y + 60, { align: "right" });
+      y += 100;
+
+      if (notes) {
+        const notesHeight = measureTextBlock(notes, contentWidth - 32) + 46;
+        addPageIfNeeded(notesHeight);
+        applyFill(stone100);
+        applyStroke(stone200);
+        doc.roundedRect(contentX, y, contentWidth, notesHeight, 10, 10, "FD");
+        writeTextAt("Notes", contentX + 16, y + 22, {
+          bold: true,
+          color: stone500,
+          fontSize: 9,
+          maxWidth: contentWidth - 32
+        });
+        writeTextAt(notes, contentX + 16, y + 42, {
+          color: stone600,
+          maxWidth: contentWidth - 32
+        });
+      }
+
+      doc.save(`invoice-${sanitizePdfFileName(invoiceNumber || "preview")}.pdf`);
+      setIsDownloadModalOpen(false);
+    } finally {
+      setIsGeneratingPdf(false);
     }
-
-    originalParent.insertBefore(placeholder, invoicePrintArea);
-    document.body.appendChild(invoicePrintArea);
-    document.body.classList.add("printing-invoice");
-
-    let cleanupTimeout: number | undefined;
-
-    const cleanup = () => {
-      document.body.classList.remove("printing-invoice");
-
-      if (placeholder.parentNode) {
-        placeholder.parentNode.insertBefore(invoicePrintArea, placeholder);
-        placeholder.remove();
-      }
-
-      window.removeEventListener("afterprint", cleanup);
-
-      if (cleanupTimeout) {
-        window.clearTimeout(cleanupTimeout);
-      }
-    };
-
-    window.addEventListener("afterprint", cleanup);
-    window.print();
-    cleanupTimeout = window.setTimeout(cleanup, 3000);
   }
 
   const previewItems =
@@ -463,7 +777,7 @@ export function InvoiceGenerator() {
             <div className="grid min-w-0 gap-4">
               <div className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-stone-600">
-                  Review your invoice before printing. The preview updates from the details you
+                  Review your invoice before downloading. The preview updates from the details you
                   entered.
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row">
@@ -476,10 +790,10 @@ export function InvoiceGenerator() {
                   </button>
                   <button
                     className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                    onClick={printInvoice}
+                    onClick={() => setIsDownloadModalOpen(true)}
                     type="button"
                   >
-                    Print invoice
+                    Download invoice PDF
                   </button>
                 </div>
               </div>
@@ -488,7 +802,6 @@ export function InvoiceGenerator() {
             <div
               className="invoice-print-area min-w-0 rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6"
               id="invoice-print-area"
-              ref={invoicePreviewRef}
             >
               <div className="invoice-print-header flex flex-col gap-6 border-b border-stone-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -704,6 +1017,55 @@ export function InvoiceGenerator() {
           </div>
         </div>
       </Card>
+
+      {isDownloadModalOpen ? (
+        <div
+          aria-labelledby="download-invoice-pdf-title"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/35 px-4 py-6 backdrop-blur-sm"
+          onClick={() => {
+            if (!isGeneratingPdf) {
+              setIsDownloadModalOpen(false);
+            }
+          }}
+          role="dialog"
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-5 shadow-2xl sm:p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="text-sm font-medium tracking-wide text-slate-500">Invoice PDF</p>
+            <h2
+              className="mt-2 text-xl font-semibold tracking-tight text-stone-950"
+              id="download-invoice-pdf-title"
+            >
+              Download invoice PDF?
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-stone-600">
+              Your invoice will be generated as a PDF file using the details in the preview.
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isGeneratingPdf}
+                onClick={() => setIsDownloadModalOpen(false)}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-80"
+                disabled={isGeneratingPdf}
+                onClick={downloadInvoicePdf}
+                ref={confirmDownloadButtonRef}
+                type="button"
+              >
+                {isGeneratingPdf ? "Generating..." : "Download PDF"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

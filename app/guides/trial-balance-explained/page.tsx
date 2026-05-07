@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Trial Balance Explained | AccountingToolsLab",
   description:
-    "Learn what a trial balance is, why total debits and total credits should match, and what an unbalanced trial balance means."
-};
+    "Learn what a trial balance is, why total debits and total credits should match, and what an unbalanced trial balance means.",
+  path: "/guides/trial-balance-explained"
+});
 
 const commonMistakes = [
   "Entering an amount on the wrong side",

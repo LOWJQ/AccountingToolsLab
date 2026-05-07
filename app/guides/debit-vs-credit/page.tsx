@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Debit vs Credit | Coming Soon",
+  alternates: {
+    canonical: "/guides/debit-vs-credit"
+  },
   robots: {
     index: false,
     follow: false

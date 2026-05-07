@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { createMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createMetadata({
   title: "Terms of Use | AccountingToolsLab",
   description:
-    "Read the starter Terms of Use for AccountingToolsLab's free accounting tools and educational content."
-};
+    "Read the starter Terms of Use for AccountingToolsLab's free accounting tools and educational content.",
+  path: "/terms"
+});
 
 const termsSections = [
   {

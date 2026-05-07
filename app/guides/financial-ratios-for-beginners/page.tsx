@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Financial Ratios for Beginners | Coming Soon",
+  alternates: {
+    canonical: "/guides/financial-ratios-for-beginners"
+  },
   robots: {
     index: false,
     follow: false
