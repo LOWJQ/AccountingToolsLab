@@ -26,9 +26,9 @@ const invoiceFaqs = [
       "A simple invoice usually includes seller details, customer details, invoice number, dates, line items, subtotal, total, and notes."
   },
   {
-    question: "Can I print the invoice?",
+    question: "Can I download the invoice as a PDF?",
     answer:
-      "Yes. Use the print button to open your browser's print dialog for the invoice page."
+      "Yes. Use the Download PDF action to generate a simple invoice PDF from the preview."
   },
   {
     question: "Does this invoice generator include tax?",
@@ -66,6 +66,29 @@ export default function InvoiceGeneratorPage() {
       />
       <FAQJsonLd faqs={invoiceFaqs} />
       <InvoiceGenerator />
+      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          Learn what to include on a simple invoice
+        </h2>
+        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+          If you want the field-by-field explanation, read{" "}
+          <a
+            className="font-semibold text-slate-700 hover:text-slate-900"
+            href="/guides/how-to-create-a-simple-invoice"
+          >
+            how to create a simple invoice
+          </a>{" "}
+          before sending an invoice to a customer. For Malaysia SST arithmetic, review{" "}
+          <a
+            className="font-semibold text-slate-700 hover:text-slate-900"
+            href="/guides/sst-calculator-malaysia-add-remove-sst"
+          >
+            how to add or remove SST in Malaysia
+          </a>
+          .
+        </p>
+      </section>
       <FAQSection faqs={invoiceFaqs} title="Invoice Generator FAQs" />
     </ToolPageLayout>
   );

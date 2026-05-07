@@ -66,6 +66,29 @@ export default function SstCalculatorMalaysiaPage() {
       />
       <FAQJsonLd faqs={sstFaqs} />
       <SstCalculatorMalaysia />
+      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          Using SST arithmetic on invoices
+        </h2>
+        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+          If you are checking SST arithmetic, read{" "}
+          <a
+            className="font-semibold text-slate-700 hover:text-slate-900"
+            href="/guides/sst-calculator-malaysia-add-remove-sst"
+          >
+            how to add or remove SST in Malaysia
+          </a>
+          . If you are preparing an invoice, review{" "}
+          <a
+            className="font-semibold text-slate-700 hover:text-slate-900"
+            href="/guides/how-to-create-a-simple-invoice"
+          >
+            how to create a simple invoice
+          </a>{" "}
+          and check official guidance or a qualified professional before deciding tax treatment.
+        </p>
+      </section>
       <FAQSection faqs={sstFaqs} title="SST Calculator Malaysia FAQs" />
     </ToolPageLayout>
   );

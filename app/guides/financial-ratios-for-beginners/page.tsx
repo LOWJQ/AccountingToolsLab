@@ -346,6 +346,11 @@ export default function FinancialRatiosForBeginnersGuidePage() {
               {[
                 ["Financial Ratio Calculator", "/tools/financial-ratio-calculator"],
                 ["Cash Flow Calculator", "/tools/cash-flow-calculator"],
+                ["Cash Flow vs Profit", "/guides/cash-flow-vs-profit"],
+                [
+                  "Straight-Line Depreciation Explained",
+                  "/guides/straight-line-depreciation-explained"
+                ],
                 ["Break-even Calculator", "/tools/break-even-calculator"],
                 ["Accounting Equation Calculator", "/tools/accounting-equation-calculator"],
                 ["Trial Balance Explained", "/guides/trial-balance-explained"]

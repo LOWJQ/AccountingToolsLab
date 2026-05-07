@@ -18,6 +18,11 @@ const learningPaths = [
         status: "Available"
       },
       {
+        label: "Journal Entries for Beginners",
+        href: "/guides/journal-entries-for-beginners",
+        status: "Available"
+      },
+      {
         label: "Debit/Credit Checker",
         href: "/tools/debit-credit-checker",
         status: "Available"
@@ -48,6 +53,11 @@ const learningPaths = [
         status: "Available"
       },
       {
+        label: "Why Trial Balance Is Not Balancing",
+        href: "/guides/why-trial-balance-not-balancing",
+        status: "Available"
+      },
+      {
         label: "Trial Balance Calculator",
         href: "/tools/trial-balance-calculator",
         status: "Available"
@@ -75,6 +85,16 @@ const learningPaths = [
     title: "Business Planning",
     steps: [
       {
+        label: "Break-even Point Explained",
+        href: "/guides/break-even-point-explained",
+        status: "Available"
+      },
+      {
+        label: "Cash Flow vs Profit",
+        href: "/guides/cash-flow-vs-profit",
+        status: "Available"
+      },
+      {
         label: "Cash Flow Calculator",
         href: "/tools/cash-flow-calculator",
         status: "Available"
@@ -91,6 +111,11 @@ const learningPaths = [
     title: "Business Documents",
     steps: [
       {
+        label: "How to Create a Simple Invoice",
+        href: "/guides/how-to-create-a-simple-invoice",
+        status: "Available"
+      },
+      {
         label: "Invoice Generator",
         href: "/tools/invoice-generator",
         status: "Available"
@@ -100,7 +125,7 @@ const learningPaths = [
         href: "/tools/cash-flow-calculator",
         status: "Available"
       },
-      { label: "Future Invoice Basics Guide", status: "Coming soon" }
+      { label: "Future Payment Terms Guide", status: "Coming soon" }
     ]
   },
   {
@@ -112,16 +137,25 @@ const learningPaths = [
         status: "Available"
       },
       {
+        label: "SST Calculator Malaysia: Add or Remove SST",
+        href: "/guides/sst-calculator-malaysia-add-remove-sst",
+        status: "Available"
+      },
+      {
         label: "Invoice Generator",
         href: "/tools/invoice-generator",
         status: "Available"
-      },
-      { label: "Future SST Basics Guide", status: "Coming soon" }
+      }
     ]
   },
   {
     title: "Depreciation & Adjustments",
     steps: [
+      {
+        label: "Straight-Line Depreciation Explained",
+        href: "/guides/straight-line-depreciation-explained",
+        status: "Available"
+      },
       {
         label: "Depreciation Calculator",
         href: "/tools/depreciation-calculator",

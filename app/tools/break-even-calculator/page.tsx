@@ -66,6 +66,22 @@ export default function BreakEvenCalculatorPage() {
       />
       <FAQJsonLd faqs={breakEvenFaqs} />
       <BreakEvenCalculator />
+      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          Learn the formula behind the result
+        </h2>
+        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+          If you want the full beginner explanation, read{" "}
+          <a
+            className="font-semibold text-slate-700 hover:text-slate-900"
+            href="/guides/break-even-point-explained"
+          >
+            break-even point explained
+          </a>{" "}
+          to see the formula, contribution margin, units, sales, and common mistakes.
+        </p>
+      </section>
       <FAQSection faqs={breakEvenFaqs} title="Break-even Calculator FAQs" />
     </ToolPageLayout>
   );

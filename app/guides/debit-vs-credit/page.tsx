@@ -278,6 +278,7 @@ export default function DebitVsCreditGuidePage() {
               {[
                 ["Debit/Credit Checker", "/tools/debit-credit-checker"],
                 ["Journal Entry Checker", "/tools/journal-entry-checker"],
+                ["Journal Entries for Beginners", "/guides/journal-entries-for-beginners"],
                 ["Accounting Equation Calculator", "/tools/accounting-equation-calculator"],
                 ["Trial Balance Calculator", "/tools/trial-balance-calculator"],
                 ["Trial Balance Explained", "/guides/trial-balance-explained"]

@@ -325,6 +325,16 @@ export default function TrialBalanceExplainedGuidePage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
+              For a focused troubleshooting walkthrough, read{" "}
+              <a
+                className="font-semibold text-slate-700 hover:text-slate-900"
+                href="/guides/why-trial-balance-not-balancing"
+              >
+                why your trial balance is not balancing
+              </a>
+              .
+            </p>
           </article>
         </section>
 
@@ -390,6 +400,7 @@ export default function TrialBalanceExplainedGuidePage() {
               {[
                 ["Trial Balance Calculator", "/tools/trial-balance-calculator"],
                 ["Journal Entry Checker", "/tools/journal-entry-checker"],
+                ["Basic Journal Entries", "/guides/journal-entries-for-beginners"],
                 ["Debit/Credit Checker", "/tools/debit-credit-checker"],
                 ["Accounting Equation Calculator", "/tools/accounting-equation-calculator"],
                 ["Debit vs Credit Guide", "/guides/debit-vs-credit"]
