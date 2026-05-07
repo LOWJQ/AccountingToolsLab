@@ -20,6 +20,7 @@ const privacySections = [
     title: "Information you provide",
     content: [
       "If you contact the site by email, AccountingToolsLab may receive the email address, subject, and message content you provide.",
+      "If you submit the contact form, AccountingToolsLab may receive the name, email address, topic, subject, message, page/tool URL, and basic technical information needed to process the message.",
       "Calculator inputs are processed in the browser where applicable to show results. Do not enter sensitive personal, financial, or confidential business information into calculators."
     ]
   },

@@ -37,14 +37,12 @@ Currently available:
 
 ## Not Implemented Yet
 
-- Backend APIs
 - Database
 - Login or authentication
 - Payments
 - Ads
 - AI features
 - Dashboard features
-- Contact form submission
 
 ## Tech Stack
 
@@ -98,6 +96,18 @@ The canonical production URL is configured in `lib/seo/site.ts`:
 ```text
 https://www.accountingtoolslab.com
 ```
+
+Contact form email delivery uses Resend through the App Router API route at
+`/api/contact`. Configure these server-side environment variables:
+
+```text
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=accttoolslab@gmail.com
+CONTACT_FROM_EMAIL=AccountingToolsLab <onboarding@resend.dev>
+```
+
+Do not prefix `RESEND_API_KEY` with `NEXT_PUBLIC_`. For production,
+`CONTACT_FROM_EMAIL` should be a verified sender or domain in Resend.
 
 ## Development
 

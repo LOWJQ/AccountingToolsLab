@@ -1,3 +1,4 @@
+import { ContactForm } from "@/components/contact/ContactForm";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -43,6 +44,27 @@ export default function ContactPage() {
             Have feedback, found an issue, or want to suggest a new accounting tool? You can
             reach out and help improve AccountingToolsLab.
           </p>
+        </section>
+
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium tracking-wide text-slate-500">Send a message</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+              Send feedback, report an issue, or ask a question
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+              Use the form below for feedback, issue reports, tool suggestions, or general
+              questions. You can still email directly at{" "}
+              <a
+                className="font-semibold text-slate-700 hover:text-slate-900"
+                href={`mailto:${contactEmail}`}
+              >
+                {contactEmail}
+              </a>
+              .
+            </p>
+          </div>
+          <ContactForm />
         </section>
 
         <section>
