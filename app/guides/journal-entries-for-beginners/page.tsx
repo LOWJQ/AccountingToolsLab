@@ -125,9 +125,19 @@ const toolLinks = [
     description: "Use it to check whether debit and credit totals match."
   },
   {
+    title: "Debit vs Credit",
+    href: "/guides/debit-vs-credit",
+    description: "Review the account rules before choosing which side to use."
+  },
+  {
     title: "Debit/Credit Checker",
     href: "/tools/debit-credit-checker",
     description: "Use it to check whether an account should be debited or credited."
+  },
+  {
+    title: "Why Trial Balance Does Not Balance",
+    href: "/guides/why-trial-balance-not-balancing",
+    description: "Learn what to check if posted entries lead to unbalanced totals."
   },
   {
     title: "Trial Balance Calculator",
@@ -516,9 +526,9 @@ export default function JournalEntriesForBeginnersPage() {
         <section>
           <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Tools that can help you check journal entries
+            Practice journal entries with related tools
           </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
               <a
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"

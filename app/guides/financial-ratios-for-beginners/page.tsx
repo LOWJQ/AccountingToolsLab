@@ -351,9 +351,8 @@ export default function FinancialRatiosForBeginnersGuidePage() {
                   "Straight-Line Depreciation Explained",
                   "/guides/straight-line-depreciation-explained"
                 ],
-                ["Break-even Calculator", "/tools/break-even-calculator"],
-                ["Accounting Equation Calculator", "/tools/accounting-equation-calculator"],
-                ["Trial Balance Explained", "/guides/trial-balance-explained"]
+                ["Break-even Point Explained", "/guides/break-even-point-explained"],
+                ["Break-even Calculator", "/tools/break-even-calculator"]
               ].map(([label, href]) => (
                 <a
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"

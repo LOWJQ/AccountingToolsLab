@@ -59,19 +59,24 @@ const toolLinks = [
     description: "Use it to estimate break-even units and sales."
   },
   {
+    title: "Cash Flow vs Profit",
+    href: "/guides/cash-flow-vs-profit",
+    description: "Learn how break-even, profit, and cash movement answer different questions."
+  },
+  {
     title: "Cash Flow Calculator",
     href: "/tools/cash-flow-calculator",
     description: "Use it to calculate net cash flow and ending cash balance."
   },
   {
+    title: "Financial Ratios for Beginners",
+    href: "/guides/financial-ratios-for-beginners",
+    description: "Review basic performance and position ratios after break-even analysis."
+  },
+  {
     title: "Financial Ratio Calculator",
     href: "/tools/financial-ratio-calculator",
     description: "Use it to review liquidity and profitability ratios."
-  },
-  {
-    title: "Invoice Generator",
-    href: "/tools/invoice-generator",
-    description: "Use it to prepare a simple invoice preview."
   }
 ];
 
@@ -437,9 +442,9 @@ export default function BreakEvenPointExplainedPage() {
         <section>
           <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Tools that can help with business planning
+            Related break-even and planning tools
           </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
               <a
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"

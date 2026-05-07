@@ -4,6 +4,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { RelatedLinks } from "@/components/ui/RelatedLinks";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -66,6 +67,31 @@ export default function DebitCreditCheckerPage() {
       />
       <FAQJsonLd faqs={debitCreditFaqs} />
       <DebitCreditChecker />
+      <RelatedLinks
+        title="Learn debit and credit rules"
+        links={[
+          {
+            title: "Debit vs Credit",
+            href: "/guides/debit-vs-credit",
+            description: "Learn the beginner rules for which accounts increase with debits or credits."
+          },
+          {
+            title: "Journal Entries for Beginners",
+            href: "/guides/journal-entries-for-beginners",
+            description: "See how debit and credit rules turn into balanced journal entries."
+          },
+          {
+            title: "Journal Entry Checker",
+            href: "/tools/journal-entry-checker",
+            description: "Check whether debit and credit amounts balance in a full journal entry."
+          },
+          {
+            title: "Accounting Equation Calculator",
+            href: "/tools/accounting-equation-calculator",
+            description: "Review how assets, liabilities, and equity connect to account direction."
+          }
+        ]}
+      />
       <FAQSection faqs={debitCreditFaqs} title="Debit/Credit Checker FAQs" />
     </ToolPageLayout>
   );

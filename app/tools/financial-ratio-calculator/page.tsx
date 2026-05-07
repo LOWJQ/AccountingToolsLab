@@ -4,6 +4,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { RelatedLinks } from "@/components/ui/RelatedLinks";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -66,6 +67,31 @@ export default function FinancialRatioCalculatorPage() {
       />
       <FAQJsonLd faqs={financialRatioFaqs} />
       <FinancialRatioCalculator />
+      <RelatedLinks
+        title="Learn financial ratio basics"
+        links={[
+          {
+            title: "Financial Ratios for Beginners",
+            href: "/guides/financial-ratios-for-beginners",
+            description: "Learn common ratio formulas, examples, and what the results can show."
+          },
+          {
+            title: "Cash Flow vs Profit",
+            href: "/guides/cash-flow-vs-profit",
+            description: "Understand why profitability and cash movement answer different questions."
+          },
+          {
+            title: "Break-even Point Explained",
+            href: "/guides/break-even-point-explained",
+            description: "Connect costs, sales, contribution margin, and break-even targets."
+          },
+          {
+            title: "Straight-Line Depreciation Explained",
+            href: "/guides/straight-line-depreciation-explained",
+            description: "Review depreciation expense and asset book value before using asset-based ratios."
+          }
+        ]}
+      />
       <FAQSection faqs={financialRatioFaqs} title="Financial Ratio Calculator FAQs" />
     </ToolPageLayout>
   );

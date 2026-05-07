@@ -4,6 +4,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { RelatedLinks } from "@/components/ui/RelatedLinks";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -66,6 +67,31 @@ export default function JournalEntryCheckerPage() {
       />
       <FAQJsonLd faqs={journalEntryFaqs} />
       <JournalEntryChecker />
+      <RelatedLinks
+        title="Learn how journal entries work"
+        links={[
+          {
+            title: "Journal Entries for Beginners",
+            href: "/guides/journal-entries-for-beginners",
+            description: "Learn journal entry format, debit and credit examples, and the balancing rule."
+          },
+          {
+            title: "Debit vs Credit",
+            href: "/guides/debit-vs-credit",
+            description: "Review which account types increase with debits and which increase with credits."
+          },
+          {
+            title: "Trial Balance Explained",
+            href: "/guides/trial-balance-explained",
+            description: "See how ledger balances from journal entries are checked in a trial balance."
+          },
+          {
+            title: "Why Trial Balance Does Not Balance",
+            href: "/guides/why-trial-balance-not-balancing",
+            description: "Learn what to check when debit and credit totals do not match later."
+          }
+        ]}
+      />
       <FAQSection faqs={journalEntryFaqs} title="Journal Entry Checker FAQs" />
     </ToolPageLayout>
   );

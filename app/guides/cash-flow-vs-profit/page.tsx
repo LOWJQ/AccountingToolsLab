@@ -71,9 +71,19 @@ const toolLinks = [
     description: "Use it to calculate net cash flow and ending cash balance."
   },
   {
+    title: "How to Create a Simple Invoice",
+    href: "/guides/how-to-create-a-simple-invoice",
+    description: "Learn why invoicing and collecting cash are not always the same moment."
+  },
+  {
     title: "Invoice Generator",
     href: "/tools/invoice-generator",
     description: "Use it to create a simple invoice before collecting payment."
+  },
+  {
+    title: "Break-even Point Explained",
+    href: "/guides/break-even-point-explained",
+    description: "Review how costs and sales targets connect to profit planning."
   },
   {
     title: "Break-even Calculator",
@@ -468,9 +478,9 @@ export default function CashFlowVsProfitGuidePage() {
         <section>
           <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Tools that can help you review cash and performance
+            Related cash and business planning resources
           </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
               <a
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"

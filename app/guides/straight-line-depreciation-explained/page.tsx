@@ -58,6 +58,11 @@ const toolLinks = [
     description: "Use it to estimate annual straight-line depreciation."
   },
   {
+    title: "Financial Ratios for Beginners",
+    href: "/guides/financial-ratios-for-beginners",
+    description: "Learn ratio basics that may use assets, profit, and depreciation context."
+  },
+  {
     title: "Accounting Equation Calculator",
     href: "/tools/accounting-equation-calculator",
     description: "Use it to review assets, liabilities, and equity."
@@ -71,6 +76,11 @@ const toolLinks = [
     title: "Journal Entry Checker",
     href: "/tools/journal-entry-checker",
     description: "Use it to check whether debit and credit lines balance."
+  },
+  {
+    title: "Journal Entries for Beginners",
+    href: "/guides/journal-entries-for-beginners",
+    description: "Review how depreciation-related entries fit into double-entry accounting."
   }
 ];
 
@@ -440,9 +450,9 @@ export default function StraightLineDepreciationExplainedPage() {
         <section>
           <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Tools that can help with depreciation and accounting basics
+            Related depreciation and accounting resources
           </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
               <a
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"

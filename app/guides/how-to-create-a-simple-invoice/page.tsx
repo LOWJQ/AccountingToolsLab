@@ -74,14 +74,29 @@ const toolLinks = [
     description: "Use it to create a simple invoice preview."
   },
   {
+    title: "SST Calculator Malaysia Guide",
+    href: "/guides/sst-calculator-malaysia-add-remove-sst",
+    description: "Learn how to add or remove SST in Malaysia for arithmetic checks."
+  },
+  {
     title: "Cash Flow Calculator",
     href: "/tools/cash-flow-calculator",
     description: "Use it to estimate net cash flow after payments are received or made."
   },
   {
+    title: "Cash Flow vs Profit",
+    href: "/guides/cash-flow-vs-profit",
+    description: "Understand why an invoice is not the same as cash received."
+  },
+  {
     title: "SST Calculator Malaysia",
     href: "/tools/sst-calculator-malaysia",
     description: "Use it to estimate SST arithmetic if you already know the correct rate and treatment."
+  },
+  {
+    title: "Break-even Point Explained",
+    href: "/guides/break-even-point-explained",
+    description: "Review how sales, prices, and costs connect to business planning."
   },
   {
     title: "Break-even Calculator",
@@ -486,9 +501,9 @@ export default function HowToCreateSimpleInvoicePage() {
         <section>
           <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Tools that can help after creating an invoice
+            Related invoice and small business tools
           </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
               <a
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"

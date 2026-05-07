@@ -399,9 +399,9 @@ export default function TrialBalanceExplainedGuidePage() {
             <div className="mt-6 grid gap-3">
               {[
                 ["Trial Balance Calculator", "/tools/trial-balance-calculator"],
+                ["Why Trial Balance Does Not Balance", "/guides/why-trial-balance-not-balancing"],
                 ["Journal Entry Checker", "/tools/journal-entry-checker"],
                 ["Basic Journal Entries", "/guides/journal-entries-for-beginners"],
-                ["Debit/Credit Checker", "/tools/debit-credit-checker"],
                 ["Accounting Equation Calculator", "/tools/accounting-equation-calculator"],
                 ["Debit vs Credit Guide", "/guides/debit-vs-credit"]
               ].map(([label, href]) => (

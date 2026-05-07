@@ -114,6 +114,21 @@ const toolLinks = [
     description: "Use it to total debits, credits, and the difference."
   },
   {
+    title: "Trial Balance Explained",
+    href: "/guides/trial-balance-explained",
+    description: "Review what a trial balance checks and what it cannot prove."
+  },
+  {
+    title: "Journal Entries for Beginners",
+    href: "/guides/journal-entries-for-beginners",
+    description: "Review how transactions become debit and credit lines."
+  },
+  {
+    title: "Debit vs Credit",
+    href: "/guides/debit-vs-credit",
+    description: "Check the normal balance rules behind wrong-side entries."
+  },
+  {
     title: "Journal Entry Checker",
     href: "/tools/journal-entry-checker",
     description: "Use it to check whether a single journal entry balances."
@@ -453,10 +468,10 @@ export default function WhyTrialBalanceNotBalancingPage() {
           <div>
             <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Tools that can help you check the problem
+              Tools and guides for fixing trial balance errors
             </h2>
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
               <a
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
