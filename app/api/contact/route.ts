@@ -78,17 +78,18 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.CONTACT_FROM_EMAIL;
+  const from =
+    process.env.CONTACT_FROM_EMAIL || "AccountingToolsLab <onboarding@resend.dev>";
   const to = process.env.CONTACT_TO_EMAIL || "accttoolslab@gmail.com";
 
-  if (!apiKey || !from) {
+  if (!apiKey) {
     return NextResponse.json(
       {
         ok: false,
         message:
           process.env.NODE_ENV === "development"
-            ? "Contact form email is not configured. Set RESEND_API_KEY and CONTACT_FROM_EMAIL."
-            : "Message could not be sent. Please try again later."
+            ? "Contact form email is not configured. Set RESEND_API_KEY."
+            : "Message could not be sent yet. Please email accttoolslab@gmail.com directly while the form is being configured."
       },
       { status: 500 }
     );
@@ -119,7 +120,11 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { ok: false, message: "Message could not be sent. Please try again later." },
+        {
+          ok: false,
+          message:
+            "Message could not be sent yet. Please email accttoolslab@gmail.com directly while the form is being configured."
+        },
         { status: 500 }
       );
     }
@@ -127,7 +132,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch {
     return NextResponse.json(
-      { ok: false, message: "Message could not be sent. Please try again later." },
+      {
+        ok: false,
+        message:
+          "Message could not be sent yet. Please email accttoolslab@gmail.com directly while the form is being configured."
+      },
       { status: 500 }
     );
   }

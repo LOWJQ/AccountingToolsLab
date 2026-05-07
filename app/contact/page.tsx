@@ -14,20 +14,20 @@ const contactOptions = [
   {
     title: "Feedback and suggestions",
     text: "Share ideas for new accounting calculators, page improvements, or beginner-friendly explanations.",
-    action: "Send feedback",
-    href: `mailto:${contactEmail}?subject=AccountingToolsLab%20Feedback`
+    action: "Use feedback form",
+    href: "#contact-form"
   },
   {
     title: "Report an issue",
     text: "Found a calculation problem, broken page, or confusing explanation? Report it so it can be reviewed.",
-    action: "Report issue",
-    href: `mailto:${contactEmail}?subject=AccountingToolsLab%20Issue%20Report`
+    action: "Use issue form",
+    href: "#contact-form"
   },
   {
     title: "General contact",
-    text: "For general questions about AccountingToolsLab.",
-    action: contactEmail,
-    href: `mailto:${contactEmail}`
+    text: `For general questions about AccountingToolsLab. Direct email: ${contactEmail}.`,
+    action: "Use contact form",
+    href: "#contact-form"
   }
 ];
 
@@ -46,7 +46,10 @@ export default function ContactPage() {
           </p>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+        <section
+          className="scroll-mt-24 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10"
+          id="contact-form"
+        >
           <div className="max-w-3xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">Send a message</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
@@ -54,14 +57,8 @@ export default function ContactPage() {
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
               Use the form below for feedback, issue reports, tool suggestions, or general
-              questions. You can still email directly at{" "}
-              <a
-                className="font-semibold text-slate-700 hover:text-slate-900"
-                href={`mailto:${contactEmail}`}
-              >
-                {contactEmail}
-              </a>
-              .
+              questions. If the form is unavailable, email{" "}
+              <span className="font-semibold text-slate-700">{contactEmail}</span> directly.
             </p>
           </div>
           <ContactForm />
@@ -111,10 +108,14 @@ export default function ContactPage() {
             </p>
             <a
               className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              href={`mailto:${contactEmail}?subject=AccountingToolsLab%20Issue%20Report`}
+              href="#contact-form"
             >
-              Email an issue report
+              Use issue report form
             </a>
+            <p className="mt-4 text-sm leading-6 text-stone-500">
+              Direct email fallback:{" "}
+              <span className="font-semibold text-stone-700">{contactEmail}</span>
+            </p>
           </article>
 
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
