@@ -11,11 +11,38 @@ export type InvoiceDiscount = {
   value: string;
 };
 
+export const DEFAULT_INVOICE_DISCOUNT: InvoiceDiscount = {
+  enabled: false,
+  type: "percentage",
+  value: "0"
+};
+
 export type InvoiceTax = {
   enabled: boolean;
   rate: string;
   label?: string;
 };
+
+export type InvoicePaymentDetails = {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  duitNowId: string;
+  paymentLink: string;
+  notes: string;
+};
+
+export const DEFAULT_INVOICE_PAYMENT_DETAILS: InvoicePaymentDetails = {
+  bankName: "",
+  accountName: "",
+  accountNumber: "",
+  duitNowId: "",
+  paymentLink: "",
+  notes: ""
+};
+
+export const DEFAULT_INVOICE_TERMS =
+  "Payment is due within 30 days of the invoice date.\nPlease include the invoice number as the payment reference.";
 
 export type InvoiceData = {
   businessName: string;
@@ -32,6 +59,7 @@ export type InvoiceData = {
   items: InvoiceLineItem[];
   discount: InvoiceDiscount;
   tax: InvoiceTax;
-  paymentDetails: string;
+  payment: InvoicePaymentDetails;
   notes: string;
+  terms: string;
 };

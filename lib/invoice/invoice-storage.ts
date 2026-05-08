@@ -1,8 +1,10 @@
-import type {
-  InvoiceData,
-  InvoiceDiscount,
-  InvoiceLineItem,
-  InvoiceTax
+import {
+  DEFAULT_INVOICE_DISCOUNT,
+  type InvoiceData,
+  type InvoiceDiscount,
+  type InvoiceLineItem,
+  type InvoicePaymentDetails,
+  type InvoiceTax
 } from "./invoice-types";
 
 export const ATL_INVOICE_DRAFT_KEY = "atl-invoice-draft";
@@ -54,7 +56,7 @@ function normalizeDiscount(value: unknown): InvoiceDiscount {
   return {
     enabled: discount.enabled === true,
     type,
-    value: readString(discount.value) || "0"
+    value: readString(discount.value) || DEFAULT_INVOICE_DISCOUNT.value
   };
 }
 
@@ -65,6 +67,19 @@ function normalizeTax(value: unknown): InvoiceTax {
     enabled: tax.enabled === true,
     rate: readString(tax.rate) || "0",
     label: typeof tax.label === "string" ? tax.label : undefined
+  };
+}
+
+function normalizePayment(value: unknown, legacyPaymentDetails: unknown): InvoicePaymentDetails {
+  const payment = isRecord(value) ? value : {};
+
+  return {
+    bankName: readString(payment.bankName),
+    accountName: readString(payment.accountName),
+    accountNumber: readString(payment.accountNumber),
+    duitNowId: readString(payment.duitNowId),
+    paymentLink: readString(payment.paymentLink),
+    notes: readString(payment.notes) || readString(legacyPaymentDetails)
   };
 }
 
@@ -94,8 +109,9 @@ function normalizeInvoice(value: unknown): InvoiceData | null {
     items,
     discount: normalizeDiscount(value.discount),
     tax: normalizeTax(value.tax),
-    paymentDetails: readString(value.paymentDetails),
-    notes: readString(value.notes)
+    payment: normalizePayment(value.payment, value.paymentDetails),
+    notes: readString(value.notes),
+    terms: readString(value.terms)
   };
 }
 

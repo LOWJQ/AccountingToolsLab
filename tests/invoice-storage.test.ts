@@ -27,7 +27,13 @@ function test(name: string, run: () => void) {
   console.log(`PASS ${name}`);
 }
 
-function createInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
+type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "tax">> & {
+  discount?: Partial<InvoiceData["discount"]>;
+  payment?: Partial<InvoiceData["payment"]>;
+  tax?: Partial<InvoiceData["tax"]>;
+};
+
+function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
   const baseInvoice: InvoiceData = {
     businessName: "Bright Ledger Studio",
     businessContact: "",
@@ -56,8 +62,16 @@ function createInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
       enabled: false,
       rate: "0"
     },
-    paymentDetails: "",
-    notes: ""
+    payment: {
+      bankName: "",
+      accountName: "",
+      accountNumber: "",
+      duitNowId: "",
+      paymentLink: "",
+      notes: ""
+    },
+    notes: "",
+    terms: ""
   };
 
   return {
@@ -70,6 +84,10 @@ function createInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
     tax: {
       ...baseInvoice.tax,
       ...overrides.tax
+    },
+    payment: {
+      ...baseInvoice.payment,
+      ...overrides.payment
     },
     items: overrides.items ?? baseInvoice.items
   };
@@ -200,4 +218,288 @@ test("storage helper handles quota and security errors gracefully", () => {
 
   assert.equal(saveInvoiceDraft(createInvoice()).ok, false);
   assert.equal(clearInvoiceDraft().ok, false);
+});
+
+test("old draft with paymentDetails string migrates to payment notes", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          payment: undefined,
+          paymentDetails: "Use invoice number as reference."
+        }
+      })
+    }).storage
+  );
+
+  const draft = loadInvoiceDraft();
+
+  assert.equal(draft?.invoice.payment.notes, "Use invoice number as reference.");
+  assert.equal(draft?.invoice.payment.bankName, "");
+  assert.equal(draft?.invoice.payment.accountName, "");
+  assert.equal(draft?.invoice.payment.accountNumber, "");
+  assert.equal(draft?.invoice.payment.duitNowId, "");
+  assert.equal(draft?.invoice.payment.paymentLink, "");
+});
+
+test("new draft with structured payment fields loads correctly", () => {
+  const invoice = createInvoice({
+    payment: {
+      bankName: "Maybank",
+      accountName: "Bright Ledger Studio",
+      accountNumber: "1234567890",
+      duitNowId: "0123456789",
+      paymentLink: "https://example.com/pay",
+      notes: "Please include invoice number."
+    }
+  });
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, invoice.payment);
+});
+
+test("missing payment object defaults to empty payment fields", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          payment: undefined
+        }
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, {
+    bankName: "",
+    accountName: "",
+    accountNumber: "",
+    duitNowId: "",
+    paymentLink: "",
+    notes: ""
+  });
+});
+
+test("malformed payment object does not crash loading", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          payment: "not an object"
+        }
+      })
+    }).storage
+  );
+
+  assert.doesNotThrow(() => loadInvoiceDraft());
+  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, {
+    bankName: "",
+    accountName: "",
+    accountNumber: "",
+    duitNowId: "",
+    paymentLink: "",
+    notes: ""
+  });
+});
+
+test("clearInvoiceDraft removes a draft with structured payment fields", () => {
+  const { entries, storage } = createStorage({
+    [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+      version: ATL_INVOICE_DRAFT_VERSION,
+      savedAt: "2026-05-08T00:00:00.000Z",
+      invoice: createInvoice({ payment: { bankName: "Maybank" } })
+    })
+  });
+  installStorage(storage);
+
+  assert.deepEqual(clearInvoiceDraft(), { ok: true });
+  assert.equal(entries[ATL_INVOICE_DRAFT_KEY], undefined);
+});
+
+test("old draft without terms loads safely", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          terms: undefined
+        }
+      })
+    }).storage
+  );
+
+  assert.equal(loadInvoiceDraft()?.invoice.terms, "");
+});
+
+test("new draft with terms loads correctly", () => {
+  const invoice = createInvoice({ terms: "Payment is due within 30 days." });
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice
+      })
+    }).storage
+  );
+
+  assert.equal(loadInvoiceDraft()?.invoice.terms, invoice.terms);
+});
+
+test("missing terms defaults to a safe string", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          terms: undefined
+        }
+      })
+    }).storage
+  );
+
+  assert.equal(typeof loadInvoiceDraft()?.invoice.terms, "string");
+});
+
+test("malformed terms value does not crash loading", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          terms: { text: "not a string" }
+        }
+      })
+    }).storage
+  );
+
+  assert.doesNotThrow(() => loadInvoiceDraft());
+  assert.equal(loadInvoiceDraft()?.invoice.terms, "");
+});
+
+test("clearInvoiceDraft removes a draft with terms", () => {
+  const { entries, storage } = createStorage({
+    [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+      version: ATL_INVOICE_DRAFT_VERSION,
+      savedAt: "2026-05-08T00:00:00.000Z",
+      invoice: createInvoice({ terms: "Payment is due within 30 days." })
+    })
+  });
+  installStorage(storage);
+
+  assert.deepEqual(clearInvoiceDraft(), { ok: true });
+  assert.equal(entries[ATL_INVOICE_DRAFT_KEY], undefined);
+});
+
+test("old draft without discount loads with discount disabled", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          discount: undefined
+        }
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, {
+    enabled: false,
+    type: "percentage",
+    value: "0"
+  });
+});
+
+test("new draft with percentage discount loads correctly", () => {
+  const invoice = createInvoice({
+    discount: { enabled: true, type: "percentage", value: "10" }
+  });
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, invoice.discount);
+});
+
+test("new draft with fixed discount loads correctly", () => {
+  const invoice = createInvoice({
+    discount: { enabled: true, type: "fixed", value: "50" }
+  });
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, invoice.discount);
+});
+
+test("malformed discount object does not crash loading", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          discount: "not an object"
+        }
+      })
+    }).storage
+  );
+
+  assert.doesNotThrow(() => loadInvoiceDraft());
+  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, {
+    enabled: false,
+    type: "percentage",
+    value: "0"
+  });
+});
+
+test("clearInvoiceDraft removes a draft with discount fields", () => {
+  const { entries, storage } = createStorage({
+    [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+      version: ATL_INVOICE_DRAFT_VERSION,
+      savedAt: "2026-05-08T00:00:00.000Z",
+      invoice: createInvoice({ discount: { enabled: true, type: "fixed", value: "50" } })
+    })
+  });
+  installStorage(storage);
+
+  assert.deepEqual(clearInvoiceDraft(), { ok: true });
+  assert.equal(entries[ATL_INVOICE_DRAFT_KEY], undefined);
 });

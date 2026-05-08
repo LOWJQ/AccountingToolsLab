@@ -47,6 +47,19 @@ function isActiveLineItem(item: InvoiceLineItem): boolean {
   return !isBlank(item.description) || !isBlank(item.quantity) || !isBlank(item.unitPrice);
 }
 
+function hasValidHttpUrl(value: string): boolean {
+  if (!value.startsWith("http://") && !value.startsWith("https://")) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] {
   const errors: InvoiceValidationError[] = [];
 
@@ -126,7 +139,7 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       if (invoice.discount.type === "percentage" && (discountValue < 0 || discountValue > 100)) {
         errors.push({
           field: "discount.value",
-          message: "Percentage discount must be between 0 and 100."
+          message: "Discount percentage must be between 0 and 100."
         });
       }
 
@@ -134,14 +147,14 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
         if (discountValue < 0) {
           errors.push({
             field: "discount.value",
-            message: "Fixed discount must be zero or greater."
+            message: "Discount amount cannot be negative."
           });
         }
 
         if (discountValue > calculateInvoiceTotals(invoice).subtotal) {
           errors.push({
             field: "discount.value",
-            message: "Fixed discount must not exceed the subtotal."
+            message: "Discount amount cannot be greater than the subtotal."
           });
         }
       }
@@ -157,6 +170,15 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
         message: "Tax rate must be between 0 and 100."
       });
     }
+  }
+
+  const paymentLink = invoice.payment.paymentLink.trim();
+
+  if (paymentLink !== "" && !hasValidHttpUrl(paymentLink)) {
+    errors.push({
+      field: "payment.paymentLink",
+      message: "Payment link must start with http:// or https://."
+    });
   }
 
   return errors;

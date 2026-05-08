@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { LogoUploader } from "@/components/invoice/LogoUploader";
+import { PaymentDetailsFields } from "@/components/invoice/PaymentDetailsFields";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { isCurrencyCode } from "@/lib/currency";
@@ -16,11 +17,20 @@ import {
   loadInvoiceDraft,
   saveInvoiceDraft
 } from "@/lib/invoice/invoice-storage";
-import type { InvoiceData, InvoiceLineItem } from "@/lib/invoice/invoice-types";
+import {
+  DEFAULT_INVOICE_DISCOUNT,
+  DEFAULT_INVOICE_PAYMENT_DETAILS,
+  DEFAULT_INVOICE_TERMS,
+  type InvoiceData,
+  type InvoiceDiscount,
+  type InvoiceLineItem,
+  type InvoicePaymentDetails
+} from "@/lib/invoice/invoice-types";
 import { validateInvoice } from "@/lib/invoice/invoice-validation";
 
 type InvoiceView = "details" | "preview";
 type TaxMode = "none" | "sst-6" | "sst-8" | "custom";
+type DiscountMode = "none" | "percentage" | "fixed";
 
 const mistakes = [
   "Forgetting invoice number",
@@ -48,6 +58,12 @@ const taxOptions: { label: string; mode: TaxMode; rate: number | null }[] = [
   { label: "SST 6%", mode: "sst-6", rate: 6 },
   { label: "SST 8%", mode: "sst-8", rate: 8 },
   { label: "Custom tax rate", mode: "custom", rate: null }
+];
+
+const discountOptions: { label: string; mode: DiscountMode }[] = [
+  { label: "No discount", mode: "none" },
+  { label: "Percentage discount", mode: "percentage" },
+  { label: "Fixed amount discount", mode: "fixed" }
 ];
 
 function createLineItem(index: number): InvoiceLineItem {
@@ -130,9 +146,11 @@ export function InvoiceGenerator() {
   const [invoiceDate, setInvoiceDate] = useState(today);
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
-  const [paymentDetails, setPaymentDetails] = useState("");
+  const [terms, setTerms] = useState(DEFAULT_INVOICE_TERMS);
+  const [payment, setPayment] = useState<InvoicePaymentDetails>(DEFAULT_INVOICE_PAYMENT_DETAILS);
   const [taxMode, setTaxMode] = useState<TaxMode>("none");
   const [customTaxRate, setCustomTaxRate] = useState("");
+  const [discount, setDiscount] = useState<InvoiceDiscount>(DEFAULT_INVOICE_DISCOUNT);
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([createLineItem(1)]);
   const [activeView, setActiveView] = useState<InvoiceView>("details");
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -144,6 +162,7 @@ export function InvoiceGenerator() {
   const autosaveTimerRef = useRef<number | null>(null);
 
   const selectedTaxOption = taxOptions.find((option) => option.mode === taxMode);
+  const discountMode: DiscountMode = discount.enabled ? discount.type : "none";
   const invoiceData: InvoiceData = useMemo(
     () => ({
       businessName,
@@ -158,18 +177,15 @@ export function InvoiceGenerator() {
       dueDate,
       currency,
       items: lineItems,
-      discount: {
-        enabled: false,
-        type: "percentage",
-        value: "0"
-      },
+      discount,
       tax: {
         enabled: taxMode !== "none",
         rate: taxMode === "custom" ? customTaxRate : String(selectedTaxOption?.rate ?? 0),
         label: selectedTaxOption?.label
       },
-      paymentDetails,
-      notes
+      payment,
+      notes,
+      terms
     }),
     [
       businessAddress,
@@ -181,14 +197,16 @@ export function InvoiceGenerator() {
       customerAddress,
       customerContact,
       customerName,
+      discount,
       dueDate,
       invoiceDate,
       invoiceNumber,
       lineItems,
       notes,
-      paymentDetails,
+      payment,
       selectedTaxOption,
-      taxMode
+      taxMode,
+      terms
     ]
   );
 
@@ -222,7 +240,9 @@ export function InvoiceGenerator() {
       setInvoiceDate(invoice.invoiceDate || today);
       setDueDate(invoice.dueDate);
       setNotes(invoice.notes);
-      setPaymentDetails(invoice.paymentDetails);
+      setTerms(invoice.terms);
+      setPayment(invoice.payment);
+      setDiscount(invoice.discount);
       setLineItems(invoice.items.length > 0 ? invoice.items : [createLineItem(1)]);
 
       if (isCurrencyCode(invoice.currency)) {
@@ -322,6 +342,34 @@ export function InvoiceGenerator() {
     );
   }
 
+  function updatePayment(field: keyof InvoicePaymentDetails, value: string) {
+    setPayment((currentPayment) => ({
+      ...currentPayment,
+      [field]: value
+    }));
+  }
+
+  function selectDiscount(mode: DiscountMode) {
+    setDiscount((currentDiscount) => {
+      if (mode === "none") {
+        return DEFAULT_INVOICE_DISCOUNT;
+      }
+
+      return {
+        enabled: true,
+        type: mode,
+        value: currentDiscount.enabled ? currentDiscount.value : DEFAULT_INVOICE_DISCOUNT.value
+      };
+    });
+  }
+
+  function updateDiscountValue(value: string) {
+    setDiscount((currentDiscount) => ({
+      ...currentDiscount,
+      value
+    }));
+  }
+
   function addLineItem() {
     setLineItems((currentItems) => [...currentItems, createLineItem(currentItems.length + 1)]);
   }
@@ -344,7 +392,9 @@ export function InvoiceGenerator() {
     setInvoiceDate(today);
     setDueDate("");
     setNotes("");
-    setPaymentDetails("");
+    setTerms(DEFAULT_INVOICE_TERMS);
+    setPayment(DEFAULT_INVOICE_PAYMENT_DETAILS);
+    setDiscount(DEFAULT_INVOICE_DISCOUNT);
     setTaxMode("none");
     setCustomTaxRate("");
     setLineItems([createLineItem(1)]);
@@ -688,31 +738,34 @@ export function InvoiceGenerator() {
 
       const totalsWidth = 220;
       const totalsX = contentRight - totalsWidth;
-      const totalsHeight = hasTax ? 104 : 76;
+      const totalsRows: Array<[string, string]> = [["Subtotal", formatCurrency(subtotal)]];
+      if (hasDiscount) {
+        totalsRows.push(["Discount", `-${formatCurrency(discountAmount)}`]);
+        totalsRows.push(["Amount after discount", formatCurrency(taxableAmount)]);
+      }
+      if (hasTax) {
+        totalsRows.push([taxLabel, formatCurrency(taxAmount)]);
+      }
+      const totalsRowHeight = 24;
+      const totalsHeight = totalsRows.length * totalsRowHeight + 58;
       addPageIfNeeded(totalsHeight + 24);
       applyFill(stone100);
       applyStroke(stone200);
       doc.roundedRect(totalsX, y, totalsWidth, totalsHeight, 10, 10, "FD");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      applyText(stone600);
-      doc.setFont("helvetica", "normal");
-      doc.text("Subtotal", totalsX + 16, y + 24);
-      doc.setFont("helvetica", "bold");
-      applyText(stone950);
-      doc.text(formatCurrency(subtotal), totalsX + totalsWidth - 16, y + 24, { align: "right" });
-      let totalRowY = y + 60;
-      if (hasTax) {
+      let totalsRowY = y + 24;
+      totalsRows.forEach(([label, value]) => {
         doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
         applyText(stone600);
-        doc.text(taxLabel, totalsX + 16, y + 52);
+        doc.text(label, totalsX + 16, totalsRowY);
         doc.setFont("helvetica", "bold");
         applyText(stone950);
-        doc.text(formatCurrency(taxAmount), totalsX + totalsWidth - 16, y + 52, {
+        doc.text(value, totalsX + totalsWidth - 16, totalsRowY, {
           align: "right"
         });
-        totalRowY = y + 88;
-      }
+        totalsRowY += totalsRowHeight;
+      });
+      const totalRowY = totalsRowY + 16;
       applyStroke(stone200);
       doc.line(totalsX + 16, totalRowY - 20, totalsX + totalsWidth - 16, totalRowY - 20);
       doc.setFontSize(12);
@@ -720,41 +773,74 @@ export function InvoiceGenerator() {
       doc.text(formatCurrency(total), totalsX + totalsWidth - 16, totalRowY, { align: "right" });
       y += totalsHeight + 24;
 
-      if (paymentDetails) {
-        const paymentDetailsHeight = measureTextBlock(paymentDetails, contentWidth - 32) + 46;
-        addPageIfNeeded(paymentDetailsHeight);
-        applyFill(stone100);
+      if (hasPaymentDetails || terms.trim()) {
+        const bottomColumnGap = 32;
+        const bottomColumnWidth =
+          hasPaymentDetails && terms.trim()
+            ? (contentWidth - bottomColumnGap) / 2
+            : contentWidth;
+        const rightBottomColumnX = contentX + bottomColumnWidth + bottomColumnGap;
+        const measurePaymentRowsHeight = (width: number) =>
+          paymentDetailRows.reduce(
+            (height, [label, value]) => {
+              const labelWidth = Math.min(92, width * 0.38);
+              const valueWidth = width - labelWidth - 8;
+              return height + Math.max(measureTextBlock(value, valueWidth), 14) + 6;
+            },
+            0
+          );
+        const paymentDetailsHeight = hasPaymentDetails
+          ? measurePaymentRowsHeight(bottomColumnWidth) + 44
+          : 0;
+        const termsHeight = terms.trim()
+          ? measureTextBlock(terms, bottomColumnWidth) + 44
+          : 0;
+        const bottomSectionHeight = Math.max(paymentDetailsHeight, termsHeight);
+        addPageIfNeeded(bottomSectionHeight + 8);
         applyStroke(stone200);
-        doc.roundedRect(contentX, y, contentWidth, paymentDetailsHeight, 10, 10, "FD");
-        writeTextAt("Payment details", contentX + 16, y + 22, {
-          bold: true,
-          color: stone500,
-          fontSize: 9,
-          maxWidth: contentWidth - 32
-        });
-        writeTextAt(paymentDetails, contentX + 16, y + 42, {
-          color: stone600,
-          maxWidth: contentWidth - 32
-        });
-        y += paymentDetailsHeight + 18;
-      }
+        doc.line(contentX, y, contentRight, y);
+        const bottomStartY = y + 20;
 
-      if (notes) {
-        const notesHeight = measureTextBlock(notes, contentWidth - 32) + 46;
-        addPageIfNeeded(notesHeight);
-        applyFill(stone100);
-        applyStroke(stone200);
-        doc.roundedRect(contentX, y, contentWidth, notesHeight, 10, 10, "FD");
-        writeTextAt("Notes", contentX + 16, y + 22, {
-          bold: true,
-          color: stone500,
-          fontSize: 9,
-          maxWidth: contentWidth - 32
-        });
-        writeTextAt(notes, contentX + 16, y + 42, {
-          color: stone600,
-          maxWidth: contentWidth - 32
-        });
+        if (hasPaymentDetails) {
+          writeTextAt("Payment Details", contentX, bottomStartY, {
+            bold: true,
+            color: stone950,
+            fontSize: 11,
+            maxWidth: bottomColumnWidth
+          });
+          let paymentY = bottomStartY + 24;
+          const paymentLabelWidth = Math.min(92, bottomColumnWidth * 0.38);
+          const paymentValueX = contentX + paymentLabelWidth + 8;
+          const paymentValueWidth = bottomColumnWidth - paymentLabelWidth - 8;
+          paymentDetailRows.forEach(([label, value]) => {
+            writeTextAt(`${label}:`, contentX, paymentY, {
+              bold: true,
+              color: stone600,
+              maxWidth: paymentLabelWidth
+            });
+            paymentY += writeTextAt(value, paymentValueX, paymentY, {
+              color: stone600,
+              maxWidth: paymentValueWidth
+            });
+            paymentY += 6;
+          });
+        }
+
+        if (terms.trim()) {
+          const termsX = hasPaymentDetails ? rightBottomColumnX : contentX;
+          writeTextAt("Terms & Conditions", termsX, bottomStartY, {
+            bold: true,
+            color: stone950,
+            fontSize: 11,
+            maxWidth: bottomColumnWidth
+          });
+          writeTextAt(terms, termsX, bottomStartY + 24, {
+            color: stone600,
+            maxWidth: bottomColumnWidth
+          });
+        }
+
+        y = bottomStartY + bottomSectionHeight + 12;
       }
 
       doc.save(`invoice-${sanitizePdfFileName(invoiceNumber || "preview")}.pdf`);
@@ -770,23 +856,38 @@ export function InvoiceGenerator() {
   }));
 
   const subtotal = calculation.subtotal;
+  const discountAmount = calculation.discountAmount;
+  const taxableAmount = calculation.taxableAmount;
+  const hasDiscount = discountAmount > 0;
   const taxRate = invoiceData.tax.enabled ? parseAmount(invoiceData.tax.rate) ?? 0 : 0;
   const taxAmount = calculation.taxAmount;
   const total = calculation.total;
   const hasTax = taxAmount > 0;
   const taxLabel = `SST / Tax (${formatAmount(taxRate)}%)`;
+  const discountError =
+    validationErrors.find((error) => error.field === "discount.value")?.message ?? "";
+  const paymentLinkError =
+    validationErrors.find((error) => error.field === "payment.paymentLink")?.message ?? "";
+  const paymentDetailRows = [
+    ["Bank", payment.bankName],
+    ["Account name", payment.accountName],
+    ["Account number", payment.accountNumber],
+    ["DuitNow ID", payment.duitNowId],
+    ["Payment link", payment.paymentLink],
+    ["Notes", payment.notes]
+  ].filter(([, value]) => value.trim() !== "");
+  const hasPaymentDetails = paymentDetailRows.length > 0;
 
   return (
     <div className="flex flex-col gap-8">
       <div className="scroll-mt-24" ref={invoiceGeneratorTopRef}>
         <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="max-w-3xl">
+        <div className="max-w-5xl">
           <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
             Invoice Generator
           </h1>
-          <p className="mt-3 text-base leading-7 text-stone-600">
-            Create a simple invoice with business details, customer details, line items,
-            optional SST / tax, subtotal, and total.
+          <p className="mt-3 text-base leading-7 text-stone-600 lg:whitespace-nowrap">
+            Create a simple invoice with business details, customer details, line items, optional SST / tax, subtotal, and total.
           </p>
         </div>
 
@@ -975,6 +1076,72 @@ export function InvoiceGenerator() {
             </section>
 
             <section className="grid gap-4">
+              <div>
+                <h2 className="text-base font-semibold text-stone-950">Discount</h2>
+                <p className="mt-1 text-sm text-stone-600">
+                  Discount is applied before SST / tax.
+                </p>
+              </div>
+              <div className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4">
+                <div className="grid gap-3 md:grid-cols-3">
+                  {discountOptions.map((option) => (
+                    <label
+                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                        discountMode === option.mode
+                          ? "border-slate-300 bg-white text-stone-950 shadow-sm"
+                          : "border-stone-200 bg-stone-50 text-stone-700 hover:bg-white"
+                      }`}
+                      key={option.mode}
+                    >
+                      <input
+                        checked={discountMode === option.mode}
+                        className="h-4 w-4 accent-slate-700"
+                        onChange={() => selectDiscount(option.mode)}
+                        type="radio"
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {discount.enabled ? (
+                  <label className="grid max-w-xs gap-2">
+                    <span className="text-sm font-semibold text-stone-800">
+                      {discount.type === "percentage"
+                        ? "Discount percentage"
+                        : `Discount amount (${currency})`}
+                    </span>
+                    <div className="relative">
+                      <input
+                        className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 ${
+                          discount.type === "percentage" ? "pr-10" : ""
+                        } ${
+                          discountError
+                            ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                            : "border-stone-200"
+                        }`}
+                        inputMode="decimal"
+                        max={discount.type === "percentage" ? "100" : undefined}
+                        min="0"
+                        onChange={(event) => updateDiscountValue(event.target.value)}
+                        placeholder={discount.type === "percentage" ? "10" : "50.00"}
+                        type="number"
+                        value={discount.value}
+                      />
+                      {discount.type === "percentage" ? (
+                        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-stone-500">
+                          %
+                        </span>
+                      ) : null}
+                    </div>
+                  </label>
+                ) : null}
+                {discountError ? (
+                  <p className="text-sm font-medium text-red-700">{discountError}</p>
+                ) : null}
+              </div>
+            </section>
+
+            <section className="grid gap-4">
               <div className="flex items-center justify-between gap-4">
                 <h2 className="text-base font-semibold text-stone-950">Line items</h2>
                 <button
@@ -1059,25 +1226,21 @@ export function InvoiceGenerator() {
               ) : null}
             </section>
 
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">
-                Payment details (optional)
-              </span>
-              <textarea
-                className="min-h-24 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                onChange={(event) => setPaymentDetails(event.target.value)}
-                placeholder="Bank name, account number, payment reference, DuitNow, PayPal, or payment link"
-                value={paymentDetails}
-              />
-            </label>
+            <PaymentDetailsFields
+              onChange={updatePayment}
+              payment={payment}
+              paymentLinkError={paymentLinkError}
+            />
 
             <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">Notes (optional)</span>
+              <span className="text-sm font-semibold text-stone-800">
+                Terms &amp; Conditions (optional)
+              </span>
               <textarea
-                className="min-h-24 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Payment terms or thank-you note"
-                value={notes}
+                className="min-h-28 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                onChange={(event) => setTerms(event.target.value)}
+                placeholder="Payment terms or invoice conditions"
+                value={terms}
               />
             </label>
 
@@ -1272,6 +1435,22 @@ export function InvoiceGenerator() {
                       {formatCurrency(subtotal)}
                     </span>
                   </div>
+                  {hasDiscount ? (
+                    <>
+                      <div className="invoice-total-row mt-3 flex justify-between gap-4 text-sm text-stone-600">
+                        <span className="invoice-total-label">Discount</span>
+                        <span className="invoice-total-amount font-semibold text-stone-950">
+                          -{formatCurrency(discountAmount)}
+                        </span>
+                      </div>
+                      <div className="invoice-total-row mt-3 flex justify-between gap-4 text-sm text-stone-600">
+                        <span className="invoice-total-label">Amount after discount</span>
+                        <span className="invoice-total-amount font-semibold text-stone-950">
+                          {formatCurrency(taxableAmount)}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
                   {hasTax ? (
                     <div className="invoice-total-row mt-3 flex justify-between gap-4 text-sm text-stone-600">
                       <span className="invoice-total-label">{taxLabel}</span>
@@ -1289,26 +1468,46 @@ export function InvoiceGenerator() {
                 </div>
               </div>
 
-              {paymentDetails ? (
-                <div className="mt-6 rounded-xl border border-stone-200 bg-stone-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                    Payment details
-                  </p>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-stone-600">
-                    {paymentDetails}
-                  </p>
-                </div>
-              ) : null}
+              {hasPaymentDetails || terms.trim() ? (
+                <section className="mt-8 border-t border-stone-200 pt-5">
+                  <div
+                    className={`grid gap-8 ${
+                      hasPaymentDetails && terms.trim() ? "md:grid-cols-2" : ""
+                    }`}
+                  >
+                    {hasPaymentDetails ? (
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-stone-950">
+                          Payment Details
+                        </h3>
+                        <dl className="mt-4 grid gap-2 text-sm leading-6 text-stone-600">
+                          {paymentDetailRows.map(([label, value]) => (
+                            <div
+                              className="grid gap-1 sm:grid-cols-[8rem_minmax(0,1fr)]"
+                              key={label}
+                            >
+                              <dt className="font-medium text-stone-500">{label}:</dt>
+                              <dd className="min-w-0 whitespace-pre-line break-words">
+                                {value}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </div>
+                    ) : null}
 
-              {notes ? (
-                <div className="mt-6 rounded-xl border border-stone-200 bg-stone-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                    Notes
-                  </p>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-stone-600">
-                    {notes}
-                  </p>
-                </div>
+                    {terms.trim() ? (
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-stone-950">
+                          Terms &amp; Conditions
+                        </h3>
+                        <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-stone-600">
+                          {terms}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
               ) : null}
             </div>
               </div>

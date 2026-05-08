@@ -8,7 +8,13 @@ function test(name: string, run: () => void) {
   console.log(`PASS ${name}`);
 }
 
-function createInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
+type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "tax">> & {
+  discount?: Partial<InvoiceData["discount"]>;
+  payment?: Partial<InvoiceData["payment"]>;
+  tax?: Partial<InvoiceData["tax"]>;
+};
+
+function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
   const baseInvoice: InvoiceData = {
     businessName: "Bright Ledger Studio",
     businessContact: "",
@@ -37,8 +43,16 @@ function createInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
       enabled: false,
       rate: "0"
     },
-    paymentDetails: "",
-    notes: ""
+    payment: {
+      bankName: "",
+      accountName: "",
+      accountNumber: "",
+      duitNowId: "",
+      paymentLink: "",
+      notes: ""
+    },
+    notes: "",
+    terms: ""
   };
 
   return {
@@ -51,6 +65,10 @@ function createInvoice(overrides: Partial<InvoiceData> = {}): InvoiceData {
     tax: {
       ...baseInvoice.tax,
       ...overrides.tax
+    },
+    payment: {
+      ...baseInvoice.payment,
+      ...overrides.payment
     },
     items: overrides.items ?? baseInvoice.items
   };
@@ -97,6 +115,20 @@ test("calculates 10 percent discount before tax", () => {
   assert.equal(result.total, 190.8);
 });
 
+test("calculates 10 percent discount with no tax", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      discount: { enabled: true, type: "percentage", value: "10" }
+    })
+  );
+
+  assert.equal(result.subtotal, 200);
+  assert.equal(result.discountAmount, 20);
+  assert.equal(result.taxableAmount, 180);
+  assert.equal(result.taxAmount, 0);
+  assert.equal(result.total, 180);
+});
+
 test("calculates fixed discount before tax", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
@@ -109,6 +141,33 @@ test("calculates fixed discount before tax", () => {
   assert.equal(result.taxableAmount, 150);
   assert.equal(result.taxAmount, 12);
   assert.equal(result.total, 162);
+});
+
+test("calculates fixed discount with no tax", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      discount: { enabled: true, type: "fixed", value: "50" }
+    })
+  );
+
+  assert.equal(result.discountAmount, 50);
+  assert.equal(result.taxableAmount, 150);
+  assert.equal(result.taxAmount, 0);
+  assert.equal(result.total, 150);
+});
+
+test("calculates fixed discount with SST 6%", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      discount: { enabled: true, type: "fixed", value: "50" },
+      tax: { enabled: true, rate: "6" }
+    })
+  );
+
+  assert.equal(result.discountAmount, 50);
+  assert.equal(result.taxableAmount, 150);
+  assert.equal(result.taxAmount, 9);
+  assert.equal(result.total, 159);
 });
 
 test("calculates 100 percent discount", () => {
@@ -185,6 +244,30 @@ test("invalid numeric values do not produce NaN", () => {
   });
 });
 
+test("calculates decimal percentage discount", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      discount: { enabled: true, type: "percentage", value: "12.5" }
+    })
+  );
+
+  assert.equal(result.discountAmount, 25);
+  assert.equal(result.taxableAmount, 175);
+  assert.equal(result.total, 175);
+});
+
+test("calculates decimal fixed discount", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      discount: { enabled: true, type: "fixed", value: "12.34" }
+    })
+  );
+
+  assert.equal(result.discountAmount, 12.34);
+  assert.equal(result.taxableAmount, 187.66);
+  assert.equal(result.total, 187.66);
+});
+
 test("tax applies after discount", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
@@ -254,7 +337,61 @@ test("percentage discount over 100 fails validation", () => {
       createInvoice({
         discount: { enabled: true, type: "percentage", value: "101" }
       })
-    ).includes("Percentage discount must be between 0 and 100.")
+    ).includes("Discount percentage must be between 0 and 100.")
+  );
+});
+
+test("valid percentage discount passes validation", () => {
+  assert.deepEqual(
+    validateInvoice(createInvoice({ discount: { enabled: true, type: "percentage", value: "10" } })),
+    []
+  );
+});
+
+test("percentage discount below 0 fails validation", () => {
+  assert.ok(
+    messagesFor(
+      createInvoice({
+        discount: { enabled: true, type: "percentage", value: "-1" }
+      })
+    ).includes("Discount percentage must be between 0 and 100.")
+  );
+});
+
+test("percentage discount NaN fails validation", () => {
+  assert.ok(
+    messagesFor(
+      createInvoice({
+        discount: { enabled: true, type: "percentage", value: "NaN" }
+      })
+    ).includes("Discount value must be a valid number.")
+  );
+});
+
+test("percentage discount Infinity fails validation", () => {
+  assert.ok(
+    messagesFor(
+      createInvoice({
+        discount: { enabled: true, type: "percentage", value: "Infinity" }
+      })
+    ).includes("Discount value must be a valid number.")
+  );
+});
+
+test("valid fixed discount passes validation", () => {
+  assert.deepEqual(
+    validateInvoice(createInvoice({ discount: { enabled: true, type: "fixed", value: "50" } })),
+    []
+  );
+});
+
+test("fixed discount below 0 fails validation", () => {
+  assert.ok(
+    messagesFor(
+      createInvoice({
+        discount: { enabled: true, type: "fixed", value: "-1" }
+      })
+    ).includes("Discount amount cannot be negative.")
   );
 });
 
@@ -264,7 +401,34 @@ test("fixed discount larger than subtotal fails validation", () => {
       createInvoice({
         discount: { enabled: true, type: "fixed", value: "201" }
       })
-    ).includes("Fixed discount must not exceed the subtotal.")
+    ).includes("Discount amount cannot be greater than the subtotal.")
+  );
+});
+
+test("fixed discount equal to subtotal passes validation", () => {
+  assert.deepEqual(
+    validateInvoice(createInvoice({ discount: { enabled: true, type: "fixed", value: "200" } })),
+    []
+  );
+});
+
+test("fixed discount NaN fails validation", () => {
+  assert.ok(
+    messagesFor(
+      createInvoice({
+        discount: { enabled: true, type: "fixed", value: "NaN" }
+      })
+    ).includes("Discount value must be a valid number.")
+  );
+});
+
+test("fixed discount Infinity fails validation", () => {
+  assert.ok(
+    messagesFor(
+      createInvoice({
+        discount: { enabled: true, type: "fixed", value: "Infinity" }
+      })
+    ).includes("Discount value must be a valid number.")
   );
 });
 
@@ -291,4 +455,88 @@ test("NaN, Infinity, and -Infinity values fail validation", () => {
   assert.ok(messages.includes("Line item 1 unit price must be a valid number."));
   assert.ok(messages.includes("Discount value must be a valid number."));
   assert.ok(messages.includes("Tax rate must be a valid number."));
+});
+
+test("empty payment fields pass validation", () => {
+  assert.deepEqual(validateInvoice(createInvoice()), []);
+});
+
+test("valid https payment link passes validation", () => {
+  assert.deepEqual(
+    validateInvoice(createInvoice({ payment: { paymentLink: "https://example.com/pay" } })),
+    []
+  );
+});
+
+test("valid http payment link passes validation", () => {
+  assert.deepEqual(
+    validateInvoice(createInvoice({ payment: { paymentLink: "http://example.com/pay" } })),
+    []
+  );
+});
+
+test("payment link without protocol fails validation", () => {
+  assert.ok(
+    messagesFor(createInvoice({ payment: { paymentLink: "example.com/pay" } })).includes(
+      "Payment link must start with http:// or https://."
+    )
+  );
+});
+
+test("invalid payment link fails validation", () => {
+  assert.ok(
+    messagesFor(createInvoice({ payment: { paymentLink: "https://exa mple.com" } })).includes(
+      "Payment link must start with http:// or https://."
+    )
+  );
+});
+
+test("bank name is not required", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ payment: { bankName: "" } })), []);
+});
+
+test("account holder name is not required", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ payment: { accountName: "" } })), []);
+});
+
+test("account number is not required", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ payment: { accountNumber: "" } })), []);
+});
+
+test("DuitNow ID is not required", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ payment: { duitNowId: "" } })), []);
+});
+
+test("payment notes are not required", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ payment: { notes: "" } })), []);
+});
+
+test("empty terms passes validation", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ terms: "" })), []);
+});
+
+test("filled terms passes validation", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ terms: "Payment is due in 30 days." })), []);
+});
+
+test("long terms passes validation", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ terms: "Terms ".repeat(200) })), []);
+});
+
+test("multiline terms passes validation", () => {
+  assert.deepEqual(
+    validateInvoice(
+      createInvoice({
+        terms: "Payment is due within 30 days.\nPlease include the invoice number."
+      })
+    ),
+    []
+  );
+});
+
+test("missing terms from old draft shape does not fail validation", () => {
+  const invoice = createInvoice();
+  Reflect.deleteProperty(invoice as Partial<InvoiceData>, "terms");
+
+  assert.deepEqual(validateInvoice({ ...invoice, terms: "" }), []);
 });
