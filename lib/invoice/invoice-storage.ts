@@ -80,7 +80,8 @@ function normalizePayment(value: unknown, legacyPaymentDetails: unknown): Invoic
     accountNumber: readString(payment.accountNumber),
     duitNowId: readString(payment.duitNowId),
     paymentLink: readString(payment.paymentLink),
-    notes: readString(payment.notes) || readString(legacyPaymentDetails)
+    notes: readString(payment.notes) || readString(legacyPaymentDetails),
+    paymentQrDataUrl: readString(payment.paymentQrDataUrl) || undefined
   };
 }
 

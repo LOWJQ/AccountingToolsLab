@@ -22,6 +22,7 @@
     "tests/invoice-numbering.test.ts",
     "tests/invoice-pdf.test.ts",
     "tests/invoice-logo.test.ts",
+    "tests/invoice-payment-qr.test.ts",
     "tests/sst-malaysia.test.ts",
     "tests/journal-entry.test.ts",
     "lib/calculators/trial-balance.ts",
@@ -40,6 +41,7 @@
     "lib/invoice/invoice-numbering.ts",
     "lib/invoice/invoice-pdf.ts",
     "lib/invoice/invoice-logo.ts",
+    "lib/invoice/invoice-payment-qr.ts",
     "lib/calculators/sst-malaysia.ts",
     "lib/calculators/journal-entry.ts"
   ]

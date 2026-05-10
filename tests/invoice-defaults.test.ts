@@ -127,7 +127,8 @@ test("clear everything defaults reset all reusable fields", () => {
     accountNumber: "",
     duitNowId: "",
     paymentLink: "",
-    notes: ""
+    notes: "",
+    paymentQrDataUrl: undefined
   });
   assert.equal(emptyInvoice.terms.includes("Payment is due within 30 days"), true);
   assert.deepEqual(emptyInvoice.discount, {
@@ -139,4 +140,21 @@ test("clear everything defaults reset all reusable fields", () => {
     enabled: false,
     rate: "0"
   });
+});
+
+test("clear everything defaults fall back to the default invoice number", () => {
+  const emptyInvoice = createEmptyInvoiceDefaults({
+    invoiceDate: "2026-05-11"
+  });
+
+  assert.equal(emptyInvoice.invoiceNumber, "INV-001");
+});
+
+test("clear everything defaults use a provided invoice number", () => {
+  const emptyInvoice = createEmptyInvoiceDefaults({
+    invoiceDate: "2026-05-11",
+    invoiceNumber: "INV-006"
+  });
+
+  assert.equal(emptyInvoice.invoiceNumber, "INV-006");
 });

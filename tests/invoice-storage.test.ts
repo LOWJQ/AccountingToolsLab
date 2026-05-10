@@ -316,6 +316,7 @@ test("old draft with paymentDetails string migrates to payment notes", () => {
   assert.equal(draft?.invoice.payment.accountNumber, "");
   assert.equal(draft?.invoice.payment.duitNowId, "");
   assert.equal(draft?.invoice.payment.paymentLink, "");
+  assert.equal(draft?.invoice.payment.paymentQrDataUrl, undefined);
 });
 
 test("new draft with structured payment fields loads correctly", () => {
@@ -326,7 +327,8 @@ test("new draft with structured payment fields loads correctly", () => {
       accountNumber: "1234567890",
       duitNowId: "0123456789",
       paymentLink: "https://example.com/pay",
-      notes: "Please include invoice number."
+      notes: "Please include invoice number.",
+      paymentQrDataUrl: "data:image/png;base64,qr"
     }
   });
   installStorage(
@@ -362,7 +364,8 @@ test("missing payment object defaults to empty payment fields", () => {
     accountNumber: "",
     duitNowId: "",
     paymentLink: "",
-    notes: ""
+    notes: "",
+    paymentQrDataUrl: undefined
   });
 });
 
@@ -387,7 +390,8 @@ test("malformed payment object does not crash loading", () => {
     accountNumber: "",
     duitNowId: "",
     paymentLink: "",
-    notes: ""
+    notes: "",
+    paymentQrDataUrl: undefined
   });
 });
 

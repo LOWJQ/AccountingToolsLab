@@ -43,23 +43,51 @@ type DiscountMode = "none" | "percentage" | "fixed";
 
 const mistakes = [
   "Forgetting invoice number",
-  "Missing customer details",
   "Using unclear item descriptions",
-  "Forgetting payment terms or due date",
-  "Confusing invoice total with cash received"
+  "Missing customer details",
+  "Forgetting payment details",
+  "Forgetting terms or due date",
+  "Applying tax before discount instead of after discount",
+  "Using a payment QR image that is blurry or hard to scan",
+  "Confusing an invoice with a receipt",
+  "Assuming this simple PDF is an official validated Malaysia e-Invoice"
+];
+
+const featureHighlights = [
+  "Add business and customer details",
+  "Upload a business logo",
+  "Add line items, quantities, and unit prices",
+  "Choose no tax, SST 6%, SST 8%, or a custom tax rate",
+  "Add a percentage or fixed discount",
+  "Add bank details, DuitNow ID, payment link, and payment notes",
+  "Upload your own payment QR image",
+  "Add terms and conditions",
+  "Preview the invoice before downloading",
+  "Download a PDF invoice",
+  "Save the current draft on this device"
 ];
 
 const fieldNotes = [
   ["Invoice number", "A unique reference that helps both sides identify the invoice."],
   ["Invoice date", "The date the invoice is issued."],
-  ["Due date", "The date payment is expected, if you want to include one."],
+  ["Due date", "The optional date payment is expected."],
+  ["Business details", "Your business name, contact, and address."],
+  ["Customer details", "The customer name, contact, and address shown in the Bill To section."],
+  ["Logo", "An optional PNG or JPG business logo shown in the preview and PDF."],
   ["Line items", "The goods or services being billed."],
   ["Quantity", "How many units, hours, or items are being charged."],
   ["Unit price", "The price for one unit or one hour."],
-  ["Subtotal", "The total of all line items before taxes or extra charges."],
-  ["SST / Tax", "An optional tax rate used for simple invoice math."],
-  ["Payment details", "Optional instructions such as bank details, DuitNow, PayPal, or a payment link."],
-  ["Total", "The final amount requested on this simple invoice."]
+  ["Subtotal", "The total of all line items before discount and SST / tax."],
+  ["Discount", "An optional percentage or fixed amount applied before SST / tax."],
+  ["SST / Tax", "Optional basic tax math using no tax, SST 6%, SST 8%, or a custom rate."],
+  [
+    "Payment details",
+    "Optional bank details, account name, account number, DuitNow ID, payment link, and payment notes."
+  ],
+  ["Payment QR image", "An optional uploaded payment QR image with a Scan here to pay caption."],
+  ["Terms & Conditions", "Optional payment or invoice terms shown near the bottom of the invoice."],
+  ["Notes", "Optional extra information for the customer when included."],
+  ["Total", "The final amount after discount and SST / tax."]
 ];
 
 const taxOptions: { label: string; mode: TaxMode; rate: number | null }[] = [
@@ -369,7 +397,7 @@ export function InvoiceGenerator() {
     );
   }
 
-  function updatePayment(field: keyof InvoicePaymentDetails, value: string) {
+  function updatePayment(field: keyof InvoicePaymentDetails, value: string | undefined) {
     setPayment((currentPayment) => ({
       ...currentPayment,
       [field]: value
@@ -431,12 +459,14 @@ export function InvoiceGenerator() {
   }
 
   function confirmClearEverything() {
+    const nextInvoiceNumber = getNextInvoiceNumberSuggestion();
     clearAutosaveTimer();
     clearInvoiceDraft();
     skipNextAutosaveRef.current = true;
     restoreInvoiceState(
       createEmptyInvoiceDefaults({
         invoiceDate: today,
+        invoiceNumber: nextInvoiceNumber ?? DEFAULT_INVOICE_NUMBER,
         lineItemId: createLineItem(1).id
       })
     );
@@ -915,7 +945,35 @@ export function InvoiceGenerator() {
         y += 18;
       };
 
-      const renderPaymentDetailsFlow = () => {
+      const renderPaymentQrAt = async (x: number, top: number, maxSize: number) => {
+        if (!payment.paymentQrDataUrl) {
+          return 0;
+        }
+
+        try {
+          const qrType = getLogoImageType(payment.paymentQrDataUrl);
+
+          if (!qrType) {
+            return 0;
+          }
+
+          const qrSize = await loadImageDimensions(payment.paymentQrDataUrl);
+          const fittedQr = fitWithinBox(qrSize.width, qrSize.height, maxSize, maxSize);
+          doc.addImage(payment.paymentQrDataUrl, qrType, x, top, fittedQr.width, fittedQr.height);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          applyText(stone500);
+          doc.text("Scan here to pay", x + fittedQr.width / 2, top + fittedQr.height + 13, {
+            align: "center"
+          });
+
+          return fittedQr.height + 22;
+        } catch {
+          return 0;
+        }
+      };
+
+      const renderPaymentDetailsFlow = async () => {
         if (!hasPaymentDetails) {
           return;
         }
@@ -979,6 +1037,12 @@ export function InvoiceGenerator() {
           y += 6;
         });
 
+        if (payment.paymentQrDataUrl) {
+          addPageIfNeeded(124);
+          y += 4;
+          y += await renderPaymentQrAt(contentX, y, 96);
+        }
+
         y += 12;
       };
 
@@ -1001,8 +1065,9 @@ export function InvoiceGenerator() {
             },
             0
           );
+        const paymentQrHeight = hasPaymentQr ? Math.min(96, bottomColumnWidth) + 26 : 0;
         const paymentDetailsHeight = hasPaymentDetails
-          ? measurePaymentRowsHeight(bottomColumnWidth) + 44
+          ? measurePaymentRowsHeight(bottomColumnWidth) + paymentQrHeight + 44
           : 0;
         const termsHeight = hasTerms
           ? measureTextBlock(terms, bottomColumnWidth) + 44
@@ -1038,6 +1103,10 @@ export function InvoiceGenerator() {
               });
               paymentY += 6;
             });
+            if (payment.paymentQrDataUrl) {
+              paymentY += 4;
+              paymentY += await renderPaymentQrAt(contentX, paymentY, Math.min(96, bottomColumnWidth));
+            }
           }
 
           if (hasTerms) {
@@ -1056,7 +1125,7 @@ export function InvoiceGenerator() {
 
           y = bottomStartY + bottomSectionHeight + 12;
         } else {
-          renderPaymentDetailsFlow();
+          await renderPaymentDetailsFlow();
           renderFlowTextSection("Terms & Conditions", terms);
         }
       }
@@ -1100,7 +1169,8 @@ export function InvoiceGenerator() {
     ["Payment link", payment.paymentLink],
     ["Notes", payment.notes]
   ].filter(([, value]) => value.trim() !== "");
-  const hasPaymentDetails = paymentDetailRows.length > 0;
+  const hasPaymentQr = Boolean(payment.paymentQrDataUrl);
+  const hasPaymentDetails = paymentDetailRows.length > 0 || hasPaymentQr;
 
   return (
     <div className="flex flex-col gap-8">
@@ -1108,10 +1178,12 @@ export function InvoiceGenerator() {
         <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
         <div className="max-w-5xl">
           <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-            Invoice Generator
+            Free Invoice Generator Malaysia
           </h1>
-          <p className="mt-3 text-base leading-7 text-stone-600 lg:whitespace-nowrap">
-            Create a simple invoice with business details, customer details, line items, optional SST / tax, subtotal, and total.
+          <p className="mt-3 max-w-4xl text-base leading-7 text-stone-600">
+            Create a simple invoice with business details, customer details, line items,
+            optional SST / tax, discounts, payment details, QR image, terms, notes, and PDF
+            download.
           </p>
         </div>
 
@@ -1716,19 +1788,36 @@ export function InvoiceGenerator() {
                         <h3 className="text-sm font-semibold text-stone-950">
                           Payment Details
                         </h3>
-                        <dl className="mt-4 grid gap-2 text-sm leading-6 text-stone-600">
-                          {paymentDetailRows.map(([label, value]) => (
-                            <div
-                              className="grid gap-1 sm:grid-cols-[8rem_minmax(0,1fr)]"
-                              key={label}
-                            >
-                              <dt className="font-medium text-stone-500">{label}:</dt>
-                              <dd className="min-w-0 whitespace-pre-line break-words">
-                                {value}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
+                        {paymentDetailRows.length > 0 ? (
+                          <dl className="mt-4 grid gap-2 text-sm leading-6 text-stone-600">
+                            {paymentDetailRows.map(([label, value]) => (
+                              <div
+                                className="grid gap-1 sm:grid-cols-[8rem_minmax(0,1fr)]"
+                                key={label}
+                              >
+                                <dt className="font-medium text-stone-500">{label}:</dt>
+                                <dd className="min-w-0 whitespace-pre-line break-words">
+                                  {value}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null}
+                        {payment.paymentQrDataUrl ? (
+                          <div className="mt-5 inline-grid justify-items-center gap-2 text-center">
+                            <Image
+                              alt="Payment QR"
+                              className="h-28 w-28 object-contain"
+                              height={112}
+                              unoptimized
+                              src={payment.paymentQrDataUrl}
+                              width={112}
+                            />
+                            <p className="text-xs font-medium text-stone-500">
+                              Scan here to pay
+                            </p>
+                          </div>
+                        ) : null}
                       </div>
                     ) : null}
 
@@ -1766,26 +1855,28 @@ export function InvoiceGenerator() {
             </p>
             <p>
               A simple invoice usually includes seller details, customer details, invoice
-              number, invoice date, optional due date, line items, subtotal, optional SST / tax,
-              total, payment details, and notes.
+              number, invoice date, optional due date, line items, subtotal, discount, SST / tax
+              if applicable, payment instructions, terms, and total amount due.
             </p>
             <p>
-              This tool can include a simple optional SST / tax line for invoice math, but it
-              does not provide professional accounting or tax advice.
+              This tool helps create a simple downloadable PDF invoice. It does not replace
+              accounting, tax, or legal advice.
             </p>
           </div>
         </Card>
 
         <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Invoice fields</p>
+          <p className="text-sm font-medium tracking-wide text-slate-500">Features</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            What each field means
+            What this invoice generator can do
           </h2>
-          <div className="mt-5 divide-y divide-stone-100">
-            {fieldNotes.map(([label, text]) => (
-              <div className="py-3 first:pt-0 last:pb-0" key={label}>
-                <h3 className="text-sm font-semibold text-stone-950">{label}</h3>
-                <p className="mt-1 text-sm leading-6 text-stone-600">{text}</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {featureHighlights.map((feature) => (
+              <div
+                className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
+                key={feature}
+              >
+                {feature}
               </div>
             ))}
           </div>
@@ -1793,11 +1884,43 @@ export function InvoiceGenerator() {
       </section>
 
       <Card className="p-6 sm:p-8">
+        <p className="text-sm font-medium tracking-wide text-slate-500">Invoice fields</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          What each field means
+        </h2>
+        <div className="mt-5 grid gap-x-8 sm:grid-cols-2">
+          {fieldNotes.map(([label, text]) => (
+            <div className="border-t border-stone-100 py-3" key={label}>
+              <h3 className="text-sm font-semibold text-stone-950">{label}</h3>
+              <p className="mt-1 text-sm leading-6 text-stone-600">{text}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="p-6 sm:p-8">
+        <p className="text-sm font-medium tracking-wide text-slate-500">Malaysia note</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          Simple PDF invoice, not official MyInvois submission
+        </h2>
+        <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
+          <p>
+            This tool creates a simple invoice PDF for everyday business use. It does not submit
+            invoices to LHDN, validate an official Malaysia e-Invoice, or connect to MyInvois.
+          </p>
+          <p>
+            For official Malaysia e-Invoice requirements, refer to LHDN/MyInvois guidance or a
+            qualified tax professional.
+          </p>
+        </div>
+      </Card>
+
+      <Card className="p-6 sm:p-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
           Mistakes to avoid
         </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {mistakes.map((mistake) => (
             <div
               className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
@@ -1814,15 +1937,18 @@ export function InvoiceGenerator() {
           <div className="max-w-2xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Connect invoices with cash and business checks
+              Connect invoices with SST, cash, and business checks
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use cash flow, break-even, and ratio tools to review what happens after an
-              invoice is issued.
+              Use SST, cash flow, break-even, and ratio tools to review the numbers around an
+              invoice before and after it is issued.
             </p>
           </div>
           <div className="flex flex-col gap-3">
-            <ButtonLink href="/tools/cash-flow-calculator">Cash Flow Calculator</ButtonLink>
+            <ButtonLink href="/tools/sst-calculator-malaysia">SST Calculator Malaysia</ButtonLink>
+            <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
+              Cash Flow Calculator
+            </ButtonLink>
             <ButtonLink href="/tools/break-even-calculator" variant="secondary">
               Break-even Calculator
             </ButtonLink>

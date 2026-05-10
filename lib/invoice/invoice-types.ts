@@ -30,6 +30,7 @@ export type InvoicePaymentDetails = {
   duitNowId: string;
   paymentLink: string;
   notes: string;
+  paymentQrDataUrl?: string;
 };
 
 export const DEFAULT_INVOICE_PAYMENT_DETAILS: InvoicePaymentDetails = {
@@ -38,7 +39,8 @@ export const DEFAULT_INVOICE_PAYMENT_DETAILS: InvoicePaymentDetails = {
   accountNumber: "",
   duitNowId: "",
   paymentLink: "",
-  notes: ""
+  notes: "",
+  paymentQrDataUrl: undefined
 };
 
 export const DEFAULT_INVOICE_TERMS =

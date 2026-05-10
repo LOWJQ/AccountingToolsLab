@@ -1,14 +1,18 @@
 import { JsonLd } from "./JsonLd";
 
 type SoftwareApplicationJsonLdProps = {
+  applicationCategory?: string;
   name: string;
   description: string;
+  priceCurrency?: string;
   url: string;
 };
 
 export function SoftwareApplicationJsonLd({
+  applicationCategory = "FinanceApplication",
   description,
   name,
+  priceCurrency = "USD",
   url
 }: SoftwareApplicationJsonLdProps) {
   return (
@@ -19,12 +23,12 @@ export function SoftwareApplicationJsonLd({
         name,
         description,
         url,
-        applicationCategory: "FinanceApplication",
+        applicationCategory,
         operatingSystem: "Web",
         offers: {
           "@type": "Offer",
           price: "0",
-          priceCurrency: "USD"
+          priceCurrency
         }
       }}
     />
