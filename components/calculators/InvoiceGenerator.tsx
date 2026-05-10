@@ -13,10 +13,19 @@ import {
   calculateInvoiceTotals
 } from "@/lib/invoice/invoice-calculations";
 import {
+  createEmptyInvoiceDefaults,
+  createNewInvoiceFromCurrent,
+  DEFAULT_INVOICE_NUMBER
+} from "@/lib/invoice/invoice-defaults";
+import {
   clearInvoiceDraft,
+  loadLastInvoiceNumber,
   loadInvoiceDraft,
+  saveLastInvoiceNumber,
   saveInvoiceDraft
 } from "@/lib/invoice/invoice-storage";
+import { getNextInvoiceNumber } from "@/lib/invoice/invoice-numbering";
+import { buildInvoicePdfFileName } from "@/lib/invoice/invoice-pdf";
 import {
   DEFAULT_INVOICE_DISCOUNT,
   DEFAULT_INVOICE_PAYMENT_DETAILS,
@@ -70,7 +79,7 @@ function createLineItem(index: number): InvoiceLineItem {
   return {
     id: `item-${Date.now()}-${index}`,
     description: "",
-    quantity: "",
+    quantity: "1",
     unitPrice: ""
   };
 }
@@ -89,10 +98,6 @@ function formatAmount(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
-}
-
-function sanitizePdfFileName(value: string): string {
-  return value.trim().replace(/[^a-zA-Z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "invoice";
 }
 
 function getLogoImageType(dataUrl: string): "PNG" | "JPEG" | null {
@@ -142,7 +147,7 @@ export function InvoiceGenerator() {
   const [customerName, setCustomerName] = useState("");
   const [customerContact, setCustomerContact] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
-  const [invoiceNumber, setInvoiceNumber] = useState("INV-001");
+  const [invoiceNumber, setInvoiceNumber] = useState(DEFAULT_INVOICE_NUMBER);
   const [invoiceDate, setInvoiceDate] = useState(today);
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
@@ -154,9 +159,11 @@ export function InvoiceGenerator() {
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([createLineItem(1)]);
   const [activeView, setActiveView] = useState<InvoiceView>("details");
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [isClearEverythingModalOpen, setIsClearEverythingModalOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
   const confirmDownloadButtonRef = useRef<HTMLButtonElement>(null);
+  const confirmClearEverythingButtonRef = useRef<HTMLButtonElement>(null);
   const hasLoadedDraftRef = useRef(false);
   const skipNextAutosaveRef = useRef(false);
   const autosaveTimerRef = useRef<number | null>(null);
@@ -236,7 +243,7 @@ export function InvoiceGenerator() {
       setCustomerName(invoice.customerName);
       setCustomerContact(invoice.customerContact);
       setCustomerAddress(invoice.customerAddress);
-      setInvoiceNumber(invoice.invoiceNumber || "INV-001");
+      setInvoiceNumber(invoice.invoiceNumber || DEFAULT_INVOICE_NUMBER);
       setInvoiceDate(invoice.invoiceDate || today);
       setDueDate(invoice.dueDate);
       setNotes(invoice.notes);
@@ -285,6 +292,26 @@ export function InvoiceGenerator() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isDownloadModalOpen, isGeneratingPdf]);
+
+  useEffect(() => {
+    if (!isClearEverythingModalOpen) {
+      return;
+    }
+
+    confirmClearEverythingButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsClearEverythingModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isClearEverythingModalOpen]);
 
   useEffect(() => {
     if (hasValidInvoice) {
@@ -380,24 +407,43 @@ export function InvoiceGenerator() {
     );
   }
 
-  function resetInvoice() {
-    setBusinessName("");
-    setBusinessContact("");
-    setBusinessAddress("");
-    setBusinessLogoDataUrl(undefined);
-    setCustomerName("");
-    setCustomerContact("");
-    setCustomerAddress("");
-    setInvoiceNumber("INV-001");
-    setInvoiceDate(today);
-    setDueDate("");
-    setNotes("");
-    setTerms(DEFAULT_INVOICE_TERMS);
-    setPayment(DEFAULT_INVOICE_PAYMENT_DETAILS);
-    setDiscount(DEFAULT_INVOICE_DISCOUNT);
-    setTaxMode("none");
-    setCustomTaxRate("");
-    setLineItems([createLineItem(1)]);
+  function getNextInvoiceNumberSuggestion() {
+    const lastInvoiceNumber = loadLastInvoiceNumber();
+    return lastInvoiceNumber ? getNextInvoiceNumber(lastInvoiceNumber) : null;
+  }
+
+  function startNewInvoice() {
+    const nextInvoiceNumber = getNextInvoiceNumberSuggestion();
+    restoreInvoiceState(
+      createNewInvoiceFromCurrent(invoiceData, {
+        invoiceDate: today,
+        invoiceNumber: nextInvoiceNumber ?? DEFAULT_INVOICE_NUMBER,
+        lineItemId: createLineItem(1).id
+      })
+    );
+    setActiveView("details");
+    setIsDownloadModalOpen(false);
+    scrollInvoiceGeneratorToTop();
+  }
+
+  function clearEverything() {
+    setIsClearEverythingModalOpen(true);
+  }
+
+  function confirmClearEverything() {
+    clearAutosaveTimer();
+    clearInvoiceDraft();
+    skipNextAutosaveRef.current = true;
+    restoreInvoiceState(
+      createEmptyInvoiceDefaults({
+        invoiceDate: today,
+        lineItemId: createLineItem(1).id
+      })
+    );
+    setActiveView("details");
+    setIsDownloadModalOpen(false);
+    setIsClearEverythingModalOpen(false);
+    scrollInvoiceGeneratorToTop();
   }
 
   function clearAutosaveTimer() {
@@ -409,13 +455,13 @@ export function InvoiceGenerator() {
     autosaveTimerRef.current = null;
   }
 
-  function clearDraftAndResetInvoice() {
-    clearAutosaveTimer();
-    clearInvoiceDraft();
-    skipNextAutosaveRef.current = true;
-    resetInvoice();
-    setActiveView("details");
-    setIsDownloadModalOpen(false);
+  function scrollInvoiceGeneratorToTop() {
+    window.requestAnimationFrame(() => {
+      invoiceGeneratorTopRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
   }
 
   function switchInvoiceView(view: InvoiceView) {
@@ -424,12 +470,7 @@ export function InvoiceGenerator() {
     }
 
     setActiveView(view);
-    window.requestAnimationFrame(() => {
-      invoiceGeneratorTopRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    });
+    scrollInvoiceGeneratorToTop();
   }
 
   async function downloadInvoicePdf() {
@@ -444,15 +485,12 @@ export function InvoiceGenerator() {
       const doc = new jsPDF({ unit: "pt", format: "a4" });
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const pageMargin = 36;
-      const cardX = pageMargin;
-      const cardY = pageMargin;
-      const cardWidth = pageWidth - pageMargin * 2;
-      const cardBottom = pageHeight - pageMargin;
-      const innerPadding = 28;
-      const contentX = cardX + innerPadding;
-      const contentWidth = cardWidth - innerPadding * 2;
+      const pageMargin = 48;
+      const contentX = pageMargin;
+      const contentWidth = pageWidth - pageMargin * 2;
       const contentRight = contentX + contentWidth;
+      const contentBottom = pageHeight - pageMargin;
+      const maxFlowHeight = contentBottom - pageMargin;
       const stone950: [number, number, number] = [28, 25, 23];
       const stone600: [number, number, number] = [87, 83, 78];
       const stone500: [number, number, number] = [120, 113, 108];
@@ -461,7 +499,7 @@ export function InvoiceGenerator() {
       const slate700: [number, number, number] = [51, 65, 85];
       const slate50: [number, number, number] = [248, 250, 252];
       const white: [number, number, number] = [255, 255, 255];
-      let y = cardY + innerPadding;
+      let y = pageMargin;
 
       const applyFill = (color: [number, number, number]) => {
         doc.setFillColor(color[0], color[1], color[2]);
@@ -475,28 +513,29 @@ export function InvoiceGenerator() {
         doc.setTextColor(color[0], color[1], color[2]);
       };
 
-      const drawInvoiceCard = () => {
-        applyFill([250, 250, 249]);
-        doc.rect(0, 0, pageWidth, pageHeight, "F");
+      const drawInvoicePage = () => {
         applyFill(white);
-        applyStroke(stone200);
-        doc.roundedRect(cardX, cardY, cardWidth, pageHeight - pageMargin * 2, 12, 12, "FD");
+        doc.rect(0, 0, pageWidth, pageHeight, "F");
       };
 
       const addPageIfNeeded = (neededHeight: number) => {
-        if (y + neededHeight <= cardBottom - innerPadding) {
+        if (y + neededHeight <= contentBottom) {
           return;
         }
 
         doc.addPage();
-        drawInvoiceCard();
-        y = cardY + innerPadding;
+        drawInvoicePage();
+        y = pageMargin;
       };
 
       const lineHeightFor = (fontSize: number) => fontSize + 4;
 
       const textLines = (text: string, maxWidth: number) =>
-        doc.splitTextToSize(text, maxWidth) as string[];
+        text
+          .split(/\r?\n/)
+          .flatMap((line) =>
+            line.trim() === "" ? [""] : (doc.splitTextToSize(line, maxWidth) as string[])
+          );
 
       const measureTextBlock = (text: string, maxWidth: number, fontSize = 10) =>
         Math.max(textLines(text, maxWidth).length, 1) * lineHeightFor(fontSize);
@@ -551,35 +590,60 @@ export function InvoiceGenerator() {
         doc.line(contentX, top, contentRight, top);
       };
 
+      const drawPageNumber = () => {
+        const pageCount = doc.getNumberOfPages();
+
+        for (let pageIndex = 1; pageIndex <= pageCount; pageIndex += 1) {
+          doc.setPage(pageIndex);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          applyText(stone500);
+          doc.text(`Page ${pageIndex} of ${pageCount}`, contentRight, pageHeight - 24, {
+            align: "right"
+          });
+        }
+      };
+
       doc.setProperties({
         title: `Invoice ${invoiceNumber || "Preview"}`,
         subject: "Invoice",
         creator: "AccountingToolsLab"
       });
 
-      drawInvoiceCard();
+      drawInvoicePage();
 
-      const columnGap = 42;
-      const leftColumnWidth = contentWidth * 0.52;
-      const rightColumnWidth = contentWidth - leftColumnWidth - columnGap;
+      const columnGap = 36;
+      const rightColumnWidth = Math.min(230, contentWidth * 0.44);
+      const leftColumnWidth = contentWidth - rightColumnWidth - columnGap;
+      const rightColumnX = contentRight - rightColumnWidth;
       const headerTop = y;
+      const writeHeaderTextBlock = (
+        text: string,
+        x: number,
+        top: number,
+        options: Parameters<typeof writeTextAt>[3] = {}
+      ) => {
+        const fontSize = options.fontSize ?? 10;
+
+        return writeTextAt(text, x, top + fontSize, options);
+      };
 
       let leftY = headerTop;
-      leftY += writeTextAt(businessName || "Business name", contentX, leftY, {
+      leftY += writeHeaderTextBlock(businessName || "Business name", contentX, leftY, {
         bold: true,
         fontSize: 18,
         maxWidth: leftColumnWidth
       });
       if (businessContact) {
         leftY += 8;
-        leftY += writeTextAt(businessContact, contentX, leftY, {
+        leftY += writeHeaderTextBlock(businessContact, contentX, leftY, {
           color: stone600,
           maxWidth: leftColumnWidth
         });
       }
       if (businessAddress) {
         leftY += 4;
-        leftY += writeTextAt(businessAddress, contentX, leftY, {
+        leftY += writeHeaderTextBlock(businessAddress, contentX, leftY, {
           color: stone600,
           maxWidth: leftColumnWidth
         });
@@ -601,39 +665,52 @@ export function InvoiceGenerator() {
               fittedLogo.width,
               fittedLogo.height
             );
-            rightY += fittedLogo.height + 18;
+            rightY += fittedLogo.height + 24;
           }
         } catch {
           rightY = headerTop;
         }
       }
 
-      rightY += writeTextAt("INVOICE", contentRight, rightY, {
+      rightY += writeHeaderTextBlock("INVOICE", contentRight, rightY, {
         align: "right",
         bold: true,
         color: slate700,
         fontSize: 30,
         maxWidth: rightColumnWidth
       });
-      rightY += 12;
-      rightY += writeTextAt(`Invoice #: ${invoiceNumber || "Invoice number"}`, contentRight, rightY, {
-        align: "right",
-        color: stone600,
-        maxWidth: rightColumnWidth
-      });
-      rightY += 5;
-      rightY += writeTextAt(`Date: ${invoiceDate || "Invoice date"}`, contentRight, rightY, {
-        align: "right",
-        color: stone600,
-        maxWidth: rightColumnWidth
-      });
+      rightY += 16;
+
+      const writeInvoiceMetaRow = (label: string, value: string, top: number) => {
+        const labelWidth = 70;
+        const labelX = rightColumnX + labelWidth;
+        const valueWidth = Math.max(110, rightColumnWidth - labelWidth - 12);
+        const fontSize = 10;
+        const textBaseline = top + fontSize;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(fontSize);
+        const valueLines =
+          doc.getTextWidth(value) <= valueWidth ? [value] : textLines(value, valueWidth);
+        const rowHeight = Math.max(valueLines.length * lineHeightFor(fontSize), lineHeightFor(fontSize));
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(fontSize);
+        applyText(stone600);
+        doc.text(label, labelX, textBaseline, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        applyText(stone950);
+        doc.text(valueLines, contentRight, textBaseline, { align: "right" });
+
+        return rowHeight;
+      };
+
+      rightY += writeInvoiceMetaRow("Invoice #:", invoiceNumber || "Invoice number", rightY);
+      rightY += 8;
+      rightY += writeInvoiceMetaRow("Date:", invoiceDate || "Invoice date", rightY);
       if (dueDate) {
-        rightY += 5;
-        rightY += writeTextAt(`Due: ${dueDate}`, contentRight, rightY, {
-          align: "right",
-          color: stone600,
-          maxWidth: rightColumnWidth
-        });
+        rightY += 8;
+        rightY += writeInvoiceMetaRow("Due:", dueDate, rightY);
       }
 
       y = Math.max(leftY, rightY) + 30;
@@ -643,9 +720,9 @@ export function InvoiceGenerator() {
       const billToHeight =
         12 +
         6 +
-        measureTextBlock(customerName || "Customer name", contentWidth, 13) +
-        (customerContact ? 4 + measureTextBlock(customerContact, contentWidth) : 0) +
-        (customerAddress ? 2 + measureTextBlock(customerAddress, contentWidth) : 0);
+        measureTextBlock(customerName || "Customer name", leftColumnWidth, 13) +
+        (customerContact ? 4 + measureTextBlock(customerContact, leftColumnWidth) : 0) +
+        (customerAddress ? 2 + measureTextBlock(customerAddress, leftColumnWidth) : 0);
 
       addPageIfNeeded(billToHeight + 28);
       writeText("BILL TO", contentX, {
@@ -705,31 +782,46 @@ export function InvoiceGenerator() {
 
       previewItems.forEach((item, index) => {
         const descriptionLines = textLines(item.description, descriptionWidth - 26);
-        const rowHeight = Math.max(descriptionLines.length * 14 + 22, 44);
+        const maxLinesPerRow = Math.max(1, Math.floor((maxFlowHeight - headerHeight - 34) / 14));
+        let remainingLines = descriptionLines.length > 0 ? descriptionLines : ["Item"];
+        let chunkIndex = 0;
 
-        if (y + rowHeight > cardBottom - innerPadding) {
-          doc.addPage();
-          drawInvoiceCard();
-          y = cardY + innerPadding;
-          drawTableHeader();
+        while (remainingLines.length > 0) {
+          const chunkLines = remainingLines.slice(0, maxLinesPerRow);
+          remainingLines = remainingLines.slice(maxLinesPerRow);
+          const rowHeight = Math.max(chunkLines.length * 14 + 22, 44);
+
+          if (y + rowHeight > contentBottom) {
+            doc.addPage();
+            drawInvoicePage();
+            y = pageMargin;
+            drawTableHeader();
+          }
+
+          applyFill(index % 2 === 0 ? white : slate50);
+          applyStroke(stone200);
+          doc.rect(tableX, y, tableWidth, rowHeight, "S");
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          applyText(stone600);
+          doc.text(chunkIndex === 0 ? String(index + 1) : "", tableX + 14, y + 22);
+          applyText(stone950);
+          doc.text(chunkLines, descriptionX + 10, y + 22);
+          applyText(stone600);
+          doc.text(chunkIndex === 0 ? formatCurrency(item.unitPrice) : "", unitRight, y + 22, {
+            align: "right"
+          });
+          doc.text(chunkIndex === 0 ? formatAmount(item.quantity) : "", qtyRight, y + 22, {
+            align: "right"
+          });
+          doc.setFont("helvetica", "bold");
+          applyText(stone950);
+          doc.text(chunkIndex === 0 ? formatCurrency(item.lineTotal) : "", totalRight, y + 22, {
+            align: "right"
+          });
+          y += rowHeight;
+          chunkIndex += 1;
         }
-
-        applyFill(index % 2 === 0 ? white : slate50);
-        applyStroke(stone200);
-        doc.rect(tableX, y, tableWidth, rowHeight, "S");
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        applyText(stone600);
-        doc.text(String(index + 1), tableX + 14, y + 22);
-        applyText(stone950);
-        doc.text(descriptionLines, descriptionX + 10, y + 22);
-        applyText(stone600);
-        doc.text(formatCurrency(item.unitPrice), unitRight, y + 22, { align: "right" });
-        doc.text(formatAmount(item.quantity), qtyRight, y + 22, { align: "right" });
-        doc.setFont("helvetica", "bold");
-        applyText(stone950);
-        doc.text(formatCurrency(item.lineTotal), totalRight, y + 22, { align: "right" });
-        y += rowHeight;
 
         if (index === previewItems.length - 1) {
           y += 24;
@@ -773,10 +865,130 @@ export function InvoiceGenerator() {
       doc.text(formatCurrency(total), totalsX + totalsWidth - 16, totalRowY, { align: "right" });
       y += totalsHeight + 24;
 
-      if (hasPaymentDetails || terms.trim()) {
+      const renderFlowTextSection = (title: string, text: string) => {
+        const trimmedText = text.trim();
+
+        if (!trimmedText) {
+          return;
+        }
+
+        addPageIfNeeded(46);
+        drawDivider();
+        y += 20;
+        writeTextAt(title, contentX, y, {
+          bold: true,
+          color: stone950,
+          fontSize: 11,
+          maxWidth: contentWidth
+        });
+        y += 24;
+
+        const lines = textLines(trimmedText, contentWidth);
+        const lineHeight = lineHeightFor(10);
+        let lineIndex = 0;
+
+        while (lineIndex < lines.length) {
+          const availableLines = Math.max(1, Math.floor((contentBottom - y) / lineHeight));
+
+          if (availableLines <= 1 && y + lineHeight > contentBottom) {
+            doc.addPage();
+            drawInvoicePage();
+            y = pageMargin;
+            continue;
+          }
+
+          const chunk = lines.slice(lineIndex, lineIndex + availableLines);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          applyText(stone600);
+          doc.text(chunk, contentX, y);
+          y += chunk.length * lineHeight;
+          lineIndex += chunk.length;
+
+          if (lineIndex < lines.length) {
+            doc.addPage();
+            drawInvoicePage();
+            y = pageMargin;
+          }
+        }
+
+        y += 18;
+      };
+
+      const renderPaymentDetailsFlow = () => {
+        if (!hasPaymentDetails) {
+          return;
+        }
+
+        addPageIfNeeded(46);
+        drawDivider();
+        y += 20;
+        writeTextAt("Payment Details", contentX, y, {
+          bold: true,
+          color: stone950,
+          fontSize: 11,
+          maxWidth: contentWidth
+        });
+        y += 24;
+
+        const paymentLabelWidth = 96;
+        const paymentValueX = contentX + paymentLabelWidth + 12;
+        const paymentValueWidth = contentWidth - paymentLabelWidth - 12;
+        const lineHeight = lineHeightFor(10);
+
+        paymentDetailRows.forEach(([label, value]) => {
+          const valueLines = textLines(value, paymentValueWidth);
+          let lineIndex = 0;
+          let isFirstChunk = true;
+
+          while (lineIndex < valueLines.length) {
+            const availableLines = Math.max(1, Math.floor((contentBottom - y) / lineHeight));
+
+            if (availableLines <= 1 && y + lineHeight > contentBottom) {
+              doc.addPage();
+              drawInvoicePage();
+              y = pageMargin;
+              continue;
+            }
+
+            const chunk = valueLines.slice(lineIndex, lineIndex + availableLines);
+
+            if (isFirstChunk) {
+              writeTextAt(`${label}:`, contentX, y, {
+                bold: true,
+                color: stone600,
+                maxWidth: paymentLabelWidth
+              });
+            }
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            applyText(stone600);
+            doc.text(chunk, paymentValueX, y);
+            y += chunk.length * lineHeight;
+            lineIndex += chunk.length;
+            isFirstChunk = false;
+
+            if (lineIndex < valueLines.length) {
+              doc.addPage();
+              drawInvoicePage();
+              y = pageMargin;
+            }
+          }
+
+          y += 6;
+        });
+
+        y += 12;
+      };
+
+      const hasTerms = terms.trim() !== "";
+      const hasNotes = notes.trim() !== "";
+
+      if (hasPaymentDetails || hasTerms) {
         const bottomColumnGap = 32;
         const bottomColumnWidth =
-          hasPaymentDetails && terms.trim()
+          hasPaymentDetails && hasTerms
             ? (contentWidth - bottomColumnGap) / 2
             : contentWidth;
         const rightBottomColumnX = contentX + bottomColumnWidth + bottomColumnGap;
@@ -792,58 +1004,70 @@ export function InvoiceGenerator() {
         const paymentDetailsHeight = hasPaymentDetails
           ? measurePaymentRowsHeight(bottomColumnWidth) + 44
           : 0;
-        const termsHeight = terms.trim()
+        const termsHeight = hasTerms
           ? measureTextBlock(terms, bottomColumnWidth) + 44
           : 0;
         const bottomSectionHeight = Math.max(paymentDetailsHeight, termsHeight);
-        addPageIfNeeded(bottomSectionHeight + 8);
-        applyStroke(stone200);
-        doc.line(contentX, y, contentRight, y);
-        const bottomStartY = y + 20;
 
-        if (hasPaymentDetails) {
-          writeTextAt("Payment Details", contentX, bottomStartY, {
-            bold: true,
-            color: stone950,
-            fontSize: 11,
-            maxWidth: bottomColumnWidth
-          });
-          let paymentY = bottomStartY + 24;
-          const paymentLabelWidth = Math.min(92, bottomColumnWidth * 0.38);
-          const paymentValueX = contentX + paymentLabelWidth + 8;
-          const paymentValueWidth = bottomColumnWidth - paymentLabelWidth - 8;
-          paymentDetailRows.forEach(([label, value]) => {
-            writeTextAt(`${label}:`, contentX, paymentY, {
+        if (bottomSectionHeight <= maxFlowHeight - 8) {
+          addPageIfNeeded(bottomSectionHeight + 8);
+          applyStroke(stone200);
+          doc.line(contentX, y, contentRight, y);
+          const bottomStartY = y + 20;
+
+          if (hasPaymentDetails) {
+            writeTextAt("Payment Details", contentX, bottomStartY, {
               bold: true,
-              color: stone600,
-              maxWidth: paymentLabelWidth
+              color: stone950,
+              fontSize: 11,
+              maxWidth: bottomColumnWidth
             });
-            paymentY += writeTextAt(value, paymentValueX, paymentY, {
-              color: stone600,
-              maxWidth: paymentValueWidth
+            let paymentY = bottomStartY + 24;
+            const paymentLabelWidth = Math.min(92, bottomColumnWidth * 0.38);
+            const paymentValueX = contentX + paymentLabelWidth + 8;
+            const paymentValueWidth = bottomColumnWidth - paymentLabelWidth - 8;
+            paymentDetailRows.forEach(([label, value]) => {
+              writeTextAt(`${label}:`, contentX, paymentY, {
+                bold: true,
+                color: stone600,
+                maxWidth: paymentLabelWidth
+              });
+              paymentY += writeTextAt(value, paymentValueX, paymentY, {
+                color: stone600,
+                maxWidth: paymentValueWidth
+              });
+              paymentY += 6;
             });
-            paymentY += 6;
-          });
-        }
+          }
 
-        if (terms.trim()) {
-          const termsX = hasPaymentDetails ? rightBottomColumnX : contentX;
-          writeTextAt("Terms & Conditions", termsX, bottomStartY, {
-            bold: true,
-            color: stone950,
-            fontSize: 11,
-            maxWidth: bottomColumnWidth
-          });
-          writeTextAt(terms, termsX, bottomStartY + 24, {
-            color: stone600,
-            maxWidth: bottomColumnWidth
-          });
-        }
+          if (hasTerms) {
+            const termsX = hasPaymentDetails ? rightBottomColumnX : contentX;
+            writeTextAt("Terms & Conditions", termsX, bottomStartY, {
+              bold: true,
+              color: stone950,
+              fontSize: 11,
+              maxWidth: bottomColumnWidth
+            });
+            writeTextAt(terms, termsX, bottomStartY + 24, {
+              color: stone600,
+              maxWidth: bottomColumnWidth
+            });
+          }
 
-        y = bottomStartY + bottomSectionHeight + 12;
+          y = bottomStartY + bottomSectionHeight + 12;
+        } else {
+          renderPaymentDetailsFlow();
+          renderFlowTextSection("Terms & Conditions", terms);
+        }
       }
 
-      doc.save(`invoice-${sanitizePdfFileName(invoiceNumber || "preview")}.pdf`);
+      if (hasNotes) {
+        renderFlowTextSection("Notes", notes);
+      }
+
+      drawPageNumber();
+      doc.save(buildInvoicePdfFileName(invoiceNumber, customerName, invoiceDate));
+      saveLastInvoiceNumber(invoiceNumber);
       setIsDownloadModalOpen(false);
     } finally {
       setIsGeneratingPdf(false);
@@ -1244,13 +1468,25 @@ export function InvoiceGenerator() {
               />
             </label>
 
+            <p className="text-sm leading-6 text-stone-600">
+              New invoice keeps your business, payment, and terms details. Clear everything resets
+              the whole form.
+            </p>
+
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                onClick={clearDraftAndResetInvoice}
+                onClick={startNewInvoice}
                 type="button"
               >
-                Clear draft
+                New invoice
+              </button>
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-red-200 px-5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                onClick={clearEverything}
+                type="button"
+              >
+                Clear everything
               </button>
               <button
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1599,6 +1835,50 @@ export function InvoiceGenerator() {
           </div>
         </div>
       </Card>
+
+      {isClearEverythingModalOpen ? (
+        <div
+          aria-labelledby="clear-invoice-draft-title"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/35 px-4 py-6 backdrop-blur-sm"
+          onClick={() => setIsClearEverythingModalOpen(false)}
+          role="dialog"
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-5 shadow-2xl sm:p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="text-sm font-medium tracking-wide text-slate-500">Invoice Draft</p>
+            <h2
+              className="mt-2 text-xl font-semibold tracking-tight text-stone-950"
+              id="clear-invoice-draft-title"
+            >
+              Clear all invoice details?
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-stone-600">
+              This will remove the current draft from this device and reset the form. Your last
+              used invoice number will not be reset.
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                onClick={() => setIsClearEverythingModalOpen(false)}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-red-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800"
+                onClick={confirmClearEverything}
+                ref={confirmClearEverythingButtonRef}
+                type="button"
+              >
+                Clear everything
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {isDownloadModalOpen ? (
         <div

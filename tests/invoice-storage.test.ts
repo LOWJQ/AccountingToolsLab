@@ -2,8 +2,12 @@ import assert from "node:assert/strict";
 import {
   ATL_INVOICE_DRAFT_KEY,
   ATL_INVOICE_DRAFT_VERSION,
+  ATL_INVOICE_LAST_NUMBER_KEY,
   clearInvoiceDraft,
+  clearLastInvoiceNumber,
+  loadLastInvoiceNumber,
   loadInvoiceDraft,
+  saveLastInvoiceNumber,
   saveInvoiceDraft
 } from "../lib/invoice/invoice-storage";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
@@ -185,6 +189,18 @@ test("clearInvoiceDraft removes the draft", () => {
   assert.equal(entries[ATL_INVOICE_DRAFT_KEY], undefined);
 });
 
+test("clearInvoiceDraft does not clear last used invoice number", () => {
+  const { entries, storage } = createStorage({
+    [ATL_INVOICE_DRAFT_KEY]: "draft",
+    [ATL_INVOICE_LAST_NUMBER_KEY]: "INV-001"
+  });
+  installStorage(storage);
+
+  assert.deepEqual(clearInvoiceDraft(), { ok: true });
+  assert.equal(entries[ATL_INVOICE_DRAFT_KEY], undefined);
+  assert.equal(entries[ATL_INVOICE_LAST_NUMBER_KEY], "INV-001");
+});
+
 test("storage helper does not throw when localStorage methods throw", () => {
   const throwingStorage: TestStorage = {
     getItem: () => {
@@ -218,6 +234,63 @@ test("storage helper handles quota and security errors gracefully", () => {
 
   assert.equal(saveInvoiceDraft(createInvoice()).ok, false);
   assert.equal(clearInvoiceDraft().ok, false);
+  assert.equal(saveLastInvoiceNumber("INV-001").ok, false);
+  assert.equal(clearLastInvoiceNumber().ok, false);
+});
+
+test("loadLastInvoiceNumber returns null when missing", () => {
+  installStorage(createStorage().storage);
+
+  assert.equal(loadLastInvoiceNumber(), null);
+});
+
+test("saveLastInvoiceNumber saves trimmed invoice number", () => {
+  const { entries, storage } = createStorage();
+  installStorage(storage);
+
+  assert.deepEqual(saveLastInvoiceNumber("  INV-001  "), { ok: true });
+  assert.equal(entries[ATL_INVOICE_LAST_NUMBER_KEY], "INV-001");
+});
+
+test("saveLastInvoiceNumber rejects empty invoice number", () => {
+  const { entries, storage } = createStorage();
+  installStorage(storage);
+
+  assert.equal(saveLastInvoiceNumber("   ").ok, false);
+  assert.equal(entries[ATL_INVOICE_LAST_NUMBER_KEY], undefined);
+});
+
+test("clearLastInvoiceNumber removes stored invoice number", () => {
+  const { entries, storage } = createStorage({ [ATL_INVOICE_LAST_NUMBER_KEY]: "INV-001" });
+  installStorage(storage);
+
+  assert.deepEqual(clearLastInvoiceNumber(), { ok: true });
+  assert.equal(entries[ATL_INVOICE_LAST_NUMBER_KEY], undefined);
+});
+
+test("last invoice number helpers do not throw when localStorage is unavailable", () => {
+  assert.doesNotThrow(() => loadLastInvoiceNumber());
+  assert.doesNotThrow(() => saveLastInvoiceNumber("INV-001"));
+  assert.doesNotThrow(() => clearLastInvoiceNumber());
+});
+
+test("last invoice number helpers do not throw when localStorage throws", () => {
+  const throwingStorage: TestStorage = {
+    getItem: () => {
+      throw new Error("blocked");
+    },
+    setItem: () => {
+      throw new Error("blocked");
+    },
+    removeItem: () => {
+      throw new Error("blocked");
+    }
+  };
+  installStorage(throwingStorage);
+
+  assert.doesNotThrow(() => loadLastInvoiceNumber());
+  assert.doesNotThrow(() => saveLastInvoiceNumber("INV-001"));
+  assert.doesNotThrow(() => clearLastInvoiceNumber());
 });
 
 test("old draft with paymentDetails string migrates to payment notes", () => {

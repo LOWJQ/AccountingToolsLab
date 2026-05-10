@@ -8,6 +8,7 @@ import {
 } from "./invoice-types";
 
 export const ATL_INVOICE_DRAFT_KEY = "atl-invoice-draft";
+export const ATL_INVOICE_LAST_NUMBER_KEY = "atl-invoice-last-number";
 export const ATL_INVOICE_DRAFT_VERSION = 1;
 
 export type StoredInvoiceDraft = {
@@ -189,6 +190,62 @@ export function clearInvoiceDraft(): StorageResult {
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Unable to clear invoice draft."
+    };
+  }
+}
+
+export function loadLastInvoiceNumber(): string | null {
+  const storage = getLocalStorage();
+
+  if (!storage) {
+    return null;
+  }
+
+  try {
+    const value = storage.getItem(ATL_INVOICE_LAST_NUMBER_KEY)?.trim() ?? "";
+    return value === "" ? null : value;
+  } catch {
+    return null;
+  }
+}
+
+export function saveLastInvoiceNumber(invoiceNumber: string): StorageResult {
+  const storage = getLocalStorage();
+  const trimmedInvoiceNumber = invoiceNumber.trim();
+
+  if (!storage) {
+    return { ok: false, error: "localStorage is unavailable." };
+  }
+
+  if (trimmedInvoiceNumber === "") {
+    return { ok: false, error: "Invoice number is empty." };
+  }
+
+  try {
+    storage.setItem(ATL_INVOICE_LAST_NUMBER_KEY, trimmedInvoiceNumber);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Unable to save invoice number."
+    };
+  }
+}
+
+export function clearLastInvoiceNumber(): StorageResult {
+  const storage = getLocalStorage();
+
+  if (!storage) {
+    return { ok: false, error: "localStorage is unavailable." };
+  }
+
+  try {
+    storage.removeItem(ATL_INVOICE_LAST_NUMBER_KEY);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Unable to clear invoice number."
     };
   }
 }
