@@ -9,7 +9,7 @@ const updatedRouteLastModified: Record<string, string> = {
   "": "2026-05-08",
   "/tools": "2026-05-08",
   "/about": "2026-05-08",
-  "/tools/invoice-generator": "2026-05-08"
+  "/tools/invoice-generator": "2026-05-11"
 };
 
 export default function sitemap(): MetadataRoute.Sitemap {

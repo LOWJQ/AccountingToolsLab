@@ -42,17 +42,23 @@ type TaxMode = "none" | "sst-6" | "sst-8" | "custom";
 type DiscountMode = "none" | "percentage" | "fixed";
 
 const featureHighlights = [
-  "Logo, invoice number, dates, and currency",
-  "Line items with quantity, unit price, subtotal, and total",
-  "Optional SST / tax and discount before tax",
-  "Structured payment details and uploaded payment QR image",
-  "Terms, notes, preview, and PDF download",
-  "Draft saved on this device with new invoice shortcuts"
+  "Add a logo, invoice number, invoice date, due date, and currency.",
+  "Enter line items with quantity, unit price, subtotal, and total.",
+  "Apply optional SST, other tax rates, and discounts when needed.",
+  "Include payment details and an optional QR/payment image.",
+  "Add invoice notes or terms before you send the invoice.",
+  "Preview the invoice, download the PDF, and keep drafts on this device."
 ];
 
 const toolFitNotes = [
-  ["Good for", "Simple PDF invoices for small businesses, freelancers, and repeat customers."],
-  ["Not for", "Official LHDN/MyInvois submission, validation, or connected e-Invoice filing."]
+  [
+    "Good for",
+    "Simple PDF invoices for Malaysia small businesses, freelancers, consultants, and repeat customers."
+  ],
+  [
+    "Not for",
+    "Official LHDN/MyInvois submission, validation, connected e-Invoice filing, or guaranteed tax compliance."
+  ]
 ];
 
 const taxOptions: { label: string; mode: TaxMode; rate: number | null }[] = [
@@ -1893,8 +1899,12 @@ export function InvoiceGenerator() {
         <Card className="p-6 sm:p-8">
           <p className="text-sm font-medium tracking-wide text-slate-500">Fast invoice setup</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Build the invoice, preview it, then download the PDF
+            Create PDF invoices for Malaysia in a few steps
           </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            Build the invoice details, check the preview, then download a clean PDF invoice for
+            your records or customer.
+          </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {featureHighlights.map((feature) => (
               <div
@@ -1910,11 +1920,12 @@ export function InvoiceGenerator() {
         <Card className="p-6 sm:p-8">
           <p className="text-sm font-medium tracking-wide text-slate-500">Malaysia note</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Simple PDF invoice only
+            Simple PDF invoice only, not MyInvois filing
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            This creates a simple PDF invoice. It does not submit, validate, or connect to
-            LHDN/MyInvois.
+            This tool creates downloadable PDF invoices. It does not submit, validate, or connect
+            invoices to LHDN/MyInvois, and it does not replace official e-Invoice filing or tax
+            advice.
           </p>
           <div className="mt-5 grid gap-3">
             {toolFitNotes.map(([label, text]) => (
@@ -1932,11 +1943,11 @@ export function InvoiceGenerator() {
           <div className="max-w-2xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Connect invoices with SST, cash, and business checks
+              Connect invoices with SST, cash flow, and business checks
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use SST, cash flow, break-even, and ratio tools to review the numbers around an
-              invoice before and after it is issued.
+              Use the SST, cash flow, break-even, and ratio calculators to review the numbers
+              around an invoice before and after it is issued.
             </p>
           </div>
           <div className="flex flex-col gap-3">

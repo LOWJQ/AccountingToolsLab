@@ -323,7 +323,7 @@ export function SstCalculatorMalaysia() {
             </p>
           </div>
           <div className="flex flex-col gap-3">
-            <ButtonLink href="/tools/invoice-generator">Invoice Generator</ButtonLink>
+            <ButtonLink href="/tools/invoice-generator">Create a PDF Invoice</ButtonLink>
             <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
               Cash Flow Calculator
             </ButtonLink>

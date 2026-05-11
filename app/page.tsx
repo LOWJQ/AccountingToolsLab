@@ -105,7 +105,7 @@ export default function HomePage() {
                   className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                   href="/tools/invoice-generator"
                 >
-                  Create Free Invoice
+                  Create a PDF Invoice
                 </a>
                 <a
                   className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
@@ -204,7 +204,7 @@ export default function HomePage() {
                 Tool spotlight
               </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Start with the Invoice Generator
+                Start with the PDF Invoice Generator
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
                 Build a clean invoice for a customer in a few minutes. Add business details,

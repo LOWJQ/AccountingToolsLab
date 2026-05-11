@@ -236,7 +236,7 @@ export default function HowToCreateSimpleInvoicePage() {
               className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/invoice-generator"
             >
-              Try the Invoice Generator
+              Try the PDF Invoice Generator
             </a>
             <a
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
@@ -294,14 +294,14 @@ export default function HowToCreateSimpleInvoicePage() {
           </p>
           <div className="mx-auto mt-5 flex max-w-[1000px] flex-col items-start justify-between gap-4 rounded-xl bg-stone-50 p-5 sm:flex-row sm:items-center">
             <p className="text-sm leading-6 text-stone-700">
-              Want to create one like this? Use the free Invoice Generator to enter your details
-              and download a PDF invoice.
+              Want to create one like this? Use the free invoice generator to enter your details
+              and download a PDF invoice for Malaysia.
             </p>
             <a
               className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/invoice-generator"
             >
-              Create an invoice
+              Create a PDF invoice
             </a>
           </div>
         </section>
@@ -461,7 +461,7 @@ export default function HowToCreateSimpleInvoicePage() {
               className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
               href="/tools/invoice-generator"
             >
-              Use the Invoice Generator
+              Use the free invoice generator
             </a>
           </div>
         </section>

@@ -162,7 +162,7 @@ export default function ToolsPage() {
                   Most Useful for Small Businesses
                 </span>
                 <h2 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-                  Invoice Generator
+                  PDF Invoice Generator Malaysia
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
                   Create simple invoices with business and customer details, line items,
@@ -173,7 +173,7 @@ export default function ToolsPage() {
                   className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                   href="/tools/invoice-generator"
                 >
-                  Create Free Invoice
+                  Create a PDF Invoice
                 </a>
               </div>
               <InvoiceMockPreview />
@@ -251,7 +251,7 @@ export default function ToolsPage() {
               Recommended starting point
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Need to bill a customer? Start with the Invoice Generator.
+              Need to bill a customer? Start with the free invoice generator.
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
               It gives small businesses and freelancers a simple path from customer details and
@@ -261,7 +261,7 @@ export default function ToolsPage() {
               className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
               href="/tools/invoice-generator"
             >
-              Open Invoice Generator
+              Open PDF Invoice Generator
             </a>
           </div>
         </section>

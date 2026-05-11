@@ -36,7 +36,7 @@ const initialFormState: FormState = {
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const turnstileSiteKey = "0x4AAAAAADK16LHmJMDKkl6s";
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 declare global {
   interface Window {

@@ -10,7 +10,7 @@ const footerSections: { title: string; links: FooterLink[] }[] = [
   {
     title: "Tools",
     links: [
-      { label: "Invoice Generator", href: "/tools/invoice-generator" },
+      { label: "Free Invoice Generator Malaysia", href: "/tools/invoice-generator" },
       { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" },
       { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
       { label: "Break-even Calculator", href: "/tools/break-even-calculator" },

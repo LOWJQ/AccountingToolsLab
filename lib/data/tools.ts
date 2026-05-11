@@ -70,9 +70,9 @@ export const tools: Tool[] = [
     slug: "invoice-generator",
     name: "Invoice Generator",
     description:
-      "Create a simple invoice with line items, subtotal, total, customer details, and business details.",
+      "Create a simple PDF invoice with business details, customer details, line items, optional SST/tax, and totals.",
     category: "Business Documents",
-    bestFor: "Preparing a basic invoice preview for goods or services.",
+    bestFor: "Preparing downloadable PDF invoices for freelancers and small businesses.",
     href: "/tools/invoice-generator",
     status: "mvp"
   },
