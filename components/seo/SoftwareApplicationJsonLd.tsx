@@ -12,7 +12,7 @@ export function SoftwareApplicationJsonLd({
   applicationCategory = "FinanceApplication",
   description,
   name,
-  priceCurrency = "USD",
+  priceCurrency = "MYR",
   url
 }: SoftwareApplicationJsonLdProps) {
   return (

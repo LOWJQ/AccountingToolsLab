@@ -61,6 +61,15 @@ export default function TrialBalanceCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={trialBalanceFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Trial Balance Calculator
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Enter account balances in the debit or credit column to preview a clean trial balance
+          worksheet layout.
+        </p>
+      </div>
       <TrialBalanceCalculator />
       <RelatedLinks
         title="Learn more about trial balances"

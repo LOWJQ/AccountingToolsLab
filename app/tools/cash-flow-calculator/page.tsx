@@ -65,6 +65,15 @@ export default function CashFlowCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={cashFlowFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Cash Flow Calculator
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Calculate net cash flow and ending cash balance from beginning cash, cash inflows, and
+          cash outflows.
+        </p>
+      </div>
       <CashFlowCalculator />
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>

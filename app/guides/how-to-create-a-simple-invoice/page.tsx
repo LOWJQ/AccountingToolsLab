@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -7,186 +8,161 @@ import { siteConfig } from "@/lib/seo/site";
 export const metadata = createMetadata({
   title: "How to Create a Simple Invoice for a Small Business | AccountingToolsLab",
   description:
-    "Learn how to create a simple invoice, what fields to include, invoice number, invoice date, due date, line items, totals, notes, and common mistakes to avoid.",
+    "Learn how to create a simple invoice with business details, customer details, invoice number, dates, line items, SST or tax notes, payment terms, and a PDF example.",
   path: "/guides/how-to-create-a-simple-invoice"
 });
 
-const invoiceFields = [
-  ["Business name", "The person or business sending the invoice", "ABC Services"],
-  ["Business contact", "Email, phone, or address", "hello@example.com"],
-  ["Customer name", "The person or business being billed", "XYZ Trading"],
-  ["Invoice number", "Unique reference for tracking", "INV-001"],
-  ["Invoice date", "Date the invoice is issued", "7 May 2026"],
-  ["Due date", "Date payment is expected", "21 May 2026"],
-  ["Line items", "Goods or services provided", "Website update, 3 hours"],
-  ["Quantity", "Number of units, hours, or items", "3"],
-  ["Unit price", "Price per unit or hour", "RM 100"],
-  ["Line total", "Quantity x unit price", "RM 300"],
-  ["Notes", "Optional payment terms or extra details", "Thank you for your business"]
+const tableOfContents = [
+  ["What to include", "#what-to-include"],
+  ["Invoice format", "#invoice-format"],
+  ["Step-by-step guide", "#steps"],
+  ["Example", "#example"],
+  ["Checklist", "#checklist"],
+  ["Malaysia note", "#malaysia-note"],
+  ["Related tools", "#related-tools"],
+  ["FAQ", "#faq"]
 ];
 
-const sampleLineItems = [
-  ["Bookkeeping service", "2", "RM 150", "RM 300"],
-  ["Report preparation", "1", "RM 200", "RM 200"],
-  ["Total", "-", "-", "RM 500"]
+const invoiceFields = [
+  ["Business details", "Who is sending the invoice", "Accounting Tools Lab"],
+  ["Customer details", "Who needs to pay", "Example Customer"],
+  ["Invoice number", "A unique tracking reference", "INV-002"],
+  ["Invoice date", "Date the invoice is issued", "2026-05-11"],
+  ["Due date", "Date payment is expected", "2026-05-18"],
+  ["Line items", "Goods or services billed", "Accounting Consultation Fee"],
+  ["Quantity and unit price", "How the amount is calculated", "1 x RM 150"],
+  ["Subtotal and total", "Amount before and after discount and tax", "RM 146.28"],
+  ["Payment details", "How the customer can pay", "Maybank or payment link"],
+  ["Terms and conditions", "Payment rules and important notes", "Payment due within 7 days"]
+];
+
+const formatItems = [
+  "Business details at the top",
+  "Customer details in a Bill To section",
+  "Invoice number, invoice date, and due date",
+  "Line item table with quantity and unit price",
+  "Subtotal, discount if any, SST/tax if applicable, and total",
+  "Payment details, terms, and notes near the bottom"
 ];
 
 const steps = [
-  "Add your business name and contact details.",
-  "Add the customer's name and contact details.",
-  "Create a unique invoice number.",
-  "Add the invoice date.",
-  "Add a due date if payment is expected later.",
-  "List the goods or services provided.",
-  "Enter quantity and unit price for each line item.",
-  "Calculate each line total.",
-  "Add the subtotal and final total.",
-  "Add notes or payment terms if needed.",
-  "Review the invoice before sending it."
+  "Add your business name, contact details, and logo if you have one.",
+  "Add the customer name and contact details.",
+  "Use a unique invoice number such as INV-001 or INV-2026-001.",
+  "Enter the invoice date and a due date if payment is expected later.",
+  "List each product or service with a clear description.",
+  "Enter quantity and unit price so each line total is easy to check.",
+  "Add any discount before SST or tax if it applies.",
+  "Add payment details, terms, and notes that help the customer pay.",
+  "Preview the invoice, check the total, then download or send the PDF."
 ];
 
-const exampleRows = [
-  ["Business name", "Aina Design Studio"],
-  ["Customer name", "Bright Cafe"],
-  ["Invoice number", "INV-1001"],
-  ["Invoice date", "7 May 2026"],
-  ["Due date", "21 May 2026"],
-  ["Description", "Logo design work"],
-  ["Quantity", "5"],
-  ["Unit price", "RM 120"],
-  ["Total", "RM 600"]
+const sampleLineItems = [
+  ["Accounting Consultation Fee", "1", "RM 150.00", "RM 150.00"],
+  ["Discount", "-", "-", "-RM 12.00"],
+  ["Amount after discount", "-", "-", "RM 138.00"],
+  ["SST / Tax 6%", "-", "-", "RM 8.28"],
+  ["Total", "-", "-", "RM 146.28"]
 ];
 
-const dateRows = [
-  ["Invoice Date", "Date the invoice is created or issued", "7 May 2026"],
-  ["Due Date", "Date payment is expected", "21 May 2026"]
+const mistakes = [
+  "Reusing an invoice number",
+  "Using vague item descriptions",
+  "Forgetting customer details",
+  "Missing payment details or terms",
+  "Adding SST/tax without checking whether it applies",
+  "Treating an unpaid invoice as cash received"
 ];
 
-const invoiceReceiptRows = [
-  ["Invoice", "Requests payment", "Before payment"],
-  ["Receipt", "Confirms payment", "After payment"]
+const checklist = [
+  "Business and customer names are correct",
+  "Invoice number is unique",
+  "Invoice date and due date are clear",
+  "Line items, quantities, and prices are correct",
+  "Discount, SST/tax, subtotal, and total look right",
+  "Payment details and terms are easy to understand"
 ];
 
-const toolLinks = [
+const relatedLinks = [
   {
     title: "Invoice Generator",
     href: "/tools/invoice-generator",
-    description: "Use it to create a simple invoice preview."
-  },
-  {
-    title: "SST Calculator Malaysia Guide",
-    href: "/guides/sst-calculator-malaysia-add-remove-sst",
-    description: "Learn how to add or remove SST in Malaysia for arithmetic checks."
-  },
-  {
-    title: "Cash Flow Calculator",
-    href: "/tools/cash-flow-calculator",
-    description: "Use it to estimate net cash flow after payments are received or made."
-  },
-  {
-    title: "Cash Flow vs Profit",
-    href: "/guides/cash-flow-vs-profit",
-    description: "Understand why an invoice is not the same as cash received."
+    description: "Create a simple invoice preview and download a PDF."
   },
   {
     title: "SST Calculator Malaysia",
     href: "/tools/sst-calculator-malaysia",
-    description: "Use it to estimate SST arithmetic if you already know the correct rate and treatment."
+    description: "Estimate SST arithmetic when you already know the correct rate."
   },
   {
-    title: "Break-even Point Explained",
-    href: "/guides/break-even-point-explained",
-    description: "Review how sales, prices, and costs connect to business planning."
+    title: "How to add or remove SST in Malaysia",
+    href: "/guides/sst-calculator-malaysia-add-remove-sst",
+    description: "Learn the basic formulas for adding or removing SST."
+  },
+  {
+    title: "Cash Flow Calculator",
+    href: "/tools/cash-flow-calculator",
+    description: "Check simple cash inflows, outflows, and ending cash balance."
+  },
+  {
+    title: "Cash Flow vs Profit",
+    href: "/guides/cash-flow-vs-profit",
+    description: "Understand why an invoice is not the same as cash collected."
   },
   {
     title: "Break-even Calculator",
     href: "/tools/break-even-calculator",
-    description: "Use it to estimate sales needed to cover costs."
+    description: "Estimate sales needed to cover fixed and variable costs."
+  },
+  {
+    title: "Break-even Point Explained",
+    href: "/guides/break-even-point-explained",
+    description: "Connect pricing, cost, and sales planning after invoicing."
   }
-];
-
-const mistakes = [
-  "Forgetting the invoice number",
-  "Leaving out customer details",
-  "Using unclear item descriptions",
-  "Forgetting the invoice date or due date",
-  "Entering the wrong quantity or unit price",
-  "Reusing the same invoice number",
-  "Confusing an invoice with a receipt",
-  "Assuming invoiced sales are the same as cash received",
-  "Adding tax without checking whether it applies"
-];
-
-const checklist = [
-  "Is your business name included?",
-  "Are your contact details included?",
-  "Is the customer name correct?",
-  "Is the invoice number unique?",
-  "Is the invoice date included?",
-  "Is the due date clear?",
-  "Are line item descriptions easy to understand?",
-  "Are quantities and unit prices correct?",
-  "Does the total look correct?",
-  "Did you review notes, payment terms, or tax treatment if needed?"
 ];
 
 const faqs = [
   {
     question: "What is a simple invoice?",
     answer:
-      "A simple invoice is a document sent to a customer to request payment for goods or services."
+      "A simple invoice is a document sent to request payment for goods or services. It should show who is billing, who is being billed, what was provided, and how much is due."
   },
   {
     question: "What should an invoice include?",
     answer:
-      "A simple invoice usually includes business details, customer details, invoice number, invoice date, due date, line items, subtotal, total, and notes."
-  },
-  {
-    question: "How do I create an invoice number?",
-    answer:
-      "Use a unique and consistent reference such as INV-001, INV-2026-001, or a client-based number."
-  },
-  {
-    question: "What is the difference between invoice date and due date?",
-    answer:
-      "Invoice date is when the invoice is issued. Due date is when payment is expected."
+      "It should include business details, customer details, invoice number, invoice date, due date if needed, line items, subtotal, tax or SST if applicable, payment details, terms, and total."
   },
   {
     question: "Is an invoice the same as a receipt?",
     answer:
-      "No. An invoice requests payment, while a receipt confirms payment has already been received."
+      "No. An invoice requests payment, while a receipt confirms that payment has already been received."
   },
   {
     question: "Can I create an invoice without tax?",
     answer:
-      "Some simple invoices may not include tax, but tax treatment depends on the business, location, registration status, and applicable rules."
+      "Yes, a simple invoice can have no tax if tax does not apply. If you are unsure about SST or other tax treatment, check official guidance or a qualified professional."
   },
   {
     question: "Should I include payment terms?",
     answer:
-      "Clear payment terms can help customers understand when and how payment is expected."
+      "Payment terms are useful because they tell the customer when payment is expected and how to pay."
   },
   {
-    question: "Does sending an invoice mean cash has been received?",
+    question: "Can I use the Invoice Generator to create a PDF invoice?",
     answer:
-      "No. Sending an invoice requests payment. Cash flow changes when payment is actually collected."
+      "Yes. The Invoice Generator lets you enter invoice details, preview the invoice, and download a simple PDF invoice."
   },
   {
-    question: "How can the Invoice Generator help?",
+    question: "Is this an official Malaysia e-Invoice or MyInvois tool?",
     answer:
-      "The Invoice Generator helps create a simple invoice preview with business details, customer details, line items, totals, and notes."
-  },
-  {
-    question: "Can this guide help freelancers and small business owners?",
-    answer:
-      "Yes. It is written for beginners, freelancers, and small business owners who need a simple educational invoice checklist."
+      "No. The Invoice Generator creates a simple PDF invoice only. It does not submit, validate, or connect to LHDN/MyInvois."
   }
 ];
 
 function GuideTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
     <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200">
-      <table className="min-w-[720px] w-full border-collapse bg-white text-left text-sm">
+      <table className="w-full min-w-[720px] border-collapse bg-white text-left text-sm">
         <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
           <tr>
             {headers.map((header) => (
@@ -202,7 +178,7 @@ function GuideTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
               {row.map((cell, index) => (
                 <td
                   className={`px-4 py-3 ${index === 0 ? "font-semibold text-stone-950" : ""}`}
-                  key={cell}
+                  key={`${row[0]}-${index}-${cell}`}
                 >
                   {cell}
                 </td>
@@ -233,28 +209,27 @@ export default function HowToCreateSimpleInvoicePage() {
           "@context": "https://schema.org",
           "@type": "Article",
           headline: "How to Create a Simple Invoice for a Small Business",
-          description:
-            "Learn how to create a simple invoice, what fields to include, invoice number, invoice date, due date, line items, totals, notes, and common mistakes to avoid.",
+          description: metadata.description,
           url: pageUrl,
           publisher: {
             "@type": "Organization",
             name: siteConfig.name,
             url: siteConfig.url
           },
+          image: `${siteConfig.url}/guides/simple-invoice-example-labeled.webp`,
           mainEntityOfPage: pageUrl
         }}
       />
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Business Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
             How to Create a Simple Invoice for a Small Business
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            An invoice is a document sent to a customer to request payment for goods or services.
-            A simple invoice should clearly show who is billing, who is being billed, what was
-            provided, how much is due, and when payment is expected.
+            Learn what a simple invoice should include, how the format works, and what to check
+            before sending it to a customer.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
@@ -265,65 +240,95 @@ export default function HowToCreateSimpleInvoicePage() {
             </a>
             <a
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-              href="/guides/cash-flow-vs-profit"
+              href="#steps"
             >
-              Learn Cash Flow vs Profit
+              Read the steps
             </a>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Quick answer</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            What is a simple invoice?
-          </h2>
-          <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>A simple invoice is a document that requests payment.</p>
-            <p>
-              It usually includes seller details, customer details, invoice number, invoice date,
-              due date, line items, subtotal, total, and notes.
+        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <p className="text-sm font-medium tracking-wide text-slate-500">Quick answer</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+              What is a simple invoice?
+            </h2>
+            <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
+              A simple invoice requests payment for goods or services. It should clearly show the
+              seller, customer, invoice number, dates, line items, payment details, and total
+              amount due.
             </p>
-            <p>
-              It is different from a receipt because an invoice requests payment while a receipt
-              confirms payment.
+          </article>
+
+          <nav className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <p className="text-sm font-medium tracking-wide text-slate-500">On this page</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {tableOfContents.map(([label, href]) => (
+                <a
+                  className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:border-slate-200 hover:bg-white hover:text-stone-950"
+                  href={href}
+                  key={href}
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
+          </nav>
+        </section>
+
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
+          <div className="flex justify-center">
+            <Image
+              alt="Labeled example of a simple invoice showing business details, customer details, invoice number, invoice date and due date, item details, subtotal and total, payment details, and terms and conditions."
+              className="h-auto w-full max-w-[1000px]"
+              height={3375}
+              priority
+              sizes="(min-width: 1024px) 1000px, 100vw"
+              src="/guides/simple-invoice-example-labeled.webp"
+              unoptimized
+              width={6000}
+            />
+          </div>
+          <p className="mt-3 text-center text-sm leading-6 text-stone-500">
+            Labeled example of a simple PDF invoice
+          </p>
+          <div className="mx-auto mt-5 flex max-w-[1000px] flex-col items-start justify-between gap-4 rounded-xl bg-stone-50 p-5 sm:flex-row sm:items-center">
+            <p className="text-sm leading-6 text-stone-700">
+              Want to create one like this? Use the free Invoice Generator to enter your details
+              and download a PDF invoice.
             </p>
+            <a
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              href="/tools/invoice-generator"
+            >
+              Create an invoice
+            </a>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="what-to-include">
           <p className="text-sm font-medium tracking-wide text-slate-500">Fields</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             What should an invoice include?
           </h2>
-          <GuideTable headers={["Field", "What it means", "Example"]} rows={invoiceFields} />
+          <GuideTable headers={["Field", "Purpose", "Example"]} rows={invoiceFields} />
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="invoice-format">
           <p className="text-sm font-medium tracking-wide text-slate-500">Format</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             Simple invoice format
           </h2>
-          <ul className="mt-5 grid gap-3 text-sm leading-6 text-stone-700 sm:grid-cols-2 sm:text-base">
-            {[
-              "Business details at the top",
-              "Customer details below or beside it",
-              "Invoice number and dates",
-              "Line item table",
-              "Subtotal and total",
-              "Notes or payment terms"
-            ].map((item) => (
+          <ul className="mt-5 grid gap-3 text-sm leading-6 text-stone-700 sm:grid-cols-2 lg:grid-cols-3">
+            {formatItems.map((item) => (
               <li className="rounded-xl border border-stone-200 bg-stone-50 p-4" key={item}>
                 {item}
               </li>
             ))}
           </ul>
-          <GuideTable
-            headers={["Description", "Quantity", "Unit Price", "Line Total"]}
-            rows={sampleLineItems}
-          />
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="steps">
           <p className="text-sm font-medium tracking-wide text-slate-500">Steps</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             How to create a simple invoice step by step
@@ -340,198 +345,27 @@ export default function HowToCreateSimpleInvoicePage() {
           </ol>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="example">
           <p className="text-sm font-medium tracking-wide text-slate-500">Example</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             Simple invoice example
           </h2>
           <p className="mt-5 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-            A freelancer provides design work to a customer. The freelancer charges RM 120 per
-            hour for 5 hours.
+            In the example above, Accounting Tools Lab bills Example Customer for one Accounting
+            Consultation Fee at RM 150. A RM 12 discount reduces the taxable amount to RM 138.
+            SST/tax is shown at 6%, adding RM 8.28, so the final total is RM 146.28.
           </p>
-          <div className="mt-5 grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-5 text-sm leading-6 text-stone-700 sm:grid-cols-3">
-            <p>Quantity: 5 hours</p>
-            <p>Unit price: RM 120</p>
-            <p className="font-semibold text-stone-950">Line total: RM 600</p>
-          </div>
-          <GuideTable headers={["Invoice Detail", "Example"]} rows={exampleRows} />
-          <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
-            The invoice clearly identifies the seller, customer, work completed, amount charged,
-            and expected payment date.
-          </p>
+          <GuideTable
+            headers={["Description", "Quantity", "Unit Price", "Line Total"]}
+            rows={sampleLineItems}
+          />
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Tracking</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              How to choose an invoice number
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>Use a unique number for each invoice.</p>
-              <p>Keep the format simple and consistent.</p>
-              <p>Examples: INV-001, INV-2026-001, CLIENTA-001.</p>
-              <p>Avoid reusing the same invoice number for different customers or jobs.</p>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Dates</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Invoice date vs due date
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>Invoice date is when the invoice is issued.</p>
-              <p>Due date is when payment is expected.</p>
-              <p>If payment is due immediately, the due date can be the same as the invoice date.</p>
-              <p>Clear dates reduce confusion.</p>
-            </div>
-            <GuideTable headers={["Date", "Meaning", "Example"]} rows={dateRows} />
-          </article>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Documents</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Invoice vs receipt
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>Invoice requests payment.</p>
-              <p>Receipt confirms payment has already been received.</p>
-              <p>A customer may receive an invoice first and a receipt after payment.</p>
-            </div>
-            <GuideTable headers={["Document", "Purpose", "When used"]} rows={invoiceReceiptRows} />
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Tax note</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Should a simple invoice include tax?
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>
-                Some invoices may need tax details depending on the business, location,
-                registration status, product or service, and rules that apply.
-              </p>
-              <p>This guide is educational and does not decide tax treatment.</p>
-              <p>
-                For Malaysia SST arithmetic only, you can{" "}
-                <a
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/tools/sst-calculator-malaysia"
-                >
-                  estimate SST arithmetic with the SST Calculator Malaysia
-                </a>
-                , or read{" "}
-                <a
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/guides/sst-calculator-malaysia-add-remove-sst"
-                >
-                  how to add or remove SST in Malaysia
-                </a>
-                . You should check official guidance or a qualified professional for tax
-                treatment.
-              </p>
-            </div>
-          </article>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Cash collection</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Why invoices matter for cash flow
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>Sending an invoice does not always mean cash has been received.</p>
-              <p>
-                An unpaid invoice may show that money is owed, but cash flow depends on actual
-                cash collected.
-              </p>
-              <p>
-                You can{" "}
-                <a
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/guides/cash-flow-vs-profit"
-                >
-                  learn the difference between cash flow and profit
-                </a>{" "}
-                or{" "}
-                <a
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/tools/cash-flow-calculator"
-                >
-                  calculate simple net cash flow
-                </a>
-                .
-              </p>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Use the tool</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Create a simple invoice with the Invoice Generator
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>
-                Users can enter business details, customer details, invoice dates, line items,
-                quantities, and unit prices.
-              </p>
-              <p>
-                The tool calculates line totals and total invoice amount. It is useful for simple
-                invoice previews and learning what invoice fields mean.
-              </p>
-              <p>It does not include payment processing or professional accounting/tax advice.</p>
-              <p>
-                You can{" "}
-                <a
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/tools/invoice-generator"
-                >
-                  create a simple invoice with the Invoice Generator
-                </a>
-                .
-              </p>
-            </div>
-          </article>
-        </section>
-
-        <section>
-          <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Related invoice and small business tools
-          </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {toolLinks.map((tool) => (
-              <a
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
-                href={tool.href}
-                key={tool.href}
-              >
-                <h3 className="text-base font-semibold text-stone-950">{tool.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{tool.description}</p>
-              </a>
-            ))}
-          </div>
-          <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
-            For planning beyond the invoice, review{" "}
-            <a
-              className="font-semibold text-slate-700 hover:text-slate-900"
-              href="/guides/break-even-point-explained"
-            >
-              Break-even Point Explained
-            </a>
-            .
-          </p>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="grid gap-6 lg:grid-cols-2" id="checklist">
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Common invoice mistakes
+              Avoid these before sending
             </h2>
             <ul className="mt-6 grid gap-3 text-sm leading-6 text-stone-700">
               {mistakes.map((mistake) => (
@@ -544,9 +378,9 @@ export default function HowToCreateSimpleInvoicePage() {
           </article>
 
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Checklist</p>
+            <p className="text-sm font-medium tracking-wide text-slate-500">Final checklist</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Simple invoice checklist
+              Quick check before download
             </h2>
             <ul className="mt-6 grid gap-3">
               {checklist.map((item) => (
@@ -561,19 +395,130 @@ export default function HowToCreateSimpleInvoicePage() {
           </article>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="grid gap-6 lg:grid-cols-2">
+          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="malaysia-note">
+            <p className="text-sm font-medium tracking-wide text-slate-500">Malaysia note</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+              Tax, SST, and MyInvois
+            </h2>
+            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
+              <p>
+                A simple PDF invoice is not the same as an official Malaysia e-Invoice submission.
+                The Invoice Generator does not submit, validate, or connect to LHDN/MyInvois.
+              </p>
+              <p>
+                For SST arithmetic, use the{" "}
+                <a className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/sst-calculator-malaysia">
+                  SST Calculator Malaysia
+                </a>{" "}
+                or read{" "}
+                <a
+                  className="font-semibold text-slate-700 hover:text-slate-900"
+                  href="/guides/sst-calculator-malaysia-add-remove-sst"
+                >
+                  how to add or remove SST
+                </a>
+                . Check official guidance or a qualified professional if you are unsure.
+              </p>
+            </div>
+          </article>
+
+          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <p className="text-sm font-medium tracking-wide text-slate-500">Cash flow note</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+              Invoice vs receipt and cash flow
+            </h2>
+            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
+              <p>An invoice requests payment. A receipt confirms payment was received.</p>
+              <p>
+                An invoice also does not mean cash has been collected. Read{" "}
+                <a className="font-semibold text-slate-700 hover:text-slate-900" href="/guides/cash-flow-vs-profit">
+                  cash flow vs profit
+                </a>{" "}
+                or use the{" "}
+                <a className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/cash-flow-calculator">
+                  Cash Flow Calculator
+                </a>{" "}
+                to think through cash movement.
+              </p>
+            </div>
+          </article>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-slate-700 p-6 text-white shadow-sm sm:p-8 lg:p-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium tracking-wide text-slate-200">Create the invoice</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+                Ready to make your invoice?
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-slate-100 sm:text-base">
+                Use the free Invoice Generator to add business details, customer details, line
+                items, optional SST/tax, payment details, terms, and download a PDF invoice.
+              </p>
+            </div>
+            <a
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
+              href="/tools/invoice-generator"
+            >
+              Use the Invoice Generator
+            </a>
+          </div>
+        </section>
+
+        <section id="related-tools">
+          <p className="text-sm font-medium tracking-wide text-slate-500">Related tools and guides</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Keep going after the invoice
+          </h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {relatedLinks.map((link) => (
+              <a
+                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+                href={link.href}
+                key={link.href}
+              >
+                <h3 className="text-base font-semibold text-stone-950">{link.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-stone-600">{link.description}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="faq">
           <p className="text-sm font-medium tracking-wide text-slate-500">FAQ</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             Simple Invoice FAQs
           </h2>
           <div className="mt-6 divide-y divide-stone-100">
             {faqs.map((faq) => (
-              <article className="py-5 first:pt-0 last:pb-0" key={faq.question}>
-                <h3 className="text-base font-semibold text-stone-950">{faq.question}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
+              <details className="group py-5 first:pt-0 last:pb-0" key={faq.question}>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-stone-950">
+                  <span>{faq.question}</span>
+                  <span
+                    aria-hidden="true"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-stone-200 text-stone-500 transition group-open:rotate-180"
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 16 16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M3.5 6L8 10.5L12.5 6"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.25"
+                      />
+                    </svg>
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-6 text-stone-600 sm:text-base">
                   {faq.answer}
                 </p>
-              </article>
+              </details>
             ))}
           </div>
         </section>

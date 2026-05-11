@@ -66,6 +66,15 @@ export default function AccountingEquationCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={accountingEquationFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Accounting Equation Calculator
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Solve for assets, liabilities, or equity using the basic accounting equation: Assets =
+          Liabilities + Equity.
+        </p>
+      </div>
       <AccountingEquationCalculator />
       <RelatedLinks
         title="Continue learning accounting basics"

@@ -24,10 +24,31 @@ export function FAQSection({
       </h2>
       <div className="mt-6 divide-y divide-stone-100">
         {faqs.map((faq) => (
-          <article className="py-5 first:pt-0 last:pb-0" key={faq.question}>
-            <h3 className="text-base font-semibold text-stone-950">{faq.question}</h3>
-            <p className="mt-2 text-sm leading-6 text-stone-600">{faq.answer}</p>
-          </article>
+          <details className="group py-5 first:pt-0 last:pb-0" key={faq.question}>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-stone-950">
+              <span>{faq.question}</span>
+              <span
+                aria-hidden="true"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-stone-200 text-stone-500 transition group-open:rotate-180"
+              >
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 16 16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.5 6L8 10.5L12.5 6"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.25"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <p className="mt-3 text-sm leading-6 text-stone-600">{faq.answer}</p>
+          </details>
         ))}
       </div>
     </Card>

@@ -101,8 +101,8 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="relative border-b border-stone-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-[1080px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link className="flex items-center" href="/" aria-label="AccountingToolsLab home">
           <Image
             alt="AccountingToolsLab"
@@ -141,7 +141,7 @@ export function Header() {
 
       {isMenuOpen ? (
         <nav className="absolute inset-x-0 top-16 z-20 border-b border-stone-200 bg-white px-4 py-3 shadow-sm sm:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col text-sm font-medium text-stone-600">
+          <div className="mx-auto flex max-w-[1080px] flex-col text-sm font-medium text-stone-600">
             <div className="border-b border-stone-100 pb-3">
               <CurrencySelector />
             </div>

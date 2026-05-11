@@ -44,7 +44,7 @@ const footerSections: { title: string; links: FooterLink[] }[] = [
 export function Footer() {
   return (
     <footer className="border-t border-stone-200 bg-white">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8 lg:py-16">
+      <div className="mx-auto grid max-w-[1080px] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8 lg:py-12">
         <div>
           <Link className="inline-flex items-center" href="/" aria-label="AccountingToolsLab home">
             <Image
@@ -81,7 +81,7 @@ export function Footer() {
           ))}
         </div>
       </div>
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 border-t border-stone-100 px-4 py-6 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1080px] flex-col gap-3 border-t border-stone-100 px-4 py-6 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p>Copyright 2026 AccountingToolsLab. All rights reserved.</p>
         <p>Built for simple invoices, business checks, and accounting learning.</p>
       </div>

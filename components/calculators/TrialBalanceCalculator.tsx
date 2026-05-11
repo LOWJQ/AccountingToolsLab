@@ -223,16 +223,7 @@ export function TrialBalanceCalculator() {
   return (
     <div className="flex flex-col gap-8">
       <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-              Trial Balance Calculator
-            </h1>
-            <p className="mt-3 text-base leading-7 text-stone-600">
-              Enter account balances in the debit or credit column to preview a clean trial
-              balance worksheet layout.
-            </p>
-          </div>
+        <div className="flex flex-col gap-5 sm:flex-row sm:justify-end">
           <button
             type="button"
             className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"

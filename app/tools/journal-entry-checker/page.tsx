@@ -66,6 +66,15 @@ export default function JournalEntryCheckerPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={journalEntryFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Journal Entry Checker
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Enter debit and credit lines to check whether total debits equal total credits in a
+          basic journal entry.
+        </p>
+      </div>
       <JournalEntryChecker />
       <RelatedLinks
         title="Learn how journal entries work"

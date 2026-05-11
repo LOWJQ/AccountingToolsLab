@@ -65,6 +65,15 @@ export default function SstCalculatorMalaysiaPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={sstFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          SST Calculator Malaysia
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Estimate SST amount, total including SST, or amount before SST using a selected SST
+          rate.
+        </p>
+      </div>
       <SstCalculatorMalaysia />
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>

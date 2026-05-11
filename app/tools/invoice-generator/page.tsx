@@ -16,11 +16,6 @@ export const metadata = createMetadata({
 
 const invoiceFaqs = [
   {
-    question: "What is an invoice?",
-    answer:
-      "An invoice is a document sent to request payment for goods or services. It usually includes seller details, customer details, line items, payment instructions, and the total amount due."
-  },
-  {
     question: "Can I download the invoice as a PDF?",
     answer:
       "Yes. Use the Download PDF action to generate a simple invoice PDF from the preview."
@@ -31,24 +26,14 @@ const invoiceFaqs = [
       "Yes. You can upload a PNG or JPG logo and include it in the invoice preview and PDF."
   },
   {
-    question: "Can I add SST or tax?",
+    question: "Can I add SST, tax, or a discount?",
     answer:
-      "Yes. You can choose no tax, SST 6%, SST 8%, or a custom tax rate for simple invoice calculations."
+      "Yes. You can choose no tax, SST 6%, SST 8%, or a custom tax rate, and you can add a percentage or fixed amount discount before SST or tax."
   },
   {
-    question: "Can I add a discount?",
+    question: "Can I add payment details and a QR image?",
     answer:
-      "Yes. You can add a percentage discount or a fixed amount discount. The discount is applied before SST or tax."
-  },
-  {
-    question: "Can I add payment details?",
-    answer:
-      "Yes. You can add bank details, account name, account number, DuitNow ID, payment link, and payment notes."
-  },
-  {
-    question: "Can I add a payment QR image?",
-    answer:
-      "Yes. You can upload your own payment QR image and show it on the invoice with a Scan here to pay caption."
+      "Yes. You can add bank details, DuitNow ID, a payment link, payment notes, and your own uploaded payment QR image."
   },
   {
     question: "Are invoices saved online?",
@@ -59,11 +44,6 @@ const invoiceFaqs = [
     question: "Is this an official Malaysia e-Invoice or MyInvois tool?",
     answer:
       "No. This tool creates a simple invoice PDF. It does not submit, validate, or store official Malaysia e-Invoices through LHDN/MyInvois."
-  },
-  {
-    question: "Is an invoice the same as a receipt?",
-    answer:
-      "No. An invoice requests payment, while a receipt confirms payment has been received."
   }
 ];
 
@@ -87,21 +67,30 @@ export default function InvoiceGeneratorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={invoiceFaqs} />
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Free Invoice Generator Malaysia
+        </h1>
+        <p className="mt-3 max-w-4xl text-base leading-7 text-stone-600">
+          Create a simple invoice with business details, customer details, line items, optional
+          SST / tax, discounts, payment details, QR image, terms, notes, and PDF download.
+        </p>
+      </div>
       <InvoiceGenerator />
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Learn how to write a simple invoice
+          Need help writing an invoice?
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          For a field-by-field walkthrough, read{" "}
+          Read the{" "}
           <a
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/how-to-create-a-simple-invoice"
           >
-            how to write a simple invoice
+            simple invoice guide
           </a>{" "}
-          before sending one to a customer. For Malaysia SST arithmetic, review{" "}
+          for a field-by-field walkthrough. For SST arithmetic, review{" "}
           <a
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/sst-calculator-malaysia-add-remove-sst"

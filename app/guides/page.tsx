@@ -193,7 +193,7 @@ export default function GuidesPage() {
 
   return (
     <div className="bg-stone-50 text-stone-950">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">
             Invoice and Accounting Guides
@@ -240,14 +240,14 @@ export default function GuidesPage() {
         </section>
 
         <section>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
+          <div className="flex flex-col gap-3">
+            <div className="w-full">
               <p className="text-sm font-medium tracking-wide text-slate-500">Featured guides</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
                 Start with practical business guides
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-stone-600">
+            <p className="w-full text-sm leading-6 text-stone-600">
               Begin with invoice, SST, cash flow, and break-even topics, then explore accounting
               basics when you need them.
             </p>

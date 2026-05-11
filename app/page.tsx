@@ -1,6 +1,8 @@
 import { InvoicePreview } from "@/components/home/InvoicePreview";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
+import { createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
 
 export const metadata = createMetadata({
   title: "Free Invoice Generator and Accounting Tools | AccountingToolsLab",
@@ -81,7 +83,9 @@ function StatusBadge({
 export default function HomePage() {
   return (
     <div className="bg-stone-50 text-stone-950">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <JsonLd data={createWebsiteSchema()} />
+      <JsonLd data={createOrganizationSchema()} />
+      <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-10 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>

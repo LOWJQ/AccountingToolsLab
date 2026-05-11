@@ -80,17 +80,7 @@ export function CashFlowCalculator() {
   return (
     <div className="flex flex-col gap-8">
       <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="max-w-3xl">
-          <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-            Cash Flow Calculator
-          </h1>
-          <p className="mt-3 text-base leading-7 text-stone-600">
-            Calculate net cash flow and ending cash balance from beginning cash, cash
-            inflows, and cash outflows.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="grid gap-5">
             <label className="grid gap-2">
               <span className="text-sm font-semibold text-stone-800">

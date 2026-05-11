@@ -41,53 +41,18 @@ type InvoiceView = "details" | "preview";
 type TaxMode = "none" | "sst-6" | "sst-8" | "custom";
 type DiscountMode = "none" | "percentage" | "fixed";
 
-const mistakes = [
-  "Forgetting invoice number",
-  "Using unclear item descriptions",
-  "Missing customer details",
-  "Forgetting payment details",
-  "Forgetting terms or due date",
-  "Applying tax before discount instead of after discount",
-  "Using a payment QR image that is blurry or hard to scan",
-  "Confusing an invoice with a receipt",
-  "Assuming this simple PDF is an official validated Malaysia e-Invoice"
-];
-
 const featureHighlights = [
-  "Add business and customer details",
-  "Upload a business logo",
-  "Add line items, quantities, and unit prices",
-  "Choose no tax, SST 6%, SST 8%, or a custom tax rate",
-  "Add a percentage or fixed discount",
-  "Add bank details, DuitNow ID, payment link, and payment notes",
-  "Upload your own payment QR image",
-  "Add terms and conditions",
-  "Preview the invoice before downloading",
-  "Download a PDF invoice",
-  "Save the current draft on this device"
+  "Logo, invoice number, dates, and currency",
+  "Line items with quantity, unit price, subtotal, and total",
+  "Optional SST / tax and discount before tax",
+  "Structured payment details and uploaded payment QR image",
+  "Terms, notes, preview, and PDF download",
+  "Draft saved on this device with new invoice shortcuts"
 ];
 
-const fieldNotes = [
-  ["Invoice number", "A unique reference that helps both sides identify the invoice."],
-  ["Invoice date", "The date the invoice is issued."],
-  ["Due date", "The optional date payment is expected."],
-  ["Business details", "Your business name, contact, and address."],
-  ["Customer details", "The customer name, contact, and address shown in the Bill To section."],
-  ["Logo", "An optional PNG or JPG business logo shown in the preview and PDF."],
-  ["Line items", "The goods or services being billed."],
-  ["Quantity", "How many units, hours, or items are being charged."],
-  ["Unit price", "The price for one unit or one hour."],
-  ["Subtotal", "The total of all line items before discount and SST / tax."],
-  ["Discount", "An optional percentage or fixed amount applied before SST / tax."],
-  ["SST / Tax", "Optional basic tax math using no tax, SST 6%, SST 8%, or a custom rate."],
-  [
-    "Payment details",
-    "Optional bank details, account name, account number, DuitNow ID, payment link, and payment notes."
-  ],
-  ["Payment QR image", "An optional uploaded payment QR image with a Scan here to pay caption."],
-  ["Terms & Conditions", "Optional payment or invoice terms shown near the bottom of the invoice."],
-  ["Notes", "Optional extra information for the customer when included."],
-  ["Total", "The final amount after discount and SST / tax."]
+const toolFitNotes = [
+  ["Good for", "Simple PDF invoices for small businesses, freelancers, and repeat customers."],
+  ["Not for", "Official LHDN/MyInvois submission, validation, or connected e-Invoice filing."]
 ];
 
 const taxOptions: { label: string; mode: TaxMode; rate: number | null }[] = [
@@ -515,11 +480,12 @@ export function InvoiceGenerator() {
       const doc = new jsPDF({ unit: "pt", format: "a4" });
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const pageMargin = 48;
+      const pageMargin = 42;
+      const pageBottomMargin = 28;
       const contentX = pageMargin;
       const contentWidth = pageWidth - pageMargin * 2;
       const contentRight = contentX + contentWidth;
-      const contentBottom = pageHeight - pageMargin;
+      const contentBottom = pageHeight - pageBottomMargin;
       const maxFlowHeight = contentBottom - pageMargin;
       const stone950: [number, number, number] = [28, 25, 23];
       const stone600: [number, number, number] = [87, 83, 78];
@@ -560,15 +526,19 @@ export function InvoiceGenerator() {
 
       const lineHeightFor = (fontSize: number) => fontSize + 4;
 
-      const textLines = (text: string, maxWidth: number) =>
-        text
+      const textLines = (text: string, maxWidth: number, fontSize = 10, bold = false) => {
+        doc.setFont("helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(fontSize);
+
+        return text
           .split(/\r?\n/)
           .flatMap((line) =>
             line.trim() === "" ? [""] : (doc.splitTextToSize(line, maxWidth) as string[])
           );
+      };
 
       const measureTextBlock = (text: string, maxWidth: number, fontSize = 10) =>
-        Math.max(textLines(text, maxWidth).length, 1) * lineHeightFor(fontSize);
+        Math.max(textLines(text, maxWidth, fontSize).length, 1) * lineHeightFor(fontSize);
 
       const writeTextAt = (
         text: string,
@@ -583,7 +553,12 @@ export function InvoiceGenerator() {
         } = {}
       ) => {
         const fontSize = options.fontSize ?? 10;
-        const lines = textLines(text, options.maxWidth ?? contentWidth);
+        const lines = textLines(
+          text,
+          options.maxWidth ?? contentWidth,
+          fontSize,
+          options.bold ?? false
+        );
 
         doc.setFont("helvetica", options.bold ? "bold" : "normal");
         doc.setFontSize(fontSize);
@@ -605,7 +580,12 @@ export function InvoiceGenerator() {
       ) => {
         const fontSize = options.fontSize ?? 10;
         const lineGap = options.lineGap ?? fontSize + 4;
-        const lines = textLines(text, options.maxWidth ?? contentWidth);
+        const lines = textLines(
+          text,
+          options.maxWidth ?? contentWidth,
+          fontSize,
+          options.bold ?? false
+        );
 
         addPageIfNeeded(lines.length * lineGap);
         doc.setFont("helvetica", options.bold ? "bold" : "normal");
@@ -628,7 +608,7 @@ export function InvoiceGenerator() {
           doc.setFont("helvetica", "normal");
           doc.setFontSize(8);
           applyText(stone500);
-          doc.text(`Page ${pageIndex} of ${pageCount}`, contentRight, pageHeight - 24, {
+          doc.text(`Page ${pageIndex} of ${pageCount}`, contentRight, pageHeight - 16, {
             align: "right"
           });
         }
@@ -695,7 +675,7 @@ export function InvoiceGenerator() {
               fittedLogo.width,
               fittedLogo.height
             );
-            rightY += fittedLogo.height + 24;
+            rightY += fittedLogo.height + 14;
           }
         } catch {
           rightY = headerTop;
@@ -706,22 +686,22 @@ export function InvoiceGenerator() {
         align: "right",
         bold: true,
         color: slate700,
-        fontSize: 30,
+        fontSize: 24,
         maxWidth: rightColumnWidth
       });
-      rightY += 16;
+      rightY += 10;
 
       const writeInvoiceMetaRow = (label: string, value: string, top: number) => {
         const labelWidth = 70;
         const labelX = rightColumnX + labelWidth;
         const valueWidth = Math.max(110, rightColumnWidth - labelWidth - 12);
-        const fontSize = 10;
+        const fontSize = 9;
         const textBaseline = top + fontSize;
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(fontSize);
         const valueLines =
-          doc.getTextWidth(value) <= valueWidth ? [value] : textLines(value, valueWidth);
+          doc.getTextWidth(value) <= valueWidth ? [value] : textLines(value, valueWidth, fontSize);
         const rowHeight = Math.max(valueLines.length * lineHeightFor(fontSize), lineHeightFor(fontSize));
 
         doc.setFont("helvetica", "bold");
@@ -736,16 +716,6 @@ export function InvoiceGenerator() {
       };
 
       rightY += writeInvoiceMetaRow("Invoice #:", invoiceNumber || "Invoice number", rightY);
-      rightY += 8;
-      rightY += writeInvoiceMetaRow("Date:", invoiceDate || "Invoice date", rightY);
-      if (dueDate) {
-        rightY += 8;
-        rightY += writeInvoiceMetaRow("Due:", dueDate, rightY);
-      }
-
-      y = Math.max(leftY, rightY) + 30;
-      drawDivider();
-      y += 30;
 
       const billToHeight =
         12 +
@@ -753,31 +723,50 @@ export function InvoiceGenerator() {
         measureTextBlock(customerName || "Customer name", leftColumnWidth, 13) +
         (customerContact ? 4 + measureTextBlock(customerContact, leftColumnWidth) : 0) +
         (customerAddress ? 2 + measureTextBlock(customerAddress, leftColumnWidth) : 0);
+      const dateRowsHeight =
+        lineHeightFor(9) + (dueDate ? 5 + lineHeightFor(9) : 0);
 
-      addPageIfNeeded(billToHeight + 28);
-      writeText("BILL TO", contentX, {
+      y = Math.max(leftY, rightY) + 14;
+      drawDivider();
+      y += 16;
+      addPageIfNeeded(Math.max(billToHeight, dateRowsHeight) + 24);
+      const secondRowTop = y;
+      let billToY = secondRowTop;
+      writeTextAt("BILL TO", contentX, billToY, {
         bold: true,
         color: slate700,
         fontSize: 9,
-        lineGap: 12,
         maxWidth: leftColumnWidth
       });
-      y += 6;
-      writeText(customerName || "Customer name", contentX, {
+      billToY += 18;
+      billToY += writeTextAt(customerName || "Customer name", contentX, billToY, {
         bold: true,
         fontSize: 15,
-        lineGap: 19,
         maxWidth: leftColumnWidth
       });
       if (customerContact) {
-        y += 4;
-        writeText(customerContact, contentX, { color: stone600, maxWidth: leftColumnWidth });
+        billToY += 4;
+        billToY += writeTextAt(customerContact, contentX, billToY, {
+          color: stone600,
+          maxWidth: leftColumnWidth
+        });
       }
       if (customerAddress) {
-        y += 2;
-        writeText(customerAddress, contentX, { color: stone600, maxWidth: leftColumnWidth });
+        billToY += 2;
+        billToY += writeTextAt(customerAddress, contentX, billToY, {
+          color: stone600,
+          maxWidth: leftColumnWidth
+        });
       }
-      y += 34;
+
+      let dateY = secondRowTop;
+      dateY += writeInvoiceMetaRow("Date:", invoiceDate || "Invoice date", dateY);
+      if (dueDate) {
+        dateY += 5;
+        dateY += writeInvoiceMetaRow("Due:", dueDate, dateY);
+      }
+
+      y = Math.max(billToY, dateY) + 18;
 
       const tableX = contentX;
       const tableWidth = contentWidth;
@@ -790,21 +779,21 @@ export function InvoiceGenerator() {
       const unitRight = tableX + noWidth + descriptionWidth + unitWidth - 14;
       const qtyRight = tableX + noWidth + descriptionWidth + unitWidth + qtyWidth - 14;
       const totalRight = tableX + tableWidth - 16;
-      const headerHeight = 34;
+      const headerHeight = 30;
 
       const drawTableHeader = () => {
-        addPageIfNeeded(headerHeight + 22);
+        addPageIfNeeded(headerHeight + 18);
         applyFill(slate700);
         applyStroke(slate700);
-        doc.roundedRect(tableX, y, tableWidth, headerHeight, 8, 8, "FD");
+        doc.rect(tableX, y, tableWidth, headerHeight, "FD");
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
         applyText(white);
-        doc.text("NO", tableX + 14, y + 21);
-        doc.text("DESCRIPTION", descriptionX + 10, y + 21);
-        doc.text("UNIT PRICE", unitRight, y + 21, { align: "right" });
-        doc.text("QTY", qtyRight, y + 21, { align: "right" });
-        doc.text("AMOUNT", totalRight, y + 21, { align: "right" });
+        doc.text("NO", tableX + 14, y + 19);
+        doc.text("DESCRIPTION", descriptionX + 10, y + 19);
+        doc.text("UNIT PRICE", unitRight, y + 19, { align: "right" });
+        doc.text("QTY", qtyRight, y + 19, { align: "right" });
+        doc.text("AMOUNT", totalRight, y + 19, { align: "right" });
         y += headerHeight;
       };
 
@@ -812,14 +801,14 @@ export function InvoiceGenerator() {
 
       previewItems.forEach((item, index) => {
         const descriptionLines = textLines(item.description, descriptionWidth - 26);
-        const maxLinesPerRow = Math.max(1, Math.floor((maxFlowHeight - headerHeight - 34) / 14));
+        const maxLinesPerRow = Math.max(1, Math.floor((maxFlowHeight - headerHeight - 30) / 13));
         let remainingLines = descriptionLines.length > 0 ? descriptionLines : ["Item"];
         let chunkIndex = 0;
 
         while (remainingLines.length > 0) {
           const chunkLines = remainingLines.slice(0, maxLinesPerRow);
           remainingLines = remainingLines.slice(maxLinesPerRow);
-          const rowHeight = Math.max(chunkLines.length * 14 + 22, 44);
+          const rowHeight = Math.max(chunkLines.length * 13 + 18, 38);
 
           if (y + rowHeight > contentBottom) {
             doc.addPage();
@@ -834,19 +823,19 @@ export function InvoiceGenerator() {
           doc.setFont("helvetica", "normal");
           doc.setFontSize(10);
           applyText(stone600);
-          doc.text(chunkIndex === 0 ? String(index + 1) : "", tableX + 14, y + 22);
+          doc.text(chunkIndex === 0 ? String(index + 1) : "", tableX + 14, y + 20);
           applyText(stone950);
-          doc.text(chunkLines, descriptionX + 10, y + 22);
+          doc.text(chunkLines, descriptionX + 10, y + 20);
           applyText(stone600);
-          doc.text(chunkIndex === 0 ? formatCurrency(item.unitPrice) : "", unitRight, y + 22, {
+          doc.text(chunkIndex === 0 ? formatCurrency(item.unitPrice) : "", unitRight, y + 20, {
             align: "right"
           });
-          doc.text(chunkIndex === 0 ? formatAmount(item.quantity) : "", qtyRight, y + 22, {
+          doc.text(chunkIndex === 0 ? formatAmount(item.quantity) : "", qtyRight, y + 20, {
             align: "right"
           });
           doc.setFont("helvetica", "bold");
           applyText(stone950);
-          doc.text(chunkIndex === 0 ? formatCurrency(item.lineTotal) : "", totalRight, y + 22, {
+          doc.text(chunkIndex === 0 ? formatCurrency(item.lineTotal) : "", totalRight, y + 20, {
             align: "right"
           });
           y += rowHeight;
@@ -854,7 +843,7 @@ export function InvoiceGenerator() {
         }
 
         if (index === previewItems.length - 1) {
-          y += 24;
+          y += 14;
         }
       });
 
@@ -868,13 +857,13 @@ export function InvoiceGenerator() {
       if (hasTax) {
         totalsRows.push([taxLabel, formatCurrency(taxAmount)]);
       }
-      const totalsRowHeight = 24;
-      const totalsHeight = totalsRows.length * totalsRowHeight + 58;
-      addPageIfNeeded(totalsHeight + 24);
+      const totalsRowHeight = 21;
+      const totalsHeight = totalsRows.length * totalsRowHeight + 48;
+      addPageIfNeeded(totalsHeight + 16);
       applyFill(stone100);
       applyStroke(stone200);
-      doc.roundedRect(totalsX, y, totalsWidth, totalsHeight, 10, 10, "FD");
-      let totalsRowY = y + 24;
+      doc.rect(totalsX, y, totalsWidth, totalsHeight, "FD");
+      let totalsRowY = y + 21;
       totalsRows.forEach(([label, value]) => {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
@@ -887,13 +876,13 @@ export function InvoiceGenerator() {
         });
         totalsRowY += totalsRowHeight;
       });
-      const totalRowY = totalsRowY + 16;
+      const totalRowY = totalsRowY + 13;
       applyStroke(stone200);
-      doc.line(totalsX + 16, totalRowY - 20, totalsX + totalsWidth - 16, totalRowY - 20);
+      doc.line(totalsX + 16, totalRowY - 17, totalsX + totalsWidth - 16, totalRowY - 17);
       doc.setFontSize(12);
       doc.text("Total", totalsX + 16, totalRowY);
       doc.text(formatCurrency(total), totalsX + totalsWidth - 16, totalRowY, { align: "right" });
-      y += totalsHeight + 24;
+      y += totalsHeight + 20;
 
       const renderFlowTextSection = (title: string, text: string) => {
         const trimmedText = text.trim();
@@ -995,7 +984,7 @@ export function InvoiceGenerator() {
         const lineHeight = lineHeightFor(10);
 
         paymentDetailRows.forEach(([label, value]) => {
-          const valueLines = textLines(value, paymentValueWidth);
+          const valueLines = textLines(value, paymentValueWidth, 10);
           let lineIndex = 0;
           let isFirstChunk = true;
 
@@ -1050,80 +1039,135 @@ export function InvoiceGenerator() {
       const hasNotes = notes.trim() !== "";
 
       if (hasPaymentDetails || hasTerms) {
-        const bottomColumnGap = 32;
-        const bottomColumnWidth =
-          hasPaymentDetails && hasTerms
-            ? (contentWidth - bottomColumnGap) / 2
-            : contentWidth;
-        const rightBottomColumnX = contentX + bottomColumnWidth + bottomColumnGap;
+        const termsColumnX = hasPaymentDetails && hasTerms ? totalsX : contentX;
+        const termsColumnWidth = contentRight - termsColumnX;
+        const paymentColumnWidth =
+          hasPaymentDetails && hasTerms ? Math.max(220, termsColumnX - contentX - 28) : contentWidth;
+        const bottomTopPadding = 21;
+        const bottomHeadingHeight = 17;
+        const bottomRowGap = 2;
+        const bottomFontSize = 9;
+        const bottomLineHeight = lineHeightFor(bottomFontSize);
+        const termsParagraphGap = 3;
+        const measureTermsHeight = (text: string, width: number) => {
+          const paragraphs = text
+            .trim()
+            .split(/\r?\n/)
+            .filter((paragraph) => paragraph.trim() !== "");
+
+          return paragraphs.reduce((height, paragraph, index) => {
+            const paragraphHeight =
+              textLines(paragraph, width, bottomFontSize).length * bottomLineHeight;
+            const gap = index < paragraphs.length - 1 ? termsParagraphGap : 0;
+
+            return height + paragraphHeight + gap;
+          }, 0);
+        };
+        const renderTermsText = (text: string, x: number, startY: number, width: number) => {
+          const paragraphs = text
+            .trim()
+            .split(/\r?\n/)
+            .filter((paragraph) => paragraph.trim() !== "");
+          let currentY = startY;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(bottomFontSize);
+          applyText(stone600);
+
+          paragraphs.forEach((paragraph, paragraphIndex) => {
+            const lines = textLines(paragraph, width, bottomFontSize);
+            lines.forEach((line) => {
+              doc.text(line, x, currentY);
+              currentY += bottomLineHeight;
+            });
+
+            if (paragraphIndex < paragraphs.length - 1) {
+              currentY += termsParagraphGap;
+            }
+          });
+
+          return currentY - startY;
+        };
         const measurePaymentRowsHeight = (width: number) =>
           paymentDetailRows.reduce(
             (height, [label, value]) => {
               const labelWidth = Math.min(92, width * 0.38);
               const valueWidth = width - labelWidth - 8;
-              return height + Math.max(measureTextBlock(value, valueWidth), 14) + 6;
+              return (
+                height +
+                Math.max(
+                  textLines(value, valueWidth, bottomFontSize).length * bottomLineHeight,
+                  bottomLineHeight
+                ) +
+                bottomRowGap
+              );
             },
             0
           );
-        const paymentQrHeight = hasPaymentQr ? Math.min(96, bottomColumnWidth) + 26 : 0;
+        const paymentQrHeight = hasPaymentQr ? 2 + Math.min(96, paymentColumnWidth) + 22 : 0;
         const paymentDetailsHeight = hasPaymentDetails
-          ? measurePaymentRowsHeight(bottomColumnWidth) + paymentQrHeight + 44
+          ? bottomHeadingHeight + measurePaymentRowsHeight(paymentColumnWidth) + paymentQrHeight
           : 0;
         const termsHeight = hasTerms
-          ? measureTextBlock(terms, bottomColumnWidth) + 44
+          ? bottomHeadingHeight + measureTermsHeight(terms, termsColumnWidth)
           : 0;
         const bottomSectionHeight = Math.max(paymentDetailsHeight, termsHeight);
+        const bottomRequiredHeight = bottomTopPadding + bottomSectionHeight;
+        const remainingHeight = contentBottom - y;
 
-        if (bottomSectionHeight <= maxFlowHeight - 8) {
-          addPageIfNeeded(bottomSectionHeight + 8);
+        if (bottomRequiredHeight <= remainingHeight || bottomRequiredHeight <= maxFlowHeight) {
+          if (bottomRequiredHeight > remainingHeight) {
+            doc.addPage();
+            drawInvoicePage();
+            y = pageMargin;
+          }
+
           applyStroke(stone200);
           doc.line(contentX, y, contentRight, y);
-          const bottomStartY = y + 20;
+          const bottomStartY = y + bottomTopPadding;
 
           if (hasPaymentDetails) {
             writeTextAt("Payment Details", contentX, bottomStartY, {
               bold: true,
               color: stone950,
               fontSize: 11,
-              maxWidth: bottomColumnWidth
+              maxWidth: paymentColumnWidth
             });
-            let paymentY = bottomStartY + 24;
-            const paymentLabelWidth = Math.min(92, bottomColumnWidth * 0.38);
+            let paymentY = bottomStartY + bottomHeadingHeight;
+            const paymentLabelWidth = Math.min(92, paymentColumnWidth * 0.38);
             const paymentValueX = contentX + paymentLabelWidth + 8;
-            const paymentValueWidth = bottomColumnWidth - paymentLabelWidth - 8;
+            const paymentValueWidth = paymentColumnWidth - paymentLabelWidth - 8;
             paymentDetailRows.forEach(([label, value]) => {
               writeTextAt(`${label}:`, contentX, paymentY, {
                 bold: true,
                 color: stone600,
+                fontSize: bottomFontSize,
                 maxWidth: paymentLabelWidth
               });
               paymentY += writeTextAt(value, paymentValueX, paymentY, {
                 color: stone600,
+                fontSize: bottomFontSize,
                 maxWidth: paymentValueWidth
               });
-              paymentY += 6;
+              paymentY += bottomRowGap;
             });
             if (payment.paymentQrDataUrl) {
-              paymentY += 4;
-              paymentY += await renderPaymentQrAt(contentX, paymentY, Math.min(96, bottomColumnWidth));
+              paymentY += 2;
+              paymentY += await renderPaymentQrAt(contentX, paymentY, Math.min(96, paymentColumnWidth));
             }
           }
 
           if (hasTerms) {
-            const termsX = hasPaymentDetails ? rightBottomColumnX : contentX;
-            writeTextAt("Terms & Conditions", termsX, bottomStartY, {
+            writeTextAt("Terms & Conditions", termsColumnX, bottomStartY, {
               bold: true,
               color: stone950,
               fontSize: 11,
-              maxWidth: bottomColumnWidth
+              maxWidth: termsColumnWidth
             });
-            writeTextAt(terms, termsX, bottomStartY + 24, {
-              color: stone600,
-              maxWidth: bottomColumnWidth
-            });
+            renderTermsText(terms, termsColumnX, bottomStartY + bottomHeadingHeight, termsColumnWidth);
           }
 
-          y = bottomStartY + bottomSectionHeight + 12;
+          y = bottomStartY + bottomSectionHeight;
         } else {
           await renderPaymentDetailsFlow();
           renderFlowTextSection("Terms & Conditions", terms);
@@ -1176,18 +1220,7 @@ export function InvoiceGenerator() {
     <div className="flex flex-col gap-8">
       <div className="scroll-mt-24" ref={invoiceGeneratorTopRef}>
         <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="max-w-5xl">
-          <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-            Free Invoice Generator Malaysia
-          </h1>
-          <p className="mt-3 max-w-4xl text-base leading-7 text-stone-600">
-            Create a simple invoice with business details, customer details, line items,
-            optional SST / tax, discounts, payment details, QR image, terms, notes, and PDF
-            download.
-          </p>
-        </div>
-
-        <div className="mt-8 inline-grid rounded-xl border border-stone-200 bg-stone-50 p-1 sm:grid-cols-2">
+        <div className="inline-grid rounded-xl border border-stone-200 bg-stone-50 p-1 sm:grid-cols-2">
           <button
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
               activeView === "details"
@@ -1605,16 +1638,16 @@ export function InvoiceGenerator() {
 
               <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
             <div
-              className="invoice-print-area min-w-0 rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-8"
+              className="invoice-print-area min-w-0 border border-stone-200 bg-white p-5 shadow-sm sm:p-7"
               id="invoice-print-area"
             >
-              <div className="invoice-print-header grid gap-8 border-b border-stone-200 pb-8 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
+              <div className="invoice-print-header grid gap-6 border-b border-stone-200 pb-5 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
                 <div className="min-w-0">
                   <h2 className="break-words text-2xl font-semibold tracking-tight text-stone-950">
                     {businessName || "Business name"}
                   </h2>
                   {businessContact ? (
-                    <p className="invoice-print-muted mt-3 break-words text-sm leading-6 text-stone-600">
+                    <p className="invoice-print-muted mt-2 break-words text-sm leading-6 text-stone-600">
                       {businessContact}
                     </p>
                   ) : null}
@@ -1628,56 +1661,60 @@ export function InvoiceGenerator() {
                   {businessLogoDataUrl ? (
                     <Image
                       alt={`${businessName || "Business"} logo`}
-                      className="mb-6 ml-0 max-h-20 max-w-44 object-contain sm:ml-auto"
+                      className="mb-4 ml-0 max-h-16 max-w-40 object-contain sm:ml-auto"
                       height={80}
                       unoptimized
                       src={businessLogoDataUrl}
                       width={180}
                     />
                   ) : null}
-                  <p className="text-4xl font-semibold uppercase tracking-wide text-slate-700">
+                  <p className="text-3xl font-semibold uppercase tracking-wide text-slate-700">
                     Invoice
                   </p>
-                  <dl className="mt-5 grid gap-2 text-sm text-stone-600">
+                  <dl className="mt-3 grid gap-2 text-sm text-stone-600">
                     <div className="flex justify-between gap-4 sm:justify-end">
                       <dt className="font-medium text-stone-500">Invoice #:</dt>
                       <dd className="font-semibold text-stone-950">
                         {invoiceNumber || "Invoice number"}
                       </dd>
                     </div>
-                    <div className="flex justify-between gap-4 sm:justify-end">
-                      <dt className="font-medium text-stone-500">Date:</dt>
-                      <dd>{invoiceDate || "Invoice date"}</dd>
-                    </div>
-                    {dueDate ? (
-                      <div className="flex justify-between gap-4 sm:justify-end">
-                        <dt className="font-medium text-stone-500">Due:</dt>
-                        <dd>{dueDate}</dd>
-                      </div>
-                    ) : null}
                   </dl>
                 </div>
               </div>
 
-              <div className="grid max-w-xl gap-2 py-8">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-700">
-                  Bill To
-                </p>
-                <h3 className="break-words text-lg font-semibold text-stone-950">
-                  {customerName || "Customer name"}
-                </h3>
-                {customerContact ? (
-                  <p className="break-words text-sm leading-6 text-stone-600">{customerContact}</p>
-                ) : null}
-                {customerAddress ? (
-                  <p className="whitespace-pre-line break-words text-sm leading-6 text-stone-600">
-                    {customerAddress}
+              <div className="mt-5 grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
+                <div className="grid max-w-xl gap-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-700">
+                    Bill To
                   </p>
-                ) : null}
+                  <h3 className="break-words text-lg font-semibold text-stone-950">
+                    {customerName || "Customer name"}
+                  </h3>
+                  {customerContact ? (
+                    <p className="break-words text-sm leading-6 text-stone-600">{customerContact}</p>
+                  ) : null}
+                  {customerAddress ? (
+                    <p className="whitespace-pre-line break-words text-sm leading-6 text-stone-600">
+                      {customerAddress}
+                    </p>
+                  ) : null}
+                </div>
+                <dl className="grid content-start gap-2 text-sm text-stone-600 sm:text-right">
+                  <div className="flex justify-between gap-4 sm:justify-end">
+                    <dt className="font-medium text-stone-500">Date:</dt>
+                    <dd>{invoiceDate || "Invoice date"}</dd>
+                  </div>
+                  {dueDate ? (
+                    <div className="flex justify-between gap-4 sm:justify-end">
+                      <dt className="font-medium text-stone-500">Due:</dt>
+                      <dd>{dueDate}</dd>
+                    </div>
+                  ) : null}
+                </dl>
               </div>
 
-              <div className="invoice-preview-lines overflow-hidden rounded-xl border border-stone-200">
-                <div className="invoice-preview-line invoice-preview-heading hidden bg-slate-700 px-3 py-3 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4">
+              <div className="invoice-preview-lines mt-6 overflow-hidden border border-stone-200">
+                <div className="invoice-preview-line invoice-preview-heading hidden bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4">
                   <span>No</span>
                   <span>Description</span>
                   <span className="text-right leading-4">Unit Price</span>
@@ -1687,7 +1724,7 @@ export function InvoiceGenerator() {
                 <div className="divide-y divide-stone-100 bg-white">
                   {previewItems.map((item, index) => (
                     <div
-                      className="invoice-preview-line grid min-w-0 gap-3 px-3 py-4 text-sm odd:bg-white even:bg-slate-50 sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4"
+                      className="invoice-preview-line grid min-w-0 gap-3 px-3 py-3 text-sm odd:bg-white even:bg-slate-50 sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4"
                       key={`${item.description}-${index}`}
                     >
                       <div className="min-w-0">
@@ -1735,8 +1772,8 @@ export function InvoiceGenerator() {
                 </div>
               </div>
 
-              <div className="invoice-totals-wrap mt-6 flex justify-end">
-                <div className="invoice-totals-box w-full max-w-sm rounded-xl border border-stone-200 bg-stone-50 p-5">
+              <div className="invoice-totals-wrap mt-4 flex justify-end">
+                <div className="invoice-totals-box w-full max-w-sm border border-stone-200 bg-stone-50 p-4">
                   <div className="invoice-total-row flex justify-between gap-4 text-sm text-stone-600">
                     <span className="invoice-total-label">Subtotal</span>
                     <span className="invoice-total-amount font-semibold text-stone-950">
@@ -1745,13 +1782,13 @@ export function InvoiceGenerator() {
                   </div>
                   {hasDiscount ? (
                     <>
-                      <div className="invoice-total-row mt-3 flex justify-between gap-4 text-sm text-stone-600">
+                      <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
                         <span className="invoice-total-label">Discount</span>
                         <span className="invoice-total-amount font-semibold text-stone-950">
                           -{formatCurrency(discountAmount)}
                         </span>
                       </div>
-                      <div className="invoice-total-row mt-3 flex justify-between gap-4 text-sm text-stone-600">
+                      <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
                         <span className="invoice-total-label">Amount after discount</span>
                         <span className="invoice-total-amount font-semibold text-stone-950">
                           {formatCurrency(taxableAmount)}
@@ -1760,14 +1797,14 @@ export function InvoiceGenerator() {
                     </>
                   ) : null}
                   {hasTax ? (
-                    <div className="invoice-total-row mt-3 flex justify-between gap-4 text-sm text-stone-600">
+                    <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
                       <span className="invoice-total-label">{taxLabel}</span>
                       <span className="invoice-total-amount font-semibold text-stone-950">
                         {formatCurrency(taxAmount)}
                       </span>
                     </div>
                   ) : null}
-                  <div className="invoice-total-row invoice-grand-total mt-4 flex justify-between gap-4 border-t border-stone-300 pt-4 text-lg font-semibold text-stone-950">
+                  <div className="invoice-total-row invoice-grand-total mt-3 flex justify-between gap-4 border-t border-stone-300 pt-3 text-lg font-semibold text-stone-950">
                     <span className="invoice-total-label">Total</span>
                     <span className="invoice-total-amount">
                       {formatCurrency(total)}
@@ -1777,10 +1814,12 @@ export function InvoiceGenerator() {
               </div>
 
               {hasPaymentDetails || terms.trim() ? (
-                <section className="mt-8 border-t border-stone-200 pt-5">
+                <section className="mt-8 border-t border-stone-200 pt-6">
                   <div
-                    className={`grid gap-8 ${
-                      hasPaymentDetails && terms.trim() ? "md:grid-cols-2" : ""
+                    className={`grid gap-6 ${
+                      hasPaymentDetails && terms.trim()
+                        ? "md:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] md:items-start"
+                        : ""
                     }`}
                   >
                     {hasPaymentDetails ? (
@@ -1789,7 +1828,7 @@ export function InvoiceGenerator() {
                           Payment Details
                         </h3>
                         {paymentDetailRows.length > 0 ? (
-                          <dl className="mt-4 grid gap-2 text-sm leading-6 text-stone-600">
+                          <dl className="mt-3 grid gap-1.5 text-sm leading-6 text-stone-600">
                             {paymentDetailRows.map(([label, value]) => (
                               <div
                                 className="grid gap-1 sm:grid-cols-[8rem_minmax(0,1fr)]"
@@ -1804,7 +1843,7 @@ export function InvoiceGenerator() {
                           </dl>
                         ) : null}
                         {payment.paymentQrDataUrl ? (
-                          <div className="mt-5 inline-grid justify-items-center gap-2 text-center">
+                          <div className="mt-4 inline-grid justify-items-center gap-1.5 text-center">
                             <Image
                               alt="Payment QR"
                               className="h-28 w-28 object-contain"
@@ -1826,9 +1865,17 @@ export function InvoiceGenerator() {
                         <h3 className="text-sm font-semibold text-stone-950">
                           Terms &amp; Conditions
                         </h3>
-                        <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-stone-600">
-                          {terms}
-                        </p>
+                        <div className="mt-3 grid gap-2 text-sm leading-6 text-stone-600">
+                          {terms
+                            .trim()
+                            .split(/\r?\n/)
+                            .filter((paragraph) => paragraph.trim() !== "")
+                            .map((paragraph, index) => (
+                              <p className="break-words" key={`${paragraph}-${index}`}>
+                                {paragraph}
+                              </p>
+                            ))}
+                        </div>
                       </div>
                     ) : null}
                   </div>
@@ -1842,33 +1889,11 @@ export function InvoiceGenerator() {
         </Card>
       </div>
 
-      <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Explanation</p>
+          <p className="text-sm font-medium tracking-wide text-slate-500">Fast invoice setup</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            What an invoice is
-          </h2>
-          <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>
-              An invoice is a document sent to a customer to request payment for goods or
-              services.
-            </p>
-            <p>
-              A simple invoice usually includes seller details, customer details, invoice
-              number, invoice date, optional due date, line items, subtotal, discount, SST / tax
-              if applicable, payment instructions, terms, and total amount due.
-            </p>
-            <p>
-              This tool helps create a simple downloadable PDF invoice. It does not replace
-              accounting, tax, or legal advice.
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Features</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            What this invoice generator can do
+            Build the invoice, preview it, then download the PDF
           </h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {featureHighlights.map((feature) => (
@@ -1881,56 +1906,26 @@ export function InvoiceGenerator() {
             ))}
           </div>
         </Card>
+
+        <Card className="p-6 sm:p-8">
+          <p className="text-sm font-medium tracking-wide text-slate-500">Malaysia note</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+            Simple PDF invoice only
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            This creates a simple PDF invoice. It does not submit, validate, or connect to
+            LHDN/MyInvois.
+          </p>
+          <div className="mt-5 grid gap-3">
+            {toolFitNotes.map(([label, text]) => (
+              <div className="rounded-xl border border-stone-200 bg-stone-50 p-4" key={label}>
+                <h3 className="text-sm font-semibold text-stone-950">{label}</h3>
+                <p className="mt-1 text-sm leading-6 text-stone-600">{text}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
       </section>
-
-      <Card className="p-6 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Invoice fields</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          What each field means
-        </h2>
-        <div className="mt-5 grid gap-x-8 sm:grid-cols-2">
-          {fieldNotes.map(([label, text]) => (
-            <div className="border-t border-stone-100 py-3" key={label}>
-              <h3 className="text-sm font-semibold text-stone-950">{label}</h3>
-              <p className="mt-1 text-sm leading-6 text-stone-600">{text}</p>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="p-6 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Malaysia note</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Simple PDF invoice, not official MyInvois submission
-        </h2>
-        <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            This tool creates a simple invoice PDF for everyday business use. It does not submit
-            invoices to LHDN, validate an official Malaysia e-Invoice, or connect to MyInvois.
-          </p>
-          <p>
-            For official Malaysia e-Invoice requirements, refer to LHDN/MyInvois guidance or a
-            qualified tax professional.
-          </p>
-        </div>
-      </Card>
-
-      <Card className="p-6 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Mistakes to avoid
-        </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {mistakes.map((mistake) => (
-            <div
-              className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
-              key={mistake}
-            >
-              {mistake}
-            </div>
-          ))}
-        </div>
-      </Card>
 
       <Card className="p-6 sm:p-8 lg:p-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

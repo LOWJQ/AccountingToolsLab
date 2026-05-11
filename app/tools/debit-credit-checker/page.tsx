@@ -66,6 +66,15 @@ export default function DebitCreditCheckerPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={debitCreditFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Debit/Credit Checker
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Choose an account type and whether it increases or decreases to see whether you should
+          debit or credit the account.
+        </p>
+      </div>
       <DebitCreditChecker />
       <RelatedLinks
         title="Learn debit and credit rules"

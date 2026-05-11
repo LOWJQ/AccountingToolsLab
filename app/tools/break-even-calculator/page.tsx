@@ -65,6 +65,15 @@ export default function BreakEvenCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={breakEvenFaqs} />
+      <div className="max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+          Break-even Calculator
+        </h1>
+        <p className="mt-3 text-base leading-7 text-stone-600">
+          Calculate how many units or how much sales revenue a business needs to cover its fixed
+          and variable costs.
+        </p>
+      </div>
       <BreakEvenCalculator />
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>

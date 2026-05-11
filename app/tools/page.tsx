@@ -1,9 +1,13 @@
-﻿import { tools } from "@/lib/data/tools";
+import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { InvoiceMockPreview } from "@/components/tools/InvoiceMockPreview";
+import { createItemListSchema } from "@/lib/seo/schema";
+import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "Free Invoice Generator and Accounting Tools | AccountingToolsLab",
+  title: "Free Accounting Calculators and Invoice Tools | AccountingToolsLab",
   description:
     "Create invoices, calculate SST, check cash flow, estimate break-even points, and use free accounting calculators for small businesses, freelancers, and learners.",
   path: "/tools"
@@ -26,6 +30,11 @@ const categories = [
 
 const availableTools = tools.filter((tool) => tool.status === "mvp");
 const invoiceTool = tools.find((tool) => tool.slug === "invoice-generator");
+const toolItemList = availableTools.map((tool) => ({
+  name: tool.name,
+  url: `${siteConfig.url}${tool.href}`,
+  description: tool.description
+}));
 
 const businessToolSlugs = [
   "sst-calculator-malaysia",
@@ -119,7 +128,14 @@ function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
 export default function ToolsPage() {
   return (
     <div className="bg-stone-50 text-stone-950">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteConfig.url },
+          { name: "Tools", url: `${siteConfig.url}/tools` }
+        ]}
+      />
+      <JsonLd data={createItemListSchema(toolItemList)} />
+      <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <div className="max-w-3xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">

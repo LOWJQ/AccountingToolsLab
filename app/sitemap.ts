@@ -3,6 +3,8 @@ import { guides } from "@/lib/data/guides";
 import { tools } from "@/lib/data/tools";
 import { siteConfig } from "@/lib/seo/site";
 
+const defaultLastModified = "2026-05-08";
+
 const updatedRouteLastModified: Record<string, string> = {
   "": "2026-05-08",
   "/tools": "2026-05-08",
@@ -25,8 +27,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return routes.map((route) => ({
     url: `${siteConfig.url}${route || "/"}`,
-    ...(updatedRouteLastModified[route]
-      ? { lastModified: updatedRouteLastModified[route] }
-      : {})
+    lastModified: updatedRouteLastModified[route] ?? defaultLastModified
   }));
 }
