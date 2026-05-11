@@ -8,7 +8,7 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "Free Invoice Generator Malaysia | Create PDF Invoices",
+  title: "Free Invoice Generator – Create & Download PDF Invoices Online",
   description:
     "Create a simple invoice PDF with logo, line items, SST/tax, discounts, payment details, QR image, terms, and notes. Free invoice generator for Malaysia.",
   path: "/tools/invoice-generator"
