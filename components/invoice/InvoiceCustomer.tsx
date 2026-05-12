@@ -1,0 +1,56 @@
+"use client";
+
+type InvoiceCustomerProps = {
+  customerAddress: string;
+  customerContact: string;
+  customerName: string;
+  onCustomerAddressChange: (value: string) => void;
+  onCustomerContactChange: (value: string) => void;
+  onCustomerNameChange: (value: string) => void;
+};
+
+export function InvoiceCustomer({
+  customerAddress,
+  customerContact,
+  customerName,
+  onCustomerAddressChange,
+  onCustomerContactChange,
+  onCustomerNameChange
+}: InvoiceCustomerProps) {
+  return (
+    <section className="grid gap-4">
+      <h2 className="text-base font-semibold text-stone-950">Customer details</h2>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-2 sm:col-span-2">
+          <span className="text-sm font-semibold text-stone-800">Customer name</span>
+          <input
+            className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            onChange={(event) => onCustomerNameChange(event.target.value)}
+            placeholder="Customer name"
+            value={customerName}
+          />
+        </label>
+        <label className="grid gap-2 sm:col-span-2">
+          <span className="text-sm font-semibold text-stone-800">
+            Customer email or phone
+          </span>
+          <input
+            className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            onChange={(event) => onCustomerContactChange(event.target.value)}
+            placeholder="customer@example.com"
+            value={customerContact}
+          />
+        </label>
+        <label className="grid gap-2 sm:col-span-2">
+          <span className="text-sm font-semibold text-stone-800">Customer address</span>
+          <textarea
+            className="min-h-20 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            onChange={(event) => onCustomerAddressChange(event.target.value)}
+            placeholder="Customer address"
+            value={customerAddress}
+          />
+        </label>
+      </div>
+    </section>
+  );
+}

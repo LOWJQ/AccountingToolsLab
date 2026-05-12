@@ -1,6 +1,10 @@
 import { JsonLd } from "./JsonLd";
 
 type SoftwareApplicationJsonLdProps = {
+  aggregateRating?: {
+    ratingValue: string;
+    reviewCount: string;
+  };
   applicationCategory?: string;
   name: string;
   description: string;
@@ -9,6 +13,7 @@ type SoftwareApplicationJsonLdProps = {
 };
 
 export function SoftwareApplicationJsonLd({
+  aggregateRating,
   applicationCategory = "FinanceApplication",
   description,
   name,
@@ -25,6 +30,15 @@ export function SoftwareApplicationJsonLd({
         url,
         applicationCategory,
         operatingSystem: "Web",
+        ...(aggregateRating
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: aggregateRating.ratingValue,
+                reviewCount: aggregateRating.reviewCount
+              }
+            }
+          : {}),
         offers: {
           "@type": "Offer",
           price: "0",

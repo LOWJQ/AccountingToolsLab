@@ -3,12 +3,12 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
-import { siteConfig } from "@/lib/seo/site";
+import { buildAssetUrl, siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "How to Create a Simple Invoice for a Small Business | AccountingToolsLab",
+  title: "How to Create a Simple Invoice in Malaysia | Step-by-Step Guide",
   description:
-    "Learn how to create a simple invoice with business details, customer details, invoice number, dates, line items, SST or tax notes, payment terms, and a PDF example.",
+    "Learn how to create a simple invoice for freelancers and small businesses in Malaysia, including invoice fields, payment terms, SST notes, examples, and common mistakes.",
   path: "/guides/how-to-create-a-simple-invoice"
 });
 
@@ -16,6 +16,7 @@ const tableOfContents = [
   ["What to include", "#what-to-include"],
   ["Invoice format", "#invoice-format"],
   ["Step-by-step guide", "#steps"],
+  ["Wording examples", "#wording-examples"],
   ["Example", "#example"],
   ["Checklist", "#checklist"],
   ["Malaysia note", "#malaysia-note"],
@@ -29,11 +30,15 @@ const invoiceFields = [
   ["Invoice number", "A unique tracking reference", "INV-002"],
   ["Invoice date", "Date the invoice is issued", "2026-05-11"],
   ["Due date", "Date payment is expected", "2026-05-18"],
-  ["Line items", "Goods or services billed", "Accounting Consultation Fee"],
+  ["Line items", "Goods or services billed", "Website maintenance service for April 2026"],
   ["Quantity and unit price", "How the amount is calculated", "1 x RM 150"],
   ["Subtotal and total", "Amount before and after discount and tax", "RM 146.28"],
-  ["Payment details", "How the customer can pay", "Maybank or payment link"],
-  ["Terms and conditions", "Payment rules and important notes", "Payment due within 7 days"]
+  ["Payment details", "How the customer can pay", "Bank transfer, DuitNow ID, or payment link"],
+  [
+    "Terms and conditions",
+    "Payment rules and important notes",
+    "Payment due within 7 days by bank transfer"
+  ]
 ];
 
 const formatItems = [
@@ -52,13 +57,46 @@ const steps = [
   "Enter the invoice date and a due date if payment is expected later.",
   "List each product or service with a clear description.",
   "Enter quantity and unit price so each line total is easy to check.",
-  "Add any discount before SST or tax if it applies.",
-  "Add payment details, terms, and notes that help the customer pay.",
+  "Add any discount before SST or tax if it applies to the invoice.",
+  "Add payment details, payment reference wording, terms, and notes that help the customer pay.",
   "Preview the invoice, check the total, then download or send the PDF."
 ];
 
+const wordingExamples = [
+  [
+    "Freelance service",
+    "Service fee",
+    "Website maintenance service for April 2026"
+  ],
+  [
+    "Consulting work",
+    "Consultation",
+    "Accounting consultation session on 11 May 2026"
+  ],
+  [
+    "Small business sale",
+    "Products",
+    "5 boxes of printed labels for May 2026 order"
+  ],
+  [
+    "Payment terms",
+    "Pay soon",
+    "Payment due within 7 days by bank transfer."
+  ],
+  [
+    "Payment reference",
+    "Reference payment",
+    "Please include invoice number INV-001 as the payment reference."
+  ],
+  [
+    "DuitNow note",
+    "Pay by QR",
+    "You may pay by bank transfer or the DuitNow QR shown on this invoice."
+  ]
+];
+
 const sampleLineItems = [
-  ["Accounting Consultation Fee", "1", "RM 150.00", "RM 150.00"],
+  ["Website maintenance service for April 2026", "1", "RM 150.00", "RM 150.00"],
   ["Discount", "-", "-", "-RM 12.00"],
   ["Amount after discount", "-", "-", "RM 138.00"],
   ["SST / Tax 6%", "-", "-", "RM 8.28"],
@@ -125,17 +163,22 @@ const faqs = [
   {
     question: "What is a simple invoice?",
     answer:
-      "A simple invoice is a document sent to request payment for goods or services. It should show who is billing, who is being billed, what was provided, and how much is due."
+      "A simple invoice is a document used to request payment for goods or services. For Malaysian freelancers and small businesses, it usually shows the seller, customer, invoice number, invoice date, line items, payment details, and total amount due."
   },
   {
     question: "What should an invoice include?",
     answer:
-      "It should include business details, customer details, invoice number, invoice date, due date if needed, line items, subtotal, tax or SST if applicable, payment details, terms, and total."
+      "An invoice should include business details, customer details, invoice number, invoice date, due date if needed, line items, subtotal, tax or SST if applicable, payment details, payment terms, and total. Use clear descriptions so the customer understands what they are paying for."
+  },
+  {
+    question: "How do you create a simple invoice?",
+    answer:
+      "Start by adding your business and customer details, then add an invoice number, invoice date, line items, quantities, prices, payment details, and payment terms. Check the subtotal, SST or tax if applicable, and final total before sending or downloading the invoice."
   },
   {
     question: "Is an invoice the same as a receipt?",
     answer:
-      "No. An invoice requests payment, while a receipt confirms that payment has already been received."
+      "No. An invoice requests payment, while a receipt confirms that payment has already been received. For record-keeping, an unpaid invoice should not be treated the same as collected cash."
   },
   {
     question: "Can I create an invoice without tax?",
@@ -143,9 +186,9 @@ const faqs = [
       "Yes, a simple invoice can have no tax if tax does not apply. If you are unsure about SST or other tax treatment, check official guidance or a qualified professional."
   },
   {
-    question: "Should I include payment terms?",
+    question: "What payment terms can I write on an invoice?",
     answer:
-      "Payment terms are useful because they tell the customer when payment is expected and how to pay."
+      "A simple payment term can say: Payment due within 7 days by bank transfer. Please include invoice number INV-001 as the payment reference. You can adjust the due date, payment method, and reference wording for your customer."
   },
   {
     question: "Can I use the Invoice Generator to create a PDF invoice?",
@@ -153,9 +196,14 @@ const faqs = [
       "Yes. The Invoice Generator lets you enter invoice details, preview the invoice, and download a simple PDF invoice."
   },
   {
-    question: "Is this an official Malaysia e-Invoice or MyInvois tool?",
+    question: "Can Malaysian freelancers use a simple invoice?",
     answer:
-      "No. The Invoice Generator creates a simple PDF invoice only. It does not submit, validate, or connect to LHDN/MyInvois."
+      "Yes. Malaysian freelancers, side-hustle sellers, and service providers can use a simple invoice to request payment and keep basic records. If your business has SST, e-Invoice, or other tax obligations, check official guidance or speak with a qualified professional."
+  },
+  {
+    question: "Is a PDF invoice the same as an official Malaysia e-Invoice?",
+    answer:
+      "No. A PDF invoice can help with payment requests and simple record-keeping, but it is not the same as submitting an e-Invoice through LHDN/MyInvois. The Invoice Generator does not submit, validate, or connect invoices to MyInvois."
   }
 ];
 
@@ -208,28 +256,44 @@ export default function HowToCreateSimpleInvoicePage() {
         data={{
           "@context": "https://schema.org",
           "@type": "Article",
-          headline: "How to Create a Simple Invoice for a Small Business",
+          headline: "How to Create a Simple Invoice in Malaysia",
           description: metadata.description,
           url: pageUrl,
+          datePublished: "2026-05-08",
+          dateModified: "2026-05-12",
+          author: {
+            "@type": "Organization",
+            name: "AccountingToolsLab"
+          },
           publisher: {
             "@type": "Organization",
             name: siteConfig.name,
             url: siteConfig.url
           },
-          image: `${siteConfig.url}/guides/simple-invoice-example-labeled.webp`,
+          image: buildAssetUrl("/guides/simple-invoice-example-labeled.webp"),
           mainEntityOfPage: pageUrl
         }}
       />
 
       <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <a
+          className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
+          href="/guides"
+        >
+          ← All guides
+        </a>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Business Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            How to Create a Simple Invoice for a Small Business
+            How to Create a Simple Invoice in Malaysia
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            Learn what a simple invoice should include, how the format works, and what to check
-            before sending it to a customer.
+            Learn what a simple invoice should include, how to write clearer invoice lines and
+            payment terms, and what Malaysian freelancers and small businesses should check before
+            sending it to a customer.
+          </p>
+          <p className="mt-3 text-sm font-medium text-stone-500">
+            Last updated: 12 May 2026
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
@@ -254,9 +318,16 @@ export default function HowToCreateSimpleInvoicePage() {
               What is a simple invoice?
             </h2>
             <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
-              A simple invoice requests payment for goods or services. It should clearly show the
-              seller, customer, invoice number, dates, line items, payment details, and total
-              amount due.
+              A simple invoice requests payment for goods or services. In Malaysia, freelancers,
+              service providers, and small businesses can use it to show who is billing, who needs
+              to pay, what was provided, the invoice number, payment details, and the total amount
+              due.
+            </p>
+            <p className="mt-4 text-sm leading-6 text-stone-500">
+              About this guide: This guide helps Malaysian freelancers, students, side-hustle
+              sellers, and small business owners understand the basic parts of a simple invoice. It
+              is for general learning and record-keeping purposes only and should not be treated as
+              professional accounting, tax, or legal advice.
             </p>
           </article>
 
@@ -345,14 +416,29 @@ export default function HowToCreateSimpleInvoicePage() {
           </ol>
         </section>
 
+        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="wording-examples">
+          <p className="text-sm font-medium tracking-wide text-slate-500">Wording examples</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+            Write invoice details clearly
+          </h2>
+          <p className="mt-5 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
+            Clear wording helps the customer understand what they are paying for and how to pay.
+            Avoid vague descriptions when a short, specific phrase would be clearer.
+          </p>
+          <GuideTable
+            headers={["Situation", "Weak wording", "Better wording"]}
+            rows={wordingExamples}
+          />
+        </section>
+
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="example">
           <p className="text-sm font-medium tracking-wide text-slate-500">Example</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             Simple invoice example
           </h2>
           <p className="mt-5 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-            In the example above, Accounting Tools Lab bills Example Customer for one Accounting
-            Consultation Fee at RM 150. A RM 12 discount reduces the taxable amount to RM 138.
+            In the example above, Accounting Tools Lab bills Example Customer for one website
+            maintenance service at RM 150. A RM 12 discount reduces the taxable amount to RM 138.
             SST/tax is shown at 6%, adding RM 8.28, so the final total is RM 146.28.
           </p>
           <GuideTable
@@ -403,11 +489,13 @@ export default function HowToCreateSimpleInvoicePage() {
             </h2>
             <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
               <p>
-                A simple PDF invoice is not the same as an official Malaysia e-Invoice submission.
-                The Invoice Generator does not submit, validate, or connect to LHDN/MyInvois.
+                For Malaysian users, a simple PDF invoice can help with payment requests and
+                record-keeping, but it is not the same as submitting an e-Invoice through
+                LHDN/MyInvois.
               </p>
               <p>
-                For SST arithmetic, use the{" "}
+                If SST applies to your business, include the SST amount and label it clearly. For
+                SST arithmetic, use the{" "}
                 <a className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/sst-calculator-malaysia">
                   SST Calculator Malaysia
                 </a>{" "}
@@ -418,7 +506,8 @@ export default function HowToCreateSimpleInvoicePage() {
                 >
                   how to add or remove SST
                 </a>
-                . Check official guidance or a qualified professional if you are unsure.
+                . If you are unsure whether SST or e-Invoice requirements apply, check official
+                guidance or ask a qualified professional.
               </p>
             </div>
           </article>

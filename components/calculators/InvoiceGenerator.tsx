@@ -3,8 +3,16 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { LogoUploader } from "@/components/invoice/LogoUploader";
-import { PaymentDetailsFields } from "@/components/invoice/PaymentDetailsFields";
+import { InvoiceBillFrom } from "@/components/invoice/InvoiceBillFrom";
+import { InvoiceCustomer } from "@/components/invoice/InvoiceCustomer";
+import { InvoiceLineItems } from "@/components/invoice/InvoiceLineItems";
+import { InvoiceMeta } from "@/components/invoice/InvoiceMeta";
+import { InvoicePaymentSection } from "@/components/invoice/InvoicePaymentSection";
+import {
+  InvoiceTotals,
+  type InvoiceDiscountMode,
+  type InvoiceTaxMode
+} from "@/components/invoice/InvoiceTotals";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { isCurrencyCode } from "@/lib/currency";
@@ -38,26 +46,26 @@ import {
 import { validateInvoice } from "@/lib/invoice/invoice-validation";
 
 type InvoiceView = "details" | "preview";
-type TaxMode = "none" | "sst-6" | "sst-8" | "custom";
-type DiscountMode = "none" | "percentage" | "fixed";
+type TaxMode = InvoiceTaxMode;
+type DiscountMode = InvoiceDiscountMode;
 
 const featureHighlights = [
-  "Add a logo, invoice number, invoice date, due date, and currency.",
+  "Malaysia-friendly for simple record-keeping.",
+  "Free to use with no sign-up required.",
   "Enter line items with quantity, unit price, subtotal, and total.",
   "Apply optional SST, other tax rates, and discounts when needed.",
   "Include payment details and an optional QR/payment image.",
-  "Add invoice notes or terms before you send the invoice.",
   "Preview the invoice, download the PDF, and keep drafts on this device."
 ];
 
 const toolFitNotes = [
   [
     "Good for",
-    "Simple PDF invoices for Malaysia small businesses, freelancers, consultants, and repeat customers."
+    "Simple PDF invoices for Malaysian freelancers, students, small business owners, consultants, side-hustle sellers, and repeat customers."
   ],
   [
     "Not for",
-    "Official LHDN/MyInvois submission, validation, connected e-Invoice filing, or guaranteed tax compliance."
+    "Official LHDN/MyInvois submission, validation, connected e-Invoice filing, professional advice, or proof of tax compliance."
   ]
 ];
 
@@ -1263,309 +1271,66 @@ export function InvoiceGenerator() {
         <div className="mt-8 grid min-w-0 gap-8">
           {activeView === "details" ? (
             <div className="grid min-w-0 gap-6">
-            <section className="grid gap-4">
-              <h2 className="text-base font-semibold text-stone-950">Business details</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-stone-800">Business name</span>
-                  <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setBusinessName(event.target.value)}
-                    placeholder="Your business name"
-                    value={businessName}
-                  />
-                </label>
-                <label className="grid gap-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-stone-800">
-                    Business email or phone
-                  </span>
-                  <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setBusinessContact(event.target.value)}
-                    placeholder="hello@example.com"
-                    value={businessContact}
-                  />
-                </label>
-                <label className="grid gap-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-stone-800">Business address</span>
-                  <textarea
-                    className="min-h-20 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setBusinessAddress(event.target.value)}
-                    placeholder="Business address"
-                    value={businessAddress}
-                  />
-                </label>
-                <LogoUploader
-                  logoDataUrl={businessLogoDataUrl}
-                  onChange={setBusinessLogoDataUrl}
-                />
-              </div>
-            </section>
+              <InvoiceBillFrom
+                businessAddress={businessAddress}
+                businessContact={businessContact}
+                businessLogoDataUrl={businessLogoDataUrl}
+                businessName={businessName}
+                onBusinessAddressChange={setBusinessAddress}
+                onBusinessContactChange={setBusinessContact}
+                onBusinessLogoChange={setBusinessLogoDataUrl}
+                onBusinessNameChange={setBusinessName}
+              />
 
-            <section className="grid gap-4">
-              <h2 className="text-base font-semibold text-stone-950">Customer details</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-stone-800">Customer name</span>
-                  <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setCustomerName(event.target.value)}
-                    placeholder="Customer name"
-                    value={customerName}
-                  />
-                </label>
-                <label className="grid gap-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-stone-800">
-                    Customer email or phone
-                  </span>
-                  <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setCustomerContact(event.target.value)}
-                    placeholder="customer@example.com"
-                    value={customerContact}
-                  />
-                </label>
-                <label className="grid gap-2 sm:col-span-2">
-                  <span className="text-sm font-semibold text-stone-800">Customer address</span>
-                  <textarea
-                    className="min-h-20 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setCustomerAddress(event.target.value)}
-                    placeholder="Customer address"
-                    value={customerAddress}
-                  />
-                </label>
-              </div>
-            </section>
+              <InvoiceCustomer
+                customerAddress={customerAddress}
+                customerContact={customerContact}
+                customerName={customerName}
+                onCustomerAddressChange={setCustomerAddress}
+                onCustomerContactChange={setCustomerContact}
+                onCustomerNameChange={setCustomerName}
+              />
 
-            <section className="grid gap-4">
-              <h2 className="text-base font-semibold text-stone-950">Invoice details</h2>
-              <div className="grid min-w-0 gap-4 md:grid-cols-3">
-                <label className="grid min-w-0 gap-2">
-                  <span className="text-sm font-semibold text-stone-800">Invoice number</span>
-                  <input
-                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setInvoiceNumber(event.target.value)}
-                    value={invoiceNumber}
-                  />
-                </label>
-                <label className="grid min-w-0 gap-2">
-                  <span className="text-sm font-semibold text-stone-800">Invoice date</span>
-                  <input
-                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setInvoiceDate(event.target.value)}
-                    type="date"
-                    value={invoiceDate}
-                  />
-                </label>
-                <label className="grid min-w-0 gap-2">
-                  <span className="text-sm font-semibold text-stone-800">Due date</span>
-                  <input
-                    className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => setDueDate(event.target.value)}
-                    type="date"
-                    value={dueDate}
-                  />
-                </label>
-              </div>
-            </section>
+              <InvoiceMeta
+                dueDate={dueDate}
+                invoiceDate={invoiceDate}
+                invoiceNumber={invoiceNumber}
+                onDueDateChange={setDueDate}
+                onInvoiceDateChange={setInvoiceDate}
+                onInvoiceNumberChange={setInvoiceNumber}
+              />
 
-            <section className="grid gap-4">
-              <h2 className="text-base font-semibold text-stone-950">SST / Tax</h2>
-              <div className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  {taxOptions.map((option) => (
-                    <label
-                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                        taxMode === option.mode
-                          ? "border-slate-300 bg-white text-stone-950 shadow-sm"
-                          : "border-stone-200 bg-stone-50 text-stone-700 hover:bg-white"
-                      }`}
-                      key={option.mode}
-                    >
-                      <input
-                        checked={taxMode === option.mode}
-                        className="h-4 w-4 accent-slate-700"
-                        onChange={() => setTaxMode(option.mode)}
-                        type="radio"
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {taxMode === "custom" ? (
-                  <label className="grid max-w-xs gap-2">
-                    <span className="text-sm font-semibold text-stone-800">Tax rate (%)</span>
-                    <input
-                      className="h-12 w-full rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                      inputMode="decimal"
-                      max="100"
-                      min="0"
-                      onChange={(event) => setCustomTaxRate(event.target.value)}
-                      placeholder="Example: 6"
-                      type="number"
-                      value={customTaxRate}
-                    />
-                  </label>
-                ) : null}
-              </div>
-            </section>
+              <InvoiceTotals
+                currency={currency}
+                customTaxRate={customTaxRate}
+                discount={discount}
+                discountError={discountError}
+                discountMode={discountMode}
+                discountOptions={discountOptions}
+                onCustomTaxRateChange={setCustomTaxRate}
+                onDiscountModeChange={selectDiscount}
+                onDiscountValueChange={updateDiscountValue}
+                onTaxModeChange={setTaxMode}
+                taxMode={taxMode}
+                taxOptions={taxOptions}
+              />
 
-            <section className="grid gap-4">
-              <div>
-                <h2 className="text-base font-semibold text-stone-950">Discount</h2>
-                <p className="mt-1 text-sm text-stone-600">
-                  Discount is applied before SST / tax.
-                </p>
-              </div>
-              <div className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4">
-                <div className="grid gap-3 md:grid-cols-3">
-                  {discountOptions.map((option) => (
-                    <label
-                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                        discountMode === option.mode
-                          ? "border-slate-300 bg-white text-stone-950 shadow-sm"
-                          : "border-stone-200 bg-stone-50 text-stone-700 hover:bg-white"
-                      }`}
-                      key={option.mode}
-                    >
-                      <input
-                        checked={discountMode === option.mode}
-                        className="h-4 w-4 accent-slate-700"
-                        onChange={() => selectDiscount(option.mode)}
-                        type="radio"
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {discount.enabled ? (
-                  <label className="grid max-w-xs gap-2">
-                    <span className="text-sm font-semibold text-stone-800">
-                      {discount.type === "percentage"
-                        ? "Discount percentage"
-                        : `Discount amount (${currency})`}
-                    </span>
-                    <div className="relative">
-                      <input
-                        className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 ${
-                          discount.type === "percentage" ? "pr-10" : ""
-                        } ${
-                          discountError
-                            ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                            : "border-stone-200"
-                        }`}
-                        inputMode="decimal"
-                        max={discount.type === "percentage" ? "100" : undefined}
-                        min="0"
-                        onChange={(event) => updateDiscountValue(event.target.value)}
-                        placeholder={discount.type === "percentage" ? "10" : "50.00"}
-                        type="number"
-                        value={discount.value}
-                      />
-                      {discount.type === "percentage" ? (
-                        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-stone-500">
-                          %
-                        </span>
-                      ) : null}
-                    </div>
-                  </label>
-                ) : null}
-                {discountError ? (
-                  <p className="text-sm font-medium text-red-700">{discountError}</p>
-                ) : null}
-              </div>
-            </section>
+              <InvoiceLineItems
+                currency={currency}
+                formatCurrency={formatCurrency}
+                lineItemPreviewTotals={lineItemPreviewTotals}
+                lineItems={lineItems}
+                lineItemsMessage={lineItemsMessage}
+                onAddLineItem={addLineItem}
+                onRemoveLineItem={removeLineItem}
+                onUpdateLineItem={updateLineItem}
+              />
 
-            <section className="grid gap-4">
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="text-base font-semibold text-stone-950">Line items</h2>
-                <button
-                  className="inline-flex h-10 items-center justify-center rounded-xl bg-slate-700 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-                  onClick={addLineItem}
-                  type="button"
-                >
-                  Add item
-                </button>
-              </div>
-
-              <div className="grid gap-4">
-                {lineItems.map((item, index) => (
-                  <div
-                    className="rounded-xl border border-stone-200 bg-stone-50 p-4"
-                    key={item.id}
-                  >
-                    <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_8.5rem_auto]">
-                      <label className="grid min-w-0 gap-2">
-                        <span className="text-sm font-semibold text-stone-800">
-                          Description
-                        </span>
-                        <input
-                          className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                          onChange={(event) =>
-                            updateLineItem(item.id, "description", event.target.value)
-                          }
-                          placeholder={`Item ${index + 1}`}
-                          value={item.description}
-                        />
-                      </label>
-                      <label className="grid min-w-0 gap-2">
-                        <span className="text-sm font-semibold text-stone-800">Quantity</span>
-                        <input
-                          className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                          inputMode="decimal"
-                          onChange={(event) =>
-                            updateLineItem(item.id, "quantity", event.target.value)
-                          }
-                          placeholder="1"
-                          type="number"
-                          value={item.quantity}
-                        />
-                      </label>
-                      <label className="grid min-w-0 gap-2">
-                        <span className="text-sm font-semibold text-stone-800">
-                          Unit price ({currency})
-                        </span>
-                        <input
-                          className="h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                          inputMode="decimal"
-                          onChange={(event) =>
-                            updateLineItem(item.id, "unitPrice", event.target.value)
-                          }
-                          placeholder="0.00"
-                          type="number"
-                          value={item.unitPrice}
-                        />
-                      </label>
-                      <div className="grid min-w-0 gap-2">
-                        <span className="text-sm font-semibold text-stone-800">Line total</span>
-                        <div className="flex h-12 w-full min-w-0 items-center rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-950">
-                          {formatCurrency(lineItemPreviewTotals[index] ?? 0)}
-                        </div>
-                      </div>
-                      <div className="flex min-w-0 items-end">
-                        <button
-                          className="h-12 w-full rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 xl:w-auto"
-                          disabled={lineItems.length === 1}
-                          onClick={() => removeLineItem(item.id)}
-                          type="button"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {lineItemsMessage ? (
-                <p className="text-sm font-medium text-red-700">{lineItemsMessage}</p>
-              ) : null}
-            </section>
-
-            <PaymentDetailsFields
-              onChange={updatePayment}
-              payment={payment}
-              paymentLinkError={paymentLinkError}
-            />
+              <InvoicePaymentSection
+                onChange={updatePayment}
+                payment={payment}
+                paymentLinkError={paymentLinkError}
+              />
 
             <label className="grid gap-2">
               <span className="text-sm font-semibold text-stone-800">
@@ -1923,9 +1688,10 @@ export function InvoiceGenerator() {
             Simple PDF invoice only, not MyInvois filing
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            This tool creates downloadable PDF invoices. It does not submit, validate, or connect
-            invoices to LHDN/MyInvois, and it does not replace official e-Invoice filing or tax
-            advice.
+            No. This invoice generator creates a simple PDF invoice for payment requests and
+            record-keeping. It does not submit, validate, or connect invoices to LHDN/MyInvois.
+            For official e-Invoice requirements, check the latest LHDN guidance or speak with a
+            qualified professional.
           </p>
           <div className="mt-5 grid gap-3">
             {toolFitNotes.map(([label, text]) => (

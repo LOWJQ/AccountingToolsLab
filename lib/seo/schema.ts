@@ -10,15 +10,12 @@ export function createWebsiteSchema() {
 }
 
 export function createOrganizationSchema() {
-  const sameAs = [siteConfig.social.x, siteConfig.social.linkedin].filter(Boolean);
-
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteConfig.name,
     url: siteConfig.url,
-    logo: `${siteConfig.url}/logo.png`,
-    ...(sameAs.length > 0 ? { sameAs } : {})
+    logo: `${siteConfig.url}/logo.png`
   };
 }
 

@@ -8,9 +8,16 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "Free Invoice Generator Malaysia | Create PDF Invoices",
+  title: "Free Invoice Generator Malaysia | Create a PDF Invoice Online",
   description:
-    "Create free PDF invoices for Malaysia online. Add business details, line items, SST or tax, discounts, payment info, notes, and download instantly.",
+    "Create a simple PDF invoice for freelancers and small businesses in Malaysia. Add invoice items, tax/SST, discounts, and payment details, then download without signing up.",
+  // TODO: Create /public/og-invoice-generator.png at 1200x630.
+  ogImage: {
+    url: "/og-invoice-generator.png",
+    width: 1200,
+    height: 630,
+    alt: "Free Invoice Generator Malaysia PDF invoice preview"
+  },
   path: "/tools/invoice-generator"
 });
 
@@ -18,7 +25,7 @@ const invoiceFaqs = [
   {
     question: "Can I download the invoice as a PDF?",
     answer:
-      "Yes. After entering your invoice details, you can preview the invoice and download it as a PDF."
+      "Yes. After entering your invoice details, you can preview the invoice and download it as a simple PDF for payment requests and record-keeping."
   },
   {
     question: "Can I add my logo to the invoice?",
@@ -28,12 +35,12 @@ const invoiceFaqs = [
   {
     question: "Can I add SST, tax, or a discount?",
     answer:
-      "Yes. You can add SST-style tax, other tax amounts, or discounts if they apply to your invoice. Check with your accountant or tax adviser if you are unsure about tax requirements."
+      "Yes. You can add SST-style tax, other tax amounts, or discounts if they apply to your invoice. If you are unsure whether SST applies, check official guidance or ask a qualified professional."
   },
   {
     question: "Can I add payment details and a QR image?",
     answer:
-      "Yes. You can add payment instructions and upload a payment QR image if you want customers to see payment details on the invoice."
+      "Yes. You can add payment instructions and upload a payment QR image if you want customers to see bank transfer, DuitNow-style, or other payment details on the invoice."
   },
   {
     question: "Are invoices saved online?",
@@ -43,17 +50,17 @@ const invoiceFaqs = [
   {
     question: "Is this an official Malaysia e-Invoice or MyInvois tool?",
     answer:
-      "No. This tool creates a simple downloadable PDF invoice. It does not submit, validate, or connect invoices to LHDN/MyInvois."
+      "No. This invoice generator creates a simple PDF invoice for payment requests and record-keeping. It does not submit invoices to LHDN or MyInvois. For official e-Invoice requirements, check the latest LHDN guidance or speak with a qualified professional."
   },
   {
     question: "Who can use this invoice generator?",
     answer:
-      "It is useful for freelancers, consultants, small businesses, and service providers who need a simple PDF invoice generator for Malaysia."
+      "It is useful for Malaysian freelancers, students, side-hustle sellers, service providers, consultants, and small business owners who need a simple PDF invoice generator."
   }
 ];
 
 const softwareApplicationDescription =
-  "Create free PDF invoices for Malaysia with business details, line items, SST or tax, discounts, payment information, notes, and PDF download.";
+  "Create simple PDF invoices for Malaysian freelancers and small businesses with business details, line items, SST or tax, discounts, payment information, notes, and PDF download.";
 
 export default function InvoiceGeneratorPage() {
   const pageUrl = `${siteConfig.url}/tools/invoice-generator`;
@@ -80,13 +87,16 @@ export default function InvoiceGeneratorPage() {
           Free Invoice Generator Malaysia
         </h1>
         <p className="mt-3 max-w-4xl text-base leading-7 text-stone-600">
-          Create professional PDF invoices online for Malaysia. Add your business details,
-          customer information, line items, SST or tax, discounts, payment instructions, notes,
-          logo, and payment QR image, then download a clean invoice PDF instantly.
+          Create a simple PDF invoice for freelancers and small businesses in Malaysia. Add your
+          business details, customer details, invoice items, tax/SST, discounts, payment
+          information, notes, logo, and payment QR image, then download a clean invoice without
+          signing up.
         </p>
         <p className="mt-3 max-w-4xl text-sm leading-6 text-stone-500">
-          Built for freelancers, consultants, small businesses, and service providers who need a
-          simple PDF invoice. It does not submit, validate, or connect invoices to LHDN/MyInvois.
+          AccountingToolsLab creates simple Malaysia-friendly tools for invoices, accounting
+          calculations, and small business record-keeping. This tool is designed for general
+          learning and record-keeping purposes only. It does not submit invoices to LHDN/MyInvois
+          and should not be treated as professional accounting, tax, or legal advice.
         </p>
       </div>
       <InvoiceGenerator />
@@ -101,7 +111,7 @@ export default function InvoiceGeneratorPage() {
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/how-to-create-a-simple-invoice"
           >
-            simple invoice guide
+            learn how to create a simple invoice
           </a>{" "}
           for a field-by-field walkthrough. For SST arithmetic, review{" "}
           <a
