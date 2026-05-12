@@ -175,4 +175,14 @@ test("rejects invalid custom rate", () => {
       }),
     /SST rate must be zero or greater/
   );
+
+  assert.throws(
+    () =>
+      calculateSstMalaysia({
+        mode: "add",
+        amount: 100,
+        sstRate: 101
+      }),
+    /SST rate must be 100% or less/
+  );
 });

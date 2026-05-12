@@ -2,6 +2,7 @@ import type {
   InvoiceCalculationResult,
   InvoiceLineCalculationResult
 } from "./invoice-calculations";
+import { parseInvoiceAmount } from "./invoice-calculations";
 import { buildInvoicePdfFileName } from "./invoice-pdf";
 import type { InvoiceData, InvoicePaymentDetails } from "./invoice-types";
 
@@ -26,15 +27,6 @@ export type InvoicePdfParams = {
   previewItems: InvoiceLineCalculationResult[];
   terms: string;
 };
-
-function parseAmount(value: string): number | null {
-  if (value.trim() === "") {
-    return null;
-  }
-
-  const amount = Number(value);
-  return Number.isFinite(amount) ? amount : null;
-}
 
 function formatAmount(value: number): string {
   return value.toLocaleString("en-US", {
@@ -108,7 +100,7 @@ export async function generateInvoicePdf(params: InvoicePdfParams): Promise<void
   const discountAmount = calculation.discountAmount;
   const taxableAmount = calculation.taxableAmount;
   const hasDiscount = discountAmount > 0;
-  const taxRate = invoiceData.tax.enabled ? parseAmount(invoiceData.tax.rate) ?? 0 : 0;
+  const taxRate = invoiceData.tax.enabled ? parseInvoiceAmount(invoiceData.tax.rate) ?? 0 : 0;
   const taxAmount = calculation.taxAmount;
   const total = calculation.total;
   const hasTax = taxAmount > 0;

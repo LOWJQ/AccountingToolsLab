@@ -163,6 +163,11 @@ export function FinancialRatioCalculator() {
             <p className="mt-3 text-sm leading-6 text-stone-600">
               {calculation.result ? calculation.result.explanation : calculation.message}
             </p>
+            {calculation.result?.warnings.length ? (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900">
+                {calculation.result.warnings[0]}
+              </div>
+            ) : null}
             <p className="mt-5 rounded-xl border border-stone-200 bg-white p-3 text-sm font-semibold text-stone-700">
               {definition.formula}
             </p>

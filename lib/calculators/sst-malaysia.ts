@@ -39,6 +39,10 @@ export function calculateSstMalaysia(input: SstMalaysiaInput): SstMalaysiaResult
     throw new Error("SST rate must be zero or greater.");
   }
 
+  if (sstRate > 100) {
+    throw new Error("SST rate must be 100% or less.");
+  }
+
   const rateDecimal = sstRate / 100;
 
   if (input.mode === "add") {

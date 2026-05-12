@@ -107,3 +107,37 @@ test("handles empty or invalid input safely", () => {
     /Cash inflows is required/
   );
 });
+
+test("keeps beginning cash balance non-negative for simple cash-on-hand modeling", () => {
+  assert.throws(
+    () =>
+      calculateCashFlow({
+        beginningCashBalance: -100,
+        cashInflows: 12000,
+        cashOutflows: 9000
+      }),
+    /Beginning cash balance must be zero or greater/
+  );
+});
+
+test("rejects negative cash inflows and outflows", () => {
+  assert.throws(
+    () =>
+      calculateCashFlow({
+        beginningCashBalance: 5000,
+        cashInflows: -1,
+        cashOutflows: 9000
+      }),
+    /Cash inflows must be zero or greater/
+  );
+
+  assert.throws(
+    () =>
+      calculateCashFlow({
+        beginningCashBalance: 5000,
+        cashInflows: 12000,
+        cashOutflows: -1
+      }),
+    /Cash outflows must be zero or greater/
+  );
+});

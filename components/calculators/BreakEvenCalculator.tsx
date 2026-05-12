@@ -142,7 +142,15 @@ export function BreakEvenCalculator() {
                     {formatAmount(calculation.result.breakEvenUnits)}
                   </p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-stone-200 bg-white p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                      Minimum whole units
+                    </p>
+                    <p className="mt-2 text-xl font-semibold text-stone-950">
+                      {calculation.result.minimumWholeUnits.toLocaleString("en-US")}
+                    </p>
+                  </div>
                   <div className="rounded-xl border border-stone-200 bg-white p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                       Contribution margin per unit
@@ -162,7 +170,9 @@ export function BreakEvenCalculator() {
                 </div>
                 <p className="text-sm leading-6 text-stone-600">
                   The business needs to sell {formatAmount(calculation.result.breakEvenUnits)}{" "}
-                  unit{calculation.result.breakEvenUnits === 1 ? "" : "s"} to cover fixed and
+                  unit{calculation.result.breakEvenUnits === 1 ? "" : "s"} exactly, or at least{" "}
+                  {calculation.result.minimumWholeUnits.toLocaleString("en-US")} whole unit
+                  {calculation.result.minimumWholeUnits === 1 ? "" : "s"}, to cover fixed and
                   variable costs.
                 </p>
               </div>

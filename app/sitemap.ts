@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
-import { guides } from "@/lib/data/guides";
-import { tools } from "@/lib/data/tools";
-import { siteConfig } from "@/lib/seo/site";
+import { guides } from "../lib/data/guides";
+import { tools } from "../lib/data/tools";
+import { siteConfig } from "../lib/seo/site";
 
 const defaultLastModified = "2026-05-08";
 

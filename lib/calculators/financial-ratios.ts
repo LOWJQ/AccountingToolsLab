@@ -18,6 +18,7 @@ export type FinancialRatioResult = {
   formula: string;
   explanation: string;
   format: "ratio" | "percentage";
+  warnings: string[];
 };
 
 export type RatioField = {
@@ -146,6 +147,7 @@ export function calculateFinancialRatio(input: FinancialRatioInput): FinancialRa
 
   const value = roundAmount(definition.calculate(values));
   const displayValue = formatRatioResult(value, definition.format);
+  const warnings = getRatioWarnings(definition, values);
 
   return {
     ratioType: input.ratioType,
@@ -154,10 +156,29 @@ export function calculateFinancialRatio(input: FinancialRatioInput): FinancialRa
     displayValue,
     formula: definition.formula,
     explanation: definition.explain(displayValue),
-    format: definition.format
+    format: definition.format,
+    warnings
   };
 }
 
 export function calculateFinancialRatios(input: FinancialRatioInput): FinancialRatioResult {
   return calculateFinancialRatio(input);
+}
+
+function getRatioWarnings(
+  definition: RatioDefinition,
+  values: Record<string, number>
+): string[] {
+  const denominator = values[definition.denominatorKey];
+  const denominatorLabel =
+    definition.fields.find((field) => field.key === definition.denominatorKey)?.label ??
+    "Denominator";
+
+  if (denominator < 0) {
+    return [
+      `${denominatorLabel} is negative, so this ratio can be unusual and should be interpreted with extra context.`
+    ];
+  }
+
+  return [];
 }

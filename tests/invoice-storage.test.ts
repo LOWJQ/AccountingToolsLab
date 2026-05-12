@@ -337,6 +337,50 @@ test("old draft with paymentDetails string migrates to payment notes", () => {
   assert.equal(draft?.invoice.payment.paymentQrDataUrl, undefined);
 });
 
+test("old draft missing optional text fields still loads safely", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          businessContact: undefined,
+          businessAddress: undefined,
+          customerContact: undefined,
+          customerAddress: undefined,
+          notes: undefined,
+          payment: {
+            bankName: undefined,
+            accountName: undefined,
+            accountNumber: undefined,
+            duitNowId: undefined,
+            paymentLink: undefined,
+            notes: undefined
+          }
+        }
+      })
+    }).storage
+  );
+
+  const invoice = loadInvoiceDraft()?.invoice;
+
+  assert.equal(invoice?.businessContact, "");
+  assert.equal(invoice?.businessAddress, "");
+  assert.equal(invoice?.customerContact, "");
+  assert.equal(invoice?.customerAddress, "");
+  assert.equal(invoice?.notes, "");
+  assert.deepEqual(invoice?.payment, {
+    bankName: "",
+    accountName: "",
+    accountNumber: "",
+    duitNowId: "",
+    paymentLink: "",
+    notes: "",
+    paymentQrDataUrl: undefined
+  });
+});
+
 test("new draft with structured payment fields loads correctly", () => {
   const invoice = createInvoice({
     payment: {

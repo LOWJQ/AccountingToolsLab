@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import {
-  type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -14,7 +12,9 @@ import { InvoiceBillFrom } from "@/components/invoice/InvoiceBillFrom";
 import { InvoiceCustomer } from "@/components/invoice/InvoiceCustomer";
 import { InvoiceLineItems } from "@/components/invoice/InvoiceLineItems";
 import { InvoiceMeta } from "@/components/invoice/InvoiceMeta";
+import { InvoiceModals } from "@/components/invoice/InvoiceModals";
 import { InvoicePaymentSection } from "@/components/invoice/InvoicePaymentSection";
+import { InvoicePreview } from "@/components/invoice/InvoicePreview";
 import {
   InvoiceTotals,
   type InvoiceDiscountMode,
@@ -23,24 +23,17 @@ import {
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { CURRENCY_CODES, isCurrencyCode } from "@/lib/currency";
-import {
-  calculateInvoiceLineItems,
-  calculateInvoiceTotals
-} from "@/lib/invoice/invoice-calculations";
+import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 import {
   createEmptyInvoiceDefaults,
   createNewInvoiceFromCurrent,
   DEFAULT_INVOICE_NUMBER
 } from "@/lib/invoice/invoice-defaults";
-import {
-  clearInvoiceDraft,
-  loadLastInvoiceNumber,
-  loadInvoiceDraft,
-  saveLastInvoiceNumber,
-  saveInvoiceDraft
-} from "@/lib/invoice/invoice-storage";
-import { getNextInvoiceNumber } from "@/lib/invoice/invoice-numbering";
-import { generateInvoicePdf } from "@/lib/invoice/invoice-pdf-generator";
+import { useInvoiceDraft } from "@/hooks/useInvoiceDraft";
+import { useInvoiceNumbering } from "@/hooks/useInvoiceNumbering";
+import { useInvoicePdf } from "@/hooks/useInvoicePdf";
+import { useInvoiceValidation } from "@/hooks/useInvoiceValidation";
+import { clearInvoiceDraft } from "@/lib/invoice/invoice-storage";
 import {
   DEFAULT_INVOICE_DISCOUNT,
   DEFAULT_INVOICE_PAYMENT_DETAILS,
@@ -50,7 +43,6 @@ import {
   type InvoiceLineItem,
   type InvoicePaymentDetails
 } from "@/lib/invoice/invoice-types";
-import { validateInvoice } from "@/lib/invoice/invoice-validation";
 
 type InvoiceView = "details" | "preview";
 type TaxMode = InvoiceTaxMode;
@@ -98,69 +90,9 @@ function createLineItem(index: number): InvoiceLineItem {
   };
 }
 
-function parseAmount(value: string): number | null {
-  if (value.trim() === "") {
-    return null;
-  }
-
-  const amount = Number(value);
-  return Number.isFinite(amount) ? amount : null;
-}
-
-function formatAmount(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
 function getLocalDateInputValue(date = new Date()) {
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return localDate.toISOString().slice(0, 10);
-}
-
-function getFocusableElements(container: HTMLElement) {
-  const focusableSelector = [
-    "a[href]",
-    "button:not([disabled])",
-    "textarea:not([disabled])",
-    "input:not([disabled])",
-    "select:not([disabled])",
-    "[tabindex]:not([tabindex='-1'])"
-  ].join(",");
-
-  return Array.from(container.querySelectorAll<HTMLElement>(focusableSelector)).filter(
-    (element) => {
-      const style = window.getComputedStyle(element);
-      return style.display !== "none" && style.visibility !== "hidden" && element.getClientRects().length > 0;
-    }
-  );
-}
-
-function trapModalFocus(
-  event: ReactKeyboardEvent<HTMLElement>,
-  container: HTMLElement | null
-) {
-  if (event.key !== "Tab" || !container) {
-    return;
-  }
-
-  const focusableElements = getFocusableElements(container);
-
-  if (focusableElements.length === 0) {
-    return;
-  }
-
-  const firstElement = focusableElements[0];
-  const lastElement = focusableElements[focusableElements.length - 1];
-
-  if (event.shiftKey && document.activeElement === firstElement) {
-    event.preventDefault();
-    lastElement.focus();
-  } else if (!event.shiftKey && document.activeElement === lastElement) {
-    event.preventDefault();
-    firstElement.focus();
-  }
 }
 
 export function InvoiceGenerator() {
@@ -186,16 +118,7 @@ export function InvoiceGenerator() {
   const [activeView, setActiveView] = useState<InvoiceView>("details");
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isClearEverythingModalOpen, setIsClearEverythingModalOpen] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [isDraftHydrated, setIsDraftHydrated] = useState(false);
-  const [autosaveError, setAutosaveError] = useState("");
-  const confirmDownloadButtonRef = useRef<HTMLButtonElement>(null);
-  const confirmClearEverythingButtonRef = useRef<HTMLButtonElement>(null);
-  const downloadDialogRef = useRef<HTMLDivElement>(null);
-  const clearEverythingDialogRef = useRef<HTMLDivElement>(null);
-  const hasLoadedDraftRef = useRef(false);
-  const skipNextAutosaveRef = useRef(false);
-  const autosaveTimerRef = useRef<number | null>(null);
+  const { getNextInvoiceNumberSuggestion, saveUsedInvoiceNumber } = useInvoiceNumbering();
 
   const selectedTaxOption = taxOptions.find((option) => option.mode === taxMode);
   const discountMode: DiscountMode = discount.enabled ? discount.type : "none";
@@ -246,31 +169,14 @@ export function InvoiceGenerator() {
     ]
   );
 
-  const calculation = useMemo(() => calculateInvoiceTotals(invoiceData), [invoiceData]);
-  const validationErrors = useMemo(() => validateInvoice(invoiceData), [invoiceData]);
-
-  const lineItemPreviewTotals = useMemo(
-    () =>
-      calculateInvoiceLineItems(lineItems).map((item) => item.lineTotal),
-    [lineItems]
-  );
-
-  const lineItemRequiredMessage = useMemo(() => {
-    const lineItemError = validationErrors.find((error) => error.field === "items");
-    return lineItemError?.message ?? "";
-  }, [validationErrors]);
-
-  const hasValidInvoice = validationErrors.length === 0;
-  const lineItemsMessage = lineItemRequiredMessage;
-  const getValidationMessage = useCallback(
-    (field: string) => validationErrors.find((error) => error.field === field)?.message ?? "",
-    [validationErrors]
-  );
-  const getLineItemError = useCallback(
-    (index: number, key: "description" | "quantity" | "unitPrice") =>
-      getValidationMessage(`items.${index}.${key}`),
-    [getValidationMessage]
-  );
+  const {
+    calculation,
+    getLineItemError,
+    getValidationMessage,
+    hasValidInvoice,
+    lineItemPreviewTotals,
+    lineItemsMessage
+  } = useInvoiceValidation(invoiceData, lineItems);
 
   const restoreInvoiceState = useCallback(
     (invoice: InvoiceData) => {
@@ -312,46 +218,6 @@ export function InvoiceGenerator() {
   );
 
   useEffect(() => {
-    if (!isDownloadModalOpen) {
-      return;
-    }
-
-    confirmDownloadButtonRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !isGeneratingPdf) {
-        setIsDownloadModalOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isDownloadModalOpen, isGeneratingPdf]);
-
-  useEffect(() => {
-    if (!isClearEverythingModalOpen) {
-      return;
-    }
-
-    confirmClearEverythingButtonRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsClearEverythingModalOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isClearEverythingModalOpen]);
-
-  useEffect(() => {
     if (hasValidInvoice) {
       return;
     }
@@ -363,50 +229,15 @@ export function InvoiceGenerator() {
     }
   }, [activeView, hasValidInvoice]);
 
-  useEffect(() => {
-    if (hasLoadedDraftRef.current) {
-      return;
-    }
-
-    hasLoadedDraftRef.current = true;
-    const storedDraft = loadInvoiceDraft();
-
-    if (storedDraft) {
-      restoreInvoiceState(storedDraft.invoice);
-    }
-
-    skipNextAutosaveRef.current = true;
-    setIsDraftHydrated(true);
-  }, [restoreInvoiceState]);
-
-  useEffect(() => {
-    if (!isDraftHydrated) {
-      return;
-    }
-
-    if (skipNextAutosaveRef.current) {
-      skipNextAutosaveRef.current = false;
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      const result = saveInvoiceDraft(invoiceData);
-
-      if (!result.ok) {
-        setAutosaveError("Draft could not be saved. Your invoice is still available this session.");
-      } else {
-        setAutosaveError("");
-      }
-
-      autosaveTimerRef.current = null;
-    }, 1000);
-
-    autosaveTimerRef.current = timer;
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [invoiceData, isDraftHydrated]);
+  const {
+    autosaveError,
+    clearAutosaveTimer,
+    setAutosaveError,
+    skipNextAutosave
+  } = useInvoiceDraft({
+    invoiceData,
+    restoreInvoiceState
+  });
 
   function updateLineItem(id: string, key: keyof InvoiceLineItem, value: string) {
     setLineItems((currentItems) =>
@@ -452,11 +283,6 @@ export function InvoiceGenerator() {
     );
   }
 
-  function getNextInvoiceNumberSuggestion() {
-    const lastInvoiceNumber = loadLastInvoiceNumber();
-    return lastInvoiceNumber ? getNextInvoiceNumber(lastInvoiceNumber) : null;
-  }
-
   function startNewInvoice() {
     const nextInvoiceNumber = getNextInvoiceNumberSuggestion();
     restoreInvoiceState(
@@ -480,7 +306,7 @@ export function InvoiceGenerator() {
     const nextInvoiceNumber = getNextInvoiceNumberSuggestion();
     clearAutosaveTimer();
     clearInvoiceDraft();
-    skipNextAutosaveRef.current = true;
+    skipNextAutosave();
     restoreInvoiceState(
       createEmptyInvoiceDefaults({
         invoiceDate: getLocalDateInputValue(),
@@ -493,15 +319,6 @@ export function InvoiceGenerator() {
     setIsDownloadModalOpen(false);
     setIsClearEverythingModalOpen(false);
     scrollInvoiceGeneratorToTop();
-  }
-
-  function clearAutosaveTimer() {
-    if (!autosaveTimerRef.current) {
-      return;
-    }
-
-    window.clearTimeout(autosaveTimerRef.current);
-    autosaveTimerRef.current = null;
   }
 
   function scrollInvoiceGeneratorToTop() {
@@ -522,73 +339,85 @@ export function InvoiceGenerator() {
     scrollInvoiceGeneratorToTop();
   }
 
-  async function downloadInvoicePdf() {
-    if (!hasValidInvoice) {
-      return;
-    }
-
-    setIsGeneratingPdf(true);
-
-    try {
-      await generateInvoicePdf({
-        businessAddress,
-        businessContact,
-        businessLogoDataUrl,
-        businessName,
-        calculation,
-        customerAddress,
-        customerContact,
-        customerName,
-        dueDate,
-        formatCurrency,
-        invoiceData,
-        invoiceDate,
-        invoiceNumber,
-        notes,
-        payment,
-        previewItems,
-        terms
-      });
-      saveLastInvoiceNumber(invoiceNumber);
-      setIsDownloadModalOpen(false);
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  }
-
-  const previewItems = calculateInvoiceLineItems(lineItems).map((item, index) => ({
-    ...item,
-    description: lineItems[index]?.description.trim() || `Item ${index + 1}`
-  }));
-
-  const subtotal = calculation.subtotal;
-  const discountAmount = calculation.discountAmount;
-  const taxableAmount = calculation.taxableAmount;
-  const hasDiscount = discountAmount > 0;
-  const taxRate = invoiceData.tax.enabled ? parseAmount(invoiceData.tax.rate) ?? 0 : 0;
-  const taxAmount = calculation.taxAmount;
-  const total = calculation.total;
-  const hasTax = taxAmount > 0;
-  const taxLabel = `SST / Tax (${formatAmount(taxRate)}%)`;
+  const previewItems = useMemo(
+    () =>
+      calculateInvoiceLineItems(lineItems).map((item, index) => ({
+        ...item,
+        description: lineItems[index]?.description.trim() || `Item ${index + 1}`
+      })),
+    [lineItems]
+  );
+  const pdfParams = useMemo(
+    () => ({
+      businessAddress,
+      businessContact,
+      businessLogoDataUrl,
+      businessName,
+      calculation,
+      customerAddress,
+      customerContact,
+      customerName,
+      dueDate,
+      formatCurrency,
+      invoiceData,
+      invoiceDate,
+      invoiceNumber,
+      notes,
+      payment,
+      previewItems,
+      terms
+    }),
+    [
+      businessAddress,
+      businessContact,
+      businessLogoDataUrl,
+      businessName,
+      calculation,
+      customerAddress,
+      customerContact,
+      customerName,
+      dueDate,
+      formatCurrency,
+      invoiceData,
+      invoiceDate,
+      invoiceNumber,
+      notes,
+      payment,
+      previewItems,
+      terms
+    ]
+  );
+  const handleDownloadComplete = useCallback(() => {
+    setIsDownloadModalOpen(false);
+  }, []);
+  const { downloadInvoicePdf, isGeneratingPdf } = useInvoicePdf({
+    hasValidInvoice,
+    invoiceNumber,
+    onDownloadComplete: handleDownloadComplete,
+    pdfParams,
+    saveUsedInvoiceNumber
+  });
   const businessNameError = getValidationMessage("businessName");
+  const businessContactError = getValidationMessage("businessContact");
+  const businessAddressError = getValidationMessage("businessAddress");
   const customerNameError = getValidationMessage("customerName");
+  const customerContactError = getValidationMessage("customerContact");
+  const customerAddressError = getValidationMessage("customerAddress");
   const invoiceNumberError = getValidationMessage("invoiceNumber");
   const invoiceDateError = getValidationMessage("invoiceDate");
   const dueDateError = getValidationMessage("dueDate");
   const notesError = getValidationMessage("notes");
+  const termsError = getValidationMessage("terms");
   const taxRateError = getValidationMessage("tax.rate");
   const discountError = getValidationMessage("discount.value");
-  const paymentLinkError = getValidationMessage("payment.paymentLink");
-  const paymentDetailRows = [
-    ["Bank", payment.bankName],
-    ["Account name", payment.accountName],
-    ["Account number", payment.accountNumber],
-    ["DuitNow ID", payment.duitNowId],
-    ["Payment link", payment.paymentLink],
-    ["Notes", payment.notes]
-  ].filter(([, value]) => value.trim() !== "");
-  const hasPaymentQr = Boolean(payment.paymentQrDataUrl);
-  const hasPaymentDetails = paymentDetailRows.length > 0 || hasPaymentQr;
+  const paymentErrors = {
+    accountName: getValidationMessage("payment.accountName"),
+    accountNumber: getValidationMessage("payment.accountNumber"),
+    bankName: getValidationMessage("payment.bankName"),
+    duitNowId: getValidationMessage("payment.duitNowId"),
+    notes: getValidationMessage("payment.notes"),
+    paymentLink: getValidationMessage("payment.paymentLink")
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -633,7 +462,9 @@ export function InvoiceGenerator() {
             <div className="grid min-w-0 gap-6">
               <InvoiceBillFrom
                 businessAddress={businessAddress}
+                businessAddressError={businessAddressError}
                 businessContact={businessContact}
+                businessContactError={businessContactError}
                 businessLogoDataUrl={businessLogoDataUrl}
                 businessNameError={businessNameError}
                 businessName={businessName}
@@ -645,7 +476,9 @@ export function InvoiceGenerator() {
 
               <InvoiceCustomer
                 customerAddress={customerAddress}
+                customerAddressError={customerAddressError}
                 customerContact={customerContact}
+                customerContactError={customerContactError}
                 customerNameError={customerNameError}
                 customerName={customerName}
                 onCustomerAddressChange={setCustomerAddress}
@@ -699,7 +532,7 @@ export function InvoiceGenerator() {
               <InvoicePaymentSection
                 onChange={updatePayment}
                 payment={payment}
-                paymentLinkError={paymentLinkError}
+                paymentErrors={paymentErrors}
               />
 
               <label className="grid gap-2">
@@ -727,11 +560,19 @@ export function InvoiceGenerator() {
                 Terms &amp; Conditions (optional)
               </span>
               <textarea
-                className="min-h-28 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                aria-describedby={termsError ? "invoice-terms-error" : undefined}
+                className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
+                  termsError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+                }`}
                 onChange={(event) => setTerms(event.target.value)}
                 placeholder="Payment terms or invoice conditions"
                 value={terms}
               />
+              {termsError ? (
+                <p className="text-sm font-medium text-red-700" id="invoice-terms-error">
+                  {termsError}
+                </p>
+              ) : null}
             </label>
 
             {autosaveError ? (
@@ -801,253 +642,12 @@ export function InvoiceGenerator() {
                 </p>
               ) : null}
 
-              <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
-            <div
-              className="invoice-print-area min-w-0 border border-stone-200 bg-white p-5 shadow-sm sm:p-7"
-              id="invoice-print-area"
-            >
-              <div className="invoice-print-header grid gap-6 border-b border-stone-200 pb-5 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
-                <div className="min-w-0">
-                  <h2 className="break-words text-2xl font-semibold tracking-tight text-stone-950">
-                    {businessName || "Business name"}
-                  </h2>
-                  {businessContact ? (
-                    <p className="invoice-print-muted mt-2 break-words text-sm leading-6 text-stone-600">
-                      {businessContact}
-                    </p>
-                  ) : null}
-                  {businessAddress ? (
-                    <p className="invoice-print-muted mt-1 whitespace-pre-line break-words text-sm leading-6 text-stone-600">
-                      {businessAddress}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="min-w-0 text-left sm:text-right">
-                  {businessLogoDataUrl ? (
-                    <Image
-                      alt={`${businessName || "Business"} logo`}
-                      className="mb-4 ml-0 max-h-16 max-w-40 object-contain sm:ml-auto"
-                      height={80}
-                      unoptimized
-                      src={businessLogoDataUrl}
-                      width={180}
-                    />
-                  ) : null}
-                  <p className="text-3xl font-semibold uppercase tracking-wide text-slate-700">
-                    Invoice
-                  </p>
-                  <dl className="mt-3 grid gap-2 text-sm text-stone-600">
-                    <div className="flex justify-between gap-4 sm:justify-end">
-                      <dt className="font-medium text-stone-500">Invoice #:</dt>
-                      <dd className="font-semibold text-stone-950">
-                        {invoiceNumber || "Invoice number"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
-                <div className="grid max-w-xl gap-2">
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-700">
-                    Bill To
-                  </p>
-                  <h3 className="break-words text-lg font-semibold text-stone-950">
-                    {customerName || "Customer name"}
-                  </h3>
-                  {customerContact ? (
-                    <p className="break-words text-sm leading-6 text-stone-600">{customerContact}</p>
-                  ) : null}
-                  {customerAddress ? (
-                    <p className="whitespace-pre-line break-words text-sm leading-6 text-stone-600">
-                      {customerAddress}
-                    </p>
-                  ) : null}
-                </div>
-                <dl className="grid content-start gap-2 text-sm text-stone-600 sm:text-right">
-                  <div className="flex justify-between gap-4 sm:justify-end">
-                    <dt className="font-medium text-stone-500">Date:</dt>
-                    <dd>{invoiceDate || "Invoice date"}</dd>
-                  </div>
-                  {dueDate ? (
-                    <div className="flex justify-between gap-4 sm:justify-end">
-                      <dt className="font-medium text-stone-500">Due:</dt>
-                      <dd>{dueDate}</dd>
-                    </div>
-                  ) : null}
-                </dl>
-              </div>
-
-              <div className="invoice-preview-lines mt-6 overflow-hidden border border-stone-200">
-                <div className="invoice-preview-line invoice-preview-heading hidden bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4">
-                  <span>No</span>
-                  <span>Description</span>
-                  <span className="text-right leading-4">Unit Price</span>
-                  <span className="text-right">Quantity</span>
-                  <span className="text-right leading-4">Amount</span>
-                </div>
-                <div className="divide-y divide-stone-100 bg-white">
-                  {previewItems.map((item, index) => (
-                    <div
-                      className="invoice-preview-line grid min-w-0 gap-3 px-3 py-3 text-sm odd:bg-white even:bg-slate-50 sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4"
-                      key={`${item.description}-${index}`}
-                    >
-                      <div className="min-w-0">
-                        <span className="block text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
-                          No
-                        </span>
-                        <span className="mt-1 block tabular-nums text-stone-600 sm:mt-0">
-                          {index + 1}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
-                          Description
-                        </span>
-                        <span className="mt-1 block min-w-0 break-words font-medium text-stone-900 sm:mt-0">
-                          {item.description}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block text-[11px] font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
-                          Unit Price
-                        </span>
-                        <span className="mt-1 block text-left tabular-nums text-stone-600 sm:mt-0 sm:text-right">
-                          {formatCurrency(item.unitPrice)}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block text-[11px] font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
-                          Quantity
-                        </span>
-                        <span className="mt-1 block text-left tabular-nums text-stone-600 sm:mt-0 sm:text-right">
-                          {formatAmount(item.quantity)}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block text-[11px] font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
-                          Amount
-                        </span>
-                        <span className="mt-1 block text-left font-semibold tabular-nums text-stone-950 sm:mt-0 sm:text-right">
-                          {formatCurrency(item.lineTotal)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="invoice-totals-wrap mt-4 flex justify-end">
-                <div className="invoice-totals-box w-full max-w-sm border border-stone-200 bg-stone-50 p-4">
-                  <div className="invoice-total-row flex justify-between gap-4 text-sm text-stone-600">
-                    <span className="invoice-total-label">Subtotal</span>
-                    <span className="invoice-total-amount font-semibold text-stone-950">
-                      {formatCurrency(subtotal)}
-                    </span>
-                  </div>
-                  {hasDiscount ? (
-                    <>
-                      <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                        <span className="invoice-total-label">Discount</span>
-                        <span className="invoice-total-amount font-semibold text-stone-950">
-                          -{formatCurrency(discountAmount)}
-                        </span>
-                      </div>
-                      <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                        <span className="invoice-total-label">Amount after discount</span>
-                        <span className="invoice-total-amount font-semibold text-stone-950">
-                          {formatCurrency(taxableAmount)}
-                        </span>
-                      </div>
-                    </>
-                  ) : null}
-                  {hasTax ? (
-                    <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                      <span className="invoice-total-label">{taxLabel}</span>
-                      <span className="invoice-total-amount font-semibold text-stone-950">
-                        {formatCurrency(taxAmount)}
-                      </span>
-                    </div>
-                  ) : null}
-                  <div className="invoice-total-row invoice-grand-total mt-3 flex justify-between gap-4 border-t border-stone-300 pt-3 text-lg font-semibold text-stone-950">
-                    <span className="invoice-total-label">Total</span>
-                    <span className="invoice-total-amount">
-                      {formatCurrency(total)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {hasPaymentDetails || terms.trim() ? (
-                <section className="mt-8 border-t border-stone-200 pt-6">
-                  <div
-                    className={`grid gap-6 ${
-                      hasPaymentDetails && terms.trim()
-                        ? "md:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] md:items-start"
-                        : ""
-                    }`}
-                  >
-                    {hasPaymentDetails ? (
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-stone-950">
-                          Payment Details
-                        </h3>
-                        {paymentDetailRows.length > 0 ? (
-                          <dl className="mt-3 grid gap-1.5 text-sm leading-6 text-stone-600">
-                            {paymentDetailRows.map(([label, value]) => (
-                              <div
-                                className="grid gap-1 sm:grid-cols-[8rem_minmax(0,1fr)]"
-                                key={label}
-                              >
-                                <dt className="font-medium text-stone-500">{label}:</dt>
-                                <dd className="min-w-0 whitespace-pre-line break-words">
-                                  {value}
-                                </dd>
-                              </div>
-                            ))}
-                          </dl>
-                        ) : null}
-                        {payment.paymentQrDataUrl ? (
-                          <div className="mt-4 inline-grid justify-items-center gap-1.5 text-center">
-                            <Image
-                              alt="Payment QR"
-                              className="h-28 w-28 object-contain"
-                              height={112}
-                              unoptimized
-                              src={payment.paymentQrDataUrl}
-                              width={112}
-                            />
-                            <p className="text-xs font-medium text-stone-500">
-                              Scan here to pay
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : null}
-
-                    {terms.trim() ? (
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-stone-950">
-                          Terms &amp; Conditions
-                        </h3>
-                        <div className="mt-3 grid gap-2 text-sm leading-6 text-stone-600">
-                          {terms
-                            .trim()
-                            .split(/\r?\n/)
-                            .filter((paragraph) => paragraph.trim() !== "")
-                            .map((paragraph, index) => (
-                              <p className="break-words" key={`${paragraph}-${index}`}>
-                                {paragraph}
-                              </p>
-                            ))}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                </section>
-              ) : null}
-            </div>
-              </div>
+              <InvoicePreview
+                calculation={calculation}
+                formatCurrency={formatCurrency}
+                invoiceData={invoiceData}
+                previewItems={previewItems}
+              />
             </div>
           )}
         </div>
@@ -1128,102 +728,16 @@ export function InvoiceGenerator() {
         </div>
       </Card>
 
-      {isClearEverythingModalOpen ? (
-        <div
-          aria-labelledby="clear-invoice-draft-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/35 px-4 py-6 backdrop-blur-sm"
-          onClick={() => setIsClearEverythingModalOpen(false)}
-          role="dialog"
-        >
-          <div
-            className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-5 shadow-2xl sm:p-6"
-            onKeyDown={(event) => trapModalFocus(event, clearEverythingDialogRef.current)}
-            onClick={(event) => event.stopPropagation()}
-            ref={clearEverythingDialogRef}
-          >
-            <p className="text-sm font-medium tracking-wide text-slate-500">Invoice Draft</p>
-            <h2
-              className="mt-2 text-xl font-semibold tracking-tight text-stone-950"
-              id="clear-invoice-draft-title"
-            >
-              Clear all invoice details?
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-stone-600">
-              This will remove the current draft from this device and reset the form. Your last
-              used invoice number will not be reset.
-            </p>
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                onClick={() => setIsClearEverythingModalOpen(false)}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-red-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800"
-                onClick={confirmClearEverything}
-                ref={confirmClearEverythingButtonRef}
-                type="button"
-              >
-                Clear everything
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {isDownloadModalOpen ? (
-        <div
-          aria-labelledby="download-invoice-pdf-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/35 px-4 py-6 backdrop-blur-sm"
-          onClick={() => {
-            if (!isGeneratingPdf) {
-              setIsDownloadModalOpen(false);
-            }
-          }}
-          role="dialog"
-        >
-          <div
-            className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-5 shadow-2xl sm:p-6"
-            onKeyDown={(event) => trapModalFocus(event, downloadDialogRef.current)}
-            onClick={(event) => event.stopPropagation()}
-            ref={downloadDialogRef}
-          >
-            <p className="text-sm font-medium tracking-wide text-slate-500">Invoice PDF</p>
-            <h2
-              className="mt-2 text-xl font-semibold tracking-tight text-stone-950"
-              id="download-invoice-pdf-title"
-            >
-              Download invoice PDF?
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-stone-600">
-              Your invoice will be generated as a PDF file using the details in the preview.
-            </p>
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isGeneratingPdf}
-                onClick={() => setIsDownloadModalOpen(false)}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-80"
-                disabled={isGeneratingPdf || !hasValidInvoice}
-                onClick={downloadInvoicePdf}
-                ref={confirmDownloadButtonRef}
-                type="button"
-              >
-                {isGeneratingPdf ? "Generating..." : "Download PDF"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <InvoiceModals
+        hasValidInvoice={hasValidInvoice}
+        isClearEverythingModalOpen={isClearEverythingModalOpen}
+        isDownloadModalOpen={isDownloadModalOpen}
+        isGeneratingPdf={isGeneratingPdf}
+        onCancelClearEverything={() => setIsClearEverythingModalOpen(false)}
+        onCancelDownload={() => setIsDownloadModalOpen(false)}
+        onConfirmClearEverything={confirmClearEverything}
+        onConfirmDownload={downloadInvoicePdf}
+      />
     </div>
   );
 }

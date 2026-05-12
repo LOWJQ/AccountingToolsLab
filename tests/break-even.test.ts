@@ -24,6 +24,18 @@ test("calculates break-even units", () => {
   });
 
   assert.equal(result.breakEvenUnits, 500);
+  assert.equal(result.minimumWholeUnits, 500);
+});
+
+test("calculates minimum whole units for fractional break-even", () => {
+  const result = calculateBreakEven({
+    fixedCosts: 100,
+    sellingPricePerUnit: 30,
+    variableCostPerUnit: 12
+  });
+
+  assert.equal(result.breakEvenUnits, 5.56);
+  assert.equal(result.minimumWholeUnits, 6);
 });
 
 test("calculates break-even sales", () => {
@@ -45,6 +57,7 @@ test("handles decimals", () => {
 
   assert.equal(result.contributionMarginPerUnit, 6.5);
   assert.equal(result.breakEvenUnits, 184.69);
+  assert.equal(result.minimumWholeUnits, 185);
   assert.equal(result.breakEvenSales, 2908.9);
 });
 
@@ -56,6 +69,7 @@ test("handles zero fixed costs", () => {
   });
 
   assert.equal(result.breakEvenUnits, 0);
+  assert.equal(result.minimumWholeUnits, 0);
   assert.equal(result.breakEvenSales, 0);
 });
 

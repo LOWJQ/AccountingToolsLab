@@ -10,6 +10,7 @@ export type BreakEvenResult = {
   variableCostPerUnit: number;
   contributionMarginPerUnit: number;
   breakEvenUnits: number;
+  minimumWholeUnits: number;
   breakEvenSales: number;
   explanation: string;
 };
@@ -56,6 +57,7 @@ export function calculateBreakEven(input: BreakEvenInput): BreakEvenResult {
   const contributionMarginPerUnit = roundAmount(sellingPricePerUnit - variableCostPerUnit);
   const rawBreakEvenUnits = fixedCosts / contributionMarginPerUnit;
   const breakEvenUnits = roundAmount(rawBreakEvenUnits);
+  const minimumWholeUnits = Math.ceil(rawBreakEvenUnits);
   const breakEvenSales = roundAmount(rawBreakEvenUnits * sellingPricePerUnit);
 
   return {
@@ -64,6 +66,7 @@ export function calculateBreakEven(input: BreakEvenInput): BreakEvenResult {
     variableCostPerUnit,
     contributionMarginPerUnit,
     breakEvenUnits,
+    minimumWholeUnits,
     breakEvenSales,
     explanation: `The business needs to sell ${breakEvenUnits.toFixed(
       2

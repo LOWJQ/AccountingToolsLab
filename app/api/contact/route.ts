@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { readJsonBodyWithLimit } from "../../../lib/contact/contact-body";
+import {
+  checkRateLimit,
+  MemoryRateLimitStore,
+  type RateLimitStore
+} from "../../../lib/contact/rate-limit";
 
 const allowedTopics = [
   "Feedback",
@@ -33,11 +39,6 @@ type ValidationResult =
   | { ok: true; data: NormalizedContact; isSpam: boolean }
   | { ok: false; errors: Record<string, string> };
 
-type RateLimitEntry = {
-  count: number;
-  resetAt: number;
-};
-
 type TurnstileVerificationResponse = {
   success?: boolean;
   "error-codes"?: string[];
@@ -47,34 +48,24 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const unsafeControlPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
 const rateLimitWindowMs = 15 * 60 * 1000;
 const rateLimitMaxRequests = 5;
-const rateLimitEntries = new Map<string, RateLimitEntry>();
+const contactRateLimitStore: RateLimitStore = new MemoryRateLimitStore();
 
 // Contact submissions are email-only. If database storage is added later,
 // use parameterized queries and never concatenate user input into SQL.
-// This in-memory limiter is basic abuse reduction for the MVP. On serverless
-// deployments, use a shared store such as Upstash Redis or Vercel KV for
-// stronger high-traffic protection.
+// The default limiter store is in-memory so local/dev/test keep working without
+// credentials. Production can replace contactRateLimitStore with a Redis/KV
+// implementation of RateLimitStore for cross-instance enforcement.
 export async function POST(request: NextRequest) {
-  const contentLength = Number(request.headers.get("content-length") || 0);
+  const bodyResult = await readJsonBodyWithLimit<ContactPayload>(request);
 
-  if (contentLength > 15000) {
+  if (!bodyResult.ok) {
     return NextResponse.json(
-      { ok: false, message: "The message is too large." },
-      { status: 400 }
+      { ok: false, message: bodyResult.message },
+      { status: bodyResult.status }
     );
   }
 
-  let payload: ContactPayload;
-
-  try {
-    payload = (await request.json()) as ContactPayload;
-  } catch {
-    return NextResponse.json(
-      { ok: false, message: "Invalid request body." },
-      { status: 400 }
-    );
-  }
-
+  const payload = bodyResult.data;
   const result = validatePayload(payload);
 
   if (!result.ok) {
@@ -92,7 +83,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, sent: false }, { status: 200 });
   }
 
-  if (isRateLimited(request)) {
+  if (await isRateLimited(request)) {
     return NextResponse.json(
       {
         ok: false,
@@ -153,7 +144,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const userAgent = normalizeString(request.headers.get("user-agent"), 500);
+  const userAgent = normalizeHeaderValue(request.headers.get("user-agent"), 500);
   const timestamp = new Date().toISOString();
   const safeTopic = stripHeaderUnsafeChars(result.data.topic);
   const safeSubject = stripHeaderUnsafeChars(result.data.subject);
@@ -211,49 +202,22 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function isRateLimited(request: NextRequest): boolean {
-  const now = Date.now();
-  cleanupExpiredRateLimitEntries(now);
+async function isRateLimited(request: NextRequest): Promise<boolean> {
+  const result = await checkRateLimit({
+    key: getRateLimitKey(request),
+    maxRequests: rateLimitMaxRequests,
+    store: contactRateLimitStore,
+    windowMs: rateLimitWindowMs
+  });
 
-  const key = getRateLimitKey(request);
-  const currentEntry = rateLimitEntries.get(key);
-
-  if (!currentEntry || currentEntry.resetAt <= now) {
-    rateLimitEntries.set(key, {
-      count: 1,
-      resetAt: now + rateLimitWindowMs
-    });
-    return false;
-  }
-
-  if (currentEntry.count >= rateLimitMaxRequests) {
-    return true;
-  }
-
-  currentEntry.count += 1;
-  return false;
+  return result.limited;
 }
 
 function getRateLimitKey(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for") || "";
-  const ip =
-    forwardedFor
-      .split(",")
-      .map((value) => value.trim())
-      .find(Boolean) ||
-    request.headers.get("x-real-ip") ||
-    "unknown-ip";
-  const userAgent = normalizeString(request.headers.get("user-agent"), 160) || "unknown-agent";
+  const clientIp = getTrustedClientIp(request) || "untrusted-ip";
+  const userAgent = normalizeHeaderValue(request.headers.get("user-agent"), 160) || "unknown-agent";
 
-  return `${stripHeaderUnsafeChars(ip)}:${stripHeaderUnsafeChars(userAgent)}`;
-}
-
-function cleanupExpiredRateLimitEntries(now: number) {
-  for (const [key, entry] of rateLimitEntries.entries()) {
-    if (entry.resetAt <= now) {
-      rateLimitEntries.delete(key);
-    }
-  }
+  return `${clientIp}:${userAgent}`;
 }
 
 async function verifyTurnstileToken(
@@ -274,7 +238,7 @@ async function verifyTurnstileToken(
   formData.set("secret", secret);
   formData.set("response", token);
 
-  const remoteIp = getRequestIp(request);
+  const remoteIp = getTrustedClientIp(request);
 
   if (remoteIp) {
     formData.set("remoteip", remoteIp);
@@ -296,17 +260,30 @@ async function verifyTurnstileToken(
   }
 }
 
-function getRequestIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for") || "";
+function getTrustedClientIp(request: NextRequest): string {
+  if (!shouldTrustProxyHeaders()) {
+    return "";
+  }
 
-  return (
-    forwardedFor
-      .split(",")
-      .map((value) => value.trim())
-      .find(Boolean) ||
-    request.headers.get("x-real-ip") ||
-    ""
-  );
+  const candidates = [
+    request.headers.get("x-forwarded-for")?.split(",")[0],
+    request.headers.get("x-real-ip")
+  ];
+
+  return candidates
+    .map((value) => normalizeHeaderValue(value, 80))
+    .find((value) => isSafeIpLikeValue(value)) ?? "";
+}
+
+function shouldTrustProxyHeaders(): boolean {
+  // x-forwarded-for can be spoofed when a Node server is directly exposed.
+  // Trust it only on Vercel or when self-hosting behind a trusted proxy that
+  // strips incoming proxy headers before setting its own.
+  return process.env.VERCEL === "1" || process.env.CONTACT_TRUST_PROXY_HEADERS === "true";
+}
+
+function isSafeIpLikeValue(value: string): boolean {
+  return /^[a-fA-F0-9:.%-]{3,80}$/.test(value);
 }
 
 function validatePayload(payload: ContactPayload): ValidationResult {
@@ -343,12 +320,12 @@ function validatePayload(payload: ContactPayload): ValidationResult {
     };
   }
 
-  const name = normalizeString(payload.name, 80);
-  const email = normalizeString(payload.email, 120).toLowerCase();
-  const topic = normalizeString(payload.topic, 40);
-  const subject = normalizeString(payload.subject, 120);
-  const message = normalizeString(payload.message, 3000);
-  const pageUrl = normalizeString(payload.pageUrl, 300);
+  const name = normalizeString(payload.name);
+  const email = normalizeString(payload.email).toLowerCase();
+  const topic = normalizeString(payload.topic);
+  const subject = normalizeString(payload.subject);
+  const message = normalizeString(payload.message);
+  const pageUrl = normalizeString(payload.pageUrl);
 
   validateStringField({
     errors,
@@ -448,14 +425,12 @@ function getString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-function normalizeString(value: unknown, maxLength: number): string {
-  const stringValue = getString(value);
+function normalizeString(value: unknown): string {
+  return getString(value).trim();
+}
 
-  if (stringValue.length > maxLength) {
-    return stringValue.trim();
-  }
-
-  return stringValue.trim();
+function normalizeHeaderValue(value: unknown, maxLength: number): string {
+  return stripHeaderUnsafeChars(normalizeString(value)).slice(0, maxLength);
 }
 
 function stripHeaderUnsafeChars(value: string): string {

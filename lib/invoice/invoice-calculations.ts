@@ -16,12 +16,16 @@ export type InvoiceLineCalculationResult = {
   lineTotal: number;
 };
 
-export function parseInvoiceNumber(value: string): number | null {
-  if (value.trim() === "") {
+const DECIMAL_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
+
+export function parseInvoiceAmount(value: string): number | null {
+  const trimmedValue = value.trim();
+
+  if (trimmedValue === "" || !DECIMAL_AMOUNT_PATTERN.test(trimmedValue)) {
     return null;
   }
 
-  const parsedValue = Number(value);
+  const parsedValue = Number(trimmedValue);
   return Number.isFinite(parsedValue) ? parsedValue : null;
 }
 
@@ -34,7 +38,7 @@ export function roundMoney(value: number): number {
 }
 
 function toSafeAmount(value: string): number {
-  return parseInvoiceNumber(value) ?? 0;
+  return parseInvoiceAmount(value) ?? 0;
 }
 
 export function calculateInvoiceLineItems(

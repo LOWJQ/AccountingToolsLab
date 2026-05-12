@@ -130,6 +130,25 @@ test("rejects negative debit or credit values", () => {
   );
 });
 
+test("rejects non-finite debit and credit values", () => {
+  [
+    { debit: Number.NaN, credit: 0, message: /Row 1 debit must be a valid number/ },
+    { debit: 0, credit: Number.NaN, message: /Row 1 credit must be a valid number/ },
+    { debit: Infinity, credit: 0, message: /Row 1 debit must be a valid number/ },
+    { debit: 0, credit: Infinity, message: /Row 1 credit must be a valid number/ },
+    { debit: -Infinity, credit: 0, message: /Row 1 debit must be a valid number/ },
+    { debit: 0, credit: -Infinity, message: /Row 1 credit must be a valid number/ }
+  ].forEach(({ debit, credit, message }) => {
+    assert.throws(
+      () =>
+        calculateTrialBalance([
+          { id: "1", accountName: "Invalid amount", debit, credit }
+        ]),
+      message
+    );
+  });
+});
+
 test("rejects rows with both debit and credit values", () => {
   assert.throws(
     () =>

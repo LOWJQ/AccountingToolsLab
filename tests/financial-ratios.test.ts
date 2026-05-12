@@ -17,6 +17,7 @@ test("calculates current ratio", () => {
 
   assert.equal(result.value, 2);
   assert.equal(result.displayValue, "2.00 : 1");
+  assert.deepEqual(result.warnings, []);
 });
 
 test("calculates debt-to-equity ratio", () => {
@@ -148,6 +149,25 @@ test("allows negative denominator values but preserves the calculated sign", () 
 
   assert.equal(result.value, -2);
   assert.equal(result.displayValue, "-2.00 : 1");
+  assert.deepEqual(result.warnings, [
+    "Total Equity is negative, so this ratio can be unusual and should be interpreted with extra context."
+  ]);
+});
+
+test("warns when percentage ratio denominator is negative", () => {
+  const result = calculateFinancialRatio({
+    ratioType: "net-profit-margin",
+    values: {
+      netIncome: 250,
+      revenue: -1000
+    }
+  });
+
+  assert.equal(result.value, -25);
+  assert.equal(result.displayValue, "-25.00%");
+  assert.deepEqual(result.warnings, [
+    "Revenue is negative, so this ratio can be unusual and should be interpreted with extra context."
+  ]);
 });
 
 test("rejects empty or invalid input safely", () => {

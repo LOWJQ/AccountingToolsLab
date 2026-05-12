@@ -7,16 +7,16 @@ import type { InvoicePaymentDetails } from "@/lib/invoice/invoice-types";
 
 type PaymentDetailsFieldsProps = {
   payment: InvoicePaymentDetails;
-  paymentLinkError?: string;
+  paymentErrors?: Partial<Record<keyof InvoicePaymentDetails, string>>;
   onChange: (field: keyof InvoicePaymentDetails, value: string | undefined) => void;
 };
 
 const inputClassName =
-  "h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
+  "h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
 
 export function PaymentDetailsFields({
   payment,
-  paymentLinkError,
+  paymentErrors = {},
   onChange
 }: PaymentDetailsFieldsProps) {
   const qrInputRef = useRef<HTMLInputElement>(null);
@@ -66,52 +66,86 @@ export function PaymentDetailsFields({
         <label className="grid gap-2">
           <span className="text-sm font-semibold text-stone-800">Bank name</span>
           <input
-            className={inputClassName}
+            aria-describedby={paymentErrors.bankName ? "payment-bank-name-error" : undefined}
+            className={`${inputClassName} ${
+              paymentErrors.bankName ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onChange("bankName", event.target.value)}
             placeholder="Maybank"
             value={payment.bankName}
           />
+          {paymentErrors.bankName ? (
+            <p className="text-sm font-medium text-red-700" id="payment-bank-name-error">
+              {paymentErrors.bankName}
+            </p>
+          ) : null}
         </label>
         <label className="grid gap-2">
           <span className="text-sm font-semibold text-stone-800">Account holder name</span>
           <input
-            className={inputClassName}
+            aria-describedby={paymentErrors.accountName ? "payment-account-name-error" : undefined}
+            className={`${inputClassName} ${
+              paymentErrors.accountName ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onChange("accountName", event.target.value)}
             placeholder="Your business or account name"
             value={payment.accountName}
           />
+          {paymentErrors.accountName ? (
+            <p className="text-sm font-medium text-red-700" id="payment-account-name-error">
+              {paymentErrors.accountName}
+            </p>
+          ) : null}
         </label>
         <label className="grid gap-2">
           <span className="text-sm font-semibold text-stone-800">Account number</span>
           <input
-            className={inputClassName}
+            aria-describedby={paymentErrors.accountNumber ? "payment-account-number-error" : undefined}
+            className={`${inputClassName} ${
+              paymentErrors.accountNumber ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onChange("accountNumber", event.target.value)}
             placeholder="Account number"
             value={payment.accountNumber}
           />
+          {paymentErrors.accountNumber ? (
+            <p className="text-sm font-medium text-red-700" id="payment-account-number-error">
+              {paymentErrors.accountNumber}
+            </p>
+          ) : null}
         </label>
         <label className="grid gap-2">
           <span className="text-sm font-semibold text-stone-800">DuitNow ID</span>
           <input
-            className={inputClassName}
+            aria-describedby={paymentErrors.duitNowId ? "payment-duitnow-id-error" : undefined}
+            className={`${inputClassName} ${
+              paymentErrors.duitNowId ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onChange("duitNowId", event.target.value)}
             placeholder="Phone number, NRIC, or business registration number"
             value={payment.duitNowId}
           />
+          {paymentErrors.duitNowId ? (
+            <p className="text-sm font-medium text-red-700" id="payment-duitnow-id-error">
+              {paymentErrors.duitNowId}
+            </p>
+          ) : null}
         </label>
         <label className="grid gap-2 sm:col-span-2">
           <span className="text-sm font-semibold text-stone-800">Payment link</span>
           <input
-            aria-describedby={paymentLinkError ? "payment-link-error" : undefined}
-            className={inputClassName}
+            aria-describedby={paymentErrors.paymentLink ? "payment-link-error" : undefined}
+            className={`${inputClassName} ${
+              paymentErrors.paymentLink ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onChange("paymentLink", event.target.value)}
             placeholder="https://example.com/pay"
             type="url"
             value={payment.paymentLink}
           />
-          {paymentLinkError ? (
+          {paymentErrors.paymentLink ? (
             <p className="text-sm font-medium text-red-700" id="payment-link-error">
-              {paymentLinkError}
+              {paymentErrors.paymentLink}
             </p>
           ) : null}
         </label>
@@ -120,11 +154,19 @@ export function PaymentDetailsFields({
             Additional payment notes
           </span>
           <textarea
-            className="min-h-24 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            aria-describedby={paymentErrors.notes ? "payment-notes-error" : undefined}
+            className={`min-h-24 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
+              paymentErrors.notes ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onChange("notes", event.target.value)}
             placeholder="Please include the invoice number as payment reference."
             value={payment.notes}
           />
+          {paymentErrors.notes ? (
+            <p className="text-sm font-medium text-red-700" id="payment-notes-error">
+              {paymentErrors.notes}
+            </p>
+          ) : null}
         </label>
         <div className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 sm:col-span-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

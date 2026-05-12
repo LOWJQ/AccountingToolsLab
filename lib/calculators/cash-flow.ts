@@ -49,6 +49,9 @@ export function calculateCashFlow(input: CashFlowInput): CashFlowResult {
   const cashOutflows = assertValidNumber(input.cashOutflows, "Cash outflows");
 
   if (beginningCashBalance < 0) {
+    // This beginner calculator models available cash for a simple period, so
+    // beginning cash is kept non-negative. Overdrafts or bank facilities should
+    // be modeled separately instead of as cash on hand.
     throw new Error("Beginning cash balance must be zero or greater.");
   }
 

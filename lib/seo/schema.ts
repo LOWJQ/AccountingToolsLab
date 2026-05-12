@@ -15,21 +15,7 @@ export function createOrganizationSchema() {
     "@type": "Organization",
     name: siteConfig.name,
     url: siteConfig.url,
-    logo: `${siteConfig.url}/logo.png`
-  };
-}
-
-export function createSoftwareApplicationSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication"
-  };
-}
-
-export function createFAQSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage"
+    logo: `${siteConfig.url}/logo-optimized.png`
   };
 }
 

@@ -6,19 +6,19 @@ import type { InvoicePaymentDetails } from "@/lib/invoice/invoice-types";
 type InvoicePaymentSectionProps = {
   onChange: (field: keyof InvoicePaymentDetails, value: string | undefined) => void;
   payment: InvoicePaymentDetails;
-  paymentLinkError: string;
+  paymentErrors: Partial<Record<keyof InvoicePaymentDetails, string>>;
 };
 
 export function InvoicePaymentSection({
   onChange,
   payment,
-  paymentLinkError
+  paymentErrors
 }: InvoicePaymentSectionProps) {
   return (
     <PaymentDetailsFields
       onChange={onChange}
       payment={payment}
-      paymentLinkError={paymentLinkError}
+      paymentErrors={paymentErrors}
     />
   );
 }

@@ -1,6 +1,6 @@
 # AccountingToolsLab
 
-AccountingToolsLab is a free accounting tools website for accounting students, beginners, and small business owners. It provides simple calculators and beginner-friendly explanations for core accounting topics.
+AccountingToolsLab is a free Malaysia-friendly accounting tools website for freelancers, students, small business owners, side-hustle sellers, and beginners. It provides simple invoice, SST, calculator, and guide pages for everyday record-keeping and learning.
 
 Production domain:
 
@@ -10,7 +10,7 @@ https://www.accountingtoolslab.com
 
 ## Current Status
 
-The project is a Next.js App Router site with multiple working calculators, guide pages, SEO routes, and shared site layout.
+The project is a Next.js App Router site with multiple working calculators, guide pages, SEO routes, a contact API route, and shared site layout.
 
 Currently available:
 
@@ -64,11 +64,12 @@ Currently available:
 
 ```text
 app/                Next.js App Router routes, root layout, sitemap, and robots files.
-components/         Layout, calculator, tool, SEO, and UI component folders.
-lib/                Calculator logic, shared data, SEO helpers, utilities, and validation placeholders.
-types/              Shared TypeScript types for tools, calculators, SEO, and accounting concepts.
-public/             Static assets such as logo and favicon assets.
-tests/              Calculator logic tests.
+components/         Layout, calculator, invoice, contact, tool, SEO, and UI component folders.
+hooks/              Client hooks for focused invoice-generator behavior.
+lib/                Calculator logic, invoice helpers, contact helpers, shared data, SEO helpers, and utilities.
+types/              Small shared TypeScript types that are still used across the app.
+public/             Static assets such as logos, favicons, OG images, and guide images.
+tests/              Lightweight TypeScript/Node tests for calculators, invoice logic, contact API helpers, and SEO helpers.
 ```
 
 ## Key Routes
@@ -118,12 +119,39 @@ Contact form email delivery uses Resend through the App Router API route at
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=accttoolslab@gmail.com
 CONTACT_FROM_EMAIL=AccountingToolsLab <onboarding@resend.dev>
+TURNSTILE_SECRET_KEY=
 ```
 
-Do not prefix `RESEND_API_KEY` with `NEXT_PUBLIC_`. Add the variables to
-`.env.local` for local development and to Vercel Environment Variables for
-production. For production, `CONTACT_FROM_EMAIL` should use a verified sender
-or domain in Resend. `onboarding@resend.dev` is mainly for testing.
+Configure the public Cloudflare Turnstile site key for the browser widget:
+
+```text
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+```
+
+Do not prefix `RESEND_API_KEY` or `TURNSTILE_SECRET_KEY` with `NEXT_PUBLIC_`.
+Add the variables to `.env.local` for local development and to Vercel
+Environment Variables for production. For production, `CONTACT_FROM_EMAIL`
+should use a verified sender or domain in Resend. `onboarding@resend.dev` is
+mainly for testing.
+
+The contact API includes an in-memory rate limiter for local/dev/test. That
+fallback is not cross-instance protection on serverless deployments. The route
+uses a small `RateLimitStore` interface so Redis, Vercel KV, or another shared
+store can be wired later without changing request handling.
+
+Contact form security behavior:
+
+- Request bodies are read with a hard byte limit before JSON parsing.
+- Required fields, email, topic, page URL, field lengths, and unsafe control characters are validated server-side.
+- A honeypot field silently accepts likely bot submissions without sending email.
+- Cloudflare Turnstile is verified server-side when configured.
+- Resend and Turnstile secrets are server-only and must not use `NEXT_PUBLIC_`.
+- Proxy IP headers are trusted only on Vercel or when `CONTACT_TRUST_PROXY_HEADERS=true` is explicitly set behind a trusted proxy.
+
+When self-hosting behind a trusted reverse proxy, set
+`CONTACT_TRUST_PROXY_HEADERS=true` only if the proxy strips incoming
+`x-forwarded-for` / `x-real-ip` headers before setting its own. Vercel is
+trusted automatically through `VERCEL=1`.
 
 After changing local environment variables, restart `npm run dev`. After
 changing Vercel environment variables, redeploy the project.
@@ -134,14 +162,29 @@ To test the contact form locally:
 2. Add `RESEND_API_KEY`.
 3. Add `CONTACT_FROM_EMAIL`.
 4. Add `CONTACT_TO_EMAIL`.
-5. Restart the dev server.
-6. Submit the form from `/contact`.
-7. If it fails, check the dev terminal for the safe Resend status summary.
-8. Check the Resend dashboard logs.
+5. Add `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
+6. Add `TURNSTILE_SECRET_KEY`.
+7. Restart the dev server.
+8. Submit the form from `/contact`.
+9. If it fails, check the dev terminal for the safe Resend status summary.
+10. Check the Resend dashboard logs.
 
 The YouTube tutorial stores contacts in Neon with Drizzle and server actions.
 This project currently sends contact submissions by email through a Next.js API
 route and Resend.
+
+## Invoice Generator Privacy
+
+The invoice generator is client-side and designed for simple PDF invoices and
+record-keeping. Draft invoice data is saved in the user's browser localStorage
+when available, so repeat editing works on the same device. Uploaded logo and
+payment QR image data URLs are intentionally stripped before drafts are saved,
+so those images remain in the current browser session and PDF output but are
+not persisted to localStorage.
+
+The invoice generator does not submit, validate, or connect invoices to
+LHDN/MyInvois and should not be treated as professional accounting, tax, or
+legal advice.
 
 ## Development
 
@@ -163,16 +206,22 @@ Run tests:
 npm test
 ```
 
+Run linting:
+
+```bash
+npm run lint
+```
+
 Build for production:
 
 ```bash
 npm run build
 ```
 
-Run linting:
+Run a dependency audit:
 
 ```bash
-npm run lint
+npm audit --audit-level=moderate
 ```
 
 ## Deployment
@@ -186,11 +235,12 @@ Before deploying, check:
 - Footer and navigation links work
 - Sitemap and robots output use the production domain
 - Contact email is correct
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` are configured together
 - Vercel Analytics and Speed Insights are enabled
 
 ## Next Steps
 
-1. Add more guide content for accounting topics.
-2. Replace placeholder OG image with a production-ready image.
-3. Review Privacy Policy and Terms before major public launch updates.
-4. Add more focused tests as calculator behavior expands.
+1. Add more guide content for accounting topics only when there is a clear search intent.
+2. Review Privacy Policy and Terms before major public launch updates.
+3. Add more focused tests as calculator behavior expands.
+4. Wire the contact rate limiter to Redis, Vercel KV, or another shared store if the site needs cross-instance production rate limiting.

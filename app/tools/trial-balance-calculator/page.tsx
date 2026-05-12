@@ -96,7 +96,7 @@ export default function TrialBalanceCalculatorPage() {
           }
         ]}
       />
-      <FAQSection faqs={trialBalanceFaqs} />
+      <FAQSection faqs={trialBalanceFaqs} title="Trial Balance Calculator FAQs" />
     </ToolPageLayout>
   );
 }

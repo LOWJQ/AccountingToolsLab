@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { calculateInvoiceTotals } from "../lib/invoice/invoice-calculations";
+import { INVOICE_TEXT_MAX_LENGTHS } from "../lib/invoice/invoice-limits";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
 import { validateInvoice } from "../lib/invoice/invoice-validation";
 
@@ -76,6 +77,10 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
 
 function messagesFor(invoice: InvoiceData): string[] {
   return validateInvoice(invoice).map((error) => error.message);
+}
+
+function fieldMessagesFor(invoice: InvoiceData): Record<string, string> {
+  return Object.fromEntries(validateInvoice(invoice).map((error) => [error.field, error.message]));
 }
 
 test("calculates no tax and no discount", () => {
@@ -301,6 +306,37 @@ test("missing invoice date fails validation", () => {
   assert.ok(messagesFor(createInvoice({ invoiceDate: "" })).includes("Invoice date is required."));
 });
 
+test("strict valid date is accepted", () => {
+  assert.deepEqual(validateInvoice(createInvoice({ dueDate: "2026-05-15" })), []);
+  assert.deepEqual(validateInvoice(createInvoice({ invoiceDate: "2028-02-29" })), []);
+});
+
+test("impossible invoice and due dates fail validation", () => {
+  assert.ok(
+    messagesFor(createInvoice({ invoiceDate: "2026-02-30" })).includes(
+      "Invoice date must be a valid date."
+    )
+  );
+  assert.ok(
+    messagesFor(createInvoice({ dueDate: "2026-13-01" })).includes(
+      "Due date must be a valid date."
+    )
+  );
+});
+
+test("malformed invoice and due dates fail validation", () => {
+  assert.ok(
+    messagesFor(createInvoice({ invoiceDate: "05/08/2026" })).includes(
+      "Invoice date must be a valid date."
+    )
+  );
+  assert.ok(
+    messagesFor(createInvoice({ dueDate: "2026-5-8" })).includes(
+      "Due date must be a valid date."
+    )
+  );
+});
+
 test("missing line item description fails validation", () => {
   assert.ok(
     messagesFor(
@@ -457,6 +493,115 @@ test("NaN, Infinity, and -Infinity values fail validation", () => {
   assert.ok(messages.includes("Tax rate must be a valid number."));
 });
 
+test("exponent notation is rejected for invoice money and quantity fields", () => {
+  const messages = messagesFor(
+    createInvoice({
+      items: [
+        { id: "item-1", description: "Service", quantity: "1e2", unitPrice: "1e3" }
+      ],
+      discount: { enabled: true, type: "fixed", value: "2e1" },
+      tax: { enabled: true, rate: "6e0" }
+    })
+  );
+
+  assert.ok(messages.includes("Line item 1 quantity must be a valid number."));
+  assert.ok(messages.includes("Line item 1 unit price must be a valid number."));
+  assert.ok(messages.includes("Discount value must be a valid number."));
+  assert.ok(messages.includes("Tax rate must be a valid number."));
+});
+
+test("comma-formatted money and quantity fields are rejected", () => {
+  const messages = messagesFor(
+    createInvoice({
+      items: [
+        { id: "item-1", description: "Service", quantity: "1,000", unitPrice: "2,500.00" }
+      ],
+      discount: { enabled: true, type: "fixed", value: "1,000" }
+    })
+  );
+
+  assert.ok(messages.includes("Line item 1 quantity must be a valid number."));
+  assert.ok(messages.includes("Line item 1 unit price must be a valid number."));
+  assert.ok(messages.includes("Discount value must be a valid number."));
+});
+
+test("oversized invoice text fields fail validation", () => {
+  const limits = INVOICE_TEXT_MAX_LENGTHS;
+  const errors = fieldMessagesFor(
+    createInvoice({
+      businessName: "B".repeat(limits.businessName + 1),
+      businessContact: "C".repeat(limits.businessContact + 1),
+      businessAddress: "A".repeat(limits.businessAddress + 1),
+      customerName: "N".repeat(limits.customerName + 1),
+      customerContact: "E".repeat(limits.customerContact + 1),
+      customerAddress: "D".repeat(limits.customerAddress + 1),
+      invoiceNumber: "I".repeat(limits.invoiceNumber + 1),
+      notes: "N".repeat(limits.notes + 1),
+      terms: "T".repeat(limits.terms + 1),
+      items: [
+        {
+          id: "item-1",
+          description: "L".repeat(limits.lineItemDescription + 1),
+          quantity: "1",
+          unitPrice: "100"
+        }
+      ],
+      payment: {
+        bankName: "B".repeat(limits.bankName + 1),
+        accountName: "A".repeat(limits.accountName + 1),
+        accountNumber: "1".repeat(limits.accountNumber + 1),
+        duitNowId: "D".repeat(limits.duitNowId + 1),
+        paymentLink: "https://example.com/" + "p".repeat(limits.paymentLink),
+        notes: "P".repeat(limits.paymentNotes + 1)
+      }
+    })
+  );
+
+  assert.equal(errors.businessName, `Business name must be ${limits.businessName} characters or less.`);
+  assert.equal(
+    errors.businessContact,
+    `Business email or phone must be ${limits.businessContact} characters or less.`
+  );
+  assert.equal(
+    errors.businessAddress,
+    `Business address must be ${limits.businessAddress} characters or less.`
+  );
+  assert.equal(errors.customerName, `Customer name must be ${limits.customerName} characters or less.`);
+  assert.equal(
+    errors.customerContact,
+    `Customer email or phone must be ${limits.customerContact} characters or less.`
+  );
+  assert.equal(
+    errors.customerAddress,
+    `Customer address must be ${limits.customerAddress} characters or less.`
+  );
+  assert.equal(errors.invoiceNumber, `Invoice number must be ${limits.invoiceNumber} characters or less.`);
+  assert.equal(errors.notes, `Notes must be ${limits.notes} characters or less.`);
+  assert.equal(errors.terms, `Terms and conditions must be ${limits.terms} characters or less.`);
+  assert.equal(
+    errors["items.0.description"],
+    `Line item 1 description must be ${limits.lineItemDescription} characters or less.`
+  );
+  assert.equal(errors["payment.bankName"], `Bank name must be ${limits.bankName} characters or less.`);
+  assert.equal(
+    errors["payment.accountName"],
+    `Account holder name must be ${limits.accountName} characters or less.`
+  );
+  assert.equal(
+    errors["payment.accountNumber"],
+    `Account number must be ${limits.accountNumber} characters or less.`
+  );
+  assert.equal(errors["payment.duitNowId"], `DuitNow ID must be ${limits.duitNowId} characters or less.`);
+  assert.equal(
+    errors["payment.paymentLink"],
+    `Payment link must be ${limits.paymentLink} characters or less.`
+  );
+  assert.equal(
+    errors["payment.notes"],
+    `Payment notes must be ${limits.paymentNotes} characters or less.`
+  );
+});
+
 test("empty payment fields pass validation", () => {
   assert.deepEqual(validateInvoice(createInvoice()), []);
 });
@@ -486,6 +631,14 @@ test("payment link without protocol fails validation", () => {
 test("invalid payment link fails validation", () => {
   assert.ok(
     messagesFor(createInvoice({ payment: { paymentLink: "https://exa mple.com" } })).includes(
+      "Payment link must start with http:// or https://."
+    )
+  );
+});
+
+test("unsupported payment link protocol fails validation", () => {
+  assert.ok(
+    messagesFor(createInvoice({ payment: { paymentLink: "javascript:alert(1)" } })).includes(
       "Payment link must start with http:// or https://."
     )
   );

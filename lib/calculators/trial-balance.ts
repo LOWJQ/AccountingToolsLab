@@ -18,11 +18,22 @@ function roundAmount(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+function assertValidAmount(value: number, label: string) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`${label} must be a valid number.`);
+  }
+
+  if (value < 0) {
+    throw new RangeError("Debit and credit amounts must be non-negative.");
+  }
+}
+
 export function calculateTrialBalance(rows: TrialBalanceRow[]): TrialBalanceResult {
-  rows.forEach((row) => {
-    if (row.debit < 0 || row.credit < 0) {
-      throw new RangeError("Debit and credit amounts must be non-negative.");
-    }
+  rows.forEach((row, index) => {
+    const rowNumber = index + 1;
+
+    assertValidAmount(row.debit, `Row ${rowNumber} debit`);
+    assertValidAmount(row.credit, `Row ${rowNumber} credit`);
 
     if (row.debit > 0 && row.credit > 0) {
       throw new Error("A row cannot have both debit and credit amounts.");

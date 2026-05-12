@@ -104,10 +104,13 @@ export function ContactForm() {
   const [form, setForm] = useState<FormState>(initialFormState);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileScriptFailed, setTurnstileScriptFailed] = useState(false);
   const [status, setStatus] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const isTurnstileConfigured = turnstileSiteKey.trim().length > 0;
+  const isTurnstileUnavailable = !isTurnstileConfigured || turnstileScriptFailed;
 
   function updateField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -121,8 +124,6 @@ export function ContactForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus(null);
-    const formData = new FormData(event.currentTarget);
-    const turnstileToken = formData.get("cf-turnstile-response");
 
     const nextErrors = validateForm(form);
     setErrors(nextErrors);
@@ -135,10 +136,22 @@ export function ContactForm() {
       return;
     }
 
+    if (isTurnstileUnavailable) {
+      setStatus({
+        type: "error",
+        message: getTurnstileUnavailableMessage(isTurnstileConfigured)
+      });
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const turnstileToken = formData.get("cf-turnstile-response");
+
     if (typeof turnstileToken !== "string" || !turnstileToken) {
       setStatus({
         type: "error",
-        message: "Complete the verification before sending your message."
+        message:
+          "Complete the verification before sending your message. If it does not load, please refresh or email directly."
       });
       return;
     }
@@ -207,10 +220,13 @@ export function ContactForm() {
 
   return (
     <>
-      <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        strategy="afterInteractive"
-      />
+      {isTurnstileConfigured ? (
+        <Script
+          onError={() => setTurnstileScriptFailed(true)}
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+        />
+      ) : null}
       <form className="mt-6 grid gap-5" onSubmit={handleSubmit} noValidate>
       <div className="hidden" aria-hidden="true">
         <label htmlFor="companyWebsite">Company website</label>
@@ -348,12 +364,21 @@ export function ContactForm() {
         </div>
       ) : null}
 
-      <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+      {isTurnstileUnavailable ? (
+        <div
+          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"
+          role="status"
+        >
+          {getTurnstileUnavailableMessage(isTurnstileConfigured)}
+        </div>
+      ) : (
+        <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+      )}
 
       <button
         className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isTurnstileUnavailable}
       >
         {isSubmitting ? "Sending..." : "Send message"}
       </button>
@@ -364,6 +389,18 @@ export function ContactForm() {
 
 const inputClassName =
   "h-12 w-full rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
+
+function getTurnstileUnavailableMessage(isConfigured: boolean): string {
+  if (process.env.NODE_ENV === "development" && !isConfigured) {
+    return "Contact verification is not configured. Set NEXT_PUBLIC_TURNSTILE_SITE_KEY in .env.local.";
+  }
+
+  if (!isConfigured) {
+    return "Contact verification is unavailable. Please email accttoolslab@gmail.com directly.";
+  }
+
+  return "Contact verification could not load. Please refresh the page or email accttoolslab@gmail.com directly.";
+}
 
 function FormField({
   children,

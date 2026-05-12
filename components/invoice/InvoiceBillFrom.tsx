@@ -4,7 +4,9 @@ import { LogoUploader } from "@/components/invoice/LogoUploader";
 
 type InvoiceBillFromProps = {
   businessAddress: string;
+  businessAddressError?: string;
   businessContact: string;
+  businessContactError?: string;
   businessLogoDataUrl?: string;
   businessNameError?: string;
   businessName: string;
@@ -16,7 +18,9 @@ type InvoiceBillFromProps = {
 
 export function InvoiceBillFrom({
   businessAddress,
+  businessAddressError,
   businessContact,
+  businessContactError,
   businessLogoDataUrl,
   businessNameError,
   businessName,
@@ -51,20 +55,36 @@ export function InvoiceBillFrom({
             Business email or phone
           </span>
           <input
-            className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            aria-describedby={businessContactError ? "business-contact-error" : undefined}
+            className={`h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
+              businessContactError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onBusinessContactChange(event.target.value)}
             placeholder="hello@example.com"
             value={businessContact}
           />
+          {businessContactError ? (
+            <p className="text-sm font-medium text-red-700" id="business-contact-error">
+              {businessContactError}
+            </p>
+          ) : null}
         </label>
         <label className="grid gap-2 sm:col-span-2">
           <span className="text-sm font-semibold text-stone-800">Business address</span>
           <textarea
-            className="min-h-20 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            aria-describedby={businessAddressError ? "business-address-error" : undefined}
+            className={`min-h-20 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
+              businessAddressError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onBusinessAddressChange(event.target.value)}
             placeholder="Business address"
             value={businessAddress}
           />
+          {businessAddressError ? (
+            <p className="text-sm font-medium text-red-700" id="business-address-error">
+              {businessAddressError}
+            </p>
+          ) : null}
         </label>
         <LogoUploader logoDataUrl={businessLogoDataUrl} onChange={onBusinessLogoChange} />
       </div>

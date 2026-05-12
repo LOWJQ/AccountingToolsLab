@@ -14,7 +14,7 @@ type FAQSectionProps = {
 export function FAQSection({
   eyebrow = "FAQ",
   faqs,
-  title = "Trial Balance Calculator FAQs"
+  title = "Frequently Asked Questions"
 }: FAQSectionProps) {
   return (
     <Card className="p-6 sm:p-8">

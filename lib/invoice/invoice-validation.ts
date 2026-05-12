@@ -1,4 +1,5 @@
-import { calculateInvoiceTotals, parseInvoiceNumber } from "./invoice-calculations";
+import { calculateInvoiceTotals, parseInvoiceAmount } from "./invoice-calculations";
+import { INVOICE_TEXT_MAX_LENGTHS } from "./invoice-limits";
 import type { InvoiceData, InvoiceLineItem } from "./invoice-types";
 
 export type InvoiceValidationError = {
@@ -39,15 +40,39 @@ function validateTextLength(
   }
 }
 
+function getDaysInMonth(year: number, month: number): number {
+  if (month === 2) {
+    const isLeapYear = year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0);
+    return isLeapYear ? 29 : 28;
+  }
+
+  return [4, 6, 9, 11].includes(month) ? 30 : 31;
+}
+
 function parseDateInput(value: string): number | null {
   if (isBlank(value)) {
     return null;
   }
 
-  const parsedDate = new Date(`${value}T00:00:00`);
-  const parsedTime = parsedDate.getTime();
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
 
-  return Number.isFinite(parsedTime) ? parsedTime : null;
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+
+  if (year < 1 || month < 1 || month > 12) {
+    return null;
+  }
+
+  if (day < 1 || day > getDaysInMonth(year, month)) {
+    return null;
+  }
+
+  return year * 10000 + month * 100 + day;
 }
 
 function parseRequiredFiniteNumber(
@@ -56,7 +81,7 @@ function parseRequiredFiniteNumber(
   label: string,
   value: string
 ): number | null {
-  const parsedValue = parseInvoiceNumber(value);
+  const parsedValue = parseInvoiceAmount(value);
 
   if (parsedValue === null) {
     errors.push({
@@ -88,15 +113,87 @@ function hasValidHttpUrl(value: string): boolean {
 
 export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] {
   const errors: InvoiceValidationError[] = [];
+  const limits = INVOICE_TEXT_MAX_LENGTHS;
 
   validateRequiredText(errors, "businessName", "Business name", invoice.businessName);
   validateRequiredText(errors, "customerName", "Customer name", invoice.customerName);
   validateRequiredText(errors, "invoiceNumber", "Invoice number", invoice.invoiceNumber);
   validateRequiredText(errors, "invoiceDate", "Invoice date", invoice.invoiceDate);
-  validateTextLength(errors, "businessName", "Business name", invoice.businessName, 120);
-  validateTextLength(errors, "customerName", "Customer name", invoice.customerName, 120);
-  validateTextLength(errors, "invoiceNumber", "Invoice number", invoice.invoiceNumber, 60);
-  validateTextLength(errors, "notes", "Notes", invoice.notes, 800);
+  validateTextLength(errors, "businessName", "Business name", invoice.businessName, limits.businessName);
+  validateTextLength(
+    errors,
+    "businessContact",
+    "Business email or phone",
+    invoice.businessContact,
+    limits.businessContact
+  );
+  validateTextLength(
+    errors,
+    "businessAddress",
+    "Business address",
+    invoice.businessAddress,
+    limits.businessAddress
+  );
+  validateTextLength(errors, "customerName", "Customer name", invoice.customerName, limits.customerName);
+  validateTextLength(
+    errors,
+    "customerContact",
+    "Customer email or phone",
+    invoice.customerContact,
+    limits.customerContact
+  );
+  validateTextLength(
+    errors,
+    "customerAddress",
+    "Customer address",
+    invoice.customerAddress,
+    limits.customerAddress
+  );
+  validateTextLength(errors, "invoiceNumber", "Invoice number", invoice.invoiceNumber, limits.invoiceNumber);
+  validateTextLength(errors, "notes", "Notes", invoice.notes, limits.notes);
+  validateTextLength(errors, "terms", "Terms and conditions", invoice.terms, limits.terms);
+  validateTextLength(
+    errors,
+    "payment.bankName",
+    "Bank name",
+    invoice.payment.bankName,
+    limits.bankName
+  );
+  validateTextLength(
+    errors,
+    "payment.accountName",
+    "Account holder name",
+    invoice.payment.accountName,
+    limits.accountName
+  );
+  validateTextLength(
+    errors,
+    "payment.accountNumber",
+    "Account number",
+    invoice.payment.accountNumber,
+    limits.accountNumber
+  );
+  validateTextLength(
+    errors,
+    "payment.duitNowId",
+    "DuitNow ID",
+    invoice.payment.duitNowId,
+    limits.duitNowId
+  );
+  validateTextLength(
+    errors,
+    "payment.paymentLink",
+    "Payment link",
+    invoice.payment.paymentLink,
+    limits.paymentLink
+  );
+  validateTextLength(
+    errors,
+    "payment.notes",
+    "Payment notes",
+    invoice.payment.notes,
+    limits.paymentNotes
+  );
 
   const parsedInvoiceDate = parseDateInput(invoice.invoiceDate);
 
@@ -158,7 +255,7 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       `items.${index}.description`,
       `Line item ${itemNumber} description`,
       item.description,
-      180
+      limits.lineItemDescription
     );
 
     const quantity = parseRequiredFiniteNumber(
