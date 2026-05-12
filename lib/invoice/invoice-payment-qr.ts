@@ -1,4 +1,5 @@
 export const INVOICE_PAYMENT_QR_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+export const INVOICE_PAYMENT_QR_MAX_DATA_URL_BYTES = 800 * 1024;
 export const INVOICE_PAYMENT_QR_MAX_STORED_WIDTH = 512;
 export const INVOICE_PAYMENT_QR_MAX_STORED_HEIGHT = 512;
 
@@ -46,6 +47,11 @@ function loadImage(dataUrl: string): Promise<HTMLImageElement> {
   });
 }
 
+function getDataUrlByteSize(dataUrl: string): number {
+  const base64 = dataUrl.split(",")[1] ?? "";
+  return Math.ceil((base64.length * 3) / 4);
+}
+
 export async function processPaymentQrFile(file: File): Promise<ProcessPaymentQrResult> {
   const validation = validatePaymentQrFile(file);
 
@@ -90,13 +96,19 @@ export async function processPaymentQrFile(file: File): Promise<ProcessPaymentQr
     context.imageSmoothingEnabled = false;
     context.drawImage(image, 0, 0, width, height);
 
-    const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
-    const dataUrl = canvas.toDataURL(outputType, outputType === "image/jpeg" ? 0.92 : undefined);
+    const dataUrl = canvas.toDataURL("image/png");
 
     if (!dataUrl.startsWith("data:image/")) {
       return {
         ok: false,
         error: "Payment QR image could not be processed. Please try another image."
+      };
+    }
+
+    if (getDataUrlByteSize(dataUrl) > INVOICE_PAYMENT_QR_MAX_DATA_URL_BYTES) {
+      return {
+        ok: false,
+        error: "Payment QR image is too large after processing. Please upload a smaller PNG or JPG image."
       };
     }
 

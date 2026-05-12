@@ -6,6 +6,7 @@ type InvoiceBillFromProps = {
   businessAddress: string;
   businessContact: string;
   businessLogoDataUrl?: string;
+  businessNameError?: string;
   businessName: string;
   onBusinessAddressChange: (value: string) => void;
   onBusinessContactChange: (value: string) => void;
@@ -17,6 +18,7 @@ export function InvoiceBillFrom({
   businessAddress,
   businessContact,
   businessLogoDataUrl,
+  businessNameError,
   businessName,
   onBusinessAddressChange,
   onBusinessContactChange,
@@ -30,11 +32,19 @@ export function InvoiceBillFrom({
         <label className="grid gap-2 sm:col-span-2">
           <span className="text-sm font-semibold text-stone-800">Business name</span>
           <input
-            className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+            aria-describedby={businessNameError ? "business-name-error" : undefined}
+            className={`h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
+              businessNameError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+            }`}
             onChange={(event) => onBusinessNameChange(event.target.value)}
             placeholder="Your business name"
             value={businessName}
           />
+          {businessNameError ? (
+            <p className="text-sm font-medium text-red-700" id="business-name-error">
+              {businessNameError}
+            </p>
+          ) : null}
         </label>
         <label className="grid gap-2 sm:col-span-2">
           <span className="text-sm font-semibold text-stone-800">

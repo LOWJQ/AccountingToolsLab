@@ -179,6 +179,24 @@ test("saved payload includes version, savedAt, and invoice", () => {
   assert.deepEqual(payload.invoice, invoice);
 });
 
+test("saveInvoiceDraft does not store logo or payment QR data URLs", () => {
+  const { entries, storage } = createStorage();
+  const invoice = createInvoice({
+    businessLogoDataUrl: "data:image/png;base64,logo",
+    payment: {
+      paymentQrDataUrl: "data:image/png;base64,qr"
+    }
+  });
+  installStorage(storage);
+
+  saveInvoiceDraft(invoice);
+  const payload = JSON.parse(entries[ATL_INVOICE_DRAFT_KEY]);
+
+  assert.equal(payload.invoice.businessLogoDataUrl, undefined);
+  assert.equal(payload.invoice.payment.paymentQrDataUrl, undefined);
+  assert.equal(payload.invoice.payment.notes, invoice.payment.notes);
+});
+
 test("clearInvoiceDraft removes the draft", () => {
   const { entries, storage } = createStorage({ [ATL_INVOICE_DRAFT_KEY]: "draft" });
   installStorage(storage);

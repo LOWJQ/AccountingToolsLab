@@ -9,6 +9,12 @@ export const metadata = createMetadata({
   title: "How to Create a Simple Invoice in Malaysia | Step-by-Step Guide",
   description:
     "Learn how to create a simple invoice for freelancers and small businesses in Malaysia, including invoice fields, payment terms, SST notes, examples, and common mistakes.",
+  ogImage: {
+    url: "/og-invoice-generator-guide.png",
+    width: 1200,
+    height: 630,
+    alt: "Free Invoice Generator and simple invoice guide preview by AccountingToolsLab"
+  },
   path: "/guides/how-to-create-a-simple-invoice"
 });
 

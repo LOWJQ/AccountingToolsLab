@@ -39,7 +39,10 @@ export function createMetadata({
     title,
     description,
     alternates: {
-      canonical: canonicalUrl
+      canonical: canonicalUrl,
+      languages: {
+        "en-MY": canonicalUrl
+      }
     },
     openGraph: {
       title,

@@ -63,6 +63,8 @@ export const currencyOptions = [
 
 export type CurrencyCode = (typeof currencyOptions)[number]["code"];
 
+export const CURRENCY_CODES = currencyOptions.map((option) => option.code) as readonly CurrencyCode[];
+
 export const defaultCurrency: CurrencyCode = "MYR";
 
 export function isCurrencyCode(value: string): value is CurrencyCode {

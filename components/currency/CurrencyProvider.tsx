@@ -30,7 +30,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>(defaultCurrency);
 
   useEffect(() => {
-    const storedCurrency = window.localStorage.getItem(currencyStorageKey);
+    let storedCurrency: string | null = null;
+
+    try {
+      storedCurrency = window.localStorage.getItem(currencyStorageKey);
+    } catch {
+      storedCurrency = null;
+    }
 
     if (storedCurrency && isCurrencyCode(storedCurrency)) {
       setCurrencyState(storedCurrency);
@@ -39,7 +45,12 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const setCurrency = useCallback((nextCurrency: CurrencyCode) => {
     setCurrencyState(nextCurrency);
-    window.localStorage.setItem(currencyStorageKey, nextCurrency);
+
+    try {
+      window.localStorage.setItem(currencyStorageKey, nextCurrency);
+    } catch {
+      // Keep the selected currency for this session even when storage is blocked.
+    }
   }, []);
 
   const formatCurrency = useCallback(

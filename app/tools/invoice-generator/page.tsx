@@ -11,12 +11,11 @@ export const metadata = createMetadata({
   title: "Free Invoice Generator Malaysia | Create a PDF Invoice Online",
   description:
     "Create a simple PDF invoice for freelancers and small businesses in Malaysia. Add invoice items, tax/SST, discounts, and payment details, then download without signing up.",
-  // TODO: Create /public/og-invoice-generator.png at 1200x630.
   ogImage: {
-    url: "/og-invoice-generator.png",
+    url: "/og-invoice-generator-guide.png",
     width: 1200,
     height: 630,
-    alt: "Free Invoice Generator Malaysia PDF invoice preview"
+    alt: "Free Invoice Generator and simple invoice guide preview by AccountingToolsLab"
   },
   path: "/tools/invoice-generator"
 });

@@ -24,6 +24,32 @@ function validateRequiredText(
   }
 }
 
+function validateTextLength(
+  errors: InvoiceValidationError[],
+  field: string,
+  label: string,
+  value: string,
+  maxLength: number
+) {
+  if (value.trim().length > maxLength) {
+    errors.push({
+      field,
+      message: `${label} must be ${maxLength} characters or less.`
+    });
+  }
+}
+
+function parseDateInput(value: string): number | null {
+  if (isBlank(value)) {
+    return null;
+  }
+
+  const parsedDate = new Date(`${value}T00:00:00`);
+  const parsedTime = parsedDate.getTime();
+
+  return Number.isFinite(parsedTime) ? parsedTime : null;
+}
+
 function parseRequiredFiniteNumber(
   errors: InvoiceValidationError[],
   field: string,
@@ -67,6 +93,35 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
   validateRequiredText(errors, "customerName", "Customer name", invoice.customerName);
   validateRequiredText(errors, "invoiceNumber", "Invoice number", invoice.invoiceNumber);
   validateRequiredText(errors, "invoiceDate", "Invoice date", invoice.invoiceDate);
+  validateTextLength(errors, "businessName", "Business name", invoice.businessName, 120);
+  validateTextLength(errors, "customerName", "Customer name", invoice.customerName, 120);
+  validateTextLength(errors, "invoiceNumber", "Invoice number", invoice.invoiceNumber, 60);
+  validateTextLength(errors, "notes", "Notes", invoice.notes, 800);
+
+  const parsedInvoiceDate = parseDateInput(invoice.invoiceDate);
+
+  if (!isBlank(invoice.invoiceDate) && parsedInvoiceDate === null) {
+    errors.push({
+      field: "invoiceDate",
+      message: "Invoice date must be a valid date."
+    });
+  }
+
+  if (!isBlank(invoice.dueDate)) {
+    const parsedDueDate = parseDateInput(invoice.dueDate);
+
+    if (parsedDueDate === null) {
+      errors.push({
+        field: "dueDate",
+        message: "Due date must be a valid date."
+      });
+    } else if (parsedInvoiceDate !== null && parsedDueDate < parsedInvoiceDate) {
+      errors.push({
+        field: "dueDate",
+        message: "Due date cannot be before the invoice date."
+      });
+    }
+  }
 
   if (invoice.items.length === 0) {
     errors.push({
@@ -98,6 +153,14 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       });
     }
 
+    validateTextLength(
+      errors,
+      `items.${index}.description`,
+      `Line item ${itemNumber} description`,
+      item.description,
+      180
+    );
+
     const quantity = parseRequiredFiniteNumber(
       errors,
       `items.${index}.quantity`,
@@ -112,6 +175,13 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       });
     }
 
+    if (quantity !== null && quantity > 1000000) {
+      errors.push({
+        field: `items.${index}.quantity`,
+        message: `Line item ${itemNumber} quantity must be 1,000,000 or less.`
+      });
+    }
+
     const unitPrice = parseRequiredFiniteNumber(
       errors,
       `items.${index}.unitPrice`,
@@ -123,6 +193,20 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       errors.push({
         field: `items.${index}.unitPrice`,
         message: `Line item ${itemNumber} unit price must be zero or greater.`
+      });
+    }
+
+    if (unitPrice !== null && unitPrice > 1000000000) {
+      errors.push({
+        field: `items.${index}.unitPrice`,
+        message: `Line item ${itemNumber} unit price must be 1,000,000,000 or less.`
+      });
+    }
+
+    if (quantity !== null && unitPrice !== null && quantity * unitPrice > 1000000000000) {
+      errors.push({
+        field: `items.${index}.unitPrice`,
+        message: `Line item ${itemNumber} total is too large for the PDF layout.`
       });
     }
   });

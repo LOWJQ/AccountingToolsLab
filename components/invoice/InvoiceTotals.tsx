@@ -27,6 +27,7 @@ type InvoiceTotalsProps = {
   onDiscountModeChange: (mode: InvoiceDiscountMode) => void;
   onDiscountValueChange: (value: string) => void;
   onTaxModeChange: (mode: InvoiceTaxMode) => void;
+  taxRateError: string;
   taxMode: InvoiceTaxMode;
   taxOptions: InvoiceTaxOption[];
 };
@@ -42,6 +43,7 @@ export function InvoiceTotals({
   onDiscountModeChange,
   onDiscountValueChange,
   onTaxModeChange,
+  taxRateError,
   taxMode,
   taxOptions
 }: InvoiceTotalsProps) {
@@ -74,7 +76,10 @@ export function InvoiceTotals({
             <label className="grid max-w-xs gap-2">
               <span className="text-sm font-semibold text-stone-800">Tax rate (%)</span>
               <input
-                className="h-12 w-full rounded-xl border border-stone-200 bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                aria-describedby={taxRateError ? "custom-tax-rate-error" : undefined}
+                className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 ${
+                  taxRateError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
+                }`}
                 inputMode="decimal"
                 max="100"
                 min="0"
@@ -83,6 +88,11 @@ export function InvoiceTotals({
                 type="number"
                 value={customTaxRate}
               />
+              {taxRateError ? (
+                <p className="text-sm font-medium text-red-700" id="custom-tax-rate-error">
+                  {taxRateError}
+                </p>
+              ) : null}
             </label>
           ) : null}
         </div>

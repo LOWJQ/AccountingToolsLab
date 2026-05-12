@@ -161,10 +161,20 @@ export function saveInvoiceDraft(invoice: InvoiceData): StorageResult {
   }
 
   try {
+    const safeInvoice: InvoiceData = {
+      ...invoice,
+      payment: {
+        ...invoice.payment
+      }
+    };
+
+    delete safeInvoice.businessLogoDataUrl;
+    delete safeInvoice.payment.paymentQrDataUrl;
+
     const draft: StoredInvoiceDraft = {
       version: ATL_INVOICE_DRAFT_VERSION,
       savedAt: new Date().toISOString(),
-      invoice
+      invoice: safeInvoice
     };
 
     storage.setItem(ATL_INVOICE_DRAFT_KEY, JSON.stringify(draft));
