@@ -1,5 +1,6 @@
 import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
+import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { InvoiceMockPreview } from "@/components/tools/InvoiceMockPreview";
@@ -136,7 +137,7 @@ export default function ToolsPage() {
         ]}
       />
       <JsonLd data={createItemListSchema(toolItemList)} />
-      <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <Container as="main">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <div className="max-w-3xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">
@@ -271,7 +272,7 @@ export default function ToolsPage() {
           Accounting learning resources still matter here. Start with invoices for business tasks,
           then use the calculators when you need tax, cash, planning, or bookkeeping checks.
         </aside>
-      </main>
+      </Container>
     </div>
   );
 }

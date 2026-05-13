@@ -1,3 +1,4 @@
+import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -218,7 +219,7 @@ export default function BreakEvenPointExplainedPage() {
         }}
       />
 
-      <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <Container as="main">
         <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
           href="/guides"
@@ -532,7 +533,7 @@ export default function BreakEvenPointExplainedPage() {
             ))}
           </div>
         </section>
-      </main>
+      </Container>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Container } from "@/components/layout/Container";
 import { createMetadata } from "@/lib/seo/metadata";
 import Link from "next/link";
 
@@ -78,7 +79,7 @@ const privacySections = [
 export default function PrivacyPolicyPage() {
   return (
     <div className="bg-stone-50 text-stone-950">
-      <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <Container as="main">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Privacy Policy</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -128,7 +129,7 @@ export default function PrivacyPolicyPage() {
             Contact AccountingToolsLab
           </Link>
         </section>
-      </main>
+      </Container>
     </div>
   );
 }

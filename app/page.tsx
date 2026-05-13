@@ -1,4 +1,5 @@
 import { InvoicePreview } from "@/components/home/InvoicePreview";
+import { Container } from "@/components/layout/Container";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -86,7 +87,7 @@ export default function HomePage() {
     <div className="bg-stone-50 text-stone-950">
       <JsonLd data={createWebsiteSchema()} />
       <JsonLd data={createOrganizationSchema()} />
-      <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-10 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <Container as="main">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
@@ -250,7 +251,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-      </main>
+      </Container>
     </div>
   );
 }
