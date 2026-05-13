@@ -213,6 +213,33 @@ exported `RateLimitStore` / `SharedRateLimitStore` interface to Redis, Vercel
 KV, Upstash, or another shared store with atomic increment and expiry. Keep
 store credentials server-only; do not expose them with `NEXT_PUBLIC_`.
 
+Production security checklist:
+
+- Keep `RESEND_API_KEY` and `TURNSTILE_SECRET_KEY` server-only.
+- Configure both `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in production.
+- Keep `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL` valid and monitored.
+- Do not set `CONTACT_TRUST_PROXY_HEADERS=true` unless the app is behind a trusted proxy that strips incoming forwarding headers.
+- Confirm `/api/contact` returns safe validation errors and does not expose provider secrets or raw provider errors.
+- Confirm `/contact` loads Turnstile and can send a staging message after every CSP change.
+- Confirm `/tools/invoice-generator` can preview uploaded logo/QR images and download PDFs after every CSP change.
+- Keep dependency audit findings in a separate tracked task when they require a major Next.js upgrade.
+
+Recommended Vercel Firewall rules for the contact API:
+
+1. Create a custom rule named `Rate limit contact API`.
+2. Match `Path equals /api/contact` and `Method equals POST`.
+3. Use `Rate Limit` with `Fixed Window`.
+4. Count by `IP` first. Add `JA4 Digest` as an additional key if available in your plan and traffic view.
+5. Start with `10 requests per 10 minutes` per key, then adjust after reviewing real traffic.
+6. Use `Log` for the first deployment window if you want to observe behavior safely.
+7. Change the action to the default `429` response or `Deny` once you confirm legitimate submissions are not blocked.
+
+Enterprise-only or plan-dependent Vercel Firewall options, such as token bucket
+rate limiting, user-agent/header counting keys, or managed OWASP rulesets, are
+nice-to-have extras. They are not required for the current contact form because
+the app already has server-side validation, Turnstile, request size limits,
+provider timeouts, and an application-level in-memory fallback limiter.
+
 ## Invoice Generator Privacy
 
 The invoice generator is client-side and designed for simple PDF invoices and
