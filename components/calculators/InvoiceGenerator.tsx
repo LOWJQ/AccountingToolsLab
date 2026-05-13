@@ -120,6 +120,8 @@ export function InvoiceGenerator() {
   const [activeView, setActiveView] = useState<InvoiceView>("details");
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isClearEverythingModalOpen, setIsClearEverythingModalOpen] = useState(false);
+  const [touchedInvoiceFields, setTouchedInvoiceFields] = useState<Set<string>>(() => new Set());
+  const [hasAttemptedInvoiceAction, setHasAttemptedInvoiceAction] = useState(false);
   const { getNextInvoiceNumberSuggestion, saveUsedInvoiceNumber } = useInvoiceNumbering();
 
   const selectedTaxOption = taxOptions.find((option) => option.mode === taxMode);
@@ -171,6 +173,14 @@ export function InvoiceGenerator() {
     ]
   );
 
+  const validationDisplayOptions = useMemo(
+    () => ({
+      showAllErrors: hasAttemptedInvoiceAction,
+      touchedFields: touchedInvoiceFields
+    }),
+    [hasAttemptedInvoiceAction, touchedInvoiceFields]
+  );
+
   const {
     calculation,
     getLineItemError,
@@ -178,7 +188,7 @@ export function InvoiceGenerator() {
     hasValidInvoice,
     lineItemPreviewTotals,
     lineItemsMessage
-  } = useInvoiceValidation(invoiceData, lineItems);
+  } = useInvoiceValidation(invoiceData, lineItems, validationDisplayOptions);
 
   const restoreInvoiceState = useCallback(
     (invoice: InvoiceData) => {
@@ -247,6 +257,29 @@ export function InvoiceGenerator() {
     restoreInvoiceState
   });
 
+  function markInvoiceFieldTouched(field: string) {
+    setTouchedInvoiceFields((currentFields) => {
+      if (currentFields.has(field)) {
+        return currentFields;
+      }
+
+      const nextFields = new Set(currentFields);
+      nextFields.add(field);
+      return nextFields;
+    });
+  }
+
+  function resetValidationDisplay() {
+    setTouchedInvoiceFields(new Set());
+    setHasAttemptedInvoiceAction(false);
+  }
+
+  function revealInvoiceValidationErrors() {
+    setHasAttemptedInvoiceAction(true);
+    setActiveView("details");
+    scrollInvoiceGeneratorToTop();
+  }
+
   function updateLineItem(id: string, key: keyof InvoiceLineItem, value: string) {
     setLineItems((currentItems) =>
       currentItems.map((item) => (item.id === id ? { ...item, [key]: value } : item))
@@ -301,6 +334,7 @@ export function InvoiceGenerator() {
       })
     );
     setAutosaveError("");
+    resetValidationDisplay();
     setActiveView("details");
     setIsDownloadModalOpen(false);
     scrollInvoiceGeneratorToTop();
@@ -327,6 +361,7 @@ export function InvoiceGenerator() {
         ? ""
         : "Draft could not be cleared from this device. The form was reset for this session."
     );
+    resetValidationDisplay();
     setActiveView("details");
     setIsDownloadModalOpen(false);
     setIsClearEverythingModalOpen(false);
@@ -344,11 +379,32 @@ export function InvoiceGenerator() {
 
   function switchInvoiceView(view: InvoiceView) {
     if (view === "preview" && !hasValidInvoice) {
+      revealInvoiceValidationErrors();
       return;
     }
 
     setActiveView(view);
     scrollInvoiceGeneratorToTop();
+  }
+
+  function openDownloadModal() {
+    if (!hasValidInvoice) {
+      revealInvoiceValidationErrors();
+      return;
+    }
+
+    clearPdfStatus();
+    setIsDownloadModalOpen(true);
+  }
+
+  function confirmDownloadInvoicePdf() {
+    if (!hasValidInvoice) {
+      revealInvoiceValidationErrors();
+      setIsDownloadModalOpen(false);
+      return;
+    }
+
+    void downloadInvoicePdf();
   }
 
   const previewItems = useMemo(
@@ -409,6 +465,10 @@ export function InvoiceGenerator() {
     notes: getValidationMessage("payment.notes"),
     paymentLink: getValidationMessage("payment.paymentLink")
   };
+  const validationSummaryMessage =
+    hasAttemptedInvoiceAction && !hasValidInvoice
+      ? "Please complete the highlighted invoice fields before downloading."
+      : "";
 
   return (
     <div className="flex flex-col gap-8">
@@ -430,21 +490,22 @@ export function InvoiceGenerator() {
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
               activeView === "preview"
                 ? "bg-white text-stone-950 shadow-sm"
-                : hasValidInvoice
-                  ? "text-stone-600 hover:text-stone-950"
-                  : "cursor-not-allowed text-stone-400"
+                : "text-stone-600 hover:text-stone-950"
             }`}
-            aria-describedby={!hasValidInvoice ? "invoice-preview-disabled-note" : undefined}
-            disabled={!hasValidInvoice}
+            aria-describedby={validationSummaryMessage ? "invoice-validation-summary" : undefined}
             onClick={() => switchInvoiceView("preview")}
             type="button"
           >
             Preview Invoice
           </button>
         </div>
-        {!hasValidInvoice ? (
-          <p className="mt-3 text-sm font-medium text-red-700" id="invoice-preview-disabled-note">
-            Enter the required information before previewing or downloading.
+        {validationSummaryMessage ? (
+          <p
+            className="mt-3 text-sm font-medium text-red-700"
+            id="invoice-validation-summary"
+            role="alert"
+          >
+            {validationSummaryMessage}
           </p>
         ) : null}
 
@@ -463,6 +524,7 @@ export function InvoiceGenerator() {
                 onBusinessContactChange={setBusinessContact}
                 onBusinessLogoChange={setBusinessLogoDataUrl}
                 onBusinessNameChange={setBusinessName}
+                onFieldBlur={markInvoiceFieldTouched}
               />
 
               <InvoiceCustomer
@@ -475,6 +537,7 @@ export function InvoiceGenerator() {
                 onCustomerAddressChange={setCustomerAddress}
                 onCustomerContactChange={setCustomerContact}
                 onCustomerNameChange={setCustomerName}
+                onFieldBlur={markInvoiceFieldTouched}
               />
 
               <InvoiceMeta
@@ -488,6 +551,7 @@ export function InvoiceGenerator() {
                 invoiceNumberError={invoiceNumberError}
                 onCurrencyChange={setCurrency}
                 onDueDateChange={setDueDate}
+                onFieldBlur={markInvoiceFieldTouched}
                 onInvoiceDateChange={setInvoiceDate}
                 onInvoiceNumberChange={setInvoiceNumber}
               />
@@ -502,6 +566,7 @@ export function InvoiceGenerator() {
                 onCustomTaxRateChange={setCustomTaxRate}
                 onDiscountModeChange={selectDiscount}
                 onDiscountValueChange={updateDiscountValue}
+                onFieldBlur={markInvoiceFieldTouched}
                 onTaxModeChange={setTaxMode}
                 taxRateError={taxRateError}
                 taxMode={taxMode}
@@ -516,12 +581,14 @@ export function InvoiceGenerator() {
                 lineItems={lineItems}
                 lineItemsMessage={lineItemsMessage}
                 onAddLineItem={addLineItem}
+                onLineItemBlur={(index, key) => markInvoiceFieldTouched(`items.${index}.${key}`)}
                 onRemoveLineItem={removeLineItem}
                 onUpdateLineItem={updateLineItem}
               />
 
               <PaymentDetailsFields
                 onChange={updatePayment}
+                onFieldBlur={(field) => markInvoiceFieldTouched(`payment.${field}`)}
                 payment={payment}
                 paymentErrors={paymentErrors}
               />
@@ -532,10 +599,12 @@ export function InvoiceGenerator() {
                 </span>
                 <textarea
                   aria-describedby={notesError ? "invoice-notes-error" : undefined}
+                  aria-invalid={notesError ? true : undefined}
                   className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
                     notesError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
                   }`}
                   maxLength={INVOICE_TEXT_MAX_LENGTHS.notes}
+                  onBlur={() => markInvoiceFieldTouched("notes")}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder="Additional notes for the customer"
                   value={notes}
@@ -553,10 +622,12 @@ export function InvoiceGenerator() {
               </span>
               <textarea
                 aria-describedby={termsError ? "invoice-terms-error" : undefined}
+                aria-invalid={termsError ? true : undefined}
                 className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
                   termsError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
                 }`}
                 maxLength={INVOICE_TEXT_MAX_LENGTHS.terms}
+                onBlur={() => markInvoiceFieldTouched("terms")}
                 onChange={(event) => setTerms(event.target.value)}
                 placeholder="Payment terms or invoice conditions"
                 value={terms}
@@ -594,8 +665,7 @@ export function InvoiceGenerator() {
               </button>
               <button
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                aria-describedby={!hasValidInvoice ? "invoice-preview-disabled-note" : undefined}
-                disabled={!hasValidInvoice}
+                aria-describedby={validationSummaryMessage ? "invoice-validation-summary" : undefined}
                 onClick={() => switchInvoiceView("preview")}
                 type="button"
               >
@@ -621,11 +691,7 @@ export function InvoiceGenerator() {
                   <button
                     className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                     aria-describedby={!hasValidInvoice ? "invoice-download-disabled-note" : undefined}
-                    disabled={!hasValidInvoice}
-                    onClick={() => {
-                      clearPdfStatus();
-                      setIsDownloadModalOpen(true);
-                    }}
+                    onClick={openDownloadModal}
                     type="button"
                   >
                     Download invoice PDF
@@ -744,7 +810,7 @@ export function InvoiceGenerator() {
         onCancelClearEverything={() => setIsClearEverythingModalOpen(false)}
         onCancelDownload={() => setIsDownloadModalOpen(false)}
         onConfirmClearEverything={confirmClearEverything}
-        onConfirmDownload={downloadInvoicePdf}
+        onConfirmDownload={confirmDownloadInvoicePdf}
         pdfStatus={pdfStatus}
       />
     </div>

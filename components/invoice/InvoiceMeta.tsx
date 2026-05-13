@@ -14,6 +14,7 @@ type InvoiceMetaProps = {
   invoiceNumberError?: string;
   onCurrencyChange: (value: CurrencyCode) => void;
   onDueDateChange: (value: string) => void;
+  onFieldBlur?: (field: "invoiceNumber" | "invoiceDate" | "dueDate") => void;
   onInvoiceDateChange: (value: string) => void;
   onInvoiceNumberChange: (value: string) => void;
 };
@@ -29,6 +30,7 @@ export function InvoiceMeta({
   invoiceNumberError,
   onCurrencyChange,
   onDueDateChange,
+  onFieldBlur,
   onInvoiceDateChange,
   onInvoiceNumberChange
 }: InvoiceMetaProps) {
@@ -40,10 +42,12 @@ export function InvoiceMeta({
           <span className="text-sm font-semibold text-stone-800">Invoice number</span>
           <input
             aria-describedby={invoiceNumberError ? "invoice-number-error" : undefined}
+            aria-invalid={invoiceNumberError ? true : undefined}
             className={`h-12 w-full min-w-0 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               invoiceNumberError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
             maxLength={INVOICE_TEXT_MAX_LENGTHS.invoiceNumber}
+            onBlur={() => onFieldBlur?.("invoiceNumber")}
             onChange={(event) => onInvoiceNumberChange(event.target.value)}
             value={invoiceNumber}
           />
@@ -57,9 +61,11 @@ export function InvoiceMeta({
           <span className="text-sm font-semibold text-stone-800">Invoice date</span>
           <input
             aria-describedby={invoiceDateError ? "invoice-date-error" : undefined}
+            aria-invalid={invoiceDateError ? true : undefined}
             className={`h-12 w-full min-w-0 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               invoiceDateError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            onBlur={() => onFieldBlur?.("invoiceDate")}
             onChange={(event) => onInvoiceDateChange(event.target.value)}
             type="date"
             value={invoiceDate}
@@ -74,9 +80,11 @@ export function InvoiceMeta({
           <span className="text-sm font-semibold text-stone-800">Due date</span>
           <input
             aria-describedby={dueDateError ? "due-date-error" : undefined}
+            aria-invalid={dueDateError ? true : undefined}
             className={`h-12 w-full min-w-0 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               dueDateError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            onBlur={() => onFieldBlur?.("dueDate")}
             onChange={(event) => onDueDateChange(event.target.value)}
             type="date"
             value={dueDate}

@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ChevronDown, Menu, X } from "lucide-react";
-import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronDown, Menu, Search, X } from "lucide-react";
+import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { currencyOptions } from "@/lib/currency";
+import { getCompactCurrencyLabel, isCurrencyCode, searchCurrencies } from "@/lib/currency";
 
 const navItems = [
   { label: "Tools", href: "/tools" },
@@ -13,60 +13,75 @@ const navItems = [
   { label: "About", href: "/about" }
 ];
 
-function getCompactCurrencyLabel(code: string) {
-  const option = currencyOptions.find((currencyOption) => currencyOption.code === code);
-
-  return option ? `${option.code} (${option.symbol})` : code;
-}
-
 function CurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const listboxId = useId();
+  const searchInputId = useId();
   const { currency, setCurrency } = useCurrency();
   const selectedLabel = getCompactCurrencyLabel(currency);
-  const selectedIndex = Math.max(
-    currencyOptions.findIndex((option) => option.code === currency),
-    0
-  );
+  const filteredCurrencies = useMemo(() => searchCurrencies(searchQuery), [searchQuery]);
+  const selectedIndex = Math.max(filteredCurrencies.findIndex((option) => option.code === currency), 0);
+  const activeCurrency = filteredCurrencies[activeIndex];
+  const activeOptionId = activeCurrency ? `${listboxId}-${activeCurrency.code}` : undefined;
 
-  function focusOption(index: number) {
-    optionRefs.current[index]?.focus();
-  }
-
-  function openAndFocusOption(index: number) {
+  function openSelector(index = selectedIndex) {
     setIsOpen(true);
     setActiveIndex(index);
-    window.requestAnimationFrame(() => focusOption(index));
+    window.requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+  }
+
+  function closeSelector({ returnFocus = true }: { returnFocus?: boolean } = {}) {
+    setIsOpen(false);
+
+    if (returnFocus) {
+      window.requestAnimationFrame(() => {
+        buttonRef.current?.focus();
+      });
+    }
   }
 
   function selectCurrency(index: number) {
-    const option = currencyOptions[index];
+    const option = filteredCurrencies[index];
 
     if (!option) {
       return;
     }
 
+    if (!isCurrencyCode(option.code)) {
+      return;
+    }
+
     setCurrency(option.code);
-    setIsOpen(false);
-    buttonRef.current?.focus();
+    setSearchQuery("");
+    closeSelector();
   }
 
-  function moveOptionFocus(index: number) {
-    const lastIndex = currencyOptions.length - 1;
+  function moveActiveOption(index: number) {
+    const lastIndex = filteredCurrencies.length - 1;
+
+    if (lastIndex < 0) {
+      setActiveIndex(0);
+      return;
+    }
+
     const nextIndex = Math.min(Math.max(index, 0), lastIndex);
 
     setActiveIndex(nextIndex);
-    focusOption(nextIndex);
+    optionRefs.current[nextIndex]?.scrollIntoView({ block: "nearest" });
   }
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
+        closeSelector({ returnFocus: false });
       }
     }
 
@@ -77,57 +92,61 @@ function CurrencySelector() {
     };
   }, []);
 
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.target !== buttonRef.current) {
-      return;
-    }
+  useEffect(() => {
+    const nextSelectedIndex = filteredCurrencies.findIndex((option) => option.code === currency);
 
+    setActiveIndex(nextSelectedIndex >= 0 ? nextSelectedIndex : 0);
+  }, [currency, filteredCurrencies]);
+
+  function handleButtonKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      openAndFocusOption(isOpen ? Math.min(activeIndex + 1, currencyOptions.length - 1) : selectedIndex);
+      openSelector(isOpen ? Math.min(activeIndex + 1, filteredCurrencies.length - 1) : selectedIndex);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      openAndFocusOption(isOpen ? Math.max(activeIndex - 1, 0) : selectedIndex);
+      openSelector(isOpen ? Math.max(activeIndex - 1, 0) : selectedIndex);
     } else if (event.key === "Home") {
       event.preventDefault();
-      openAndFocusOption(0);
+      openSelector(0);
     } else if (event.key === "End") {
       event.preventDefault();
-      openAndFocusOption(currencyOptions.length - 1);
+      openSelector(filteredCurrencies.length - 1);
     } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
       event.preventDefault();
-      openAndFocusOption(isOpen ? activeIndex : selectedIndex);
+      openSelector(isOpen ? activeIndex : selectedIndex);
     } else if (event.key === "Escape") {
       event.preventDefault();
-      setIsOpen(false);
+      closeSelector();
     }
   }
 
-  function handleOptionKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      moveOptionFocus(index + 1);
+      moveActiveOption(activeIndex + 1);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      moveOptionFocus(index - 1);
+      moveActiveOption(activeIndex - 1);
     } else if (event.key === "Home") {
       event.preventDefault();
-      moveOptionFocus(0);
+      moveActiveOption(0);
     } else if (event.key === "End") {
       event.preventDefault();
-      moveOptionFocus(currencyOptions.length - 1);
+      moveActiveOption(filteredCurrencies.length - 1);
     } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
-      event.preventDefault();
-      selectCurrency(index);
+      if (event.key !== " " || searchQuery.trim() === "") {
+        event.preventDefault();
+        selectCurrency(activeIndex);
+      }
     } else if (event.key === "Escape") {
       event.preventDefault();
-      setIsOpen(false);
-      buttonRef.current?.focus();
+      setSearchQuery("");
+      closeSelector();
     }
   }
 
   return (
-    <div className="relative inline-flex" onKeyDown={handleKeyDown} ref={rootRef}>
+    <div className="relative inline-flex" ref={rootRef}>
       <button
         aria-controls={isOpen ? listboxId : undefined}
         aria-expanded={isOpen}
@@ -135,9 +154,14 @@ function CurrencySelector() {
         aria-label="Select currency"
         className="inline-flex h-10 w-32 items-center justify-between gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
         onClick={() => {
-          setActiveIndex(selectedIndex);
-          setIsOpen((current) => !current);
+          if (isOpen) {
+            closeSelector();
+          } else {
+            setSearchQuery("");
+            openSelector(selectedIndex);
+          }
         }}
+        onKeyDown={handleButtonKeyDown}
         ref={buttonRef}
         type="button"
       >
@@ -150,41 +174,89 @@ function CurrencySelector() {
 
       {isOpen ? (
         <div
-          className="absolute right-0 top-full z-40 mt-2 w-32 overflow-hidden rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
-          id={listboxId}
-          role="listbox"
+          className="absolute left-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60 sm:left-auto sm:right-0"
         >
-          {currencyOptions.map((option, index) => {
-            const isSelected = option.code === currency;
-            const optionId = `${listboxId}-${option.code}`;
+          <div className="border-b border-stone-100 p-3">
+            <label className="relative block" htmlFor={searchInputId}>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+              />
+              <input
+                aria-activedescendant={activeOptionId}
+                aria-controls={listboxId}
+                aria-expanded={isOpen}
+                aria-label="Search currencies"
+                autoComplete="off"
+                className="h-10 w-full rounded-xl border border-stone-200 bg-stone-50 py-2 pl-9 pr-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                id={searchInputId}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setActiveIndex(0);
+                }}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search code, name, country"
+                ref={searchInputRef}
+                role="combobox"
+                value={searchQuery}
+              />
+            </label>
+          </div>
 
-            return (
-              <button
-                aria-selected={isSelected}
-                className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition ${
-                  isSelected
-                    ? "bg-slate-50 font-semibold text-slate-800"
-                    : "font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-950"
-                }`}
-                id={optionId}
-                key={option.code}
-                onClick={() => {
-                  selectCurrency(index);
-                }}
-                onFocus={() => setActiveIndex(index)}
-                onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                ref={(element) => {
-                  optionRefs.current[index] = element;
-                }}
-                role="option"
-                tabIndex={activeIndex === index ? 0 : -1}
-                type="button"
-              >
-                <span>{getCompactCurrencyLabel(option.code)}</span>
-                {isSelected ? <Check aria-hidden="true" className="h-4 w-4" /> : null}
-              </button>
-            );
-          })}
+          <div
+            className="max-h-80 overflow-y-auto py-1.5"
+            id={listboxId}
+            role="listbox"
+          >
+            {filteredCurrencies.length > 0 ? (
+              filteredCurrencies.map((option, index) => {
+                const isActive = activeIndex === index;
+                const isSelected = option.code === currency;
+                const optionId = `${listboxId}-${option.code}`;
+
+                return (
+                  <button
+                    aria-selected={isSelected}
+                    className={`grid w-full grid-cols-[1fr_auto] items-center gap-3 px-3 py-2.5 text-left text-sm transition ${
+                      isSelected
+                        ? "bg-slate-50 text-slate-800"
+                        : isActive
+                          ? "bg-stone-50 text-stone-950"
+                          : "text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                    }`}
+                    id={optionId}
+                    key={option.code}
+                    onClick={() => {
+                      selectCurrency(index);
+                    }}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    ref={(element) => {
+                      optionRefs.current[index] = element;
+                    }}
+                    role="option"
+                    tabIndex={-1}
+                    type="button"
+                  >
+                    <span className="min-w-0">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="shrink-0 font-semibold text-stone-950">{option.code}</span>
+                        <span className="shrink-0 text-stone-500">{option.symbol}</span>
+                        <span className="min-w-0 truncate font-medium">{option.name}</span>
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs text-stone-500">
+                        {option.countries.join(", ")}
+                      </span>
+                    </span>
+                    {isSelected ? <Check aria-hidden="true" className="h-4 w-4 text-slate-700" /> : null}
+                  </button>
+                );
+              })
+            ) : (
+              <p className="px-3 py-6 text-center text-sm font-medium text-stone-500">
+                No currencies found.
+              </p>
+            )}
+          </div>
         </div>
       ) : null}
     </div>

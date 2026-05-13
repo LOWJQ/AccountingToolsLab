@@ -26,6 +26,7 @@ type InvoiceTotalsProps = {
   onCustomTaxRateChange: (value: string) => void;
   onDiscountModeChange: (mode: InvoiceDiscountMode) => void;
   onDiscountValueChange: (value: string) => void;
+  onFieldBlur?: (field: "tax.rate" | "discount.value") => void;
   onTaxModeChange: (mode: InvoiceTaxMode) => void;
   taxRateError: string;
   taxMode: InvoiceTaxMode;
@@ -42,6 +43,7 @@ export function InvoiceTotals({
   onCustomTaxRateChange,
   onDiscountModeChange,
   onDiscountValueChange,
+  onFieldBlur,
   onTaxModeChange,
   taxRateError,
   taxMode,
@@ -77,12 +79,14 @@ export function InvoiceTotals({
               <span className="text-sm font-semibold text-stone-800">Tax rate (%)</span>
               <input
                 aria-describedby={taxRateError ? "custom-tax-rate-error" : undefined}
+                aria-invalid={taxRateError ? true : undefined}
                 className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 ${
                   taxRateError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
                 }`}
                 inputMode="decimal"
                 max="100"
                 min="0"
+                onBlur={() => onFieldBlur?.("tax.rate")}
                 onChange={(event) => onCustomTaxRateChange(event.target.value)}
                 placeholder="Example: 6"
                 type="number"
@@ -135,6 +139,8 @@ export function InvoiceTotals({
               </span>
               <div className="relative">
                 <input
+                  aria-describedby={discountError ? "invoice-discount-error" : undefined}
+                  aria-invalid={discountError ? true : undefined}
                   className={`h-12 w-full rounded-xl border bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 ${
                     discount.type === "percentage" ? "pr-10" : ""
                   } ${
@@ -145,6 +151,7 @@ export function InvoiceTotals({
                   inputMode="decimal"
                   max={discount.type === "percentage" ? "100" : undefined}
                   min="0"
+                  onBlur={() => onFieldBlur?.("discount.value")}
                   onChange={(event) => onDiscountValueChange(event.target.value)}
                   placeholder={discount.type === "percentage" ? "10" : "50.00"}
                   type="number"
@@ -159,7 +166,9 @@ export function InvoiceTotals({
             </label>
           ) : null}
           {discountError ? (
-            <p className="text-sm font-medium text-red-700">{discountError}</p>
+            <p className="text-sm font-medium text-red-700" id="invoice-discount-error">
+              {discountError}
+            </p>
           ) : null}
         </div>
       </section>

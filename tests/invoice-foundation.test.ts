@@ -5,8 +5,10 @@ import {
   parseInvoicePercentage,
   parseInvoiceQuantity
 } from "../lib/invoice/invoice-calculations";
+import { formatLineItemErrorForDisplay } from "../lib/invoice/invoice-line-item-error-display";
 import { INVOICE_TEXT_MAX_LENGTHS } from "../lib/invoice/invoice-limits";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
+import { shouldShowInvoiceValidationError } from "../lib/invoice/invoice-validation-display";
 import { validateInvoice } from "../lib/invoice/invoice-validation";
 
 function test(name: string, run: () => void) {
@@ -325,6 +327,47 @@ test("percentage parser allows decimal percentages and rejects unsafe formats", 
 
 test("valid minimal invoice passes validation", () => {
   assert.deepEqual(validateInvoice(createInvoice()), []);
+});
+
+test("invoice UI validation display waits for touched fields or an attempted action", () => {
+  const touchedFields = new Set(["items.0.description"]);
+
+  assert.equal(
+    shouldShowInvoiceValidationError("items.0.description", { touchedFields }),
+    true
+  );
+  assert.equal(
+    shouldShowInvoiceValidationError("items.0.unitPrice", { touchedFields }),
+    false
+  );
+  assert.equal(
+    shouldShowInvoiceValidationError("items.0.unitPrice", {
+      showAllErrors: true,
+      touchedFields
+    }),
+    true
+  );
+  assert.equal(shouldShowInvoiceValidationError("items", { touchedFields }), true);
+  assert.equal(
+    shouldShowInvoiceValidationError("businessName", { touchedFields }),
+    false
+  );
+});
+
+test("line item UI errors use short field-level messages", () => {
+  assert.equal(
+    formatLineItemErrorForDisplay("Line item 1 description is required.", "description"),
+    "Enter a description."
+  );
+  assert.equal(
+    formatLineItemErrorForDisplay("Line item 1 quantity must be a valid number.", "quantity"),
+    "Enter a valid quantity."
+  );
+  assert.equal(
+    formatLineItemErrorForDisplay("Line item 1 unit price must be a valid number.", "unitPrice"),
+    "Enter a valid price."
+  );
+  assert.equal(formatLineItemErrorForDisplay("", "quantity"), "");
 });
 
 test("missing business name fails validation", () => {
