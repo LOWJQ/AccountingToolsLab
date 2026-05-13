@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import sitemap from "../app/sitemap";
 import { guides } from "../lib/data/guides";
 import { tools } from "../lib/data/tools";
@@ -8,6 +10,21 @@ import { buildAssetUrl, siteConfig } from "../lib/seo/site";
 function test(name: string, run: () => void) {
   run();
   console.log(`PASS ${name}`);
+}
+
+function publicAssetPathFromUrl(url: string): string {
+  const pathname = new URL(url).pathname.replace(/^\/+/, "");
+  return join(process.cwd(), "public", pathname);
+}
+
+function readPngDimensions(filePath: string): { height: number; width: number } {
+  const buffer = readFileSync(filePath);
+  assert.equal(buffer.toString("ascii", 1, 4), "PNG", `${filePath} must be a PNG file`);
+
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20)
+  };
 }
 
 test("sitemap includes all tools", () => {
@@ -70,4 +87,40 @@ test("createMetadata resolves custom OG image URLs consistently", () => {
       width: 1200
     }
   ]);
+});
+
+test("default OG image exists and matches configured dimensions", () => {
+  const filePath = publicAssetPathFromUrl(siteConfig.ogImage.url);
+
+  assert.equal(existsSync(filePath), true, filePath);
+  assert.deepEqual(readPngDimensions(filePath), {
+    width: siteConfig.ogImage.width,
+    height: siteConfig.ogImage.height
+  });
+});
+
+test("custom invoice OG image exists and matches metadata dimensions", () => {
+  const metadata = createMetadata({
+    title: "Invoice",
+    path: "/tools/invoice-generator",
+    ogImage: {
+      alt: "Invoice OG image",
+      height: 630,
+      url: "/og-invoice-generator-guide.png",
+      width: 1200
+    }
+  });
+  const [image] = metadata.openGraph?.images as Array<{
+    alt: string;
+    height: number;
+    url: string;
+    width: number;
+  }>;
+  const filePath = publicAssetPathFromUrl(image.url);
+
+  assert.equal(existsSync(filePath), true, filePath);
+  assert.deepEqual(readPngDimensions(filePath), {
+    width: image.width,
+    height: image.height
+  });
 });

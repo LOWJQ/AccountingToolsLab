@@ -3,6 +3,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Break-even Point Explained: Formula, Example, and Meaning | AccountingToolsLab",
@@ -218,12 +219,12 @@ export default function BreakEvenPointExplainedPage() {
       />
 
       <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <a
+        <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
           href="/guides"
         >
           ← All guides
-        </a>
+        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -234,18 +235,18 @@ export default function BreakEvenPointExplainedPage() {
             the business has no profit and no loss yet.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/break-even-calculator"
             >
               Try the Break-even Calculator
-            </a>
-            <a
+            </Link>
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
               href="/guides/cash-flow-vs-profit"
             >
               Learn Cash Flow vs Profit
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -419,26 +420,26 @@ export default function BreakEvenPointExplainedPage() {
               </p>
               <p>
                 You can{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/tools/break-even-calculator"
                 >
                   calculate break-even point with the Break-even Calculator
-                </a>
+                </Link>
                 ,{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/tools/cash-flow-calculator"
                 >
                   review simple cash flow
-                </a>
+                </Link>
                 , or{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/tools/financial-ratio-calculator"
                 >
                   calculate basic financial ratios
-                </a>
+                </Link>
                 .
               </p>
             </div>
@@ -452,31 +453,31 @@ export default function BreakEvenPointExplainedPage() {
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
-              <a
+              <Link
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
                 href={tool.href}
                 key={tool.href}
               >
                 <h3 className="text-base font-semibold text-stone-950">{tool.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-600">{tool.description}</p>
-              </a>
+              </Link>
             ))}
           </div>
           <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
             To connect break-even planning with cash timing and performance checks, review{" "}
-            <a
+            <Link
               className="font-semibold text-slate-700 hover:text-slate-900"
               href="/guides/cash-flow-vs-profit"
             >
               Cash Flow vs Profit
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
+            <Link
               className="font-semibold text-slate-700 hover:text-slate-900"
               href="/guides/financial-ratios-for-beginners"
             >
               Financial Ratios for Beginners
-            </a>
+            </Link>
             .
           </p>
         </section>

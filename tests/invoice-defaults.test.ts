@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import {
   createEmptyInvoiceDefaults,
-  createNewInvoiceFromCurrent
+  createNewInvoiceFromCurrent,
+  prepareInvoiceForFormRestore
 } from "../lib/invoice/invoice-defaults";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
 
@@ -157,4 +158,52 @@ test("clear everything defaults use a provided invoice number", () => {
   });
 
   assert.equal(emptyInvoice.invoiceNumber, "INV-006");
+});
+
+test("prepareInvoiceForFormRestore restores all invoice fields with safe fallbacks", () => {
+  const invoice = createReusableInvoice();
+  const restoredInvoice = prepareInvoiceForFormRestore(
+    {
+      ...invoice,
+      invoiceNumber: "",
+      invoiceDate: "",
+      dueDate: undefined as unknown as string,
+      items: [],
+      notes: undefined as unknown as string,
+      terms: undefined as unknown as string
+    },
+    {
+      invoiceDate: "2026-05-13",
+      invoiceNumber: "INV-099",
+      lineItemId: "item-fallback"
+    }
+  );
+
+  assert.equal(restoredInvoice.businessName, invoice.businessName);
+  assert.equal(restoredInvoice.businessContact, invoice.businessContact);
+  assert.equal(restoredInvoice.businessAddress, invoice.businessAddress);
+  assert.equal(restoredInvoice.businessLogoDataUrl, invoice.businessLogoDataUrl);
+  assert.equal(restoredInvoice.customerName, invoice.customerName);
+  assert.equal(restoredInvoice.customerContact, invoice.customerContact);
+  assert.equal(restoredInvoice.customerAddress, invoice.customerAddress);
+  assert.equal(restoredInvoice.invoiceNumber, "INV-099");
+  assert.equal(restoredInvoice.invoiceDate, "2026-05-13");
+  assert.equal(restoredInvoice.dueDate, "");
+  assert.equal(restoredInvoice.currency, invoice.currency);
+  assert.deepEqual(restoredInvoice.discount, invoice.discount);
+  assert.deepEqual(restoredInvoice.tax, invoice.tax);
+  assert.deepEqual(restoredInvoice.payment, {
+    ...invoice.payment,
+    paymentQrDataUrl: undefined
+  });
+  assert.equal(restoredInvoice.notes, "");
+  assert.equal(restoredInvoice.terms, "");
+  assert.deepEqual(restoredInvoice.items, [
+    {
+      id: "item-fallback",
+      description: "",
+      quantity: "1",
+      unitPrice: ""
+    }
+  ]);
 });

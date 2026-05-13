@@ -3,6 +3,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Straight-Line Depreciation Explained: Formula and Example | AccountingToolsLab",
@@ -227,12 +228,12 @@ export default function StraightLineDepreciationExplainedPage() {
       />
 
       <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <a
+        <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
           href="/guides"
         >
           ← All guides
-        </a>
+        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -243,18 +244,18 @@ export default function StraightLineDepreciationExplainedPage() {
             life.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/depreciation-calculator"
             >
               Try the Depreciation Calculator
-            </a>
-            <a
+            </Link>
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
               href="/guides/financial-ratios-for-beginners"
             >
               Review Financial Ratios
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -427,26 +428,26 @@ export default function StraightLineDepreciationExplainedPage() {
               </p>
               <p>
                 You can{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/tools/depreciation-calculator"
                 >
                   calculate straight-line depreciation
-                </a>
+                </Link>
                 ,{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/tools/financial-ratio-calculator"
                 >
                   review financial ratios
-                </a>
+                </Link>
                 , or{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/tools/accounting-equation-calculator"
                 >
                   review assets, liabilities, and equity
-                </a>
+                </Link>
                 .
               </p>
             </div>
@@ -460,31 +461,31 @@ export default function StraightLineDepreciationExplainedPage() {
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {toolLinks.map((tool) => (
-              <a
+              <Link
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
                 href={tool.href}
                 key={tool.href}
               >
                 <h3 className="text-base font-semibold text-stone-950">{tool.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-600">{tool.description}</p>
-              </a>
+              </Link>
             ))}
           </div>
           <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
             To connect depreciation with performance measures and journal entries, read{" "}
-            <a
+            <Link
               className="font-semibold text-slate-700 hover:text-slate-900"
               href="/guides/financial-ratios-for-beginners"
             >
               Financial Ratios for Beginners
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
+            <Link
               className="font-semibold text-slate-700 hover:text-slate-900"
               href="/guides/journal-entries-for-beginners"
             >
               Journal Entries for Beginners
-            </a>
+            </Link>
             .
           </p>
         </section>

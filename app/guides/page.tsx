@@ -1,5 +1,6 @@
 import { guides } from "@/lib/data/guides";
 import { createMetadata } from "@/lib/seo/metadata";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Invoice and Accounting Guides | AccountingToolsLab",
@@ -223,18 +224,18 @@ export default function GuidesPage() {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-              <a
+              <Link
                 className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                 href="/tools/invoice-generator"
               >
                 Create Free Invoice
-              </a>
-              <a
+              </Link>
+              <Link
                 className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                 href="/guides/how-to-create-a-simple-invoice"
               >
                 Read Simple Invoice Guide
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -277,13 +278,13 @@ export default function GuidesPage() {
               );
 
               return isAvailable ? (
-                <a
+                <Link
                   className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
                   href={guide.href}
                   key={guide.slug}
                 >
                   {content}
-                </a>
+                </Link>
               ) : (
                 <article
                   className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
@@ -319,12 +320,12 @@ export default function GuidesPage() {
                       </span>
                       <span>
                         {step.href ? (
-                          <a
+                          <Link
                             className="font-semibold text-stone-800 hover:text-slate-700"
                             href={step.href}
                           >
                             {step.label}
-                          </a>
+                          </Link>
                         ) : (
                           <span className="font-semibold text-stone-500">{step.label}</span>
                         )}
@@ -353,18 +354,18 @@ export default function GuidesPage() {
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <a
+              <Link
                 className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                 href="/tools/invoice-generator"
               >
                 Create Free Invoice
-              </a>
-              <a
+              </Link>
+              <Link
                 className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                 href="/tools"
               >
                 Explore Tools
-              </a>
+              </Link>
             </div>
           </div>
         </section>

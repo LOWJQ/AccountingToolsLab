@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronDown, Menu, X } from "lucide-react";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { currencyOptions } from "@/lib/currency";
 
@@ -21,38 +21,124 @@ function getCompactCurrencyLabel(code: string) {
 
 function CurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const listboxId = useId();
   const { currency, setCurrency } = useCurrency();
   const selectedLabel = getCompactCurrencyLabel(currency);
+  const selectedIndex = Math.max(
+    currencyOptions.findIndex((option) => option.code === currency),
+    0
+  );
+
+  function focusOption(index: number) {
+    optionRefs.current[index]?.focus();
+  }
+
+  function openAndFocusOption(index: number) {
+    setIsOpen(true);
+    setActiveIndex(index);
+    window.requestAnimationFrame(() => focusOption(index));
+  }
+
+  function selectCurrency(index: number) {
+    const option = currencyOptions[index];
+
+    if (!option) {
+      return;
+    }
+
+    setCurrency(option.code);
+    setIsOpen(false);
+    buttonRef.current?.focus();
+  }
+
+  function moveOptionFocus(index: number) {
+    const lastIndex = currencyOptions.length - 1;
+    const nextIndex = Math.min(Math.max(index, 0), lastIndex);
+
+    setActiveIndex(nextIndex);
+    focusOption(nextIndex);
+  }
 
   useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
+    function handlePointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
 
-    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, []);
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Escape") {
+    if (event.target !== buttonRef.current) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      openAndFocusOption(isOpen ? Math.min(activeIndex + 1, currencyOptions.length - 1) : selectedIndex);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      openAndFocusOption(isOpen ? Math.max(activeIndex - 1, 0) : selectedIndex);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      openAndFocusOption(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      openAndFocusOption(currencyOptions.length - 1);
+    } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      openAndFocusOption(isOpen ? activeIndex : selectedIndex);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
       setIsOpen(false);
+    }
+  }
+
+  function handleOptionKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveOptionFocus(index + 1);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveOptionFocus(index - 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      moveOptionFocus(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      moveOptionFocus(currencyOptions.length - 1);
+    } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      selectCurrency(index);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+      buttonRef.current?.focus();
     }
   }
 
   return (
     <div className="relative inline-flex" onKeyDown={handleKeyDown} ref={rootRef}>
       <button
+        aria-controls={isOpen ? listboxId : undefined}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label="Select currency"
         className="inline-flex h-10 w-32 items-center justify-between gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          setActiveIndex(selectedIndex);
+          setIsOpen((current) => !current);
+        }}
+        ref={buttonRef}
         type="button"
       >
         <span className="whitespace-nowrap">{selectedLabel}</span>
@@ -65,10 +151,12 @@ function CurrencySelector() {
       {isOpen ? (
         <div
           className="absolute right-0 top-full z-40 mt-2 w-32 overflow-hidden rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
+          id={listboxId}
           role="listbox"
         >
-          {currencyOptions.map((option) => {
+          {currencyOptions.map((option, index) => {
             const isSelected = option.code === currency;
+            const optionId = `${listboxId}-${option.code}`;
 
             return (
               <button
@@ -78,12 +166,18 @@ function CurrencySelector() {
                     ? "bg-slate-50 font-semibold text-slate-800"
                     : "font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-950"
                 }`}
+                id={optionId}
                 key={option.code}
                 onClick={() => {
-                  setCurrency(option.code);
-                  setIsOpen(false);
+                  selectCurrency(index);
+                }}
+                onFocus={() => setActiveIndex(index)}
+                onKeyDown={(event) => handleOptionKeyDown(event, index)}
+                ref={(element) => {
+                  optionRefs.current[index] = element;
                 }}
                 role="option"
+                tabIndex={activeIndex === index ? 0 : -1}
                 type="button"
               >
                 <span>{getCompactCurrencyLabel(option.code)}</span>
@@ -99,9 +193,31 @@ function CurrencySelector() {
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!headerRef.current?.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur">
+    <header
+      className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur"
+      ref={headerRef}
+    >
       <div className="mx-auto flex h-16 max-w-[1080px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link className="flex items-center" href="/" aria-label="AccountingToolsLab home">
           <Image

@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoUploader } from "@/components/invoice/LogoUploader";
+import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 
 type InvoiceBillFromProps = {
   businessAddress: string;
@@ -40,6 +41,7 @@ export function InvoiceBillFrom({
             className={`h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               businessNameError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.businessName}
             onChange={(event) => onBusinessNameChange(event.target.value)}
             placeholder="Your business name"
             value={businessName}
@@ -59,6 +61,7 @@ export function InvoiceBillFrom({
             className={`h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               businessContactError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.businessContact}
             onChange={(event) => onBusinessContactChange(event.target.value)}
             placeholder="hello@example.com"
             value={businessContact}
@@ -76,6 +79,7 @@ export function InvoiceBillFrom({
             className={`min-h-20 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               businessAddressError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.businessAddress}
             onChange={(event) => onBusinessAddressChange(event.target.value)}
             placeholder="Business address"
             value={businessAddress}

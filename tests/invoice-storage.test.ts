@@ -381,7 +381,7 @@ test("old draft missing optional text fields still loads safely", () => {
   });
 });
 
-test("new draft with structured payment fields loads correctly", () => {
+test("new draft with structured payment fields loads correctly without persisted QR image", () => {
   const invoice = createInvoice({
     payment: {
       bankName: "Maybank",
@@ -403,7 +403,45 @@ test("new draft with structured payment fields loads correctly", () => {
     }).storage
   );
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, invoice.payment);
+  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, {
+    ...invoice.payment,
+    paymentQrDataUrl: undefined
+  });
+});
+
+test("loadInvoiceDraft strips old business logo data URLs", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          businessLogoDataUrl: "data:image/png;base64,old-logo"
+        }
+      })
+    }).storage
+  );
+
+  assert.equal(loadInvoiceDraft()?.invoice.businessLogoDataUrl, undefined);
+});
+
+test("loadInvoiceDraft strips old payment QR data URLs", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: createInvoice({
+          payment: {
+            paymentQrDataUrl: "data:image/png;base64,old-qr"
+          }
+        })
+      })
+    }).storage
+  );
+
+  assert.equal(loadInvoiceDraft()?.invoice.payment.paymentQrDataUrl, undefined);
 });
 
 test("missing payment object defaults to empty payment fields", () => {

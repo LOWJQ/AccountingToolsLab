@@ -3,6 +3,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Financial Ratios for Beginners: Formulas and Examples | AccountingToolsLab",
@@ -174,12 +175,12 @@ export default function FinancialRatiosForBeginnersGuidePage() {
       />
 
       <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <a
+        <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
           href="/guides"
         >
           ← All guides
-        </a>
+        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -191,18 +192,18 @@ export default function FinancialRatiosForBeginnersGuidePage() {
             business review, and asking better questions about performance.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/financial-ratio-calculator"
             >
               Try the Financial Ratio Calculator
-            </a>
-            <a
+            </Link>
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
               href="/tools"
             >
               Explore Accounting Tools
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -360,13 +361,13 @@ export default function FinancialRatiosForBeginnersGuidePage() {
                 ["Break-even Point Explained", "/guides/break-even-point-explained"],
                 ["Break-even Calculator", "/tools/break-even-calculator"]
               ].map(([label, href]) => (
-                <a
+                <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                   href={href}
                   key={href}
                 >
                   {label}
-                </a>
+                </Link>
               ))}
             </div>
           </article>

@@ -1,4 +1,5 @@
 import { createMetadata } from "@/lib/seo/metadata";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Terms of Use | AccountingToolsLab",
@@ -125,12 +126,12 @@ export default function TermsPage() {
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
             Use the contact page for questions about these starter Terms or future updates.
           </p>
-          <a
+          <Link
             className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             href="/contact"
           >
             Contact AccountingToolsLab
-          </a>
+          </Link>
         </section>
       </main>
     </div>

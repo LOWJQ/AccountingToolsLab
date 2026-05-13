@@ -1,5 +1,7 @@
 "use client";
 
+import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
+
 type InvoiceCustomerProps = {
   customerAddress: string;
   customerAddressError?: string;
@@ -34,6 +36,7 @@ export function InvoiceCustomer({
             className={`h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               customerNameError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.customerName}
             onChange={(event) => onCustomerNameChange(event.target.value)}
             placeholder="Customer name"
             value={customerName}
@@ -53,6 +56,7 @@ export function InvoiceCustomer({
             className={`h-12 rounded-xl border bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               customerContactError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.customerContact}
             onChange={(event) => onCustomerContactChange(event.target.value)}
             placeholder="customer@example.com"
             value={customerContact}
@@ -70,6 +74,7 @@ export function InvoiceCustomer({
             className={`min-h-20 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               customerAddressError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.customerAddress}
             onChange={(event) => onCustomerAddressChange(event.target.value)}
             placeholder="Customer address"
             value={customerAddress}

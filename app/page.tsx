@@ -3,6 +3,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 import { createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Free Invoice Generator and Accounting Tools | AccountingToolsLab",
@@ -101,18 +102,18 @@ export default function HomePage() {
                 beginner-friendly accounting tools for everyday business checks.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
+                <Link
                   className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                   href="/tools/invoice-generator"
                 >
                   Create a PDF Invoice
-                </a>
-                <a
+                </Link>
+                <Link
                   className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                   href="/tools"
                 >
                   Explore Accounting Tools
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -154,13 +155,13 @@ export default function HomePage() {
               );
 
               return tool.isAvailable ? (
-                <a
+                <Link
                   className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
                   href={tool.href}
                   key={tool.name}
                 >
                   {content}
-                </a>
+                </Link>
               ) : (
                 <article
                   className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
@@ -219,12 +220,12 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <a
+              <Link
                 className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
                 href="/tools/invoice-generator"
               >
                 Create Free Invoice
-              </a>
+              </Link>
             </div>
 
             <div className="rounded-xl border border-stone-200 bg-stone-50 p-5">

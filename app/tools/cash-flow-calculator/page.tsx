@@ -6,6 +6,7 @@ import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Cash Flow Calculator | Calculate Net Cash Flow",
@@ -82,12 +83,12 @@ export default function CashFlowCalculatorPage() {
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
           If you are comparing cash movement with business performance, read{" "}
-          <a
+          <Link
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/cash-flow-vs-profit"
           >
             cash flow vs profit
-          </a>{" "}
+          </Link>{" "}
           to understand why a business can be profitable but still short on cash.
         </p>
       </section>

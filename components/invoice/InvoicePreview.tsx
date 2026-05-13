@@ -5,7 +5,7 @@ import type {
   InvoiceCalculationResult,
   InvoiceLineCalculationResult
 } from "@/lib/invoice/invoice-calculations";
-import { parseInvoiceAmount } from "@/lib/invoice/invoice-calculations";
+import { parseInvoicePercentage } from "@/lib/invoice/invoice-calculations";
 import type { InvoiceData } from "@/lib/invoice/invoice-types";
 
 type InvoicePreviewProps = {
@@ -45,7 +45,7 @@ export function InvoicePreview({
   const subtotal = calculation.subtotal;
   const discountAmount = calculation.discountAmount;
   const taxableAmount = calculation.taxableAmount;
-  const taxRate = invoiceData.tax.enabled ? parseInvoiceAmount(invoiceData.tax.rate) ?? 0 : 0;
+  const taxRate = invoiceData.tax.enabled ? parseInvoicePercentage(invoiceData.tax.rate) ?? 0 : 0;
   const taxAmount = calculation.taxAmount;
   const total = calculation.total;
   const hasDiscount = discountAmount > 0;

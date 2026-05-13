@@ -203,6 +203,106 @@ test("contact route rate limiting is testable without waiting real time", async 
   }
 });
 
+test("contact route reports Turnstile timeout safely", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = (async () => {
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }) as typeof fetch;
+
+  try {
+    await withEnv({ TURNSTILE_SECRET_KEY: "turnstile-test" }, async () => {
+      const response = await POST(
+        createRequest(createPayload(), "contact-turnstile-timeout-test")
+      );
+      const body = await readJson(response);
+
+      assert.equal(response.status, 400);
+      assert.equal(body.message, "Verification took too long. Please try again.");
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("contact route rejects invalid configured recipient email", async () => {
+  const fetchMock = installSuccessfulFetchMock();
+
+  try {
+    await withEnv(
+      {
+        CONTACT_FROM_EMAIL: "AccountingToolsLab <hello@example.com>",
+        CONTACT_TO_EMAIL: "not-an-email",
+        RESEND_API_KEY: "resend-test",
+        TURNSTILE_SECRET_KEY: "turnstile-test"
+      },
+      async () => {
+        const response = await POST(
+          createRequest(createPayload(), "contact-invalid-recipient-test")
+        );
+        const body = await readJson(response);
+
+        assert.equal(response.status, 500);
+        assert.equal(
+          body.message,
+          "Message could not be sent. Please email accttoolslab@gmail.com directly."
+        );
+        assert.deepEqual(fetchMock.calls, ["https://challenges.cloudflare.com/turnstile/v0/siteverify"]);
+      }
+    );
+  } finally {
+    fetchMock.restore();
+  }
+});
+
+test("contact route reports Resend timeout safely", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls: string[] = [];
+
+  globalThis.fetch = (async (input) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    calls.push(url);
+
+    if (url.includes("challenges.cloudflare.com")) {
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "content-type": "application/json" },
+        status: 200
+      });
+    }
+
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }) as typeof fetch;
+
+  try {
+    await withEnv(
+      {
+        CONTACT_FROM_EMAIL: "AccountingToolsLab <hello@example.com>",
+        CONTACT_TO_EMAIL: "owner@example.com",
+        RESEND_API_KEY: "resend-test",
+        TURNSTILE_SECRET_KEY: "turnstile-test"
+      },
+      async () => {
+        const response = await POST(
+          createRequest(createPayload(), "contact-resend-timeout-test")
+        );
+        const body = await readJson(response);
+
+        assert.equal(response.status, 500);
+        assert.equal(
+          body.message,
+          "Message could not be sent. Please email accttoolslab@gmail.com directly."
+        );
+        assert.deepEqual(calls, [
+          "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+          "https://api.resend.com/emails"
+        ]);
+      }
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 async function runTests() {
   for (const [name, run] of tests) {
     await run();

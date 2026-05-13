@@ -1,5 +1,6 @@
 import { ContactForm } from "@/components/contact/ContactForm";
 import { createMetadata } from "@/lib/seo/metadata";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Contact AccountingToolsLab",
@@ -143,18 +144,18 @@ export default function ContactPage() {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <a
+              <Link
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                 href="/tools/invoice-generator"
               >
                 Create Free Invoice
-              </a>
-              <a
+              </Link>
+              <Link
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                 href="/tools"
               >
                 Explore Tools
-              </a>
+              </Link>
             </div>
           </div>
         </section>

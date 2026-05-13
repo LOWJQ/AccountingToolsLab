@@ -161,9 +161,15 @@ export function CashFlowCalculator() {
                   </p>
                 </div>
                 <p className="text-sm leading-6 text-stone-600">
-                  Net cash flow is {calculation.result.status}, so the ending cash balance is{" "}
-                  {formatCurrency(calculation.result.endingCashBalance)}.
+                  Net cash flow is {calculation.result.status}. After adding beginning cash,
+                  ending cash balance is {formatCurrency(calculation.result.endingCashBalance)}.
                 </p>
+                {calculation.result.endingCashBalance < 0 ? (
+                  <p className="rounded-xl border border-red-100 bg-red-50 p-3 text-sm font-medium leading-6 text-red-700">
+                    Ending cash balance is below zero. Review upcoming payments, collections,
+                    or funding before relying on this cash position.
+                  </p>
+                ) : null}
               </div>
             ) : (
               <p className="mt-4 text-sm leading-6 text-stone-600">{calculation.message}</p>

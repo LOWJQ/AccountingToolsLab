@@ -116,10 +116,13 @@ Contact form email delivery uses Resend through the App Router API route at
 `/api/contact`. Configure these server-side environment variables:
 
 ```text
+NEXT_PUBLIC_SITE_URL=https://www.accountingtoolslab.com
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=accttoolslab@gmail.com
 CONTACT_FROM_EMAIL=AccountingToolsLab <onboarding@resend.dev>
 TURNSTILE_SECRET_KEY=
+CONTACT_TURNSTILE_TIMEOUT_MS=8000
+CONTACT_RESEND_TIMEOUT_MS=10000
 ```
 
 Configure the public Cloudflare Turnstile site key for the browser widget:
@@ -132,7 +135,9 @@ Do not prefix `RESEND_API_KEY` or `TURNSTILE_SECRET_KEY` with `NEXT_PUBLIC_`.
 Add the variables to `.env.local` for local development and to Vercel
 Environment Variables for production. For production, `CONTACT_FROM_EMAIL`
 should use a verified sender or domain in Resend. `onboarding@resend.dev` is
-mainly for testing.
+mainly for testing. `CONTACT_TO_EMAIL` should be a valid comma-separated list
+of recipient email addresses; if it is configured incorrectly, the contact API
+fails safely instead of silently falling back.
 
 The contact API includes an in-memory rate limiter for local/dev/test. That
 fallback is not cross-instance protection on serverless deployments. The route
@@ -145,6 +150,8 @@ Contact form security behavior:
 - Required fields, email, topic, page URL, field lengths, and unsafe control characters are validated server-side.
 - A honeypot field silently accepts likely bot submissions without sending email.
 - Cloudflare Turnstile is verified server-side when configured.
+- Cloudflare Turnstile and Resend requests use server-side timeouts so a slow
+  provider does not leave the API waiting indefinitely.
 - Resend and Turnstile secrets are server-only and must not use `NEXT_PUBLIC_`.
 - Proxy IP headers are trusted only on Vercel or when `CONTACT_TRUST_PROXY_HEADERS=true` is explicitly set behind a trusted proxy.
 
@@ -173,6 +180,39 @@ The YouTube tutorial stores contacts in Neon with Drizzle and server actions.
 This project currently sends contact submissions by email through a Next.js API
 route and Resend.
 
+## Production Security
+
+`next.config.mjs` applies baseline HTTP security headers to every route:
+
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `X-Frame-Options: DENY`
+- `Permissions-Policy` disabling camera, microphone, geolocation, payment, USB, and browsing topics
+- `Content-Security-Policy`
+
+The CSP is intentionally staged instead of nonce-only. It keeps the app
+compatible with Next.js App Router, Cloudflare Turnstile, Vercel Analytics,
+Vercel Speed Insights, uploaded invoice logo/QR previews, and PDF generation.
+It allows `data:` and `blob:` only for media/image/worker cases where the app
+needs local previews or generated files.
+
+Manual browser checks after CSP changes:
+
+1. Open `/contact` and confirm the Turnstile widget loads.
+2. Submit a valid contact form message in a staging environment.
+3. Open `/tools/invoice-generator`.
+4. Upload an invoice logo and payment QR image and confirm previews render.
+5. Preview and download an invoice PDF.
+6. Check the browser console for CSP violations.
+7. Confirm Vercel Analytics and Speed Insights still receive events in production.
+
+The contact rate limiter currently uses the in-memory fallback in
+`MemoryRateLimitStore`. That is useful for local/dev/test, but it is not enough
+across multiple serverless instances. For production abuse protection, wire the
+exported `RateLimitStore` / `SharedRateLimitStore` interface to Redis, Vercel
+KV, Upstash, or another shared store with atomic increment and expiry. Keep
+store credentials server-only; do not expose them with `NEXT_PUBLIC_`.
+
 ## Invoice Generator Privacy
 
 The invoice generator is client-side and designed for simple PDF invoices and
@@ -181,6 +221,10 @@ when available, so repeat editing works on the same device. Uploaded logo and
 payment QR image data URLs are intentionally stripped before drafts are saved,
 so those images remain in the current browser session and PDF output but are
 not persisted to localStorage.
+
+Uploaded invoice logos and payment QR images are validated before use. They are
+only used for the current preview/PDF workflow and are not uploaded to a server
+by the invoice generator.
 
 The invoice generator does not submit, validate, or connect invoices to
 LHDN/MyInvois and should not be treated as professional accounting, tax, or
@@ -206,10 +250,22 @@ Run tests:
 npm test
 ```
 
+The test runner compiles the lightweight TypeScript tests with
+`tsconfig.test.json`, then runs the compiled `.test.js` files through
+`scripts/run-tests.mjs`. The project does not currently use Vitest or a browser
+component test runner; add one only if component interaction tests become worth
+the extra setup.
+
 Run linting:
 
 ```bash
 npm run lint
+```
+
+Run a TypeScript type check without emitting files:
+
+```bash
+npx tsc --noEmit
 ```
 
 Build for production:
@@ -218,11 +274,20 @@ Build for production:
 npm run build
 ```
 
+Static metadata assets are served from `public/`. The default OG image and the
+invoice/guide OG image are expected to be 1200x630 PNG files so metadata and
+actual asset dimensions stay aligned.
+
 Run a dependency audit:
 
 ```bash
 npm audit --audit-level=moderate
 ```
+
+Current audit note: Next.js advisories may require a major Next upgrade
+according to `npm audit fix --force`. Do not force that automatically; treat it
+as a separate framework migration and verify App Router routes, metadata,
+security headers, analytics, Turnstile, and PDF generation after upgrading.
 
 ## Deployment
 
@@ -234,9 +299,26 @@ Before deploying, check:
 - Apex and HTTP traffic redirect to `https://www.accountingtoolslab.com`
 - Footer and navigation links work
 - Sitemap and robots output use the production domain
+- Security headers are present on the homepage and key routes
+- CSP does not block Turnstile, invoice previews, PDF downloads, or analytics
 - Contact email is correct
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` are configured together
 - Vercel Analytics and Speed Insights are enabled
+
+Recommended production build check:
+
+```bash
+rm -rf .next
+NEXT_TELEMETRY_DISABLED=1 npm run build
+```
+
+On Windows PowerShell, use:
+
+```powershell
+Remove-Item -LiteralPath .next -Recurse -Force
+$env:NEXT_TELEMETRY_DISABLED='1'
+npm.cmd run build
+```
 
 ## Next Steps
 

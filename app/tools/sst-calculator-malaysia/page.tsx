@@ -6,6 +6,7 @@ import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "SST Calculator Malaysia | Add or Remove SST",
@@ -82,19 +83,19 @@ export default function SstCalculatorMalaysiaPage() {
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
           If you are checking SST arithmetic, read{" "}
-          <a
+          <Link
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/sst-calculator-malaysia-add-remove-sst"
           >
             how to add or remove SST in Malaysia
-          </a>
+          </Link>
           . If you are preparing an invoice, review{" "}
-          <a
+          <Link
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/how-to-create-a-simple-invoice"
           >
             how to create a simple invoice
-          </a>{" "}
+          </Link>{" "}
           and check official guidance or a qualified professional before deciding tax treatment.
         </p>
       </section>

@@ -103,27 +103,14 @@ test("PDF generation gracefully skips when browser APIs are unavailable", async 
   const invoice = createInvoice();
   const previewItems = calculateInvoiceLineItems(invoice.items);
 
-  await assert.doesNotReject(() =>
-    generateInvoicePdf({
-      businessAddress: invoice.businessAddress,
-      businessContact: invoice.businessContact,
-      businessLogoDataUrl: invoice.businessLogoDataUrl,
-      businessName: invoice.businessName,
-      calculation: calculateInvoiceTotals(invoice),
-      customerAddress: invoice.customerAddress,
-      customerContact: invoice.customerContact,
-      customerName: invoice.customerName,
-      dueDate: invoice.dueDate,
-      formatCurrency: (value) => `MYR ${value.toFixed(2)}`,
-      invoiceData: invoice,
-      invoiceDate: invoice.invoiceDate,
-      invoiceNumber: invoice.invoiceNumber,
-      notes: invoice.notes,
-      payment: invoice.payment,
-      previewItems,
-      terms: invoice.terms
-    })
-  );
+  const result = await generateInvoicePdf({
+    calculation: calculateInvoiceTotals(invoice),
+    formatCurrency: (value) => `MYR ${value.toFixed(2)}`,
+    invoiceData: invoice,
+    previewItems
+  });
+
+  assert.deepEqual(result, { warnings: [] });
 });
 
 test("PDF generation does not throw for invalid logo or QR data when browser APIs are unavailable", async () => {
@@ -137,27 +124,14 @@ test("PDF generation does not throw for invalid logo or QR data when browser API
   });
   const previewItems = calculateInvoiceLineItems(invoice.items);
 
-  await assert.doesNotReject(() =>
-    generateInvoicePdf({
-      businessAddress: invoice.businessAddress,
-      businessContact: invoice.businessContact,
-      businessLogoDataUrl: invoice.businessLogoDataUrl,
-      businessName: invoice.businessName,
-      calculation: calculateInvoiceTotals(invoice),
-      customerAddress: invoice.customerAddress,
-      customerContact: invoice.customerContact,
-      customerName: invoice.customerName,
-      dueDate: invoice.dueDate,
-      formatCurrency: (value) => `MYR ${value.toFixed(2)}`,
-      invoiceData: invoice,
-      invoiceDate: invoice.invoiceDate,
-      invoiceNumber: invoice.invoiceNumber,
-      notes: invoice.notes,
-      payment: invoice.payment,
-      previewItems,
-      terms: invoice.terms
-    })
-  );
+  const result = await generateInvoicePdf({
+    calculation: calculateInvoiceTotals(invoice),
+    formatCurrency: (value) => `MYR ${value.toFixed(2)}`,
+    invoiceData: invoice,
+    previewItems
+  });
+
+  assert.deepEqual(result, { warnings: [] });
 });
 
 async function runTests() {

@@ -81,7 +81,7 @@ function normalizePayment(value: unknown, legacyPaymentDetails: unknown): Invoic
     duitNowId: readString(payment.duitNowId),
     paymentLink: readString(payment.paymentLink),
     notes: readString(payment.notes) || readString(legacyPaymentDetails),
-    paymentQrDataUrl: readString(payment.paymentQrDataUrl) || undefined
+    paymentQrDataUrl: undefined
   };
 }
 
@@ -100,7 +100,7 @@ function normalizeInvoice(value: unknown): InvoiceData | null {
     businessName: readString(value.businessName),
     businessContact: readString(value.businessContact),
     businessAddress: readString(value.businessAddress),
-    businessLogoDataUrl: readString(value.businessLogoDataUrl) || undefined,
+    businessLogoDataUrl: undefined,
     customerName: readString(value.customerName),
     customerContact: readString(value.customerContact),
     customerAddress: readString(value.customerAddress),

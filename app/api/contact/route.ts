@@ -48,6 +48,8 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const unsafeControlPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
 const rateLimitWindowMs = 15 * 60 * 1000;
 const rateLimitMaxRequests = 5;
+const defaultTurnstileVerificationTimeoutMs = 8_000;
+const defaultResendEmailTimeoutMs = 10_000;
 const contactRateLimitStore: RateLimitStore = new MemoryRateLimitStore();
 
 // Contact submissions are email-only. If database storage is added later,
@@ -101,10 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        message:
-          turnstileVerification.isConfigError && process.env.NODE_ENV === "development"
-            ? "Turnstile is not configured. Set TURNSTILE_SECRET_KEY."
-            : "Verification failed. Please try again."
+        message: getTurnstileFailureMessage(turnstileVerification)
       },
       { status: 400 }
     );
@@ -113,7 +112,7 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
   const from =
     process.env.CONTACT_FROM_EMAIL || "AccountingToolsLab <onboarding@resend.dev>";
-  const to = parseRecipientEmails(process.env.CONTACT_TO_EMAIL);
+  const recipientResult = parseRecipientEmails(process.env.CONTACT_TO_EMAIL);
 
   if (!apiKey) {
     return NextResponse.json(
@@ -123,6 +122,18 @@ export async function POST(request: NextRequest) {
           process.env.NODE_ENV === "development"
             ? "Contact form email is not configured. Set RESEND_API_KEY."
             : "Message could not be sent. Please email accttoolslab@gmail.com directly."
+      },
+      { status: 500 }
+    );
+  }
+
+  if (!recipientResult.ok) {
+    console.error("Invalid CONTACT_TO_EMAIL.");
+
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Message could not be sent. Please email accttoolslab@gmail.com directly."
       },
       { status: 500 }
     );
@@ -150,6 +161,9 @@ export async function POST(request: NextRequest) {
   const safeSubject = stripHeaderUnsafeChars(result.data.subject);
   const emailSubject = `AccountingToolsLab Contact: ${safeTopic} - ${safeSubject}`;
   const text = buildPlainTextEmail(result.data, timestamp, userAgent || "Unknown");
+  const timeout = createTimeoutSignal(
+    getProviderTimeoutMs("CONTACT_RESEND_TIMEOUT_MS", defaultResendEmailTimeoutMs)
+  );
 
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -160,11 +174,12 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         from,
-        to,
+        to: recipientResult.emails,
         subject: emailSubject,
         text,
         reply_to: stripHeaderUnsafeChars(result.data.email)
-      })
+      }),
+      signal: timeout.signal
     });
 
     if (!response.ok) {
@@ -191,7 +206,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch {
+  } catch (error) {
+    if (isAbortError(error)) {
+      console.error("Resend contact email timed out.");
+    }
+
     return NextResponse.json(
       {
         ok: false,
@@ -199,6 +218,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    timeout.clear();
   }
 }
 
@@ -213,6 +234,46 @@ async function isRateLimited(request: NextRequest): Promise<boolean> {
   return result.limited;
 }
 
+function createTimeoutSignal(timeoutMs: number): { clear: () => void; signal: AbortSignal } {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  return {
+    clear: () => clearTimeout(timeoutId),
+    signal: controller.signal
+  };
+}
+
+function getProviderTimeoutMs(envName: string, fallbackMs: number): number {
+  const value = Number(process.env[envName]);
+
+  return Number.isFinite(value) && value >= 1_000 && value <= 30_000
+    ? value
+    : fallbackMs;
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function getTurnstileFailureMessage({
+  isConfigError,
+  timedOut
+}: {
+  isConfigError?: boolean;
+  timedOut?: boolean;
+}): string {
+  if (isConfigError && process.env.NODE_ENV === "development") {
+    return "Turnstile is not configured. Set TURNSTILE_SECRET_KEY.";
+  }
+
+  if (timedOut) {
+    return "Verification took too long. Please try again.";
+  }
+
+  return "Verification failed. Please try again.";
+}
+
 function getRateLimitKey(request: NextRequest): string {
   const clientIp = getTrustedClientIp(request) || "untrusted-ip";
   const userAgent = normalizeHeaderValue(request.headers.get("user-agent"), 160) || "unknown-agent";
@@ -223,7 +284,7 @@ function getRateLimitKey(request: NextRequest): string {
 async function verifyTurnstileToken(
   token: string,
   request: NextRequest
-): Promise<{ success: boolean; isConfigError?: boolean }> {
+): Promise<{ success: boolean; isConfigError?: boolean; timedOut?: boolean }> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
 
   if (!secret) {
@@ -244,19 +305,26 @@ async function verifyTurnstileToken(
     formData.set("remoteip", remoteIp);
   }
 
+  const timeout = createTimeoutSignal(
+    getProviderTimeoutMs("CONTACT_TURNSTILE_TIMEOUT_MS", defaultTurnstileVerificationTimeoutMs)
+  );
+
   try {
     const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: formData
+      body: formData,
+      signal: timeout.signal
     });
     const data = (await response.json()) as TurnstileVerificationResponse;
 
     return { success: response.ok && data.success === true };
-  } catch {
-    return { success: false };
+  } catch (error) {
+    return { success: false, timedOut: isAbortError(error) };
+  } finally {
+    timeout.clear();
   }
 }
 
@@ -467,13 +535,23 @@ function isSafeOptionalUrl(value: string): boolean {
   }
 }
 
-function parseRecipientEmails(value: string | undefined): string[] {
-  const recipients = (value || "accttoolslab@gmail.com")
+function parseRecipientEmails(
+  value: string | undefined
+): { ok: true; emails: string[] } | { ok: false } {
+  if (!value) {
+    return { ok: true, emails: ["accttoolslab@gmail.com"] };
+  }
+
+  const recipients = value
     .split(",")
     .map((email) => stripHeaderUnsafeChars(email).trim())
-    .filter((email) => email.length > 0 && isValidEmail(email));
+    .filter((email) => email.length > 0);
 
-  return recipients.length > 0 ? recipients : ["accttoolslab@gmail.com"];
+  if (recipients.length === 0 || recipients.some((email) => !isValidEmail(email))) {
+    return { ok: false };
+  }
+
+  return { ok: true, emails: recipients };
 }
 
 function isValidSenderValue(value: string): boolean {

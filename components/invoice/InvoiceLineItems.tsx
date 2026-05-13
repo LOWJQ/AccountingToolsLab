@@ -1,6 +1,7 @@
 "use client";
 
 import type { InvoiceLineItem } from "@/lib/invoice/invoice-types";
+import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 
 type InvoiceLineItemsProps = {
   currency: string;
@@ -57,6 +58,7 @@ export function InvoiceLineItems({
                   className={`h-12 w-full min-w-0 rounded-xl border bg-white px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100 ${
                     descriptionError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
                   }`}
+                  maxLength={INVOICE_TEXT_MAX_LENGTHS.lineItemDescription}
                   onChange={(event) =>
                     onUpdateLineItem(item.id, "description", event.target.value)
                   }

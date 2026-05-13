@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -282,12 +283,12 @@ export default function HowToCreateSimpleInvoicePage() {
       />
 
       <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <a
+        <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
           href="/guides"
         >
           ← All guides
-        </a>
+        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Business Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -302,12 +303,12 @@ export default function HowToCreateSimpleInvoicePage() {
             Last updated: 12 May 2026
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/invoice-generator"
             >
               Try the PDF Invoice Generator
-            </a>
+            </Link>
             <a
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
               href="#steps"
@@ -341,13 +342,13 @@ export default function HowToCreateSimpleInvoicePage() {
             <p className="text-sm font-medium tracking-wide text-slate-500">On this page</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {tableOfContents.map(([label, href]) => (
-                <a
+                <Link
                   className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:border-slate-200 hover:bg-white hover:text-stone-950"
                   href={href}
                   key={href}
                 >
                   {label}
-                </a>
+                </Link>
               ))}
             </div>
           </nav>
@@ -374,12 +375,12 @@ export default function HowToCreateSimpleInvoicePage() {
               Want to create one like this? Use the free invoice generator to enter your details
               and download a PDF invoice for Malaysia.
             </p>
-            <a
+            <Link
               className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/invoice-generator"
             >
               Create a PDF invoice
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -502,16 +503,16 @@ export default function HowToCreateSimpleInvoicePage() {
               <p>
                 If SST applies to your business, include the SST amount and label it clearly. For
                 SST arithmetic, use the{" "}
-                <a className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/sst-calculator-malaysia">
+                <Link className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/sst-calculator-malaysia">
                   SST Calculator Malaysia
-                </a>{" "}
+                </Link>{" "}
                 or read{" "}
-                <a
+                <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
                   href="/guides/sst-calculator-malaysia-add-remove-sst"
                 >
                   how to add or remove SST
-                </a>
+                </Link>
                 . If you are unsure whether SST or e-Invoice requirements apply, check official
                 guidance or ask a qualified professional.
               </p>
@@ -527,13 +528,13 @@ export default function HowToCreateSimpleInvoicePage() {
               <p>An invoice requests payment. A receipt confirms payment was received.</p>
               <p>
                 An invoice also does not mean cash has been collected. Read{" "}
-                <a className="font-semibold text-slate-700 hover:text-slate-900" href="/guides/cash-flow-vs-profit">
+                <Link className="font-semibold text-slate-700 hover:text-slate-900" href="/guides/cash-flow-vs-profit">
                   cash flow vs profit
-                </a>{" "}
+                </Link>{" "}
                 or use the{" "}
-                <a className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/cash-flow-calculator">
+                <Link className="font-semibold text-slate-700 hover:text-slate-900" href="/tools/cash-flow-calculator">
                   Cash Flow Calculator
-                </a>{" "}
+                </Link>{" "}
                 to think through cash movement.
               </p>
             </div>
@@ -552,12 +553,12 @@ export default function HowToCreateSimpleInvoicePage() {
                 items, optional SST/tax, payment details, terms, and download a PDF invoice.
               </p>
             </div>
-            <a
+            <Link
               className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-100"
               href="/tools/invoice-generator"
             >
               Use the free invoice generator
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -568,14 +569,14 @@ export default function HowToCreateSimpleInvoicePage() {
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {relatedLinks.map((link) => (
-              <a
+              <Link
                 className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
                 href={link.href}
                 key={link.href}
               >
                 <h3 className="text-base font-semibold text-stone-950">{link.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-600">{link.description}</p>
-              </a>
+              </Link>
             ))}
           </div>
         </section>

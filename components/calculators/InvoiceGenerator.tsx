@@ -13,13 +13,13 @@ import { InvoiceCustomer } from "@/components/invoice/InvoiceCustomer";
 import { InvoiceLineItems } from "@/components/invoice/InvoiceLineItems";
 import { InvoiceMeta } from "@/components/invoice/InvoiceMeta";
 import { InvoiceModals } from "@/components/invoice/InvoiceModals";
-import { InvoicePaymentSection } from "@/components/invoice/InvoicePaymentSection";
 import { InvoicePreview } from "@/components/invoice/InvoicePreview";
 import {
   InvoiceTotals,
   type InvoiceDiscountMode,
   type InvoiceTaxMode
 } from "@/components/invoice/InvoiceTotals";
+import { PaymentDetailsFields } from "@/components/invoice/PaymentDetailsFields";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { CURRENCY_CODES, isCurrencyCode } from "@/lib/currency";
@@ -27,8 +27,10 @@ import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 import {
   createEmptyInvoiceDefaults,
   createNewInvoiceFromCurrent,
-  DEFAULT_INVOICE_NUMBER
+  DEFAULT_INVOICE_NUMBER,
+  prepareInvoiceForFormRestore
 } from "@/lib/invoice/invoice-defaults";
+import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 import { useInvoiceDraft } from "@/hooks/useInvoiceDraft";
 import { useInvoiceNumbering } from "@/hooks/useInvoiceNumbering";
 import { useInvoicePdf } from "@/hooks/useInvoicePdf";
@@ -180,38 +182,44 @@ export function InvoiceGenerator() {
 
   const restoreInvoiceState = useCallback(
     (invoice: InvoiceData) => {
-      setBusinessName(invoice.businessName);
-      setBusinessContact(invoice.businessContact);
-      setBusinessAddress(invoice.businessAddress);
-      setBusinessLogoDataUrl(invoice.businessLogoDataUrl);
-      setCustomerName(invoice.customerName);
-      setCustomerContact(invoice.customerContact);
-      setCustomerAddress(invoice.customerAddress);
-      setInvoiceNumber(invoice.invoiceNumber || DEFAULT_INVOICE_NUMBER);
-      setInvoiceDate(invoice.invoiceDate || getLocalDateInputValue());
-      setDueDate(invoice.dueDate);
-      setNotes(invoice.notes);
-      setTerms(invoice.terms);
-      setPayment(invoice.payment);
-      setDiscount(invoice.discount);
-      setLineItems(invoice.items.length > 0 ? invoice.items : [createLineItem(1)]);
+      const restoredInvoice = prepareInvoiceForFormRestore(invoice, {
+        invoiceDate: getLocalDateInputValue(),
+        invoiceNumber: DEFAULT_INVOICE_NUMBER,
+        lineItemId: createLineItem(1).id
+      });
 
-      if (isCurrencyCode(invoice.currency)) {
-        setCurrency(invoice.currency);
+      setBusinessName(restoredInvoice.businessName);
+      setBusinessContact(restoredInvoice.businessContact);
+      setBusinessAddress(restoredInvoice.businessAddress);
+      setBusinessLogoDataUrl(restoredInvoice.businessLogoDataUrl);
+      setCustomerName(restoredInvoice.customerName);
+      setCustomerContact(restoredInvoice.customerContact);
+      setCustomerAddress(restoredInvoice.customerAddress);
+      setInvoiceNumber(restoredInvoice.invoiceNumber);
+      setInvoiceDate(restoredInvoice.invoiceDate);
+      setDueDate(restoredInvoice.dueDate);
+      setNotes(restoredInvoice.notes);
+      setTerms(restoredInvoice.terms);
+      setPayment(restoredInvoice.payment);
+      setDiscount(restoredInvoice.discount);
+      setLineItems(restoredInvoice.items);
+
+      if (isCurrencyCode(restoredInvoice.currency)) {
+        setCurrency(restoredInvoice.currency);
       }
 
-      if (!invoice.tax.enabled) {
+      if (!restoredInvoice.tax.enabled) {
         setTaxMode("none");
         setCustomTaxRate("");
-      } else if (invoice.tax.rate === "6") {
+      } else if (restoredInvoice.tax.rate === "6") {
         setTaxMode("sst-6");
         setCustomTaxRate("");
-      } else if (invoice.tax.rate === "8") {
+      } else if (restoredInvoice.tax.rate === "8") {
         setTaxMode("sst-8");
         setCustomTaxRate("");
       } else {
         setTaxMode("custom");
-        setCustomTaxRate(invoice.tax.rate);
+        setCustomTaxRate(restoredInvoice.tax.rate);
       }
     },
     [setCurrency]
@@ -305,7 +313,7 @@ export function InvoiceGenerator() {
   function confirmClearEverything() {
     const nextInvoiceNumber = getNextInvoiceNumberSuggestion();
     clearAutosaveTimer();
-    clearInvoiceDraft();
+    const clearResult = clearInvoiceDraft();
     skipNextAutosave();
     restoreInvoiceState(
       createEmptyInvoiceDefaults({
@@ -314,7 +322,11 @@ export function InvoiceGenerator() {
         lineItemId: createLineItem(1).id
       })
     );
-    setAutosaveError("");
+    setAutosaveError(
+      clearResult.ok
+        ? ""
+        : "Draft could not be cleared from this device. The form was reset for this session."
+    );
     setActiveView("details");
     setIsDownloadModalOpen(false);
     setIsClearEverythingModalOpen(false);
@@ -349,48 +361,27 @@ export function InvoiceGenerator() {
   );
   const pdfParams = useMemo(
     () => ({
-      businessAddress,
-      businessContact,
-      businessLogoDataUrl,
-      businessName,
       calculation,
-      customerAddress,
-      customerContact,
-      customerName,
-      dueDate,
       formatCurrency,
       invoiceData,
-      invoiceDate,
-      invoiceNumber,
-      notes,
-      payment,
-      previewItems,
-      terms
+      previewItems
     }),
     [
-      businessAddress,
-      businessContact,
-      businessLogoDataUrl,
-      businessName,
       calculation,
-      customerAddress,
-      customerContact,
-      customerName,
-      dueDate,
       formatCurrency,
       invoiceData,
-      invoiceDate,
-      invoiceNumber,
-      notes,
-      payment,
-      previewItems,
-      terms
+      previewItems
     ]
   );
   const handleDownloadComplete = useCallback(() => {
     setIsDownloadModalOpen(false);
   }, []);
-  const { downloadInvoicePdf, isGeneratingPdf } = useInvoicePdf({
+  const {
+    clearPdfStatus,
+    downloadInvoicePdf,
+    isGeneratingPdf,
+    pdfStatus
+  } = useInvoicePdf({
     hasValidInvoice,
     invoiceNumber,
     onDownloadComplete: handleDownloadComplete,
@@ -529,7 +520,7 @@ export function InvoiceGenerator() {
                 onUpdateLineItem={updateLineItem}
               />
 
-              <InvoicePaymentSection
+              <PaymentDetailsFields
                 onChange={updatePayment}
                 payment={payment}
                 paymentErrors={paymentErrors}
@@ -544,6 +535,7 @@ export function InvoiceGenerator() {
                   className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
                     notesError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
                   }`}
+                  maxLength={INVOICE_TEXT_MAX_LENGTHS.notes}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder="Additional notes for the customer"
                   value={notes}
@@ -564,6 +556,7 @@ export function InvoiceGenerator() {
                 className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
                   termsError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
                 }`}
+                maxLength={INVOICE_TEXT_MAX_LENGTHS.terms}
                 onChange={(event) => setTerms(event.target.value)}
                 placeholder="Payment terms or invoice conditions"
                 value={terms}
@@ -629,7 +622,10 @@ export function InvoiceGenerator() {
                     className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                     aria-describedby={!hasValidInvoice ? "invoice-download-disabled-note" : undefined}
                     disabled={!hasValidInvoice}
-                    onClick={() => setIsDownloadModalOpen(true)}
+                    onClick={() => {
+                      clearPdfStatus();
+                      setIsDownloadModalOpen(true);
+                    }}
                     type="button"
                   >
                     Download invoice PDF
@@ -639,6 +635,18 @@ export function InvoiceGenerator() {
               {!hasValidInvoice ? (
                 <p className="text-sm font-medium text-red-700" id="invoice-download-disabled-note">
                   Fix invoice errors before downloading.
+                </p>
+              ) : null}
+              {pdfStatus ? (
+                <p
+                  className={`rounded-xl border p-3 text-sm font-medium leading-6 ${
+                    pdfStatus.type === "error"
+                      ? "border-red-100 bg-red-50 text-red-700"
+                      : "border-amber-100 bg-amber-50 text-amber-800"
+                  }`}
+                  role="status"
+                >
+                  {pdfStatus.message}
                 </p>
               ) : null}
 
@@ -737,6 +745,7 @@ export function InvoiceGenerator() {
         onCancelDownload={() => setIsDownloadModalOpen(false)}
         onConfirmClearEverything={confirmClearEverything}
         onConfirmDownload={downloadInvoicePdf}
+        pdfStatus={pdfStatus}
       />
     </div>
   );

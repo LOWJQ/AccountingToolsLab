@@ -1,4 +1,9 @@
-import { calculateInvoiceTotals, parseInvoiceAmount } from "./invoice-calculations";
+import {
+  calculateInvoiceTotals,
+  parseInvoiceMoneyAmount,
+  parseInvoicePercentage,
+  parseInvoiceQuantity
+} from "./invoice-calculations";
 import { INVOICE_TEXT_MAX_LENGTHS } from "./invoice-limits";
 import type { InvoiceData, InvoiceLineItem } from "./invoice-types";
 
@@ -79,9 +84,10 @@ function parseRequiredFiniteNumber(
   errors: InvoiceValidationError[],
   field: string,
   label: string,
-  value: string
+  value: string,
+  parser: (value: string) => number | null
 ): number | null {
-  const parsedValue = parseInvoiceAmount(value);
+  const parsedValue = parser(value);
 
   if (parsedValue === null) {
     errors.push({
@@ -262,7 +268,8 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       errors,
       `items.${index}.quantity`,
       `Line item ${itemNumber} quantity`,
-      item.quantity
+      item.quantity,
+      parseInvoiceQuantity
     );
 
     if (quantity !== null && quantity <= 0) {
@@ -283,7 +290,8 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       errors,
       `items.${index}.unitPrice`,
       `Line item ${itemNumber} unit price`,
-      item.unitPrice
+      item.unitPrice,
+      parseInvoiceMoneyAmount
     );
 
     if (unitPrice !== null && unitPrice < 0) {
@@ -313,7 +321,8 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
       errors,
       "discount.value",
       "Discount value",
-      invoice.discount.value
+      invoice.discount.value,
+      invoice.discount.type === "percentage" ? parseInvoicePercentage : parseInvoiceMoneyAmount
     );
 
     if (discountValue !== null) {
@@ -343,7 +352,13 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
   }
 
   if (invoice.tax.enabled) {
-    const taxRate = parseRequiredFiniteNumber(errors, "tax.rate", "Tax rate", invoice.tax.rate);
+    const taxRate = parseRequiredFiniteNumber(
+      errors,
+      "tax.rate",
+      "Tax rate",
+      invoice.tax.rate,
+      parseInvoicePercentage
+    );
 
     if (taxRate !== null && (taxRate < 0 || taxRate > 100)) {
       errors.push({

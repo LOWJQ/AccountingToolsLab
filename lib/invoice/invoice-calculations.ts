@@ -16,17 +16,35 @@ export type InvoiceLineCalculationResult = {
   lineTotal: number;
 };
 
-const DECIMAL_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
+const MONEY_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/;
+const QUANTITY_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d{0,4})?|\.\d{1,4})$/;
+const PERCENTAGE_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d{0,4})?|\.\d{1,4})$/;
 
-export function parseInvoiceAmount(value: string): number | null {
+function parseDecimalAmount(value: string, pattern: RegExp): number | null {
   const trimmedValue = value.trim();
 
-  if (trimmedValue === "" || !DECIMAL_AMOUNT_PATTERN.test(trimmedValue)) {
+  if (trimmedValue === "" || !pattern.test(trimmedValue)) {
     return null;
   }
 
   const parsedValue = Number(trimmedValue);
   return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
+export function parseInvoiceMoneyAmount(value: string): number | null {
+  return parseDecimalAmount(value, MONEY_AMOUNT_PATTERN);
+}
+
+export function parseInvoiceQuantity(value: string): number | null {
+  return parseDecimalAmount(value, QUANTITY_AMOUNT_PATTERN);
+}
+
+export function parseInvoicePercentage(value: string): number | null {
+  return parseDecimalAmount(value, PERCENTAGE_AMOUNT_PATTERN);
+}
+
+export function parseInvoiceAmount(value: string): number | null {
+  return parseInvoiceMoneyAmount(value);
 }
 
 export function roundMoney(value: number): number {
@@ -37,16 +55,24 @@ export function roundMoney(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-function toSafeAmount(value: string): number {
-  return parseInvoiceAmount(value) ?? 0;
+function toSafeMoneyAmount(value: string): number {
+  return parseInvoiceMoneyAmount(value) ?? 0;
+}
+
+function toSafeQuantity(value: string): number {
+  return parseInvoiceQuantity(value) ?? 0;
+}
+
+function toSafePercentage(value: string): number {
+  return parseInvoicePercentage(value) ?? 0;
 }
 
 export function calculateInvoiceLineItems(
   items: InvoiceLineItem[]
 ): InvoiceLineCalculationResult[] {
   return items.map((item) => {
-    const quantity = toSafeAmount(item.quantity);
-    const unitPrice = toSafeAmount(item.unitPrice);
+    const quantity = toSafeQuantity(item.quantity);
+    const unitPrice = toSafeMoneyAmount(item.unitPrice);
     const safeQuantity = quantity > 0 ? quantity : 0;
     const safeUnitPrice = unitPrice >= 0 ? unitPrice : 0;
 
@@ -65,7 +91,10 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
     calculateInvoiceLineItems(invoice.items).reduce((total, item) => total + item.lineTotal, 0)
   );
 
-  const discountValue = toSafeAmount(invoice.discount.value);
+  const discountValue =
+    invoice.discount.type === "percentage"
+      ? toSafePercentage(invoice.discount.value)
+      : toSafeMoneyAmount(invoice.discount.value);
   const rawDiscountAmount = invoice.discount.enabled
     ? invoice.discount.type === "percentage"
       ? subtotal * (discountValue / 100)
@@ -73,7 +102,7 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
     : 0;
   const discountAmount = roundMoney(Math.min(Math.max(rawDiscountAmount, 0), subtotal));
   const taxableAmount = roundMoney(Math.max(subtotal - discountAmount, 0));
-  const taxRate = invoice.tax.enabled ? toSafeAmount(invoice.tax.rate) : 0;
+  const taxRate = invoice.tax.enabled ? toSafePercentage(invoice.tax.rate) : 0;
   const taxAmount = roundMoney(taxableAmount * (Math.max(taxRate, 0) / 100));
 
   return {

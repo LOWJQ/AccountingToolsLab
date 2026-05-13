@@ -78,3 +78,40 @@ export function createNewInvoiceFromCurrent(
     notes: ""
   };
 }
+
+export function prepareInvoiceForFormRestore(
+  invoice: InvoiceData,
+  {
+    invoiceDate,
+    invoiceNumber = DEFAULT_INVOICE_NUMBER,
+    lineItemId
+  }: {
+    invoiceDate: string;
+    invoiceNumber?: string;
+    lineItemId?: string;
+  }
+): InvoiceData {
+  return {
+    ...invoice,
+    invoiceNumber: invoice.invoiceNumber || invoiceNumber,
+    invoiceDate: invoice.invoiceDate || invoiceDate,
+    dueDate: invoice.dueDate || "",
+    items:
+      invoice.items.length > 0 ? invoice.items : [createDefaultInvoiceLineItem(lineItemId)],
+    discount: {
+      ...DEFAULT_INVOICE_DISCOUNT,
+      ...invoice.discount
+    },
+    tax: {
+      enabled: invoice.tax.enabled === true,
+      rate: invoice.tax.rate || "0",
+      label: invoice.tax.label
+    },
+    payment: {
+      ...DEFAULT_INVOICE_PAYMENT_DETAILS,
+      ...invoice.payment
+    },
+    notes: invoice.notes || "",
+    terms: invoice.terms || ""
+  };
+}

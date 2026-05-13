@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 import { processPaymentQrFile } from "@/lib/invoice/invoice-payment-qr";
 import type { InvoicePaymentDetails } from "@/lib/invoice/invoice-types";
 
@@ -70,6 +71,7 @@ export function PaymentDetailsFields({
             className={`${inputClassName} ${
               paymentErrors.bankName ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.bankName}
             onChange={(event) => onChange("bankName", event.target.value)}
             placeholder="Maybank"
             value={payment.bankName}
@@ -87,6 +89,7 @@ export function PaymentDetailsFields({
             className={`${inputClassName} ${
               paymentErrors.accountName ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.accountName}
             onChange={(event) => onChange("accountName", event.target.value)}
             placeholder="Your business or account name"
             value={payment.accountName}
@@ -104,6 +107,7 @@ export function PaymentDetailsFields({
             className={`${inputClassName} ${
               paymentErrors.accountNumber ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.accountNumber}
             onChange={(event) => onChange("accountNumber", event.target.value)}
             placeholder="Account number"
             value={payment.accountNumber}
@@ -121,6 +125,7 @@ export function PaymentDetailsFields({
             className={`${inputClassName} ${
               paymentErrors.duitNowId ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.duitNowId}
             onChange={(event) => onChange("duitNowId", event.target.value)}
             placeholder="Phone number, NRIC, or business registration number"
             value={payment.duitNowId}
@@ -138,6 +143,7 @@ export function PaymentDetailsFields({
             className={`${inputClassName} ${
               paymentErrors.paymentLink ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentLink}
             onChange={(event) => onChange("paymentLink", event.target.value)}
             placeholder="https://example.com/pay"
             type="url"
@@ -158,6 +164,7 @@ export function PaymentDetailsFields({
             className={`min-h-24 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
               paymentErrors.notes ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
             }`}
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentNotes}
             onChange={(event) => onChange("notes", event.target.value)}
             placeholder="Please include the invoice number as payment reference."
             value={payment.notes}

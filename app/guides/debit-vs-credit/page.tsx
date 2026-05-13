@@ -2,6 +2,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Debit vs Credit: Simple Rules for Beginners | AccountingToolsLab",
@@ -120,12 +121,12 @@ export default function DebitVsCreditGuidePage() {
       <FAQJsonLd faqs={faqs} />
 
       <main className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <a
+        <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
           href="/guides"
         >
           ← All guides
-        </a>
+        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -137,18 +138,18 @@ export default function DebitVsCreditGuidePage() {
             an account depends on the type of account you are recording.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               href="/tools/debit-credit-checker"
             >
               Try the Debit/Credit Checker
-            </a>
-            <a
+            </Link>
+            <Link
               className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
               href="/tools/journal-entry-checker"
             >
               Check a Journal Entry
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -289,13 +290,13 @@ export default function DebitVsCreditGuidePage() {
                 ["Trial Balance Calculator", "/tools/trial-balance-calculator"],
                 ["Trial Balance Explained", "/guides/trial-balance-explained"]
               ].map(([label, href]) => (
-                <a
+                <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
                   href={href}
                   key={href}
                 >
                   {label}
-                </a>
+                </Link>
               ))}
             </div>
           </article>

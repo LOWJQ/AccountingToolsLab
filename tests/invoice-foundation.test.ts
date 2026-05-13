@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
-import { calculateInvoiceTotals } from "../lib/invoice/invoice-calculations";
+import {
+  calculateInvoiceTotals,
+  parseInvoiceMoneyAmount,
+  parseInvoicePercentage,
+  parseInvoiceQuantity
+} from "../lib/invoice/invoice-calculations";
 import { INVOICE_TEXT_MAX_LENGTHS } from "../lib/invoice/invoice-limits";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
 import { validateInvoice } from "../lib/invoice/invoice-validation";
@@ -286,6 +291,38 @@ test("tax applies after discount", () => {
   assert.equal(result.total, 192.5);
 });
 
+test("money parser accepts normal currency amounts and rejects unsafe formats", () => {
+  assert.equal(parseInvoiceMoneyAmount("100"), 100);
+  assert.equal(parseInvoiceMoneyAmount("100.50"), 100.5);
+  assert.equal(parseInvoiceMoneyAmount(".50"), 0.5);
+  assert.equal(parseInvoiceMoneyAmount("100.555"), null);
+  assert.equal(parseInvoiceMoneyAmount("1e2"), null);
+  assert.equal(parseInvoiceMoneyAmount("Infinity"), null);
+  assert.equal(parseInvoiceMoneyAmount("NaN"), null);
+  assert.equal(parseInvoiceMoneyAmount(""), null);
+  assert.equal(parseInvoiceMoneyAmount("1,000.00"), null);
+});
+
+test("quantity parser allows practical decimal quantities and rejects unsafe formats", () => {
+  assert.equal(parseInvoiceQuantity("1"), 1);
+  assert.equal(parseInvoiceQuantity("1.2345"), 1.2345);
+  assert.equal(parseInvoiceQuantity(".25"), 0.25);
+  assert.equal(parseInvoiceQuantity("1.23456"), null);
+  assert.equal(parseInvoiceQuantity("1e2"), null);
+  assert.equal(parseInvoiceQuantity("Infinity"), null);
+  assert.equal(parseInvoiceQuantity(""), null);
+});
+
+test("percentage parser allows decimal percentages and rejects unsafe formats", () => {
+  assert.equal(parseInvoicePercentage("6"), 6);
+  assert.equal(parseInvoicePercentage("6.1234"), 6.1234);
+  assert.equal(parseInvoicePercentage(".5"), 0.5);
+  assert.equal(parseInvoicePercentage("6.12345"), null);
+  assert.equal(parseInvoicePercentage("6e0"), null);
+  assert.equal(parseInvoicePercentage("NaN"), null);
+  assert.equal(parseInvoicePercentage(""), null);
+});
+
 test("valid minimal invoice passes validation", () => {
   assert.deepEqual(validateInvoice(createInvoice()), []);
 });
@@ -523,6 +560,35 @@ test("comma-formatted money and quantity fields are rejected", () => {
   assert.ok(messages.includes("Line item 1 quantity must be a valid number."));
   assert.ok(messages.includes("Line item 1 unit price must be a valid number."));
   assert.ok(messages.includes("Discount value must be a valid number."));
+});
+
+test("money fields reject more than two decimal places", () => {
+  const messages = messagesFor(
+    createInvoice({
+      items: [
+        { id: "item-1", description: "Service", quantity: "1", unitPrice: "100.555" }
+      ],
+      discount: { enabled: true, type: "fixed", value: "1.234" }
+    })
+  );
+
+  assert.ok(messages.includes("Line item 1 unit price must be a valid number."));
+  assert.ok(messages.includes("Discount value must be a valid number."));
+});
+
+test("quantity and percentage fields keep practical decimal support", () => {
+  assert.deepEqual(
+    validateInvoice(
+      createInvoice({
+        items: [
+          { id: "item-1", description: "Service", quantity: "1.2345", unitPrice: "100.55" }
+        ],
+        discount: { enabled: true, type: "percentage", value: "12.3456" },
+        tax: { enabled: true, rate: "6.1234" }
+      })
+    ),
+    []
+  );
 });
 
 test("oversized invoice text fields fail validation", () => {

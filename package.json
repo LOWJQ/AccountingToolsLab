@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "test": "tsc -p tsconfig.test.json && node .test-dist/tests/trial-balance.test.js && node .test-dist/tests/accounting-equation.test.js && node .test-dist/tests/debit-credit.test.js && node .test-dist/tests/financial-ratios.test.js && node .test-dist/tests/depreciation.test.js && node .test-dist/tests/break-even.test.js && node .test-dist/tests/cash-flow.test.js && node .test-dist/tests/invoice.test.js && node .test-dist/tests/invoice-foundation.test.js && node .test-dist/tests/invoice-storage.test.js && node .test-dist/tests/invoice-defaults.test.js && node .test-dist/tests/invoice-numbering.test.js && node .test-dist/tests/invoice-pdf.test.js && node .test-dist/tests/invoice-logo.test.js && node .test-dist/tests/invoice-payment-qr.test.js && node .test-dist/tests/contact-route.test.js && node .test-dist/tests/contact-body.test.js && node .test-dist/tests/contact-rate-limit.test.js && node .test-dist/tests/seo-sitemap.test.js && node .test-dist/tests/sst-malaysia.test.js && node .test-dist/tests/journal-entry.test.js",
+    "test": "tsc -p tsconfig.test.json && node scripts/run-tests.mjs",
     "start": "next start",
     "lint": "next lint"
   },

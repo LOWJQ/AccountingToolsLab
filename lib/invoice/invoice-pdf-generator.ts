@@ -2,30 +2,21 @@ import type {
   InvoiceCalculationResult,
   InvoiceLineCalculationResult
 } from "./invoice-calculations";
-import { parseInvoiceAmount } from "./invoice-calculations";
+import { parseInvoicePercentage } from "./invoice-calculations";
 import { buildInvoicePdfFileName } from "./invoice-pdf";
-import type { InvoiceData, InvoicePaymentDetails } from "./invoice-types";
+import type { InvoiceData } from "./invoice-types";
 
 type PdfColor = [number, number, number];
+export type InvoicePdfWarning = "business-logo-skipped" | "payment-qr-skipped";
+export type InvoicePdfGenerationResult = {
+  warnings: InvoicePdfWarning[];
+};
 
 export type InvoicePdfParams = {
-  businessAddress: string;
-  businessContact: string;
-  businessLogoDataUrl?: string;
-  businessName: string;
   calculation: InvoiceCalculationResult;
-  customerAddress: string;
-  customerContact: string;
-  customerName: string;
-  dueDate: string;
   formatCurrency: (value: number) => string;
   invoiceData: InvoiceData;
-  invoiceDate: string;
-  invoiceNumber: string;
-  notes: string;
-  payment: InvoicePaymentDetails;
   previewItems: InvoiceLineCalculationResult[];
-  terms: string;
 };
 
 function formatAmount(value: number): string {
@@ -71,36 +62,41 @@ function fitWithinBox(width: number, height: number, maxWidth: number, maxHeight
   };
 }
 
-export async function generateInvoicePdf(params: InvoicePdfParams): Promise<void> {
+export async function generateInvoicePdf(
+  params: InvoicePdfParams
+): Promise<InvoicePdfGenerationResult> {
+  const {
+    calculation,
+    formatCurrency,
+    invoiceData,
+    previewItems
+  } = params;
   const {
     businessAddress,
     businessContact,
     businessLogoDataUrl,
     businessName,
-    calculation,
     customerAddress,
     customerContact,
     customerName,
     dueDate,
-    formatCurrency,
-    invoiceData,
     invoiceDate,
     invoiceNumber,
     notes,
     payment,
-    previewItems,
     terms
-  } = params;
+  } = invoiceData;
+  const warnings = new Set<InvoicePdfWarning>();
 
   if (typeof window === "undefined") {
-    return;
+    return { warnings: [] };
   }
 
   const subtotal = calculation.subtotal;
   const discountAmount = calculation.discountAmount;
   const taxableAmount = calculation.taxableAmount;
   const hasDiscount = discountAmount > 0;
-  const taxRate = invoiceData.tax.enabled ? parseInvoiceAmount(invoiceData.tax.rate) ?? 0 : 0;
+  const taxRate = invoiceData.tax.enabled ? parseInvoicePercentage(invoiceData.tax.rate) ?? 0 : 0;
   const taxAmount = calculation.taxAmount;
   const total = calculation.total;
   const hasTax = taxAmount > 0;
@@ -316,8 +312,11 @@ export async function generateInvoicePdf(params: InvoicePdfParams): Promise<void
           fittedLogo.height
         );
         rightY += fittedLogo.height + 14;
+      } else {
+        warnings.add("business-logo-skipped");
       }
     } catch {
+      warnings.add("business-logo-skipped");
       rightY = headerTop;
     }
   }
@@ -583,6 +582,7 @@ export async function generateInvoicePdf(params: InvoicePdfParams): Promise<void
       const qrType = getLogoImageType(payment.paymentQrDataUrl);
 
       if (!qrType) {
+        warnings.add("payment-qr-skipped");
         return 0;
       }
 
@@ -598,6 +598,7 @@ export async function generateInvoicePdf(params: InvoicePdfParams): Promise<void
 
       return fittedQr.height + 22;
     } catch {
+      warnings.add("payment-qr-skipped");
       return 0;
     }
   };
@@ -821,4 +822,5 @@ export async function generateInvoicePdf(params: InvoicePdfParams): Promise<void
   drawPageNumber();
   doc.save(buildInvoicePdfFileName(invoiceNumber, customerName, invoiceDate));
 
+  return { warnings: Array.from(warnings) };
 }

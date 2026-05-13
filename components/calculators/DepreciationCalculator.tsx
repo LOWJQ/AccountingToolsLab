@@ -154,6 +154,10 @@ export function DepreciationCalculator() {
                   spread evenly over {calculation.result.usefulLifeYears} year
                   {calculation.result.usefulLifeYears === 1 ? "" : "s"}.
                 </p>
+                <p className="text-xs leading-5 text-stone-500">
+                  Rounded yearly amounts can differ by a cent when multiplied across several
+                  years.
+                </p>
               </div>
             ) : (
               <p className="mt-4 text-sm leading-6 text-stone-600">{calculation.message}</p>

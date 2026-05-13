@@ -6,6 +6,7 @@ import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Break-even Calculator | Calculate Break-even Units and Sales",
@@ -82,12 +83,12 @@ export default function BreakEvenCalculatorPage() {
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
           If you want the full beginner explanation, read{" "}
-          <a
+          <Link
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/break-even-point-explained"
           >
             break-even point explained
-          </a>{" "}
+          </Link>{" "}
           to see the formula, contribution margin, units, sales, and common mistakes.
         </p>
       </section>

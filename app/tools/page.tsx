@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { InvoiceMockPreview } from "@/components/tools/InvoiceMockPreview";
 import { createItemListSchema } from "@/lib/seo/schema";
 import { siteConfig } from "@/lib/seo/site";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Free Accounting Calculators and Invoice Tools | AccountingToolsLab",
@@ -108,13 +109,13 @@ function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
   );
 
   return isAvailable ? (
-    <a
+    <Link
       className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
       href={tool.href}
       key={tool.slug}
     >
       {content}
-    </a>
+    </Link>
   ) : (
     <article
       className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
@@ -169,12 +170,12 @@ export default function ToolsPage() {
                   subtotal, optional SST / tax, total, and 10 supported currencies including MYR.
                   Preview your invoice and download it as a PDF when it is ready.
                 </p>
-                <a
+                <Link
                   className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                   href="/tools/invoice-generator"
                 >
                   Create a PDF Invoice
-                </a>
+                </Link>
               </div>
               <InvoiceMockPreview />
             </div>
@@ -257,12 +258,12 @@ export default function ToolsPage() {
               It gives small businesses and freelancers a simple path from customer details and
               line items to a clean downloadable PDF invoice.
             </p>
-            <a
+            <Link
               className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
               href="/tools/invoice-generator"
             >
               Open PDF Invoice Generator
-            </a>
+            </Link>
           </div>
         </section>
 

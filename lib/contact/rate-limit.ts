@@ -18,6 +18,12 @@ export type RateLimitStore = {
   increment: (key: string, windowMs: number, now: number) => Promise<RateLimitIncrement>;
 };
 
+export type SharedRateLimitIncrementer = (params: {
+  key: string;
+  now: number;
+  windowMs: number;
+}) => Promise<RateLimitIncrement>;
+
 type MemoryRateLimitEntry = {
   count: number;
   resetAt: number;
@@ -50,6 +56,19 @@ export class MemoryRateLimitStore implements RateLimitStore {
         this.entries.delete(key);
       }
     }
+  }
+}
+
+/**
+ * Thin adapter for production stores such as Redis, Vercel KV, or Upstash.
+ * The incrementer must perform an atomic increment and set/keep an expiry for
+ * the current window so limits work across serverless instances.
+ */
+export class SharedRateLimitStore implements RateLimitStore {
+  constructor(private readonly incrementer: SharedRateLimitIncrementer) {}
+
+  increment(key: string, windowMs: number, now: number): Promise<RateLimitIncrement> {
+    return this.incrementer({ key, now, windowMs });
   }
 }
 
