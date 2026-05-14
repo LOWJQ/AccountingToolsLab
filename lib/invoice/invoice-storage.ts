@@ -1,9 +1,11 @@
 import {
   DEFAULT_INVOICE_DISCOUNT,
+  DEFAULT_INVOICE_SHIPPING,
   type InvoiceData,
   type InvoiceDiscount,
   type InvoiceLineItem,
   type InvoicePaymentDetails,
+  type InvoiceShipping,
   type InvoiceTax
 } from "./invoice-types";
 
@@ -71,6 +73,15 @@ function normalizeTax(value: unknown): InvoiceTax {
   };
 }
 
+function normalizeShipping(value: unknown): InvoiceShipping {
+  const shipping = isRecord(value) ? value : {};
+
+  return {
+    enabled: shipping.enabled === true,
+    amount: readString(shipping.amount) || DEFAULT_INVOICE_SHIPPING.amount
+  };
+}
+
 function normalizePayment(value: unknown, legacyPaymentDetails: unknown): InvoicePaymentDetails {
   const payment = isRecord(value) ? value : {};
 
@@ -111,6 +122,7 @@ function normalizeInvoice(value: unknown): InvoiceData | null {
     items,
     discount: normalizeDiscount(value.discount),
     tax: normalizeTax(value.tax),
+    shipping: normalizeShipping(value.shipping),
     payment: normalizePayment(value.payment, value.paymentDetails),
     notes: readString(value.notes),
     terms: readString(value.terms)

@@ -368,6 +368,32 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
     }
   }
 
+  if (invoice.shipping?.enabled === true) {
+    const shippingAmount = parseRequiredFiniteNumber(
+      errors,
+      "shipping.amount",
+      "Shipping amount",
+      invoice.shipping.amount,
+      parseInvoiceMoneyAmount
+    );
+
+    if (shippingAmount !== null) {
+      if (shippingAmount < 0) {
+        errors.push({
+          field: "shipping.amount",
+          message: "Shipping amount cannot be negative."
+        });
+      }
+
+      if (shippingAmount > 1000000000) {
+        errors.push({
+          field: "shipping.amount",
+          message: "Shipping amount must be 1,000,000,000 or less."
+        });
+      }
+    }
+  }
+
   const paymentLink = invoice.payment.paymentLink.trim();
 
   if (paymentLink !== "" && !hasValidHttpUrl(paymentLink)) {

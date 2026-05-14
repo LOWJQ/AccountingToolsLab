@@ -2,24 +2,17 @@
 
 import {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState
 } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { InvoiceBillFrom } from "@/components/invoice/InvoiceBillFrom";
-import { InvoiceCustomer } from "@/components/invoice/InvoiceCustomer";
-import { InvoiceLineItems } from "@/components/invoice/InvoiceLineItems";
-import { InvoiceMeta } from "@/components/invoice/InvoiceMeta";
-import { InvoiceModals } from "@/components/invoice/InvoiceModals";
-import { InvoicePreview } from "@/components/invoice/InvoicePreview";
 import {
-  InvoiceTotals,
-  type InvoiceDiscountMode,
-  type InvoiceTaxMode
-} from "@/components/invoice/InvoiceTotals";
-import { PaymentDetailsFields } from "@/components/invoice/PaymentDetailsFields";
+  EditableInvoiceCanvas,
+  type EditableInvoiceDiscountMode,
+  type EditableInvoiceTaxMode
+} from "@/components/invoice/EditableInvoiceCanvas";
+import { InvoiceModals } from "@/components/invoice/InvoiceModals";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { CURRENCY_CODES, isCurrencyCode } from "@/lib/currency";
@@ -30,7 +23,6 @@ import {
   DEFAULT_INVOICE_NUMBER,
   prepareInvoiceForFormRestore
 } from "@/lib/invoice/invoice-defaults";
-import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 import { useInvoiceDraft } from "@/hooks/useInvoiceDraft";
 import { useInvoiceNumbering } from "@/hooks/useInvoiceNumbering";
 import { useInvoicePdf } from "@/hooks/useInvoicePdf";
@@ -39,16 +31,17 @@ import { clearInvoiceDraft } from "@/lib/invoice/invoice-storage";
 import {
   DEFAULT_INVOICE_DISCOUNT,
   DEFAULT_INVOICE_PAYMENT_DETAILS,
+  DEFAULT_INVOICE_SHIPPING,
   DEFAULT_INVOICE_TERMS,
   type InvoiceData,
   type InvoiceDiscount,
   type InvoiceLineItem,
-  type InvoicePaymentDetails
+  type InvoicePaymentDetails,
+  type InvoiceShipping
 } from "@/lib/invoice/invoice-types";
 
-type InvoiceView = "details" | "preview";
-type TaxMode = InvoiceTaxMode;
-type DiscountMode = InvoiceDiscountMode;
+type TaxMode = EditableInvoiceTaxMode;
+type DiscountMode = EditableInvoiceDiscountMode;
 
 const featureHighlights = [
   "Malaysia-friendly for simple record-keeping.",
@@ -116,8 +109,8 @@ export function InvoiceGenerator() {
   const [taxMode, setTaxMode] = useState<TaxMode>("none");
   const [customTaxRate, setCustomTaxRate] = useState("");
   const [discount, setDiscount] = useState<InvoiceDiscount>(DEFAULT_INVOICE_DISCOUNT);
+  const [shipping, setShipping] = useState<InvoiceShipping>(DEFAULT_INVOICE_SHIPPING);
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([createLineItem(1)]);
-  const [activeView, setActiveView] = useState<InvoiceView>("details");
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isClearEverythingModalOpen, setIsClearEverythingModalOpen] = useState(false);
   const [touchedInvoiceFields, setTouchedInvoiceFields] = useState<Set<string>>(() => new Set());
@@ -146,6 +139,7 @@ export function InvoiceGenerator() {
         rate: taxMode === "custom" ? customTaxRate : String(selectedTaxOption?.rate ?? 0),
         label: selectedTaxOption?.label
       },
+      shipping,
       payment,
       notes,
       terms
@@ -168,6 +162,7 @@ export function InvoiceGenerator() {
       notes,
       payment,
       selectedTaxOption,
+      shipping,
       taxMode,
       terms
     ]
@@ -212,6 +207,7 @@ export function InvoiceGenerator() {
       setTerms(restoredInvoice.terms);
       setPayment(restoredInvoice.payment);
       setDiscount(restoredInvoice.discount);
+      setShipping(restoredInvoice.shipping ?? DEFAULT_INVOICE_SHIPPING);
       setLineItems(restoredInvoice.items);
 
       if (isCurrencyCode(restoredInvoice.currency)) {
@@ -234,18 +230,6 @@ export function InvoiceGenerator() {
     },
     [setCurrency]
   );
-
-  useEffect(() => {
-    if (hasValidInvoice) {
-      return;
-    }
-
-    setIsDownloadModalOpen(false);
-
-    if (activeView === "preview") {
-      setActiveView("details");
-    }
-  }, [activeView, hasValidInvoice]);
 
   const {
     autosaveError,
@@ -276,7 +260,6 @@ export function InvoiceGenerator() {
 
   function revealInvoiceValidationErrors() {
     setHasAttemptedInvoiceAction(true);
-    setActiveView("details");
     scrollInvoiceGeneratorToTop();
   }
 
@@ -290,6 +273,20 @@ export function InvoiceGenerator() {
     setPayment((currentPayment) => ({
       ...currentPayment,
       [field]: value
+    }));
+  }
+
+  function updateShippingAmount(value: string) {
+    setShipping((currentShipping) => ({
+      ...currentShipping,
+      amount: value
+    }));
+  }
+
+  function updateShippingEnabled(enabled: boolean) {
+    setShipping((currentShipping) => ({
+      enabled,
+      amount: currentShipping.amount || DEFAULT_INVOICE_SHIPPING.amount
     }));
   }
 
@@ -335,7 +332,6 @@ export function InvoiceGenerator() {
     );
     setAutosaveError("");
     resetValidationDisplay();
-    setActiveView("details");
     setIsDownloadModalOpen(false);
     scrollInvoiceGeneratorToTop();
   }
@@ -362,7 +358,6 @@ export function InvoiceGenerator() {
         : "Draft could not be cleared from this device. The form was reset for this session."
     );
     resetValidationDisplay();
-    setActiveView("details");
     setIsDownloadModalOpen(false);
     setIsClearEverythingModalOpen(false);
     scrollInvoiceGeneratorToTop();
@@ -375,16 +370,6 @@ export function InvoiceGenerator() {
         block: "start"
       });
     });
-  }
-
-  function switchInvoiceView(view: InvoiceView) {
-    if (view === "preview" && !hasValidInvoice) {
-      revealInvoiceValidationErrors();
-      return;
-    }
-
-    setActiveView(view);
-    scrollInvoiceGeneratorToTop();
   }
 
   function openDownloadModal() {
@@ -457,6 +442,7 @@ export function InvoiceGenerator() {
   const termsError = getValidationMessage("terms");
   const taxRateError = getValidationMessage("tax.rate");
   const discountError = getValidationMessage("discount.value");
+  const shippingError = getValidationMessage("shipping.amount");
   const paymentErrors = {
     accountName: getValidationMessage("payment.accountName"),
     accountNumber: getValidationMessage("payment.accountNumber"),
@@ -473,259 +459,85 @@ export function InvoiceGenerator() {
   return (
     <div className="flex flex-col gap-8">
       <div className="scroll-mt-24" ref={invoiceGeneratorTopRef}>
-        <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="inline-grid rounded-xl border border-stone-200 bg-stone-50 p-1 sm:grid-cols-2">
-          <button
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-              activeView === "details"
-                ? "bg-white text-stone-950 shadow-sm"
-                : "text-stone-600 hover:text-stone-950"
-            }`}
-            onClick={() => switchInvoiceView("details")}
-            type="button"
-          >
-            Enter Invoice Details
-          </button>
-          <button
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-              activeView === "preview"
-                ? "bg-white text-stone-950 shadow-sm"
-                : "text-stone-600 hover:text-stone-950"
-            }`}
-            aria-describedby={validationSummaryMessage ? "invoice-validation-summary" : undefined}
-            onClick={() => switchInvoiceView("preview")}
-            type="button"
-          >
-            Preview Invoice
-          </button>
-        </div>
-        {validationSummaryMessage ? (
-          <p
-            className="mt-3 text-sm font-medium text-red-700"
-            id="invoice-validation-summary"
-            role="alert"
-          >
-            {validationSummaryMessage}
-          </p>
-        ) : null}
-
-        <div className="mt-8 grid min-w-0 gap-8">
-          {activeView === "details" ? (
-            <div className="grid min-w-0 gap-6">
-              <InvoiceBillFrom
-                businessAddress={businessAddress}
-                businessAddressError={businessAddressError}
-                businessContact={businessContact}
-                businessContactError={businessContactError}
-                businessLogoDataUrl={businessLogoDataUrl}
-                businessNameError={businessNameError}
-                businessName={businessName}
-                onBusinessAddressChange={setBusinessAddress}
-                onBusinessContactChange={setBusinessContact}
-                onBusinessLogoChange={setBusinessLogoDataUrl}
-                onBusinessNameChange={setBusinessName}
-                onFieldBlur={markInvoiceFieldTouched}
-              />
-
-              <InvoiceCustomer
-                customerAddress={customerAddress}
-                customerAddressError={customerAddressError}
-                customerContact={customerContact}
-                customerContactError={customerContactError}
-                customerNameError={customerNameError}
-                customerName={customerName}
-                onCustomerAddressChange={setCustomerAddress}
-                onCustomerContactChange={setCustomerContact}
-                onCustomerNameChange={setCustomerName}
-                onFieldBlur={markInvoiceFieldTouched}
-              />
-
-              <InvoiceMeta
-                currency={currency}
-                currencyCodes={CURRENCY_CODES}
-                dueDate={dueDate}
-                dueDateError={dueDateError}
-                invoiceDate={invoiceDate}
-                invoiceDateError={invoiceDateError}
-                invoiceNumber={invoiceNumber}
-                invoiceNumberError={invoiceNumberError}
-                onCurrencyChange={setCurrency}
-                onDueDateChange={setDueDate}
-                onFieldBlur={markInvoiceFieldTouched}
-                onInvoiceDateChange={setInvoiceDate}
-                onInvoiceNumberChange={setInvoiceNumber}
-              />
-
-              <InvoiceTotals
-                currency={currency}
-                customTaxRate={customTaxRate}
-                discount={discount}
-                discountError={discountError}
-                discountMode={discountMode}
-                discountOptions={discountOptions}
-                onCustomTaxRateChange={setCustomTaxRate}
-                onDiscountModeChange={selectDiscount}
-                onDiscountValueChange={updateDiscountValue}
-                onFieldBlur={markInvoiceFieldTouched}
-                onTaxModeChange={setTaxMode}
-                taxRateError={taxRateError}
-                taxMode={taxMode}
-                taxOptions={taxOptions}
-              />
-
-              <InvoiceLineItems
-                currency={currency}
-                formatCurrency={formatCurrency}
-                getLineItemError={getLineItemError}
-                lineItemPreviewTotals={lineItemPreviewTotals}
-                lineItems={lineItems}
-                lineItemsMessage={lineItemsMessage}
-                onAddLineItem={addLineItem}
-                onLineItemBlur={(index, key) => markInvoiceFieldTouched(`items.${index}.${key}`)}
-                onRemoveLineItem={removeLineItem}
-                onUpdateLineItem={updateLineItem}
-              />
-
-              <PaymentDetailsFields
-                onChange={updatePayment}
-                onFieldBlur={(field) => markInvoiceFieldTouched(`payment.${field}`)}
-                payment={payment}
-                paymentErrors={paymentErrors}
-              />
-
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-stone-800">
-                  Notes (optional)
-                </span>
-                <textarea
-                  aria-describedby={notesError ? "invoice-notes-error" : undefined}
-                  aria-invalid={notesError ? true : undefined}
-                  className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
-                    notesError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
-                  }`}
-                  maxLength={INVOICE_TEXT_MAX_LENGTHS.notes}
-                  onBlur={() => markInvoiceFieldTouched("notes")}
-                  onChange={(event) => setNotes(event.target.value)}
-                  placeholder="Additional notes for the customer"
-                  value={notes}
-                />
-                {notesError ? (
-                  <p className="text-sm font-medium text-red-700" id="invoice-notes-error">
-                    {notesError}
-                  </p>
-                ) : null}
-              </label>
-
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">
-                Terms &amp; Conditions (optional)
-              </span>
-              <textarea
-                aria-describedby={termsError ? "invoice-terms-error" : undefined}
-                aria-invalid={termsError ? true : undefined}
-                className={`min-h-28 rounded-xl border bg-stone-50 px-4 py-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 ${
-                  termsError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-stone-200"
-                }`}
-                maxLength={INVOICE_TEXT_MAX_LENGTHS.terms}
-                onBlur={() => markInvoiceFieldTouched("terms")}
-                onChange={(event) => setTerms(event.target.value)}
-                placeholder="Payment terms or invoice conditions"
-                value={terms}
-              />
-              {termsError ? (
-                <p className="text-sm font-medium text-red-700" id="invoice-terms-error">
-                  {termsError}
-                </p>
-              ) : null}
-            </label>
-
-            {autosaveError ? (
-              <p className="text-sm font-medium text-red-700">{autosaveError}</p>
-            ) : null}
-
-            <p className="text-sm leading-6 text-stone-600">
-              New invoice keeps your business, payment, and terms details. Clear everything resets
-              the whole form.
-            </p>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                onClick={startNewInvoice}
-                type="button"
-              >
-                New invoice
-              </button>
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-red-200 px-5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
-                onClick={clearEverything}
-                type="button"
-              >
-                Clear everything
-              </button>
-              <button
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                aria-describedby={validationSummaryMessage ? "invoice-validation-summary" : undefined}
-                onClick={() => switchInvoiceView("preview")}
-                type="button"
-              >
-                Preview invoice
-              </button>
-            </div>
-            </div>
-          ) : (
-            <div className="grid min-w-0 gap-4">
-              <div className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm leading-6 text-stone-600">
-                  Review your invoice before downloading. The preview updates from the details you
-                  entered.
-                </p>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <button
-                    className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-white"
-                    onClick={() => switchInvoiceView("details")}
-                    type="button"
-                  >
-                    Back to details
-                  </button>
-                  <button
-                    className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    aria-describedby={!hasValidInvoice ? "invoice-download-disabled-note" : undefined}
-                    onClick={openDownloadModal}
-                    type="button"
-                  >
-                    Download invoice PDF
-                  </button>
-                </div>
-              </div>
-              {!hasValidInvoice ? (
-                <p className="text-sm font-medium text-red-700" id="invoice-download-disabled-note">
-                  Fix invoice errors before downloading.
-                </p>
-              ) : null}
-              {pdfStatus ? (
-                <p
-                  className={`rounded-xl border p-3 text-sm font-medium leading-6 ${
-                    pdfStatus.type === "error"
-                      ? "border-red-100 bg-red-50 text-red-700"
-                      : "border-amber-100 bg-amber-50 text-amber-800"
-                  }`}
-                  role="status"
-                >
-                  {pdfStatus.message}
-                </p>
-              ) : null}
-
-              <InvoicePreview
-                calculation={calculation}
-                formatCurrency={formatCurrency}
-                invoiceData={invoiceData}
-                previewItems={previewItems}
-              />
-            </div>
-          )}
-        </div>
-        </Card>
+        <EditableInvoiceCanvas
+          autosaveError={autosaveError}
+          businessAddress={businessAddress}
+          businessAddressError={businessAddressError}
+          businessContact={businessContact}
+          businessContactError={businessContactError}
+          businessLogoDataUrl={businessLogoDataUrl}
+          businessName={businessName}
+          businessNameError={businessNameError}
+          calculation={calculation}
+          currency={currency}
+          currencyCodes={CURRENCY_CODES}
+          customTaxRate={customTaxRate}
+          customerAddress={customerAddress}
+          customerAddressError={customerAddressError}
+          customerContact={customerContact}
+          customerContactError={customerContactError}
+          customerName={customerName}
+          customerNameError={customerNameError}
+          discount={discount}
+          discountError={discountError}
+          discountMode={discountMode}
+          discountOptions={discountOptions}
+          dueDate={dueDate}
+          dueDateError={dueDateError}
+          formatCurrency={formatCurrency}
+          getLineItemError={getLineItemError}
+          invoiceDate={invoiceDate}
+          invoiceDateError={invoiceDateError}
+          invoiceNumber={invoiceNumber}
+          invoiceNumberError={invoiceNumberError}
+          isGeneratingPdf={isGeneratingPdf}
+          lineItemPreviewTotals={lineItemPreviewTotals}
+          lineItems={lineItems}
+          lineItemsMessage={lineItemsMessage}
+          notes={notes}
+          notesError={notesError}
+          onAddLineItem={addLineItem}
+          onBusinessAddressChange={setBusinessAddress}
+          onBusinessContactChange={setBusinessContact}
+          onBusinessLogoChange={setBusinessLogoDataUrl}
+          onBusinessNameChange={setBusinessName}
+          onClearEverything={clearEverything}
+          onCurrencyChange={setCurrency}
+          onCustomTaxRateChange={setCustomTaxRate}
+          onCustomerAddressChange={setCustomerAddress}
+          onCustomerContactChange={setCustomerContact}
+          onCustomerNameChange={setCustomerName}
+          onDiscountModeChange={selectDiscount}
+          onDiscountValueChange={updateDiscountValue}
+          onDownloadInvoice={openDownloadModal}
+          onDueDateChange={setDueDate}
+          onFieldBlur={markInvoiceFieldTouched}
+          onInvoiceDateChange={setInvoiceDate}
+          onInvoiceNumberChange={setInvoiceNumber}
+          onLineItemBlur={(index, key) => markInvoiceFieldTouched(`items.${index}.${key}`)}
+          onNewInvoice={startNewInvoice}
+          onNotesChange={setNotes}
+          onPaymentChange={updatePayment}
+          onPaymentFieldBlur={(field) => markInvoiceFieldTouched(`payment.${field}`)}
+          onRemoveLineItem={removeLineItem}
+          onShippingAmountChange={updateShippingAmount}
+          onShippingEnabledChange={updateShippingEnabled}
+          onTaxModeChange={setTaxMode}
+          onTermsChange={setTerms}
+          onUpdateLineItem={updateLineItem}
+          payment={payment}
+          paymentErrors={paymentErrors}
+          pdfStatus={pdfStatus}
+          previewItems={previewItems}
+          shipping={shipping}
+          shippingError={shippingError}
+          taxMode={taxMode}
+          taxOptions={taxOptions}
+          taxRateError={taxRateError}
+          terms={terms}
+          termsError={termsError}
+          validationSummaryMessage={validationSummaryMessage}
+        />
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">

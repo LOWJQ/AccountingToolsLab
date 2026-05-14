@@ -1,0 +1,1170 @@
+"use client";
+
+import Image from "next/image";
+import { useRef, useState } from "react";
+import { Download, FilePlus2, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
+import type { CurrencyCode } from "@/lib/currency";
+import type {
+  InvoiceCalculationResult,
+  InvoiceLineCalculationResult
+} from "@/lib/invoice/invoice-calculations";
+import { parseInvoicePercentage } from "@/lib/invoice/invoice-calculations";
+import { formatLineItemErrorForDisplay } from "@/lib/invoice/invoice-line-item-error-display";
+import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
+import { processLogoFile } from "@/lib/invoice/invoice-logo";
+import { processPaymentQrFile } from "@/lib/invoice/invoice-payment-qr";
+import type {
+  InvoiceDiscount,
+  InvoiceLineItem,
+  InvoicePaymentDetails,
+  InvoiceShipping
+} from "@/lib/invoice/invoice-types";
+
+export type EditableInvoiceTaxMode = "none" | "sst-6" | "sst-8" | "custom";
+export type EditableInvoiceDiscountMode = "none" | "percentage" | "fixed";
+
+type TaxOption = {
+  label: string;
+  mode: EditableInvoiceTaxMode;
+  rate: number | null;
+};
+
+type DiscountOption = {
+  label: string;
+  mode: EditableInvoiceDiscountMode;
+};
+
+type EditableInvoiceCanvasProps = {
+  autosaveError: string;
+  businessAddress: string;
+  businessAddressError: string;
+  businessContact: string;
+  businessContactError: string;
+  businessLogoDataUrl?: string;
+  businessName: string;
+  businessNameError: string;
+  calculation: InvoiceCalculationResult;
+  currency: CurrencyCode;
+  currencyCodes: readonly CurrencyCode[];
+  customTaxRate: string;
+  customerAddress: string;
+  customerAddressError: string;
+  customerContact: string;
+  customerContactError: string;
+  customerName: string;
+  customerNameError: string;
+  discount: InvoiceDiscount;
+  discountError: string;
+  discountMode: EditableInvoiceDiscountMode;
+  discountOptions: DiscountOption[];
+  dueDate: string;
+  dueDateError: string;
+  formatCurrency: (value: number) => string;
+  getLineItemError: (
+    index: number,
+    key: "description" | "quantity" | "unitPrice"
+  ) => string;
+  invoiceDate: string;
+  invoiceDateError: string;
+  invoiceNumber: string;
+  invoiceNumberError: string;
+  isGeneratingPdf: boolean;
+  lineItemPreviewTotals: number[];
+  lineItems: InvoiceLineItem[];
+  lineItemsMessage: string;
+  notes: string;
+  notesError: string;
+  onAddLineItem: () => void;
+  onBusinessAddressChange: (value: string) => void;
+  onBusinessContactChange: (value: string) => void;
+  onBusinessLogoChange: (value: string | undefined) => void;
+  onBusinessNameChange: (value: string) => void;
+  onClearEverything: () => void;
+  onCurrencyChange: (value: CurrencyCode) => void;
+  onCustomTaxRateChange: (value: string) => void;
+  onCustomerAddressChange: (value: string) => void;
+  onCustomerContactChange: (value: string) => void;
+  onCustomerNameChange: (value: string) => void;
+  onDiscountModeChange: (mode: EditableInvoiceDiscountMode) => void;
+  onDiscountValueChange: (value: string) => void;
+  onDownloadInvoice: () => void;
+  onDueDateChange: (value: string) => void;
+  onFieldBlur: (field: string) => void;
+  onInvoiceDateChange: (value: string) => void;
+  onInvoiceNumberChange: (value: string) => void;
+  onLineItemBlur: (index: number, key: "description" | "quantity" | "unitPrice") => void;
+  onNewInvoice: () => void;
+  onNotesChange: (value: string) => void;
+  onPaymentChange: (field: keyof InvoicePaymentDetails, value: string | undefined) => void;
+  onPaymentFieldBlur: (field: keyof InvoicePaymentDetails) => void;
+  onRemoveLineItem: (id: string) => void;
+  onShippingAmountChange: (value: string) => void;
+  onShippingEnabledChange: (enabled: boolean) => void;
+  onTaxModeChange: (mode: EditableInvoiceTaxMode) => void;
+  onTermsChange: (value: string) => void;
+  onUpdateLineItem: (id: string, key: keyof InvoiceLineItem, value: string) => void;
+  payment: InvoicePaymentDetails;
+  paymentErrors: Partial<Record<keyof InvoicePaymentDetails, string>>;
+  pdfStatus?: { type: "error" | "warning"; message: string } | null;
+  previewItems: InvoiceLineCalculationResult[];
+  shipping: InvoiceShipping;
+  shippingError: string;
+  taxMode: EditableInvoiceTaxMode;
+  taxOptions: TaxOption[];
+  taxRateError: string;
+  terms: string;
+  termsError: string;
+  validationSummaryMessage: string;
+};
+
+const editableBaseClass =
+  "w-full min-w-0 rounded-md border border-transparent bg-transparent text-stone-900 outline-none transition placeholder:text-stone-400 hover:border-stone-200 hover:bg-stone-50 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100";
+const compactInputClass = `${editableBaseClass} h-9 px-2 text-sm`;
+const multilineInputClass = `${editableBaseClass} px-2 py-1.5 text-sm leading-6`;
+
+function errorClass(error: string) {
+  return error ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-100" : "";
+}
+
+function FieldError({ error, id }: { error: string; id: string }) {
+  if (!error) {
+    return null;
+  }
+
+  return (
+    <p className="mt-1 text-xs font-medium text-red-700" id={id}>
+      {error}
+    </p>
+  );
+}
+
+function EditableInput({
+  ariaLabel,
+  className = "",
+  error = "",
+  errorId,
+  inputMode,
+  max,
+  maxLength,
+  min,
+  onBlur,
+  onChange,
+  placeholder,
+  type = "text",
+  value
+}: {
+  ariaLabel: string;
+  className?: string;
+  error?: string;
+  errorId: string;
+  inputMode?: "decimal" | "text";
+  max?: string;
+  maxLength?: number;
+  min?: string;
+  onBlur?: () => void;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type?: "date" | "number" | "text" | "url";
+  value: string;
+}) {
+  return (
+    <>
+      <input
+        aria-describedby={error ? errorId : undefined}
+        aria-invalid={error ? true : undefined}
+        aria-label={ariaLabel}
+        className={`${compactInputClass} ${errorClass(error)} ${className}`}
+        inputMode={inputMode}
+        max={max}
+        maxLength={maxLength}
+        min={min}
+        onBlur={onBlur}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        type={type}
+        value={value}
+      />
+      <FieldError error={error} id={errorId} />
+    </>
+  );
+}
+
+function EditableTextarea({
+  ariaLabel,
+  className = "",
+  error = "",
+  errorId,
+  maxLength,
+  onBlur,
+  onChange,
+  placeholder,
+  rows = 2,
+  value
+}: {
+  ariaLabel: string;
+  className?: string;
+  error?: string;
+  errorId: string;
+  maxLength?: number;
+  onBlur?: () => void;
+  onChange: (value: string) => void;
+  placeholder: string;
+  rows?: number;
+  value: string;
+}) {
+  return (
+    <>
+      <textarea
+        aria-describedby={error ? errorId : undefined}
+        aria-invalid={error ? true : undefined}
+        aria-label={ariaLabel}
+        className={`${multilineInputClass} ${errorClass(error)} ${className}`}
+        maxLength={maxLength}
+        onBlur={onBlur}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        value={value}
+      />
+      <FieldError error={error} id={errorId} />
+    </>
+  );
+}
+
+export function EditableInvoiceActions({
+  isGeneratingPdf,
+  onClearEverything,
+  onDownloadInvoice,
+  onNewInvoice,
+  validationSummaryMessage
+}: Pick<
+  EditableInvoiceCanvasProps,
+  | "isGeneratingPdf"
+  | "onClearEverything"
+  | "onDownloadInvoice"
+  | "onNewInvoice"
+  | "validationSummaryMessage"
+>) {
+  return (
+    <div className="flex flex-col gap-3 border-b border-stone-200 bg-stone-50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      <div className="flex flex-wrap gap-2">
+        <button
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          onClick={onNewInvoice}
+          type="button"
+        >
+          <FilePlus2 aria-hidden="true" className="h-4 w-4" />
+          New invoice
+        </button>
+        <button
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+          onClick={onClearEverything}
+          type="button"
+        >
+          <RotateCcw aria-hidden="true" className="h-4 w-4" />
+          Reset / Clear everything
+        </button>
+      </div>
+      <button
+        aria-describedby={validationSummaryMessage ? "invoice-validation-summary" : undefined}
+        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-wait disabled:opacity-70"
+        disabled={isGeneratingPdf}
+        onClick={onDownloadInvoice}
+        type="button"
+      >
+        <Download aria-hidden="true" className="h-4 w-4" />
+        {isGeneratingPdf ? "Preparing PDF..." : "Download invoice PDF"}
+      </button>
+    </div>
+  );
+}
+
+function EditableInvoiceLogo({
+  businessLogoDataUrl,
+  businessName,
+  onBusinessLogoChange
+}: Pick<
+  EditableInvoiceCanvasProps,
+  "businessLogoDataUrl" | "businessName" | "onBusinessLogoChange"
+>) {
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  async function handleLogoChange(file: File | undefined) {
+    if (!file) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setMessage("Processing logo...");
+    const result = await processLogoFile(file);
+    setIsProcessing(false);
+
+    if (result.ok) {
+      onBusinessLogoChange(result.dataUrl);
+      setMessage("");
+      return;
+    }
+
+    onBusinessLogoChange(undefined);
+    setMessage(result.error);
+  }
+
+  function openLogoPicker() {
+    logoInputRef.current?.click();
+  }
+
+  function removeLogo() {
+    onBusinessLogoChange(undefined);
+    setMessage("");
+
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="grid justify-items-start gap-2 sm:justify-items-end">
+      <button
+        aria-label={businessLogoDataUrl ? "Replace business logo" : "Upload logo"}
+        className="group flex min-h-20 w-40 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 p-2 text-sm font-semibold text-stone-500 transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        disabled={isProcessing}
+        onClick={openLogoPicker}
+        type="button"
+      >
+        {businessLogoDataUrl ? (
+          <Image
+            alt={`${businessName || "Business"} logo`}
+            className="max-h-16 max-w-36 object-contain"
+            height={80}
+            unoptimized
+            src={businessLogoDataUrl}
+            width={160}
+          />
+        ) : (
+          <span className="inline-flex items-center gap-2">
+            <Upload aria-hidden="true" className="h-4 w-4" />
+            Upload logo
+          </span>
+        )}
+      </button>
+      <input
+        accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+        className="sr-only"
+        disabled={isProcessing}
+        onChange={(event) => handleLogoChange(event.target.files?.[0])}
+        ref={logoInputRef}
+        type="file"
+      />
+      {businessLogoDataUrl ? (
+        <div className="flex gap-2">
+          <button
+            className="text-xs font-semibold text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus:outline-none focus:ring-4 focus:ring-slate-100"
+            onClick={openLogoPicker}
+            type="button"
+          >
+            Replace
+          </button>
+          <button
+            className="text-xs font-semibold text-red-600 underline-offset-4 hover:text-red-800 hover:underline focus:outline-none focus:ring-4 focus:ring-red-100"
+            onClick={removeLogo}
+            type="button"
+          >
+            Remove
+          </button>
+        </div>
+      ) : null}
+      <p
+        aria-live="polite"
+        className={`min-h-4 text-xs ${
+          message === "Processing logo..." ? "text-stone-500" : "font-medium text-red-700"
+        }`}
+      >
+        {message}
+      </p>
+    </div>
+  );
+}
+
+export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
+  return (
+    <header className="grid gap-6 border-b border-stone-200 pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
+      <div className="min-w-0">
+        <EditableInput
+          ariaLabel="Business name"
+          className="h-12 px-0 text-2xl font-semibold tracking-tight focus:px-2"
+          error={props.businessNameError}
+          errorId="business-name-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.businessName}
+          onBlur={() => props.onFieldBlur("businessName")}
+          onChange={props.onBusinessNameChange}
+          placeholder="Your business name"
+          value={props.businessName}
+        />
+        <EditableInput
+          ariaLabel="Business email or phone"
+          error={props.businessContactError}
+          errorId="business-contact-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.businessContact}
+          onBlur={() => props.onFieldBlur("businessContact")}
+          onChange={props.onBusinessContactChange}
+          placeholder="Business email or phone"
+          value={props.businessContact}
+        />
+        <EditableTextarea
+          ariaLabel="Business address"
+          error={props.businessAddressError}
+          errorId="business-address-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.businessAddress}
+          onBlur={() => props.onFieldBlur("businessAddress")}
+          onChange={props.onBusinessAddressChange}
+          placeholder="Business address"
+          rows={2}
+          value={props.businessAddress}
+        />
+      </div>
+
+      <div className="grid min-w-0 gap-4 text-left sm:justify-items-end sm:text-right">
+        <EditableInvoiceLogo
+          businessLogoDataUrl={props.businessLogoDataUrl}
+          businessName={props.businessName}
+          onBusinessLogoChange={props.onBusinessLogoChange}
+        />
+        <p className="text-3xl font-semibold uppercase tracking-wide text-slate-700">Invoice</p>
+        <div className="grid w-full max-w-xs gap-2 text-sm text-stone-600">
+          <label className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-2">
+            <span className="pt-2 font-medium text-stone-500">Invoice #</span>
+            <span>
+              <EditableInput
+                ariaLabel="Invoice number"
+                error={props.invoiceNumberError}
+                errorId="invoice-number-error"
+                maxLength={INVOICE_TEXT_MAX_LENGTHS.invoiceNumber}
+                onBlur={() => props.onFieldBlur("invoiceNumber")}
+                onChange={props.onInvoiceNumberChange}
+                placeholder="Invoice number"
+                value={props.invoiceNumber}
+              />
+            </span>
+          </label>
+          <label className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-2">
+            <span className="pt-2 font-medium text-stone-500">Currency</span>
+            <select
+              aria-label="Currency"
+              className={`${compactInputClass} cursor-pointer`}
+              onChange={(event) => props.onCurrencyChange(event.target.value as CurrencyCode)}
+              value={props.currency}
+            >
+              {props.currencyCodes.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function EditableInvoiceCustomerAndDates(props: EditableInvoiceCanvasProps) {
+  return (
+    <section className="mt-6 grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
+      <div className="min-w-0">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-700">Bill To</p>
+        <EditableInput
+          ariaLabel="Customer name"
+          className="h-11 text-lg font-semibold"
+          error={props.customerNameError}
+          errorId="customer-name-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.customerName}
+          onBlur={() => props.onFieldBlur("customerName")}
+          onChange={props.onCustomerNameChange}
+          placeholder="Customer name"
+          value={props.customerName}
+        />
+        <EditableInput
+          ariaLabel="Customer email or phone"
+          error={props.customerContactError}
+          errorId="customer-contact-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.customerContact}
+          onBlur={() => props.onFieldBlur("customerContact")}
+          onChange={props.onCustomerContactChange}
+          placeholder="Customer email or phone"
+          value={props.customerContact}
+        />
+        <EditableTextarea
+          ariaLabel="Customer address"
+          error={props.customerAddressError}
+          errorId="customer-address-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.customerAddress}
+          onBlur={() => props.onFieldBlur("customerAddress")}
+          onChange={props.onCustomerAddressChange}
+          placeholder="Customer address"
+          rows={2}
+          value={props.customerAddress}
+        />
+      </div>
+      <div className="grid content-start gap-2 text-sm text-stone-600 sm:text-right">
+        <label className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[5rem_minmax(0,1fr)]">
+          <span className="pt-2 font-medium text-stone-500">Date</span>
+          <span>
+            <EditableInput
+              ariaLabel="Invoice date"
+              error={props.invoiceDateError}
+              errorId="invoice-date-error"
+              onBlur={() => props.onFieldBlur("invoiceDate")}
+              onChange={props.onInvoiceDateChange}
+              placeholder="Invoice date"
+              type="date"
+              value={props.invoiceDate}
+            />
+          </span>
+        </label>
+        <label className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[5rem_minmax(0,1fr)]">
+          <span className="pt-2 font-medium text-stone-500">Due</span>
+          <span>
+            <EditableInput
+              ariaLabel="Due date"
+              error={props.dueDateError}
+              errorId="due-date-error"
+              onBlur={() => props.onFieldBlur("dueDate")}
+              onChange={props.onDueDateChange}
+              placeholder="Due date"
+              type="date"
+              value={props.dueDate}
+            />
+          </span>
+        </label>
+      </div>
+    </section>
+  );
+}
+
+export function EditableInvoiceLineItems({
+  formatCurrency,
+  getLineItemError,
+  lineItemPreviewTotals,
+  lineItems,
+  lineItemsMessage,
+  onAddLineItem,
+  onLineItemBlur,
+  onRemoveLineItem,
+  onUpdateLineItem
+}: Pick<
+  EditableInvoiceCanvasProps,
+  | "formatCurrency"
+  | "getLineItemError"
+  | "lineItemPreviewTotals"
+  | "lineItems"
+  | "lineItemsMessage"
+  | "onAddLineItem"
+  | "onLineItemBlur"
+  | "onRemoveLineItem"
+  | "onUpdateLineItem"
+>) {
+  return (
+    <section className="mt-7">
+      <div className="overflow-hidden border border-stone-200">
+        <div className="hidden bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:gap-3 sm:px-4">
+          <span>No</span>
+          <span>Description</span>
+          <span className="text-right">Unit Price</span>
+          <span className="text-right">Qty</span>
+          <span className="text-right">Amount</span>
+          <span className="sr-only">Remove</span>
+        </div>
+        <div className="divide-y divide-stone-100 bg-white">
+          {lineItems.map((item, index) => {
+            const descriptionError = formatLineItemErrorForDisplay(
+              getLineItemError(index, "description"),
+              "description"
+            );
+            const quantityError = formatLineItemErrorForDisplay(
+              getLineItemError(index, "quantity"),
+              "quantity"
+            );
+            const unitPriceError = formatLineItemErrorForDisplay(
+              getLineItemError(index, "unitPrice"),
+              "unitPrice"
+            );
+
+            return (
+              <div
+                className="group grid min-w-0 gap-3 px-3 py-3 text-sm odd:bg-white even:bg-slate-50 sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:items-start sm:gap-3 sm:px-4"
+                key={item.id}
+              >
+                <div className="pt-2 tabular-nums text-stone-500">
+                  <span className="mr-2 text-xs font-semibold uppercase tracking-wide sm:hidden">
+                    No
+                  </span>
+                  {index + 1}
+                </div>
+                <div className="min-w-0">
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                    Description
+                  </span>
+                  <EditableInput
+                    ariaLabel={`Line item ${index + 1} description`}
+                    error={descriptionError}
+                    errorId={`line-item-${index}-description-error`}
+                    maxLength={INVOICE_TEXT_MAX_LENGTHS.lineItemDescription}
+                    onBlur={() => onLineItemBlur(index, "description")}
+                    onChange={(value) => onUpdateLineItem(item.id, "description", value)}
+                    placeholder={`Item ${index + 1} description`}
+                    value={item.description}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                    Unit Price
+                  </span>
+                  <EditableInput
+                    ariaLabel={`Line item ${index + 1} unit price`}
+                    className="tabular-nums sm:text-right"
+                    error={unitPriceError}
+                    errorId={`line-item-${index}-unit-price-error`}
+                    inputMode="decimal"
+                    onBlur={() => onLineItemBlur(index, "unitPrice")}
+                    onChange={(value) => onUpdateLineItem(item.id, "unitPrice", value)}
+                    placeholder="0.00"
+                    value={item.unitPrice}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                    Qty
+                  </span>
+                  <EditableInput
+                    ariaLabel={`Line item ${index + 1} quantity`}
+                    className="tabular-nums sm:text-right"
+                    error={quantityError}
+                    errorId={`line-item-${index}-quantity-error`}
+                    inputMode="decimal"
+                    onBlur={() => onLineItemBlur(index, "quantity")}
+                    onChange={(value) => onUpdateLineItem(item.id, "quantity", value)}
+                    placeholder="1"
+                    value={item.quantity}
+                  />
+                </div>
+                <div className="min-w-0 pt-2 font-semibold tabular-nums text-stone-950 sm:text-right">
+                  <span className="mr-2 text-xs font-semibold uppercase tracking-wide text-stone-500 sm:hidden">
+                    Amount
+                  </span>
+                  {formatCurrency(lineItemPreviewTotals[index] ?? 0)}
+                </div>
+                <button
+                  aria-label={`Remove line item ${index + 1}`}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 opacity-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-30 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+                  disabled={lineItems.length === 1}
+                  onClick={() => onRemoveLineItem(item.id)}
+                  type="button"
+                >
+                  <Trash2 aria-hidden="true" className="h-4 w-4" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <button
+          className="inline-flex h-9 items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          onClick={onAddLineItem}
+          type="button"
+        >
+          <Plus aria-hidden="true" className="h-4 w-4" />
+          Add item
+        </button>
+        {lineItemsMessage ? (
+          <p className="text-sm font-medium text-red-700">{lineItemsMessage}</p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
+  const taxRate =
+    props.taxMode === "custom"
+      ? parseInvoicePercentage(props.customTaxRate) ?? 0
+      : props.taxOptions.find((option) => option.mode === props.taxMode)?.rate ?? 0;
+
+  function addDiscount() {
+    props.onDiscountModeChange("percentage");
+
+    if (!props.discount.enabled || props.discount.value === "0") {
+      props.onDiscountValueChange("10");
+    }
+  }
+
+  return (
+    <section className="mt-5 flex justify-end">
+      <div className="w-full max-w-lg text-sm">
+        <div className="flex justify-between gap-4 py-2 text-stone-600">
+          <span>Subtotal</span>
+          <span className="font-semibold tabular-nums text-stone-950">
+            {props.formatCurrency(props.calculation.subtotal)}
+          </span>
+        </div>
+
+        {props.taxMode === "none" ? (
+          <button
+            className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            onClick={() => props.onTaxModeChange("sst-8")}
+            type="button"
+          >
+            + Add tax
+          </button>
+        ) : (
+          <div className="grid grid-cols-[5rem_minmax(0,1fr)_7rem_2rem] items-start gap-2 py-1.5 text-stone-600">
+            <span className="pt-2">Tax</span>
+            <div>
+              <select
+                aria-label="Tax rate"
+                className={compactInputClass}
+                onBlur={() => props.onFieldBlur("tax.rate")}
+                onChange={(event) =>
+                  props.onTaxModeChange(event.target.value as EditableInvoiceTaxMode)
+                }
+                value={props.taxMode}
+              >
+                {props.taxOptions.map((option) => (
+                  <option key={option.mode} value={option.mode}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {props.taxMode === "custom" ? (
+                <EditableInput
+                  ariaLabel="Custom tax rate"
+                  className="mt-2"
+                  error={props.taxRateError}
+                  errorId="custom-tax-rate-error"
+                  inputMode="decimal"
+                  max="100"
+                  min="0"
+                  onBlur={() => props.onFieldBlur("tax.rate")}
+                  onChange={props.onCustomTaxRateChange}
+                  placeholder="Custom rate"
+                  type="number"
+                  value={props.customTaxRate}
+                />
+              ) : (
+                <FieldError error={props.taxRateError} id="custom-tax-rate-error" />
+              )}
+            </div>
+            <span className="pt-2 text-right font-semibold tabular-nums text-stone-950">
+              {props.formatCurrency(props.calculation.taxAmount)}
+              <span className="sr-only"> at {taxRate}%</span>
+            </span>
+            <button
+              aria-label="Remove tax"
+              className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+              onClick={() => props.onTaxModeChange("none")}
+              type="button"
+            >
+              <X aria-hidden="true" className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {props.discountMode === "none" ? (
+          <button
+            className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            onClick={addDiscount}
+            type="button"
+          >
+            + Add discount
+          </button>
+        ) : (
+          <div className="grid grid-cols-[5rem_minmax(0,1fr)_7rem_2rem] items-start gap-2 py-1.5 text-stone-600">
+            <span className="pt-2">Discount</span>
+            <div className="grid gap-2 sm:grid-cols-[minmax(7.5rem,1fr)_5.5rem]">
+              <select
+                aria-label="Discount type"
+                className={compactInputClass}
+                onChange={(event) =>
+                  props.onDiscountModeChange(event.target.value as EditableInvoiceDiscountMode)
+                }
+                value={props.discountMode}
+              >
+                {props.discountOptions.map((option) => (
+                  <option key={option.mode} value={option.mode}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className="relative">
+                <EditableInput
+                  ariaLabel={
+                    props.discount.type === "percentage"
+                      ? "Discount percentage"
+                      : "Discount amount"
+                  }
+                  className={`tabular-nums ${
+                    props.discount.type === "percentage" ? "pr-7" : ""
+                  }`}
+                  error={props.discountError}
+                  errorId="invoice-discount-error"
+                  inputMode="decimal"
+                  max={props.discount.type === "percentage" ? "100" : undefined}
+                  min="0"
+                  onBlur={() => props.onFieldBlur("discount.value")}
+                  onChange={props.onDiscountValueChange}
+                  placeholder={props.discount.type === "percentage" ? "10" : "50.00"}
+                  type="number"
+                  value={props.discount.value}
+                />
+                {props.discount.type === "percentage" ? (
+                  <span className="pointer-events-none absolute right-2 top-2 text-sm font-semibold text-stone-500">
+                    %
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <span className="pt-2 text-right font-semibold tabular-nums text-stone-950">
+              -{props.formatCurrency(props.calculation.discountAmount)}
+            </span>
+            <button
+              aria-label="Remove discount"
+              className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+              onClick={() => props.onDiscountModeChange("none")}
+              type="button"
+            >
+              <X aria-hidden="true" className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {!props.shipping.enabled ? (
+          <button
+            className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            onClick={() => props.onShippingEnabledChange(true)}
+            type="button"
+          >
+            + Add shipping
+          </button>
+        ) : (
+          <div className="grid grid-cols-[5rem_minmax(0,1fr)_7rem_2rem] items-start gap-2 py-1.5 text-stone-600">
+            <span className="pt-2">Shipping</span>
+            <EditableInput
+              ariaLabel="Shipping amount"
+              error={props.shippingError}
+              errorId="invoice-shipping-error"
+              inputMode="decimal"
+              min="0"
+              onBlur={() => props.onFieldBlur("shipping.amount")}
+              onChange={props.onShippingAmountChange}
+              placeholder="RM 10.00"
+              value={props.shipping.amount}
+            />
+            <span className="pt-2 text-right font-semibold tabular-nums text-stone-950">
+              {props.formatCurrency(props.calculation.shippingAmount)}
+            </span>
+            <button
+              aria-label="Remove shipping"
+              className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+              onClick={() => props.onShippingEnabledChange(false)}
+              type="button"
+            >
+              <X aria-hidden="true" className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="mt-3 flex justify-between gap-4 border-t border-stone-300 pt-3 text-lg font-semibold text-stone-950">
+          <span>Total</span>
+          <span className="tabular-nums">{props.formatCurrency(props.calculation.total)}</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function EditableInvoicePaymentDetails({
+  onPaymentChange,
+  onPaymentFieldBlur,
+  payment,
+  paymentErrors
+}: Pick<
+  EditableInvoiceCanvasProps,
+  "onPaymentChange" | "onPaymentFieldBlur" | "payment" | "paymentErrors"
+>) {
+  const qrInputRef = useRef<HTMLInputElement>(null);
+  const [qrMessage, setQrMessage] = useState("");
+  const [isProcessingQr, setIsProcessingQr] = useState(false);
+
+  async function handlePaymentQrChange(file: File | undefined) {
+    if (!file) {
+      return;
+    }
+
+    setIsProcessingQr(true);
+    setQrMessage("Processing payment QR...");
+    const result = await processPaymentQrFile(file);
+    setIsProcessingQr(false);
+
+    if (result.ok) {
+      onPaymentChange("paymentQrDataUrl", result.dataUrl);
+      setQrMessage("");
+      return;
+    }
+
+    onPaymentChange("paymentQrDataUrl", undefined);
+    setQrMessage(result.error);
+  }
+
+  function openQrPicker() {
+    qrInputRef.current?.click();
+  }
+
+  function removePaymentQr() {
+    onPaymentChange("paymentQrDataUrl", undefined);
+    setQrMessage("");
+
+    if (qrInputRef.current) {
+      qrInputRef.current.value = "";
+    }
+  }
+
+  return (
+    <section className="mt-8 border-t border-stone-200 pt-6">
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.86fr)]">
+        <div className="min-w-0">
+          <h3 className="mb-3 text-sm font-semibold text-stone-950">Payment Details</h3>
+          <div className="grid gap-1.5">
+            <EditableInput
+              ariaLabel="Bank name"
+              error={paymentErrors.bankName ?? ""}
+              errorId="payment-bank-name-error"
+              maxLength={INVOICE_TEXT_MAX_LENGTHS.bankName}
+              onBlur={() => onPaymentFieldBlur("bankName")}
+              onChange={(value) => onPaymentChange("bankName", value)}
+              placeholder="Bank name"
+              value={payment.bankName}
+            />
+            <EditableInput
+              ariaLabel="Account holder name"
+              error={paymentErrors.accountName ?? ""}
+              errorId="payment-account-name-error"
+              maxLength={INVOICE_TEXT_MAX_LENGTHS.accountName}
+              onBlur={() => onPaymentFieldBlur("accountName")}
+              onChange={(value) => onPaymentChange("accountName", value)}
+              placeholder="Account holder name"
+              value={payment.accountName}
+            />
+            <EditableInput
+              ariaLabel="Account number"
+              error={paymentErrors.accountNumber ?? ""}
+              errorId="payment-account-number-error"
+              maxLength={INVOICE_TEXT_MAX_LENGTHS.accountNumber}
+              onBlur={() => onPaymentFieldBlur("accountNumber")}
+              onChange={(value) => onPaymentChange("accountNumber", value)}
+              placeholder="Account number"
+              value={payment.accountNumber}
+            />
+            <EditableInput
+              ariaLabel="DuitNow ID"
+              error={paymentErrors.duitNowId ?? ""}
+              errorId="payment-duitnow-id-error"
+              maxLength={INVOICE_TEXT_MAX_LENGTHS.duitNowId}
+              onBlur={() => onPaymentFieldBlur("duitNowId")}
+              onChange={(value) => onPaymentChange("duitNowId", value)}
+              placeholder="DuitNow ID"
+              value={payment.duitNowId}
+            />
+            <EditableInput
+              ariaLabel="Payment link"
+              error={paymentErrors.paymentLink ?? ""}
+              errorId="payment-link-error"
+              maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentLink}
+              onBlur={() => onPaymentFieldBlur("paymentLink")}
+              onChange={(value) => onPaymentChange("paymentLink", value)}
+              placeholder="Payment link"
+              type="url"
+              value={payment.paymentLink}
+            />
+            <EditableTextarea
+              ariaLabel="Payment notes"
+              error={paymentErrors.notes ?? ""}
+              errorId="payment-notes-error"
+              maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentNotes}
+              onBlur={() => onPaymentFieldBlur("notes")}
+              onChange={(value) => onPaymentChange("notes", value)}
+              placeholder="Payment notes"
+              rows={2}
+              value={payment.notes}
+            />
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <h3 className="mb-3 text-sm font-semibold text-stone-950">Payment QR</h3>
+          <button
+            aria-label={payment.paymentQrDataUrl ? "Replace payment QR image" : "Upload payment QR image"}
+            className="flex min-h-32 w-32 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 p-2 text-center text-sm font-semibold text-stone-500 transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+            disabled={isProcessingQr}
+            onClick={openQrPicker}
+            type="button"
+          >
+            {payment.paymentQrDataUrl ? (
+              <Image
+                alt="Payment QR"
+                className="h-28 w-28 object-contain"
+                height={112}
+                unoptimized
+                src={payment.paymentQrDataUrl}
+                width={112}
+              />
+            ) : (
+              <span className="inline-flex flex-col items-center gap-2">
+                <Upload aria-hidden="true" className="h-4 w-4" />
+                Upload QR
+              </span>
+            )}
+          </button>
+          <input
+            accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+            className="sr-only"
+            disabled={isProcessingQr}
+            onChange={(event) => handlePaymentQrChange(event.target.files?.[0])}
+            ref={qrInputRef}
+            type="file"
+          />
+          {payment.paymentQrDataUrl ? (
+            <div className="mt-2 flex gap-2">
+              <button
+                className="text-xs font-semibold text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus:outline-none focus:ring-4 focus:ring-slate-100"
+                onClick={openQrPicker}
+                type="button"
+              >
+                Replace
+              </button>
+              <button
+                className="text-xs font-semibold text-red-600 underline-offset-4 hover:text-red-800 hover:underline focus:outline-none focus:ring-4 focus:ring-red-100"
+                onClick={removePaymentQr}
+                type="button"
+              >
+                Remove
+              </button>
+            </div>
+          ) : null}
+          <p
+            aria-live="polite"
+            className={`mt-2 min-h-4 text-xs ${
+              qrMessage === "Processing payment QR..." ? "text-stone-500" : "font-medium text-red-700"
+            }`}
+          >
+            {qrMessage}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
+  return (
+    <section className="mt-8 grid gap-6 border-t border-stone-200 pt-6 md:grid-cols-2">
+      <div className="min-w-0">
+        <h3 className="mb-3 text-sm font-semibold text-stone-950">Notes</h3>
+        <EditableTextarea
+          ariaLabel="Invoice notes"
+          error={props.notesError}
+          errorId="invoice-notes-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.notes}
+          onBlur={() => props.onFieldBlur("notes")}
+          onChange={props.onNotesChange}
+          placeholder="Add notes"
+          rows={4}
+          value={props.notes}
+        />
+      </div>
+      <div className="min-w-0">
+        <h3 className="mb-3 text-sm font-semibold text-stone-950">Terms &amp; Conditions</h3>
+        <EditableTextarea
+          ariaLabel="Payment terms"
+          error={props.termsError}
+          errorId="invoice-terms-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.terms}
+          onBlur={() => props.onFieldBlur("terms")}
+          onChange={props.onTermsChange}
+          placeholder="Add payment terms"
+          rows={4}
+          value={props.terms}
+        />
+      </div>
+    </section>
+  );
+}
+
+export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+      <EditableInvoiceActions
+        isGeneratingPdf={props.isGeneratingPdf}
+        onClearEverything={props.onClearEverything}
+        onDownloadInvoice={props.onDownloadInvoice}
+        onNewInvoice={props.onNewInvoice}
+        validationSummaryMessage={props.validationSummaryMessage}
+      />
+
+      {props.validationSummaryMessage ? (
+        <p
+          className="mx-4 mt-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+          id="invoice-validation-summary"
+          role="alert"
+        >
+          {props.validationSummaryMessage}
+        </p>
+      ) : null}
+      {props.pdfStatus ? (
+        <p
+          className={`mx-4 mt-4 rounded-lg border px-3 py-2 text-sm font-medium leading-6 ${
+            props.pdfStatus.type === "error"
+              ? "border-red-100 bg-red-50 text-red-700"
+              : "border-amber-100 bg-amber-50 text-amber-800"
+          }`}
+          role="status"
+        >
+          {props.pdfStatus.message}
+        </p>
+      ) : null}
+      {props.autosaveError ? (
+        <p className="mx-4 mt-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+          {props.autosaveError}
+        </p>
+      ) : null}
+
+      <div
+        className="invoice-print-area min-w-0 bg-white p-5 sm:p-7 lg:p-9"
+        id="invoice-print-area"
+      >
+        <EditableInvoiceHeader {...props} />
+        <EditableInvoiceCustomerAndDates {...props} />
+        <EditableInvoiceLineItems
+          formatCurrency={props.formatCurrency}
+          getLineItemError={props.getLineItemError}
+          lineItemPreviewTotals={props.lineItemPreviewTotals}
+          lineItems={props.lineItems}
+          lineItemsMessage={props.lineItemsMessage}
+          onAddLineItem={props.onAddLineItem}
+          onLineItemBlur={props.onLineItemBlur}
+          onRemoveLineItem={props.onRemoveLineItem}
+          onUpdateLineItem={props.onUpdateLineItem}
+        />
+        <EditableInvoiceTotals {...props} />
+        <EditableInvoicePaymentDetails
+          onPaymentChange={props.onPaymentChange}
+          onPaymentFieldBlur={props.onPaymentFieldBlur}
+          payment={props.payment}
+          paymentErrors={props.paymentErrors}
+        />
+        <EditableInvoiceNotesAndTerms {...props} />
+      </div>
+    </div>
+  );
+}

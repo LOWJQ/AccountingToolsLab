@@ -98,6 +98,7 @@ test("calculates no tax and no discount", () => {
     discountAmount: 0,
     taxableAmount: 200,
     taxAmount: 0,
+    shippingAmount: 0,
     total: 200
   });
 });
@@ -278,6 +279,23 @@ test("calculates decimal fixed discount", () => {
   assert.equal(result.discountAmount, 12.34);
   assert.equal(result.taxableAmount, 187.66);
   assert.equal(result.total, 187.66);
+});
+
+test("calculates shipping after tax and discount", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      discount: { enabled: true, type: "fixed", value: "20" },
+      shipping: { enabled: true, amount: "15.50" },
+      tax: { enabled: true, rate: "10" }
+    })
+  );
+
+  assert.equal(result.subtotal, 200);
+  assert.equal(result.discountAmount, 20);
+  assert.equal(result.taxableAmount, 180);
+  assert.equal(result.taxAmount, 18);
+  assert.equal(result.shippingAmount, 15.5);
+  assert.equal(result.total, 213.5);
 });
 
 test("tax applies after discount", () => {
@@ -498,6 +516,19 @@ test("valid fixed discount passes validation", () => {
   assert.deepEqual(
     validateInvoice(createInvoice({ discount: { enabled: true, type: "fixed", value: "50" } })),
     []
+  );
+});
+
+test("shipping amount validation rejects invalid values", () => {
+  assert.ok(
+    messagesFor(createInvoice({ shipping: { enabled: true, amount: "NaN" } })).includes(
+      "Shipping amount must be a valid number."
+    )
+  );
+  assert.ok(
+    messagesFor(createInvoice({ shipping: { enabled: true, amount: "-1" } })).includes(
+      "Shipping amount cannot be negative."
+    )
   );
 });
 

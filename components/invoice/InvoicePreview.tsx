@@ -47,9 +47,11 @@ export function InvoicePreview({
   const taxableAmount = calculation.taxableAmount;
   const taxRate = invoiceData.tax.enabled ? parseInvoicePercentage(invoiceData.tax.rate) ?? 0 : 0;
   const taxAmount = calculation.taxAmount;
+  const shippingAmount = calculation.shippingAmount;
   const total = calculation.total;
   const hasDiscount = discountAmount > 0;
   const hasTax = taxAmount > 0;
+  const hasShipping = shippingAmount > 0;
   const taxLabel = `SST / Tax (${formatAmount(taxRate)}%)`;
   const paymentDetailRows = [
     ["Bank", payment.bankName],
@@ -228,6 +230,14 @@ export function InvoicePreview({
                 <span className="invoice-total-label">{taxLabel}</span>
                 <span className="invoice-total-amount font-semibold text-stone-950">
                   {formatCurrency(taxAmount)}
+                </span>
+              </div>
+            ) : null}
+            {hasShipping ? (
+              <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
+                <span className="invoice-total-label">Shipping</span>
+                <span className="invoice-total-amount font-semibold text-stone-950">
+                  {formatCurrency(shippingAmount)}
                 </span>
               </div>
             ) : null}

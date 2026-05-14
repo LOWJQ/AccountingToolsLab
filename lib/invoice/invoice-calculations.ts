@@ -5,6 +5,7 @@ export type InvoiceCalculationResult = {
   discountAmount: number;
   taxableAmount: number;
   taxAmount: number;
+  shippingAmount: number;
   total: number;
 };
 
@@ -104,12 +105,16 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
   const taxableAmount = roundMoney(Math.max(subtotal - discountAmount, 0));
   const taxRate = invoice.tax.enabled ? toSafePercentage(invoice.tax.rate) : 0;
   const taxAmount = roundMoney(taxableAmount * (Math.max(taxRate, 0) / 100));
+  const rawShippingAmount =
+    invoice.shipping?.enabled === true ? toSafeMoneyAmount(invoice.shipping.amount) : 0;
+  const shippingAmount = roundMoney(Math.max(rawShippingAmount, 0));
 
   return {
     subtotal,
     discountAmount,
     taxableAmount,
     taxAmount,
-    total: roundMoney(taxableAmount + taxAmount)
+    shippingAmount,
+    total: roundMoney(taxableAmount + taxAmount + shippingAmount)
   };
 }

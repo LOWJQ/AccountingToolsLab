@@ -23,6 +23,16 @@ export type InvoiceTax = {
   label?: string;
 };
 
+export type InvoiceShipping = {
+  enabled: boolean;
+  amount: string;
+};
+
+export const DEFAULT_INVOICE_SHIPPING: InvoiceShipping = {
+  enabled: false,
+  amount: "0"
+};
+
 export type InvoicePaymentDetails = {
   bankName: string;
   accountName: string;
@@ -61,6 +71,7 @@ export type InvoiceData = {
   items: InvoiceLineItem[];
   discount: InvoiceDiscount;
   tax: InvoiceTax;
+  shipping?: InvoiceShipping;
   payment: InvoicePaymentDetails;
   notes: string;
   terms: string;

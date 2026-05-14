@@ -2,6 +2,7 @@ import { defaultCurrency } from "../currency";
 import {
   DEFAULT_INVOICE_DISCOUNT,
   DEFAULT_INVOICE_PAYMENT_DETAILS,
+  DEFAULT_INVOICE_SHIPPING,
   DEFAULT_INVOICE_TERMS,
   type InvoiceData,
   type InvoiceLineItem
@@ -47,6 +48,7 @@ export function createEmptyInvoiceDefaults({
       enabled: false,
       rate: "0"
     },
+    shipping: DEFAULT_INVOICE_SHIPPING,
     payment: DEFAULT_INVOICE_PAYMENT_DETAILS,
     notes: "",
     terms: DEFAULT_INVOICE_TERMS
@@ -75,6 +77,7 @@ export function createNewInvoiceFromCurrent(
     dueDate: "",
     items: [createDefaultInvoiceLineItem(lineItemId)],
     discount: DEFAULT_INVOICE_DISCOUNT,
+    shipping: DEFAULT_INVOICE_SHIPPING,
     notes: ""
   };
 }
@@ -106,6 +109,10 @@ export function prepareInvoiceForFormRestore(
       enabled: invoice.tax.enabled === true,
       rate: invoice.tax.rate || "0",
       label: invoice.tax.label
+    },
+    shipping: {
+      ...DEFAULT_INVOICE_SHIPPING,
+      ...invoice.shipping
     },
     payment: {
       ...DEFAULT_INVOICE_PAYMENT_DETAILS,

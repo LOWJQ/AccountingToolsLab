@@ -98,8 +98,10 @@ export async function generateInvoicePdf(
   const hasDiscount = discountAmount > 0;
   const taxRate = invoiceData.tax.enabled ? parseInvoicePercentage(invoiceData.tax.rate) ?? 0 : 0;
   const taxAmount = calculation.taxAmount;
+  const shippingAmount = calculation.shippingAmount;
   const total = calculation.total;
   const hasTax = taxAmount > 0;
+  const hasShipping = shippingAmount > 0;
   const taxLabel = `SST / Tax (${formatAmount(taxRate)}%)`;
   const paymentDetailRows = [
     ["Bank", payment.bankName],
@@ -495,6 +497,9 @@ export async function generateInvoicePdf(
   }
   if (hasTax) {
     totalsRows.push([taxLabel, formatCurrency(taxAmount)]);
+  }
+  if (hasShipping) {
+    totalsRows.push(["Shipping", formatCurrency(shippingAmount)]);
   }
   const totalsRowHeight = 21;
   const totalsHeight = totalsRows.length * totalsRowHeight + 48;
