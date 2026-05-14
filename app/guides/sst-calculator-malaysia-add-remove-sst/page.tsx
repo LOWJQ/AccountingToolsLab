@@ -299,7 +299,7 @@ export default function SstCalculatorMalaysiaGuidePage() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="grid gap-6">
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <p className="text-sm font-medium tracking-wide text-slate-500">Quick answer</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
@@ -327,7 +327,7 @@ export default function SstCalculatorMalaysiaGuidePage() {
           </article>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-2">
+        <section className="grid gap-6">
           <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <p className="text-sm font-medium tracking-wide text-slate-500">Add SST</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
