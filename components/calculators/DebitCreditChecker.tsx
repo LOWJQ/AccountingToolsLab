@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import {
-  accountLabels,
   checkDebitCredit,
   normalBalances,
   type AccountEffect,

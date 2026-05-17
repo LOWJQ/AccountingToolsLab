@@ -129,7 +129,7 @@ function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
 
 export default function ToolsPage() {
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },
@@ -276,4 +276,3 @@ export default function ToolsPage() {
     </div>
   );
 }
-

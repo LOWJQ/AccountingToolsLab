@@ -103,8 +103,18 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
     : 0;
   const discountAmount = roundMoney(Math.min(Math.max(rawDiscountAmount, 0), subtotal));
   const taxableAmount = roundMoney(Math.max(subtotal - discountAmount, 0));
-  const taxRate = invoice.tax.enabled ? toSafePercentage(invoice.tax.rate) : 0;
-  const taxAmount = roundMoney(taxableAmount * (Math.max(taxRate, 0) / 100));
+  const rawTaxValue = invoice.tax.enabled
+    ? invoice.tax.type === "fixed"
+      ? toSafeMoneyAmount(invoice.tax.value)
+      : toSafePercentage(invoice.tax.value)
+    : 0;
+  const taxAmount = roundMoney(
+    invoice.tax.enabled
+      ? invoice.tax.type === "fixed"
+        ? Math.max(rawTaxValue, 0)
+        : taxableAmount * (Math.max(rawTaxValue, 0) / 100)
+      : 0
+  );
   const rawShippingAmount =
     invoice.shipping?.enabled === true ? toSafeMoneyAmount(invoice.shipping.amount) : 0;
   const shippingAmount = roundMoney(Math.max(rawShippingAmount, 0));

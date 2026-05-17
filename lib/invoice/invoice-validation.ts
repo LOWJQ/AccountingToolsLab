@@ -158,6 +158,15 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
   validateTextLength(errors, "invoiceNumber", "Invoice number", invoice.invoiceNumber, limits.invoiceNumber);
   validateTextLength(errors, "notes", "Notes", invoice.notes, limits.notes);
   validateTextLength(errors, "terms", "Terms and conditions", invoice.terms, limits.terms);
+  validateTextLength(errors, "discount.label", "Discount label", invoice.discount.label, limits.discountLabel);
+  validateTextLength(errors, "tax.label", "Tax label", invoice.tax.label, limits.taxLabel);
+  validateTextLength(
+    errors,
+    "shipping.label",
+    "Shipping label",
+    invoice.shipping?.label ?? "",
+    limits.shippingLabel
+  );
   validateTextLength(
     errors,
     "payment.bankName",
@@ -352,19 +361,28 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
   }
 
   if (invoice.tax.enabled) {
-    const taxRate = parseRequiredFiniteNumber(
+    const taxValue = parseRequiredFiniteNumber(
       errors,
-      "tax.rate",
-      "Tax rate",
-      invoice.tax.rate,
-      parseInvoicePercentage
+      "tax.value",
+      invoice.tax.type === "fixed" ? "Tax amount" : "Tax rate",
+      invoice.tax.value,
+      invoice.tax.type === "fixed" ? parseInvoiceMoneyAmount : parseInvoicePercentage
     );
 
-    if (taxRate !== null && (taxRate < 0 || taxRate > 100)) {
-      errors.push({
-        field: "tax.rate",
-        message: "Tax rate must be between 0 and 100."
-      });
+    if (taxValue !== null) {
+      if (invoice.tax.type === "percentage" && (taxValue < 0 || taxValue > 100)) {
+        errors.push({
+          field: "tax.value",
+          message: "Tax rate must be between 0 and 100."
+        });
+      }
+
+      if (invoice.tax.type === "fixed" && taxValue < 0) {
+        errors.push({
+          field: "tax.value",
+          message: "Tax amount cannot be negative."
+        });
+      }
     }
   }
 

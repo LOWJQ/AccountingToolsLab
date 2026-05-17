@@ -202,7 +202,7 @@ export default function StraightLineDepreciationExplainedPage() {
   const pageUrl = `${siteConfig.url}/guides/straight-line-depreciation-explained`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

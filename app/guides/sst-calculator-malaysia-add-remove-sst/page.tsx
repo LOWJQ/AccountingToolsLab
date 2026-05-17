@@ -215,7 +215,7 @@ export default function SstCalculatorMalaysiaGuidePage() {
   const pageUrl = `${siteConfig.url}/guides/sst-calculator-malaysia-add-remove-sst`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

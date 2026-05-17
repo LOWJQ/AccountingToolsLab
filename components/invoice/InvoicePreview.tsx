@@ -44,15 +44,28 @@ export function InvoicePreview({
   } = invoiceData;
   const subtotal = calculation.subtotal;
   const discountAmount = calculation.discountAmount;
-  const taxableAmount = calculation.taxableAmount;
-  const taxRate = invoiceData.tax.enabled ? parseInvoicePercentage(invoiceData.tax.rate) ?? 0 : 0;
+  const discountRate =
+    invoiceData.discount.enabled && invoiceData.discount.type === "percentage"
+      ? parseInvoicePercentage(invoiceData.discount.value) ?? 0
+      : 0;
+  const taxRate =
+    invoiceData.tax.enabled && invoiceData.tax.type === "percentage"
+      ? parseInvoicePercentage(invoiceData.tax.value) ?? 0
+      : 0;
   const taxAmount = calculation.taxAmount;
   const shippingAmount = calculation.shippingAmount;
   const total = calculation.total;
   const hasDiscount = discountAmount > 0;
   const hasTax = taxAmount > 0;
   const hasShipping = shippingAmount > 0;
-  const taxLabel = `SST / Tax (${formatAmount(taxRate)}%)`;
+  const discountLabel =
+    invoiceData.discount.type === "percentage"
+      ? `${formatAmount(discountRate)}% ${invoiceData.discount.label || "Discount"}`
+      : invoiceData.discount.label || "Discount";
+  const taxLabel =
+    invoiceData.tax.type === "percentage"
+      ? `${formatAmount(taxRate)}% ${invoiceData.tax.label || "Tax"}`
+      : invoiceData.tax.label || "Tax";
   const paymentDetailRows = [
     ["Bank", payment.bankName],
     ["Account name", payment.accountName],
@@ -65,12 +78,12 @@ export function InvoicePreview({
   const hasPaymentDetails = paymentDetailRows.length > 0 || hasPaymentQr;
 
   return (
-    <div className="min-w-0 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+    <div className="min-w-0 rounded-2xl border border-stone-300 bg-stone-50 p-4">
       <div
-        className="invoice-print-area min-w-0 border border-stone-200 bg-white p-5 shadow-sm sm:p-7"
+        className="invoice-print-area min-w-0 border border-stone-300 bg-white p-5 shadow-sm sm:p-7"
         id="invoice-print-area"
       >
-        <div className="invoice-print-header grid gap-6 border-b border-stone-200 pb-5 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
+        <div className="invoice-print-header grid gap-6 border-b border-stone-300 pb-5 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.85fr)]">
           <div className="min-w-0">
             <h2 className="break-words text-2xl font-semibold tracking-tight text-stone-950">
               {businessName || "Business name"}
@@ -142,15 +155,15 @@ export function InvoicePreview({
           </dl>
         </div>
 
-        <div className="invoice-preview-lines mt-6 overflow-hidden border border-stone-200">
-          <div className="invoice-preview-line invoice-preview-heading hidden bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4">
+        <div className="invoice-preview-lines mt-6 overflow-hidden rounded-xl border border-stone-300">
+          <div className="invoice-preview-line invoice-preview-heading hidden border-b border-slate-800 bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4">
             <span>No</span>
             <span>Description</span>
             <span className="text-right leading-4">Unit Price</span>
             <span className="text-right">Quantity</span>
             <span className="text-right leading-4">Amount</span>
           </div>
-          <div className="divide-y divide-stone-100 bg-white">
+          <div className="divide-y divide-stone-200 bg-white">
             {previewItems.map((item, index) => (
               <div
                 className="invoice-preview-line grid min-w-0 gap-3 px-3 py-3 text-sm odd:bg-white even:bg-slate-50 sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4"
@@ -202,7 +215,7 @@ export function InvoicePreview({
         </div>
 
         <div className="invoice-totals-wrap mt-4 flex justify-end">
-          <div className="invoice-totals-box w-full max-w-sm border border-stone-200 bg-stone-50 p-4">
+          <div className="invoice-totals-box w-full max-w-sm border border-stone-300 bg-stone-50 p-4">
             <div className="invoice-total-row flex justify-between gap-4 text-sm text-stone-600">
               <span className="invoice-total-label">Subtotal</span>
               <span className="invoice-total-amount font-semibold text-stone-950">
@@ -210,20 +223,12 @@ export function InvoicePreview({
               </span>
             </div>
             {hasDiscount ? (
-              <>
-                <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                  <span className="invoice-total-label">Discount</span>
-                  <span className="invoice-total-amount font-semibold text-stone-950">
-                    -{formatCurrency(discountAmount)}
-                  </span>
-                </div>
-                <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                  <span className="invoice-total-label">Amount after discount</span>
-                  <span className="invoice-total-amount font-semibold text-stone-950">
-                    {formatCurrency(taxableAmount)}
-                  </span>
-                </div>
-              </>
+              <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
+                <span className="invoice-total-label">{discountLabel}</span>
+                <span className="invoice-total-amount font-semibold text-stone-950">
+                  -{formatCurrency(discountAmount)}
+                </span>
+              </div>
             ) : null}
             {hasTax ? (
               <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
@@ -235,13 +240,13 @@ export function InvoicePreview({
             ) : null}
             {hasShipping ? (
               <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                <span className="invoice-total-label">Shipping</span>
+                <span className="invoice-total-label">{invoiceData.shipping?.label || "Shipping"}</span>
                 <span className="invoice-total-amount font-semibold text-stone-950">
                   {formatCurrency(shippingAmount)}
                 </span>
               </div>
             ) : null}
-            <div className="invoice-total-row invoice-grand-total mt-3 flex justify-between gap-4 border-t border-stone-300 pt-3 text-lg font-semibold text-stone-950">
+            <div className="invoice-total-row invoice-grand-total mt-3 flex justify-between gap-4 border-t border-stone-400 pt-3 text-lg font-semibold text-stone-950">
               <span className="invoice-total-label">Total</span>
               <span className="invoice-total-amount">
                 {formatCurrency(total)}
@@ -251,7 +256,7 @@ export function InvoicePreview({
         </div>
 
         {hasPaymentDetails || terms.trim() ? (
-          <section className="mt-8 border-t border-stone-200 pt-6">
+          <section className="mt-8 border-t border-stone-300 pt-6">
             <div
               className={`grid gap-6 ${
                 hasPaymentDetails && terms.trim()

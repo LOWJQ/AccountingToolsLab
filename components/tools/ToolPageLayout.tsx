@@ -8,7 +8,7 @@ type ToolPageLayoutProps = {
 
 export function ToolPageLayout({ eyebrow, children }: ToolPageLayoutProps) {
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <Container as="main">
         {eyebrow ? (
           <p className="text-sm font-medium tracking-wide text-slate-500">{eyebrow}</p>

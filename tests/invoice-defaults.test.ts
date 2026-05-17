@@ -34,13 +34,20 @@ function createReusableInvoice(): InvoiceData {
     ],
     discount: {
       enabled: true,
+      label: "Special discount",
       type: "fixed",
       value: "50"
     },
     tax: {
       enabled: true,
-      rate: "6",
-      label: "SST 6%"
+      label: "SST",
+      type: "percentage",
+      value: "6"
+    },
+    shipping: {
+      enabled: true,
+      label: "Delivery",
+      amount: "15"
     },
     payment: {
       bankName: "Maybank",
@@ -87,6 +94,7 @@ test("new invoice resets customer and invoice-specific fields", () => {
   assert.equal(nextInvoice.notes, "");
   assert.deepEqual(nextInvoice.discount, {
     enabled: false,
+    label: "Discount",
     type: "percentage",
     value: "0"
   });
@@ -131,15 +139,18 @@ test("clear everything defaults reset all reusable fields", () => {
     notes: "",
     paymentQrDataUrl: undefined
   });
-  assert.equal(emptyInvoice.terms.includes("Payment is due within 30 days"), true);
+  assert.equal(emptyInvoice.terms, "");
   assert.deepEqual(emptyInvoice.discount, {
     enabled: false,
+    label: "Discount",
     type: "percentage",
     value: "0"
   });
   assert.deepEqual(emptyInvoice.tax, {
     enabled: false,
-    rate: "0"
+    label: "Tax",
+    type: "percentage",
+    value: "0"
   });
 });
 

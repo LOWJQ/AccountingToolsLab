@@ -7,29 +7,41 @@ export type InvoiceLineItem = {
 
 export type InvoiceDiscount = {
   enabled: boolean;
+  label: string;
   type: "percentage" | "fixed";
   value: string;
 };
 
 export const DEFAULT_INVOICE_DISCOUNT: InvoiceDiscount = {
   enabled: false,
+  label: "Discount",
   type: "percentage",
   value: "0"
 };
 
 export type InvoiceTax = {
   enabled: boolean;
-  rate: string;
-  label?: string;
+  label: string;
+  type: "percentage" | "fixed";
+  value: string;
+};
+
+export const DEFAULT_INVOICE_TAX: InvoiceTax = {
+  enabled: false,
+  label: "Tax",
+  type: "percentage",
+  value: "0"
 };
 
 export type InvoiceShipping = {
   enabled: boolean;
+  label: string;
   amount: string;
 };
 
 export const DEFAULT_INVOICE_SHIPPING: InvoiceShipping = {
   enabled: false,
+  label: "Shipping",
   amount: "0"
 };
 
@@ -53,8 +65,7 @@ export const DEFAULT_INVOICE_PAYMENT_DETAILS: InvoicePaymentDetails = {
   paymentQrDataUrl: undefined
 };
 
-export const DEFAULT_INVOICE_TERMS =
-  "Payment is due within 30 days of the invoice date.\nPlease include the invoice number as the payment reference.";
+export const DEFAULT_INVOICE_TERMS = "";
 
 export type InvoiceData = {
   businessName: string;

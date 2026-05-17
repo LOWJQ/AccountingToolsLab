@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/Card";
-
 export type FAQItem = {
   question: string;
   answer: string;
@@ -17,19 +15,19 @@ export function FAQSection({
   title = "Frequently Asked Questions"
 }: FAQSectionProps) {
   return (
-    <Card className="p-6 sm:p-8">
-      <p className="text-sm font-medium tracking-wide text-slate-500">{eyebrow}</p>
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+    <section className="border-t border-stone-200 pt-8">
+      {eyebrow ? <p className="text-sm font-medium tracking-wide text-slate-500">{eyebrow}</p> : null}
+      <h2 className={`${eyebrow ? "mt-3" : ""} text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl`}>
         {title}
       </h2>
-      <div className="mt-6 divide-y divide-stone-100">
+      <div className="mt-6 divide-y divide-stone-200">
         {faqs.map((faq) => (
           <details className="group py-5 first:pt-0 last:pb-0" key={faq.question}>
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-stone-950">
               <span>{faq.question}</span>
               <span
                 aria-hidden="true"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-stone-200 text-stone-500 transition group-open:rotate-180"
+                className="flex h-7 w-7 shrink-0 items-center justify-center text-stone-500 transition group-open:rotate-180"
               >
                 <svg
                   className="h-3.5 w-3.5"
@@ -51,6 +49,6 @@ export function FAQSection({
           </details>
         ))}
       </div>
-    </Card>
+    </section>
   );
 }

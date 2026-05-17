@@ -1,6 +1,7 @@
 import {
   DEFAULT_INVOICE_DISCOUNT,
   DEFAULT_INVOICE_SHIPPING,
+  DEFAULT_INVOICE_TAX,
   type InvoiceData,
   type InvoiceDiscount,
   type InvoiceLineItem,
@@ -58,6 +59,7 @@ function normalizeDiscount(value: unknown): InvoiceDiscount {
 
   return {
     enabled: discount.enabled === true,
+    label: readString(discount.label) || DEFAULT_INVOICE_DISCOUNT.label,
     type,
     value: readString(discount.value) || DEFAULT_INVOICE_DISCOUNT.value
   };
@@ -65,11 +67,17 @@ function normalizeDiscount(value: unknown): InvoiceDiscount {
 
 function normalizeTax(value: unknown): InvoiceTax {
   const tax = isRecord(value) ? value : {};
+  const legacyRate = readString(tax.rate);
+  const nextValue = readString(tax.value) || legacyRate || DEFAULT_INVOICE_TAX.value;
+  const nextLabel = readString(tax.label);
 
   return {
     enabled: tax.enabled === true,
-    rate: readString(tax.rate) || "0",
-    label: typeof tax.label === "string" ? tax.label : undefined
+    label: ["SST 6%", "SST 8%", "Custom tax rate"].includes(nextLabel)
+      ? DEFAULT_INVOICE_TAX.label
+      : nextLabel || DEFAULT_INVOICE_TAX.label,
+    type: tax.type === "fixed" ? "fixed" : "percentage",
+    value: nextValue
   };
 }
 
@@ -78,6 +86,7 @@ function normalizeShipping(value: unknown): InvoiceShipping {
 
   return {
     enabled: shipping.enabled === true,
+    label: readString(shipping.label) || DEFAULT_INVOICE_SHIPPING.label,
     amount: readString(shipping.amount) || DEFAULT_INVOICE_SHIPPING.amount
   };
 }

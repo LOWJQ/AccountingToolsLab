@@ -94,15 +94,28 @@ export async function generateInvoicePdf(
 
   const subtotal = calculation.subtotal;
   const discountAmount = calculation.discountAmount;
-  const taxableAmount = calculation.taxableAmount;
   const hasDiscount = discountAmount > 0;
-  const taxRate = invoiceData.tax.enabled ? parseInvoicePercentage(invoiceData.tax.rate) ?? 0 : 0;
+  const discountRate =
+    invoiceData.discount.enabled && invoiceData.discount.type === "percentage"
+      ? parseInvoicePercentage(invoiceData.discount.value) ?? 0
+      : 0;
+  const taxRate =
+    invoiceData.tax.enabled && invoiceData.tax.type === "percentage"
+      ? parseInvoicePercentage(invoiceData.tax.value) ?? 0
+      : 0;
   const taxAmount = calculation.taxAmount;
   const shippingAmount = calculation.shippingAmount;
   const total = calculation.total;
   const hasTax = taxAmount > 0;
   const hasShipping = shippingAmount > 0;
-  const taxLabel = `SST / Tax (${formatAmount(taxRate)}%)`;
+  const discountLabel =
+    invoiceData.discount.type === "percentage"
+      ? `${formatAmount(discountRate)}% ${invoiceData.discount.label || "Discount"}`
+      : invoiceData.discount.label || "Discount";
+  const taxLabel =
+    invoiceData.tax.type === "percentage"
+      ? `${formatAmount(taxRate)}% ${invoiceData.tax.label || "Tax"}`
+      : invoiceData.tax.label || "Tax";
   const paymentDetailRows = [
     ["Bank", payment.bankName],
     ["Account name", payment.accountName],
@@ -203,34 +216,6 @@ export async function generateInvoicePdf(
     applyText(options.color ?? stone950);
     doc.text(lines, x, top, { align: options.align ?? "left" });
     return lines.length * lineHeightFor(fontSize);
-  };
-
-  const writeText = (
-    text: string,
-    x: number,
-    options: {
-      bold?: boolean;
-      color?: PdfColor;
-      fontSize?: number;
-      lineGap?: number;
-      maxWidth?: number;
-    } = {}
-  ) => {
-    const fontSize = options.fontSize ?? 10;
-    const lineGap = options.lineGap ?? fontSize + 4;
-    const lines = textLines(
-      text,
-      options.maxWidth ?? contentWidth,
-      fontSize,
-      options.bold ?? false
-    );
-
-    addPageIfNeeded(lines.length * lineGap);
-    doc.setFont("helvetica", options.bold ? "bold" : "normal");
-    doc.setFontSize(fontSize);
-    applyText(options.color ?? stone950);
-    doc.text(lines, x, y);
-    y += lines.length * lineGap;
   };
 
   const drawDivider = (top = y) => {
@@ -492,14 +477,13 @@ export async function generateInvoicePdf(
   const totalsX = contentRight - totalsWidth;
   const totalsRows: Array<[string, string]> = [["Subtotal", formatCurrency(subtotal)]];
   if (hasDiscount) {
-    totalsRows.push(["Discount", `-${formatCurrency(discountAmount)}`]);
-    totalsRows.push(["Amount after discount", formatCurrency(taxableAmount)]);
+    totalsRows.push([discountLabel, `-${formatCurrency(discountAmount)}`]);
   }
   if (hasTax) {
     totalsRows.push([taxLabel, formatCurrency(taxAmount)]);
   }
   if (hasShipping) {
-    totalsRows.push(["Shipping", formatCurrency(shippingAmount)]);
+    totalsRows.push([invoiceData.shipping?.label || "Shipping", formatCurrency(shippingAmount)]);
   }
   const totalsRowHeight = 21;
   const totalsHeight = totalsRows.length * totalsRowHeight + 48;
@@ -736,7 +720,7 @@ export async function generateInvoicePdf(
     };
     const measurePaymentRowsHeight = (width: number) =>
       paymentDetailRows.reduce(
-        (height, [label, value]) => {
+        (height, [, value]) => {
           const labelWidth = Math.min(92, width * 0.38);
           const valueWidth = width - labelWidth - 8;
           return (

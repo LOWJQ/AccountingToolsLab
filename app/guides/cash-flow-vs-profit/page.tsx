@@ -210,7 +210,7 @@ export default function CashFlowVsProfitGuidePage() {
   const pageUrl = `${siteConfig.url}/guides/cash-flow-vs-profit`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

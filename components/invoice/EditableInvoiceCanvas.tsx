@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { Download, FilePlus2, Plus, RotateCcw, Trash2, Upload, X } from "lucide-react";
-import type { CurrencyCode } from "@/lib/currency";
+import { Download, FilePlus2, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type {
   InvoiceCalculationResult,
   InvoiceLineCalculationResult
@@ -17,22 +16,9 @@ import type {
   InvoiceDiscount,
   InvoiceLineItem,
   InvoicePaymentDetails,
-  InvoiceShipping
+  InvoiceShipping,
+  InvoiceTax
 } from "@/lib/invoice/invoice-types";
-
-export type EditableInvoiceTaxMode = "none" | "sst-6" | "sst-8" | "custom";
-export type EditableInvoiceDiscountMode = "none" | "percentage" | "fixed";
-
-type TaxOption = {
-  label: string;
-  mode: EditableInvoiceTaxMode;
-  rate: number | null;
-};
-
-type DiscountOption = {
-  label: string;
-  mode: EditableInvoiceDiscountMode;
-};
 
 type EditableInvoiceCanvasProps = {
   autosaveError: string;
@@ -44,9 +30,8 @@ type EditableInvoiceCanvasProps = {
   businessName: string;
   businessNameError: string;
   calculation: InvoiceCalculationResult;
-  currency: CurrencyCode;
-  currencyCodes: readonly CurrencyCode[];
-  customTaxRate: string;
+  currencyCode: string;
+  currencySymbol: string;
   customerAddress: string;
   customerAddressError: string;
   customerContact: string;
@@ -55,8 +40,7 @@ type EditableInvoiceCanvasProps = {
   customerNameError: string;
   discount: InvoiceDiscount;
   discountError: string;
-  discountMode: EditableInvoiceDiscountMode;
-  discountOptions: DiscountOption[];
+  discountLabelError: string;
   dueDate: string;
   dueDateError: string;
   formatCurrency: (value: number) => string;
@@ -80,12 +64,12 @@ type EditableInvoiceCanvasProps = {
   onBusinessLogoChange: (value: string | undefined) => void;
   onBusinessNameChange: (value: string) => void;
   onClearEverything: () => void;
-  onCurrencyChange: (value: CurrencyCode) => void;
-  onCustomTaxRateChange: (value: string) => void;
   onCustomerAddressChange: (value: string) => void;
   onCustomerContactChange: (value: string) => void;
   onCustomerNameChange: (value: string) => void;
-  onDiscountModeChange: (mode: EditableInvoiceDiscountMode) => void;
+  onDiscountEnabledChange: (enabled: boolean) => void;
+  onDiscountLabelChange: (value: string) => void;
+  onDiscountTypeToggle: () => void;
   onDiscountValueChange: (value: string) => void;
   onDownloadInvoice: () => void;
   onDueDateChange: (value: string) => void;
@@ -100,7 +84,11 @@ type EditableInvoiceCanvasProps = {
   onRemoveLineItem: (id: string) => void;
   onShippingAmountChange: (value: string) => void;
   onShippingEnabledChange: (enabled: boolean) => void;
-  onTaxModeChange: (mode: EditableInvoiceTaxMode) => void;
+  onShippingLabelChange: (value: string) => void;
+  onTaxEnabledChange: (enabled: boolean) => void;
+  onTaxLabelChange: (value: string) => void;
+  onTaxTypeToggle: () => void;
+  onTaxValueChange: (value: string) => void;
   onTermsChange: (value: string) => void;
   onUpdateLineItem: (id: string, key: keyof InvoiceLineItem, value: string) => void;
   payment: InvoicePaymentDetails;
@@ -109,17 +97,17 @@ type EditableInvoiceCanvasProps = {
   previewItems: InvoiceLineCalculationResult[];
   shipping: InvoiceShipping;
   shippingError: string;
-  taxMode: EditableInvoiceTaxMode;
-  taxOptions: TaxOption[];
-  taxRateError: string;
+  shippingLabelError: string;
+  tax: InvoiceTax;
+  taxLabelError: string;
+  taxValueError: string;
   terms: string;
   termsError: string;
   validationSummaryMessage: string;
 };
 
 const editableBaseClass =
-  "w-full min-w-0 rounded-md border border-transparent bg-transparent text-stone-900 outline-none transition placeholder:text-stone-400 hover:border-stone-200 hover:bg-stone-50 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100";
-const compactInputClass = `${editableBaseClass} h-9 px-2 text-sm`;
+  "w-full min-w-0 rounded-md border border-dashed border-stone-300 bg-stone-50 text-stone-900 outline-none transition placeholder:text-stone-400 hover:border-solid hover:border-stone-300 hover:bg-stone-50 focus:border-solid focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100";
 const multilineInputClass = `${editableBaseClass} px-2 py-1.5 text-sm leading-6`;
 
 function errorClass(error: string) {
@@ -132,7 +120,7 @@ function FieldError({ error, id }: { error: string; id: string }) {
   }
 
   return (
-    <p className="mt-1 text-xs font-medium text-red-700" id={id}>
+    <p className="mt-1 whitespace-nowrap text-xs font-medium text-red-700" id={id}>
       {error}
     </p>
   );
@@ -173,7 +161,7 @@ function EditableInput({
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
         aria-label={ariaLabel}
-        className={`${compactInputClass} ${errorClass(error)} ${className}`}
+        className={`${editableBaseClass} h-9 px-2 text-sm ${errorClass(error)} ${className}`}
         inputMode={inputMode}
         max={max}
         maxLength={maxLength}
@@ -328,7 +316,7 @@ function EditableInvoiceLogo({
     <div className="grid justify-items-start gap-2 sm:justify-items-end">
       <button
         aria-label={businessLogoDataUrl ? "Replace business logo" : "Upload logo"}
-        className="group flex min-h-20 w-40 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 p-2 text-sm font-semibold text-stone-500 transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className="group flex min-h-20 w-40 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 p-2 text-sm font-semibold text-stone-500 transition hover:border-solid hover:border-stone-300 hover:bg-stone-50 focus:border-solid focus:border-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100"
         disabled={isProcessing}
         onClick={openLogoPicker}
         type="button"
@@ -389,40 +377,42 @@ function EditableInvoiceLogo({
 
 export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
   return (
-    <header className="grid gap-6 border-b border-stone-200 pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
+    <header className="grid gap-6 border-b border-stone-300 pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
       <div className="min-w-0">
-        <EditableInput
-          ariaLabel="Business name"
-          className="h-12 px-0 text-2xl font-semibold tracking-tight focus:px-2"
-          error={props.businessNameError}
-          errorId="business-name-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.businessName}
-          onBlur={() => props.onFieldBlur("businessName")}
-          onChange={props.onBusinessNameChange}
-          placeholder="Your business name"
-          value={props.businessName}
-        />
-        <EditableInput
-          ariaLabel="Business email or phone"
-          error={props.businessContactError}
-          errorId="business-contact-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.businessContact}
-          onBlur={() => props.onFieldBlur("businessContact")}
-          onChange={props.onBusinessContactChange}
-          placeholder="Business email or phone"
-          value={props.businessContact}
-        />
-        <EditableTextarea
-          ariaLabel="Business address"
-          error={props.businessAddressError}
-          errorId="business-address-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.businessAddress}
-          onBlur={() => props.onFieldBlur("businessAddress")}
-          onChange={props.onBusinessAddressChange}
-          placeholder="Business address"
-          rows={2}
-          value={props.businessAddress}
-        />
+        <div className="grid gap-1.5">
+          <EditableInput
+            ariaLabel="Business name"
+            className="h-12 px-0 text-2xl font-semibold tracking-tight focus:px-2"
+            error={props.businessNameError}
+            errorId="business-name-error"
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.businessName}
+            onBlur={() => props.onFieldBlur("businessName")}
+            onChange={props.onBusinessNameChange}
+            placeholder="Your business name"
+            value={props.businessName}
+          />
+          <EditableInput
+            ariaLabel="Business email or phone"
+            error={props.businessContactError}
+            errorId="business-contact-error"
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.businessContact}
+            onBlur={() => props.onFieldBlur("businessContact")}
+            onChange={props.onBusinessContactChange}
+            placeholder="Business email or phone"
+            value={props.businessContact}
+          />
+          <EditableTextarea
+            ariaLabel="Business address"
+            error={props.businessAddressError}
+            errorId="business-address-error"
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.businessAddress}
+            onBlur={() => props.onFieldBlur("businessAddress")}
+            onChange={props.onBusinessAddressChange}
+            placeholder="Business address"
+            rows={2}
+            value={props.businessAddress}
+          />
+        </div>
       </div>
 
       <div className="grid min-w-0 gap-4 text-left sm:justify-items-end sm:text-right">
@@ -448,21 +438,6 @@ export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
               />
             </span>
           </label>
-          <label className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-2">
-            <span className="pt-2 font-medium text-stone-500">Currency</span>
-            <select
-              aria-label="Currency"
-              className={`${compactInputClass} cursor-pointer`}
-              onChange={(event) => props.onCurrencyChange(event.target.value as CurrencyCode)}
-              value={props.currency}
-            >
-              {props.currencyCodes.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
       </div>
     </header>
@@ -474,38 +449,40 @@ function EditableInvoiceCustomerAndDates(props: EditableInvoiceCanvasProps) {
     <section className="mt-6 grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
       <div className="min-w-0">
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-700">Bill To</p>
-        <EditableInput
-          ariaLabel="Customer name"
-          className="h-11 text-lg font-semibold"
-          error={props.customerNameError}
-          errorId="customer-name-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.customerName}
-          onBlur={() => props.onFieldBlur("customerName")}
-          onChange={props.onCustomerNameChange}
-          placeholder="Customer name"
-          value={props.customerName}
-        />
-        <EditableInput
-          ariaLabel="Customer email or phone"
-          error={props.customerContactError}
-          errorId="customer-contact-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.customerContact}
-          onBlur={() => props.onFieldBlur("customerContact")}
-          onChange={props.onCustomerContactChange}
-          placeholder="Customer email or phone"
-          value={props.customerContact}
-        />
-        <EditableTextarea
-          ariaLabel="Customer address"
-          error={props.customerAddressError}
-          errorId="customer-address-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.customerAddress}
-          onBlur={() => props.onFieldBlur("customerAddress")}
-          onChange={props.onCustomerAddressChange}
-          placeholder="Customer address"
-          rows={2}
-          value={props.customerAddress}
-        />
+        <div className="grid gap-1.5">
+          <EditableInput
+            ariaLabel="Customer name"
+            className="h-11 text-lg font-semibold"
+            error={props.customerNameError}
+            errorId="customer-name-error"
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.customerName}
+            onBlur={() => props.onFieldBlur("customerName")}
+            onChange={props.onCustomerNameChange}
+            placeholder="Customer name"
+            value={props.customerName}
+          />
+          <EditableInput
+            ariaLabel="Customer email or phone"
+            error={props.customerContactError}
+            errorId="customer-contact-error"
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.customerContact}
+            onBlur={() => props.onFieldBlur("customerContact")}
+            onChange={props.onCustomerContactChange}
+            placeholder="Customer email or phone"
+            value={props.customerContact}
+          />
+          <EditableTextarea
+            ariaLabel="Customer address"
+            error={props.customerAddressError}
+            errorId="customer-address-error"
+            maxLength={INVOICE_TEXT_MAX_LENGTHS.customerAddress}
+            onBlur={() => props.onFieldBlur("customerAddress")}
+            onChange={props.onCustomerAddressChange}
+            placeholder="Customer address"
+            rows={2}
+            value={props.customerAddress}
+          />
+        </div>
       </div>
       <div className="grid content-start gap-2 text-sm text-stone-600 sm:text-right">
         <label className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[5rem_minmax(0,1fr)]">
@@ -567,8 +544,8 @@ export function EditableInvoiceLineItems({
 >) {
   return (
     <section className="mt-7">
-      <div className="overflow-hidden border border-stone-200">
-        <div className="hidden bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:gap-3 sm:px-4">
+      <div className="overflow-hidden rounded-xl border border-stone-300">
+        <div className="hidden border-b border-slate-800 bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:gap-3 sm:px-4">
           <span>No</span>
           <span>Description</span>
           <span className="text-right">Unit Price</span>
@@ -576,7 +553,7 @@ export function EditableInvoiceLineItems({
           <span className="text-right">Amount</span>
           <span className="sr-only">Remove</span>
         </div>
-        <div className="divide-y divide-stone-100 bg-white">
+        <div className="divide-y divide-stone-200 bg-white">
           {lineItems.map((item, index) => {
             const descriptionError = formatLineItemErrorForDisplay(
               getLineItemError(index, "description"),
@@ -687,22 +664,13 @@ export function EditableInvoiceLineItems({
 }
 
 export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
-  const taxRate =
-    props.taxMode === "custom"
-      ? parseInvoicePercentage(props.customTaxRate) ?? 0
-      : props.taxOptions.find((option) => option.mode === props.taxMode)?.rate ?? 0;
-
-  function addDiscount() {
-    props.onDiscountModeChange("percentage");
-
-    if (!props.discount.enabled || props.discount.value === "0") {
-      props.onDiscountValueChange("10");
-    }
-  }
+  const taxValueIsPercentage = props.tax.type === "percentage";
+  const discountValueIsPercentage = props.discount.type === "percentage";
+  const parsedTaxRate = taxValueIsPercentage ? parseInvoicePercentage(props.tax.value) ?? 0 : 0;
 
   return (
     <section className="mt-5 flex justify-end">
-      <div className="w-full max-w-lg text-sm">
+      <div className="w-full max-w-xl text-sm">
         <div className="flex justify-between gap-4 py-2 text-stone-600">
           <span>Subtotal</span>
           <span className="font-semibold tabular-nums text-stone-950">
@@ -710,60 +678,99 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
           </span>
         </div>
 
-        {props.taxMode === "none" ? (
+        {!props.tax.enabled ? (
           <button
             className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
-            onClick={() => props.onTaxModeChange("sst-8")}
+            onClick={() => props.onTaxEnabledChange(true)}
             type="button"
           >
             + Add tax
           </button>
         ) : (
-          <div className="grid grid-cols-[5rem_minmax(0,1fr)_7rem_2rem] items-start gap-2 py-1.5 text-stone-600">
-            <span className="pt-2">Tax</span>
+          <div className="grid grid-cols-[minmax(0,1fr)_18rem_2rem] items-start gap-2 py-1.5 text-stone-600">
             <div>
-              <select
-                aria-label="Tax rate"
-                className={compactInputClass}
-                onBlur={() => props.onFieldBlur("tax.rate")}
-                onChange={(event) =>
-                  props.onTaxModeChange(event.target.value as EditableInvoiceTaxMode)
-                }
-                value={props.taxMode}
-              >
-                {props.taxOptions.map((option) => (
-                  <option key={option.mode} value={option.mode}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {props.taxMode === "custom" ? (
-                <EditableInput
-                  ariaLabel="Custom tax rate"
-                  className="mt-2"
-                  error={props.taxRateError}
-                  errorId="custom-tax-rate-error"
-                  inputMode="decimal"
-                  max="100"
-                  min="0"
-                  onBlur={() => props.onFieldBlur("tax.rate")}
-                  onChange={props.onCustomTaxRateChange}
-                  placeholder="Custom rate"
-                  type="number"
-                  value={props.customTaxRate}
-                />
-              ) : (
-                <FieldError error={props.taxRateError} id="custom-tax-rate-error" />
-              )}
+              <EditableInput
+                ariaLabel="Tax label"
+                className="h-12 px-4"
+                error={props.taxLabelError}
+                errorId="invoice-tax-label-error"
+                onBlur={() => props.onFieldBlur("tax.label")}
+                onChange={props.onTaxLabelChange}
+                placeholder="Tax"
+                value={props.tax.label}
+              />
             </div>
-            <span className="pt-2 text-right font-semibold tabular-nums text-stone-950">
-              {props.formatCurrency(props.calculation.taxAmount)}
-              <span className="sr-only"> at {taxRate}%</span>
-            </span>
+            {taxValueIsPercentage ? (
+              <div className="min-w-0">
+                <div className="flex h-9 min-w-0 items-stretch">
+                <div className="relative min-w-0 flex-1">
+                  <EditableInput
+                    ariaLabel="Tax percentage"
+                    className="h-full rounded-r-none px-4 pr-8 tabular-nums"
+                    error=""
+                    errorId="invoice-tax-value-error"
+                    inputMode="decimal"
+                    max="100"
+                    min="0"
+                    onBlur={() => props.onFieldBlur("tax.value")}
+                    onChange={props.onTaxValueChange}
+                    placeholder="0"
+                    type="number"
+                    value={props.tax.value}
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-stone-500">
+                    %
+                    <span className="sr-only">, calculated tax {props.formatCurrency(props.calculation.taxAmount)} at {parsedTaxRate}%</span>
+                  </span>
+                </div>
+                <button
+                  aria-label="Switch tax to fixed amount"
+                  className="inline-flex h-full w-12 shrink-0 items-center justify-center rounded-r-md border border-l-0 border-dashed border-stone-300 bg-stone-50 text-stone-600 transition hover:border-solid hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+                  onClick={props.onTaxTypeToggle}
+                  type="button"
+                >
+                  <Repeat2 aria-hidden="true" className="h-4 w-4" />
+                </button>
+                </div>
+                <FieldError error={props.taxValueError} id="invoice-tax-value-error" />
+              </div>
+            ) : (
+              <div className="min-w-0">
+                <div className="flex h-9 min-w-0 items-stretch overflow-hidden rounded-md border border-dashed border-stone-300 bg-stone-50 hover:border-solid hover:border-stone-300 focus-within:border-solid focus-within:border-slate-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
+                  <span className="inline-flex shrink-0 items-center px-3 text-sm font-semibold text-stone-500">
+                    {props.currencySymbol}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <EditableInput
+                      ariaLabel="Tax amount"
+                      className="h-full rounded-none border-0 bg-transparent px-0 tabular-nums hover:border-0 focus:border-0 focus:bg-transparent focus:ring-0"
+                      error=""
+                      errorId="invoice-tax-value-error"
+                      inputMode="decimal"
+                      min="0"
+                      onBlur={() => props.onFieldBlur("tax.value")}
+                      onChange={props.onTaxValueChange}
+                      placeholder="0"
+                      type="number"
+                      value={props.tax.value}
+                    />
+                  </div>
+                  <button
+                    aria-label="Switch tax to percentage"
+                    className="inline-flex h-full w-12 shrink-0 items-center justify-center border-l border-dashed border-stone-300 bg-stone-50 text-stone-600 transition hover:border-solid hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+                    onClick={props.onTaxTypeToggle}
+                    type="button"
+                  >
+                    <Repeat2 aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                </div>
+                <FieldError error={props.taxValueError} id="invoice-tax-value-error" />
+              </div>
+            )}
             <button
               aria-label="Remove tax"
               className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
-              onClick={() => props.onTaxModeChange("none")}
+              onClick={() => props.onTaxEnabledChange(false)}
               type="button"
             >
               <X aria-hidden="true" className="h-4 w-4" />
@@ -771,67 +778,99 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
           </div>
         )}
 
-        {props.discountMode === "none" ? (
+        {!props.discount.enabled ? (
           <button
             className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
-            onClick={addDiscount}
+            onClick={() => props.onDiscountEnabledChange(true)}
             type="button"
           >
             + Add discount
           </button>
         ) : (
-          <div className="grid grid-cols-[5rem_minmax(0,1fr)_7rem_2rem] items-start gap-2 py-1.5 text-stone-600">
-            <span className="pt-2">Discount</span>
-            <div className="grid gap-2 sm:grid-cols-[minmax(7.5rem,1fr)_5.5rem]">
-              <select
-                aria-label="Discount type"
-                className={compactInputClass}
-                onChange={(event) =>
-                  props.onDiscountModeChange(event.target.value as EditableInvoiceDiscountMode)
-                }
-                value={props.discountMode}
-              >
-                {props.discountOptions.map((option) => (
-                  <option key={option.mode} value={option.mode}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <div className="relative">
-                <EditableInput
-                  ariaLabel={
-                    props.discount.type === "percentage"
-                      ? "Discount percentage"
-                      : "Discount amount"
-                  }
-                  className={`tabular-nums ${
-                    props.discount.type === "percentage" ? "pr-7" : ""
-                  }`}
-                  error={props.discountError}
-                  errorId="invoice-discount-error"
-                  inputMode="decimal"
-                  max={props.discount.type === "percentage" ? "100" : undefined}
-                  min="0"
-                  onBlur={() => props.onFieldBlur("discount.value")}
-                  onChange={props.onDiscountValueChange}
-                  placeholder={props.discount.type === "percentage" ? "10" : "50.00"}
-                  type="number"
-                  value={props.discount.value}
-                />
-                {props.discount.type === "percentage" ? (
-                  <span className="pointer-events-none absolute right-2 top-2 text-sm font-semibold text-stone-500">
-                    %
-                  </span>
-                ) : null}
-              </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_18rem_2rem] items-start gap-2 py-1.5 text-stone-600">
+            <div>
+              <EditableInput
+                ariaLabel="Discount label"
+                className="h-12 px-4"
+                error={props.discountLabelError}
+                errorId="invoice-discount-label-error"
+                onBlur={() => props.onFieldBlur("discount.label")}
+                onChange={props.onDiscountLabelChange}
+                placeholder="Discount"
+                value={props.discount.label}
+              />
             </div>
-            <span className="pt-2 text-right font-semibold tabular-nums text-stone-950">
-              -{props.formatCurrency(props.calculation.discountAmount)}
-            </span>
+            {discountValueIsPercentage ? (
+              <div className="min-w-0">
+                <div className="flex h-9 min-w-0 items-stretch">
+                <div className="relative min-w-0 flex-1">
+                  <EditableInput
+                    ariaLabel="Discount percentage"
+                    className="h-full rounded-r-none px-4 pr-8 tabular-nums"
+                    error=""
+                    errorId="invoice-discount-error"
+                    inputMode="decimal"
+                    max="100"
+                    min="0"
+                    onBlur={() => props.onFieldBlur("discount.value")}
+                    onChange={props.onDiscountValueChange}
+                    placeholder="0"
+                    type="number"
+                    value={props.discount.value}
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-stone-500">
+                    %
+                    <span className="sr-only">, calculated discount {props.formatCurrency(props.calculation.discountAmount)}</span>
+                  </span>
+                </div>
+                <button
+                  aria-label="Switch discount to fixed amount"
+                  className="inline-flex h-full w-12 shrink-0 items-center justify-center rounded-r-md border border-l-0 border-dashed border-stone-300 bg-stone-50 text-stone-600 transition hover:border-solid hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+                  onClick={props.onDiscountTypeToggle}
+                  type="button"
+                >
+                  <Repeat2 aria-hidden="true" className="h-4 w-4" />
+                </button>
+                </div>
+                <FieldError error={props.discountError} id="invoice-discount-error" />
+              </div>
+            ) : (
+              <div className="min-w-0">
+                <div className="flex h-9 min-w-0 items-stretch overflow-hidden rounded-md border border-dashed border-stone-300 bg-stone-50 hover:border-solid hover:border-stone-300 focus-within:border-solid focus-within:border-slate-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
+                  <span className="inline-flex shrink-0 items-center px-3 text-sm font-semibold text-stone-500">
+                    {props.currencySymbol}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <EditableInput
+                      ariaLabel="Discount amount"
+                      className="h-full rounded-none border-0 bg-transparent px-0 tabular-nums hover:border-0 focus:border-0 focus:bg-transparent focus:ring-0"
+                      error=""
+                      errorId="invoice-discount-error"
+                      inputMode="decimal"
+                      min="0"
+                      onBlur={() => props.onFieldBlur("discount.value")}
+                      onChange={props.onDiscountValueChange}
+                      placeholder="0"
+                      type="number"
+                      value={props.discount.value}
+                    />
+                  </div>
+                  <button
+                    aria-label="Switch discount to percentage"
+                    className="inline-flex h-full w-12 shrink-0 items-center justify-center border-l border-dashed border-stone-300 bg-stone-50 text-stone-600 transition hover:border-solid hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+                    onClick={props.onDiscountTypeToggle}
+                    type="button"
+                  >
+                    <Repeat2 aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                </div>
+                <FieldError error={props.discountError} id="invoice-discount-error" />
+              </div>
+            )}
             <button
               aria-label="Remove discount"
               className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
-              onClick={() => props.onDiscountModeChange("none")}
+              onClick={() => props.onDiscountEnabledChange(false)}
               type="button"
             >
               <X aria-hidden="true" className="h-4 w-4" />
@@ -848,22 +887,41 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
             + Add shipping
           </button>
         ) : (
-          <div className="grid grid-cols-[5rem_minmax(0,1fr)_7rem_2rem] items-start gap-2 py-1.5 text-stone-600">
-            <span className="pt-2">Shipping</span>
-            <EditableInput
-              ariaLabel="Shipping amount"
-              error={props.shippingError}
-              errorId="invoice-shipping-error"
-              inputMode="decimal"
-              min="0"
-              onBlur={() => props.onFieldBlur("shipping.amount")}
-              onChange={props.onShippingAmountChange}
-              placeholder="RM 10.00"
-              value={props.shipping.amount}
-            />
-            <span className="pt-2 text-right font-semibold tabular-nums text-stone-950">
-              {props.formatCurrency(props.calculation.shippingAmount)}
-            </span>
+          <div className="grid grid-cols-[minmax(0,1fr)_18rem_2rem] items-start gap-2 py-1.5 text-stone-600">
+            <div>
+              <EditableInput
+                ariaLabel="Shipping label"
+                className="h-12 px-4"
+                error={props.shippingLabelError}
+                errorId="invoice-shipping-label-error"
+                onBlur={() => props.onFieldBlur("shipping.label")}
+                onChange={props.onShippingLabelChange}
+                placeholder="Shipping"
+                value={props.shipping.label}
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex h-9 min-w-0 items-stretch overflow-hidden rounded-md border border-dashed border-stone-300 bg-stone-50 hover:border-solid hover:border-stone-300 focus-within:border-solid focus-within:border-slate-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
+                <span className="inline-flex shrink-0 items-center px-3 text-sm font-semibold text-stone-500">
+                  {props.currencySymbol}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <EditableInput
+                    ariaLabel="Shipping amount"
+                    className="h-full rounded-none border-0 bg-transparent px-0 tabular-nums hover:border-0 focus:border-0 focus:bg-transparent focus:ring-0"
+                    error=""
+                    errorId="invoice-shipping-error"
+                    inputMode="decimal"
+                    min="0"
+                    onBlur={() => props.onFieldBlur("shipping.amount")}
+                    onChange={props.onShippingAmountChange}
+                    placeholder="0"
+                    value={props.shipping.amount}
+                  />
+                </div>
+              </div>
+              <FieldError error={props.shippingError} id="invoice-shipping-error" />
+            </div>
             <button
               aria-label="Remove shipping"
               className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
@@ -875,7 +933,7 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
           </div>
         )}
 
-        <div className="mt-3 flex justify-between gap-4 border-t border-stone-300 pt-3 text-lg font-semibold text-stone-950">
+        <div className="mt-3 flex justify-between gap-4 border-t border-stone-400 pt-3 text-lg font-semibold text-stone-950">
           <span>Total</span>
           <span className="tabular-nums">{props.formatCurrency(props.calculation.total)}</span>
         </div>
@@ -931,7 +989,7 @@ export function EditableInvoicePaymentDetails({
   }
 
   return (
-    <section className="mt-8 border-t border-stone-200 pt-6">
+    <section className="mt-8 border-t border-stone-300 pt-6">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.86fr)]">
         <div className="min-w-0">
           <h3 className="mb-3 text-sm font-semibold text-stone-950">Payment Details</h3>
@@ -1005,7 +1063,7 @@ export function EditableInvoicePaymentDetails({
           <h3 className="mb-3 text-sm font-semibold text-stone-950">Payment QR</h3>
           <button
             aria-label={payment.paymentQrDataUrl ? "Replace payment QR image" : "Upload payment QR image"}
-            className="flex min-h-32 w-32 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 p-2 text-center text-sm font-semibold text-stone-500 transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+            className="flex min-h-32 w-32 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-stone-50 p-2 text-center text-sm font-semibold text-stone-500 transition hover:border-solid hover:border-stone-300 hover:bg-stone-50 focus:border-solid focus:border-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100"
             disabled={isProcessingQr}
             onClick={openQrPicker}
             type="button"
@@ -1068,31 +1126,18 @@ export function EditableInvoicePaymentDetails({
 
 function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
   return (
-    <section className="mt-8 grid gap-6 border-t border-stone-200 pt-6 md:grid-cols-2">
-      <div className="min-w-0">
-        <h3 className="mb-3 text-sm font-semibold text-stone-950">Notes</h3>
-        <EditableTextarea
-          ariaLabel="Invoice notes"
-          error={props.notesError}
-          errorId="invoice-notes-error"
-          maxLength={INVOICE_TEXT_MAX_LENGTHS.notes}
-          onBlur={() => props.onFieldBlur("notes")}
-          onChange={props.onNotesChange}
-          placeholder="Add notes"
-          rows={4}
-          value={props.notes}
-        />
-      </div>
+    <section className="mt-8 border-t border-stone-300 pt-6">
       <div className="min-w-0">
         <h3 className="mb-3 text-sm font-semibold text-stone-950">Terms &amp; Conditions</h3>
         <EditableTextarea
           ariaLabel="Payment terms"
           error={props.termsError}
           errorId="invoice-terms-error"
+          className="max-w-2xl"
           maxLength={INVOICE_TEXT_MAX_LENGTHS.terms}
           onBlur={() => props.onFieldBlur("terms")}
           onChange={props.onTermsChange}
-          placeholder="Add payment terms"
+          placeholder="Add terms & conditions"
           rows={4}
           value={props.terms}
         />
@@ -1103,7 +1148,7 @@ function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
 
 export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-sm">
       <EditableInvoiceActions
         isGeneratingPdf={props.isGeneratingPdf}
         onClearEverything={props.onClearEverything}

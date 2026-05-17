@@ -16,9 +16,10 @@ function test(name: string, run: () => void) {
   console.log(`PASS ${name}`);
 }
 
-type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "tax">> & {
+type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "shipping" | "tax">> & {
   discount?: Partial<InvoiceData["discount"]>;
   payment?: Partial<InvoiceData["payment"]>;
+  shipping?: Partial<InvoiceData["shipping"]>;
   tax?: Partial<InvoiceData["tax"]>;
 };
 
@@ -44,12 +45,20 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     ],
     discount: {
       enabled: false,
+      label: "Discount",
       type: "percentage",
       value: "0"
     },
     tax: {
       enabled: false,
-      rate: "0"
+      label: "Tax",
+      type: "percentage",
+      value: "0"
+    },
+    shipping: {
+      enabled: false,
+      label: "Shipping",
+      amount: "0"
     },
     payment: {
       bankName: "",
@@ -62,6 +71,7 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     notes: "",
     terms: ""
   };
+  const baseShipping = baseInvoice.shipping ?? { enabled: false, label: "Shipping", amount: "0" };
 
   return {
     ...baseInvoice,
@@ -73,6 +83,11 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     tax: {
       ...baseInvoice.tax,
       ...overrides.tax
+    },
+    shipping: {
+      enabled: overrides.shipping?.enabled ?? baseShipping.enabled,
+      label: overrides.shipping?.label ?? baseShipping.label,
+      amount: overrides.shipping?.amount ?? baseShipping.amount
     },
     payment: {
       ...baseInvoice.payment,
@@ -104,7 +119,9 @@ test("calculates no tax and no discount", () => {
 });
 
 test("calculates tax enabled and no discount", () => {
-  const result = calculateInvoiceTotals(createInvoice({ tax: { enabled: true, rate: "6" } }));
+  const result = calculateInvoiceTotals(
+    createInvoice({ tax: { enabled: true, type: "percentage", value: "6" } })
+  );
 
   assert.equal(result.subtotal, 200);
   assert.equal(result.discountAmount, 0);
@@ -117,7 +134,7 @@ test("calculates 10 percent discount before tax", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "percentage", value: "10" },
-      tax: { enabled: true, rate: "6" }
+      tax: { enabled: true, type: "percentage", value: "6" }
     })
   );
 
@@ -146,7 +163,7 @@ test("calculates fixed discount before tax", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "fixed", value: "50" },
-      tax: { enabled: true, rate: "8" }
+      tax: { enabled: true, type: "percentage", value: "8" }
     })
   );
 
@@ -173,7 +190,7 @@ test("calculates fixed discount with SST 6%", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "fixed", value: "50" },
-      tax: { enabled: true, rate: "6" }
+      tax: { enabled: true, type: "percentage", value: "6" }
     })
   );
 
@@ -187,7 +204,7 @@ test("calculates 100 percent discount", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "percentage", value: "100" },
-      tax: { enabled: true, rate: "6" }
+      tax: { enabled: true, type: "percentage", value: "6" }
     })
   );
 
@@ -201,7 +218,7 @@ test("calculates fixed discount equal to subtotal", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "fixed", value: "200" },
-      tax: { enabled: true, rate: "6" }
+      tax: { enabled: true, type: "percentage", value: "6" }
     })
   );
 
@@ -247,7 +264,7 @@ test("invalid numeric values do not produce NaN", () => {
     createInvoice({
       items: [{ id: "item-1", description: "Service", quantity: "abc", unitPrice: "Infinity" }],
       discount: { enabled: true, type: "fixed", value: "NaN" },
-      tax: { enabled: true, rate: "Infinity" }
+      tax: { enabled: true, type: "percentage", value: "Infinity" }
     })
   );
 
@@ -285,8 +302,8 @@ test("calculates shipping after tax and discount", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "fixed", value: "20" },
-      shipping: { enabled: true, amount: "15.50" },
-      tax: { enabled: true, rate: "10" }
+      shipping: { enabled: true, label: "Shipping", amount: "15.50" },
+      tax: { enabled: true, type: "percentage", value: "10" }
     })
   );
 
@@ -302,7 +319,7 @@ test("tax applies after discount", () => {
   const result = calculateInvoiceTotals(
     createInvoice({
       discount: { enabled: true, type: "fixed", value: "25" },
-      tax: { enabled: true, rate: "10" }
+      tax: { enabled: true, type: "percentage", value: "10" }
     })
   );
 
@@ -581,7 +598,7 @@ test("fixed discount Infinity fails validation", () => {
 
 test("tax rate over 100 fails validation", () => {
   assert.ok(
-    messagesFor(createInvoice({ tax: { enabled: true, rate: "101" } })).includes(
+    messagesFor(createInvoice({ tax: { enabled: true, type: "percentage", value: "101" } })).includes(
       "Tax rate must be between 0 and 100."
     )
   );
@@ -594,7 +611,7 @@ test("NaN, Infinity, and -Infinity values fail validation", () => {
         { id: "item-1", description: "Service", quantity: "NaN", unitPrice: "Infinity" }
       ],
       discount: { enabled: true, type: "fixed", value: "-Infinity" },
-      tax: { enabled: true, rate: "Infinity" }
+      tax: { enabled: true, type: "percentage", value: "Infinity" }
     })
   );
 
@@ -611,7 +628,7 @@ test("exponent notation is rejected for invoice money and quantity fields", () =
         { id: "item-1", description: "Service", quantity: "1e2", unitPrice: "1e3" }
       ],
       discount: { enabled: true, type: "fixed", value: "2e1" },
-      tax: { enabled: true, rate: "6e0" }
+      tax: { enabled: true, type: "percentage", value: "6e0" }
     })
   );
 
@@ -658,7 +675,7 @@ test("quantity and percentage fields keep practical decimal support", () => {
           { id: "item-1", description: "Service", quantity: "1.2345", unitPrice: "100.55" }
         ],
         discount: { enabled: true, type: "percentage", value: "12.3456" },
-        tax: { enabled: true, rate: "6.1234" }
+        tax: { enabled: true, type: "percentage", value: "6.1234" }
       })
     ),
     []

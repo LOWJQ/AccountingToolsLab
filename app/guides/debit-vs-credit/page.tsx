@@ -111,7 +111,7 @@ export default function DebitVsCreditGuidePage() {
   const pageUrl = `${siteConfig.url}/guides/debit-vs-credit`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

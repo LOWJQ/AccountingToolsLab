@@ -86,23 +86,16 @@ export default function InvoiceGeneratorPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
           Free Invoice Generator Malaysia
         </h1>
-        <p className="mt-3 max-w-4xl text-base leading-7 text-stone-600">
+        <p className="mt-3 text-base leading-7 text-stone-600">
           Create a simple PDF invoice for freelancers and small businesses in Malaysia. Add your
           business details, customer details, invoice items, tax/SST, discounts, payment
           information, notes, logo, and payment QR image, then download a clean invoice without
           signing up.
         </p>
-        <p className="mt-3 max-w-4xl text-sm leading-6 text-stone-500">
-          AccountingToolsLab creates simple Malaysia-friendly tools for invoices, accounting
-          calculations, and small business record-keeping. This tool is designed for general
-          learning and record-keeping purposes only. It does not submit invoices to LHDN/MyInvois
-          and should not be treated as professional accounting, tax, or legal advice.
-        </p>
       </div>
       <InvoiceGenerator />
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
           Need help writing an invoice?
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
@@ -123,7 +116,7 @@ export default function InvoiceGeneratorPage() {
           .
         </p>
       </section>
-      <FAQSection faqs={invoiceFaqs} title="Free Invoice Generator Malaysia FAQs" />
+      <FAQSection eyebrow="" faqs={invoiceFaqs} title="Free Invoice Generator Malaysia FAQs" />
     </ToolPageLayout>
   );
 }

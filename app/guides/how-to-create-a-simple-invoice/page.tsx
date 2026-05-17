@@ -251,7 +251,7 @@ export default function HowToCreateSimpleInvoicePage() {
   const pageUrl = `${siteConfig.url}/guides/how-to-create-a-simple-invoice`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

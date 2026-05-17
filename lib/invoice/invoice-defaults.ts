@@ -3,6 +3,7 @@ import {
   DEFAULT_INVOICE_DISCOUNT,
   DEFAULT_INVOICE_PAYMENT_DETAILS,
   DEFAULT_INVOICE_SHIPPING,
+  DEFAULT_INVOICE_TAX,
   DEFAULT_INVOICE_TERMS,
   type InvoiceData,
   type InvoiceLineItem
@@ -44,10 +45,7 @@ export function createEmptyInvoiceDefaults({
     currency,
     items: [createDefaultInvoiceLineItem(lineItemId)],
     discount: DEFAULT_INVOICE_DISCOUNT,
-    tax: {
-      enabled: false,
-      rate: "0"
-    },
+    tax: DEFAULT_INVOICE_TAX,
     shipping: DEFAULT_INVOICE_SHIPPING,
     payment: DEFAULT_INVOICE_PAYMENT_DETAILS,
     notes: "",
@@ -106,13 +104,17 @@ export function prepareInvoiceForFormRestore(
       ...invoice.discount
     },
     tax: {
+      ...DEFAULT_INVOICE_TAX,
+      ...invoice.tax,
       enabled: invoice.tax.enabled === true,
-      rate: invoice.tax.rate || "0",
-      label: invoice.tax.label
+      label: invoice.tax.label || DEFAULT_INVOICE_TAX.label,
+      type: invoice.tax.type === "fixed" ? "fixed" : "percentage",
+      value: invoice.tax.value || "0"
     },
     shipping: {
       ...DEFAULT_INVOICE_SHIPPING,
-      ...invoice.shipping
+      ...invoice.shipping,
+      label: invoice.shipping?.label || DEFAULT_INVOICE_SHIPPING.label
     },
     payment: {
       ...DEFAULT_INVOICE_PAYMENT_DETAILS,

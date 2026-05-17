@@ -235,7 +235,7 @@ export default function WhyTrialBalanceNotBalancingPage() {
   const pageUrl = `${siteConfig.url}/guides/why-trial-balance-not-balancing`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

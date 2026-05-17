@@ -193,7 +193,7 @@ export default function BreakEvenPointExplainedPage() {
   const pageUrl = `${siteConfig.url}/guides/break-even-point-explained`;
 
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

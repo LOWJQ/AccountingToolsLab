@@ -35,7 +35,7 @@ const contactOptions = [
 
 export default function ContactPage() {
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <Container as="main">
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Contact</p>

@@ -84,7 +84,7 @@ function StatusBadge({
 
 export default function HomePage() {
   return (
-    <div className="bg-stone-50 text-stone-950">
+    <div>
       <JsonLd data={createWebsiteSchema()} />
       <JsonLd data={createOrganizationSchema()} />
       <Container as="main">

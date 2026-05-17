@@ -31,9 +31,10 @@ function test(name: string, run: () => void) {
   console.log(`PASS ${name}`);
 }
 
-type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "tax">> & {
+type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "shipping" | "tax">> & {
   discount?: Partial<InvoiceData["discount"]>;
   payment?: Partial<InvoiceData["payment"]>;
+  shipping?: Partial<InvoiceData["shipping"]>;
   tax?: Partial<InvoiceData["tax"]>;
 };
 
@@ -59,12 +60,20 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     ],
     discount: {
       enabled: false,
+      label: "Discount",
       type: "percentage",
       value: "0"
     },
     tax: {
       enabled: false,
-      rate: "0"
+      label: "Tax",
+      type: "percentage",
+      value: "0"
+    },
+    shipping: {
+      enabled: false,
+      label: "Shipping",
+      amount: "0"
     },
     payment: {
       bankName: "",
@@ -77,6 +86,7 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     notes: "",
     terms: ""
   };
+  const baseShipping = baseInvoice.shipping ?? { enabled: false, label: "Shipping", amount: "0" };
 
   return {
     ...baseInvoice,
@@ -88,6 +98,11 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     tax: {
       ...baseInvoice.tax,
       ...overrides.tax
+    },
+    shipping: {
+      enabled: overrides.shipping?.enabled ?? baseShipping.enabled,
+      label: overrides.shipping?.label ?? baseShipping.label,
+      amount: overrides.shipping?.amount ?? baseShipping.amount
     },
     payment: {
       ...baseInvoice.payment,
@@ -606,6 +621,7 @@ test("old draft without discount loads with discount disabled", () => {
 
   assert.deepEqual(loadInvoiceDraft()?.invoice.discount, {
     enabled: false,
+    label: "Discount",
     type: "percentage",
     value: "0"
   });
@@ -662,6 +678,7 @@ test("malformed discount object does not crash loading", () => {
   assert.doesNotThrow(() => loadInvoiceDraft());
   assert.deepEqual(loadInvoiceDraft()?.invoice.discount, {
     enabled: false,
+    label: "Discount",
     type: "percentage",
     value: "0"
   });

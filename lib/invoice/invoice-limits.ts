@@ -8,11 +8,14 @@ export const INVOICE_TEXT_MAX_LENGTHS = {
   customerAddress: 500,
   customerContact: 160,
   customerName: 120,
+  discountLabel: 80,
   duitNowId: 120,
   invoiceNumber: 60,
   lineItemDescription: 180,
   notes: 800,
   paymentLink: 300,
   paymentNotes: 800,
+  shippingLabel: 80,
+  taxLabel: 80,
   terms: 2000
 } as const;
