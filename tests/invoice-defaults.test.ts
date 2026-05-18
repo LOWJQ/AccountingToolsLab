@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import {
   createEmptyInvoiceDefaults,
-  createNewInvoiceFromCurrent,
   prepareInvoiceForFormRestore
 } from "../lib/invoice/invoice-defaults";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
@@ -61,62 +60,6 @@ function createReusableInvoice(): InvoiceData {
     terms: "Payment is due within 30 days."
   };
 }
-
-test("new invoice keeps reusable business fields", () => {
-  const currentInvoice = createReusableInvoice();
-  const nextInvoice = createNewInvoiceFromCurrent(currentInvoice, {
-    invoiceDate: "2026-05-11",
-    invoiceNumber: "INV-002",
-    lineItemId: "item-new"
-  });
-
-  assert.equal(nextInvoice.businessName, currentInvoice.businessName);
-  assert.equal(nextInvoice.businessContact, currentInvoice.businessContact);
-  assert.equal(nextInvoice.businessAddress, currentInvoice.businessAddress);
-  assert.equal(nextInvoice.businessLogoDataUrl, currentInvoice.businessLogoDataUrl);
-  assert.equal(nextInvoice.currency, currentInvoice.currency);
-  assert.deepEqual(nextInvoice.payment, currentInvoice.payment);
-  assert.equal(nextInvoice.terms, currentInvoice.terms);
-  assert.deepEqual(nextInvoice.tax, currentInvoice.tax);
-});
-
-test("new invoice resets customer and invoice-specific fields", () => {
-  const nextInvoice = createNewInvoiceFromCurrent(createReusableInvoice(), {
-    invoiceDate: "2026-05-11",
-    invoiceNumber: "INV-002",
-    lineItemId: "item-new"
-  });
-
-  assert.equal(nextInvoice.customerName, "");
-  assert.equal(nextInvoice.customerContact, "");
-  assert.equal(nextInvoice.customerAddress, "");
-  assert.equal(nextInvoice.dueDate, "");
-  assert.equal(nextInvoice.notes, "");
-  assert.deepEqual(nextInvoice.discount, {
-    enabled: false,
-    label: "Discount",
-    type: "percentage",
-    value: "0"
-  });
-  assert.deepEqual(nextInvoice.items, [
-    {
-      id: "item-new",
-      description: "",
-      quantity: "1",
-      unitPrice: ""
-    }
-  ]);
-});
-
-test("new invoice sets invoice date and provided next invoice number", () => {
-  const nextInvoice = createNewInvoiceFromCurrent(createReusableInvoice(), {
-    invoiceDate: "2026-05-11",
-    invoiceNumber: "INV-002"
-  });
-
-  assert.equal(nextInvoice.invoiceDate, "2026-05-11");
-  assert.equal(nextInvoice.invoiceNumber, "INV-002");
-});
 
 test("clear everything defaults reset all reusable fields", () => {
   const emptyInvoice = createEmptyInvoiceDefaults({

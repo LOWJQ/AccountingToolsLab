@@ -290,8 +290,8 @@ export function Header() {
       className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur"
       ref={headerRef}
     >
-      <div className="mx-auto flex h-16 max-w-[1080px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link className="flex items-center" href="/" aria-label="AccountingToolsLab home">
+      <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-4 px-3 sm:px-5 lg:px-6">
+        <Link className="flex shrink-0 items-center" href="/" aria-label="AccountingToolsLab home">
           <Image
             alt="AccountingToolsLab"
             className="h-auto w-[185px] sm:w-[220px]"
@@ -302,7 +302,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm font-medium text-stone-600 sm:flex">
+        <nav className="hidden flex-1 items-center justify-center gap-7 text-sm font-medium text-stone-600 sm:flex">
           {navItems.map((item) => (
             <Link className="transition hover:text-stone-950" href={item.href} key={item.href}>
               {item.label}
@@ -310,7 +310,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <div className="hidden sm:block">
             <CurrencySelector />
           </div>

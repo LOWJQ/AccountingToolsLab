@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { Download, FilePlus2, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
+import { Download, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type {
   InvoiceCalculationResult,
   InvoiceLineCalculationResult
@@ -77,7 +77,6 @@ type EditableInvoiceCanvasProps = {
   onInvoiceDateChange: (value: string) => void;
   onInvoiceNumberChange: (value: string) => void;
   onLineItemBlur: (index: number, key: "description" | "quantity" | "unitPrice") => void;
-  onNewInvoice: () => void;
   onNotesChange: (value: string) => void;
   onPaymentChange: (field: keyof InvoicePaymentDetails, value: string | undefined) => void;
   onPaymentFieldBlur: (field: keyof InvoicePaymentDetails) => void;
@@ -223,27 +222,17 @@ export function EditableInvoiceActions({
   isGeneratingPdf,
   onClearEverything,
   onDownloadInvoice,
-  onNewInvoice,
   validationSummaryMessage
 }: Pick<
   EditableInvoiceCanvasProps,
   | "isGeneratingPdf"
   | "onClearEverything"
   | "onDownloadInvoice"
-  | "onNewInvoice"
   | "validationSummaryMessage"
 >) {
   return (
     <div className="flex flex-col gap-3 border-b border-stone-200 bg-stone-50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
       <div className="flex flex-wrap gap-2">
-        <button
-          className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          onClick={onNewInvoice}
-          type="button"
-        >
-          <FilePlus2 aria-hidden="true" className="h-4 w-4" />
-          New invoice
-        </button>
         <button
           className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
           onClick={onClearEverything}
@@ -1153,7 +1142,6 @@ export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
         isGeneratingPdf={props.isGeneratingPdf}
         onClearEverything={props.onClearEverything}
         onDownloadInvoice={props.onDownloadInvoice}
-        onNewInvoice={props.onNewInvoice}
         validationSummaryMessage={props.validationSummaryMessage}
       />
 

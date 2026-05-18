@@ -53,33 +53,6 @@ export function createEmptyInvoiceDefaults({
   };
 }
 
-export function createNewInvoiceFromCurrent(
-  currentInvoice: InvoiceData,
-  {
-    invoiceDate,
-    invoiceNumber = DEFAULT_INVOICE_NUMBER,
-    lineItemId
-  }: {
-    invoiceDate: string;
-    invoiceNumber?: string;
-    lineItemId?: string;
-  }
-): InvoiceData {
-  return {
-    ...currentInvoice,
-    customerName: "",
-    customerContact: "",
-    customerAddress: "",
-    invoiceNumber,
-    invoiceDate,
-    dueDate: "",
-    items: [createDefaultInvoiceLineItem(lineItemId)],
-    discount: DEFAULT_INVOICE_DISCOUNT,
-    shipping: DEFAULT_INVOICE_SHIPPING,
-    notes: ""
-  };
-}
-
 export function prepareInvoiceForFormRestore(
   invoice: InvoiceData,
   {

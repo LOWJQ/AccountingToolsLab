@@ -14,7 +14,6 @@ import { getCurrencyOption, isCurrencyCode } from "@/lib/currency";
 import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 import {
   createEmptyInvoiceDefaults,
-  createNewInvoiceFromCurrent,
   DEFAULT_INVOICE_NUMBER,
   prepareInvoiceForFormRestore
 } from "@/lib/invoice/invoice-defaults";
@@ -326,21 +325,6 @@ export function InvoiceGenerator() {
     );
   }
 
-  function startNewInvoice() {
-    const nextInvoiceNumber = getNextInvoiceNumberSuggestion();
-    restoreInvoiceState(
-      createNewInvoiceFromCurrent(invoiceData, {
-        invoiceDate: getLocalDateInputValue(),
-        invoiceNumber: nextInvoiceNumber ?? DEFAULT_INVOICE_NUMBER,
-        lineItemId: createLineItem(1).id
-      })
-    );
-    setAutosaveError("");
-    resetValidationDisplay();
-    setIsDownloadModalOpen(false);
-    scrollInvoiceGeneratorToTop();
-  }
-
   function clearEverything() {
     setIsClearEverythingModalOpen(true);
   }
@@ -476,10 +460,10 @@ export function InvoiceGenerator() {
           businessLogoDataUrl={businessLogoDataUrl}
           businessName={businessName}
           businessNameError={businessNameError}
-      calculation={calculation}
-      currencyCode={currency}
-      currencySymbol={currencySymbol}
-      customerAddress={customerAddress}
+          calculation={calculation}
+          currencyCode={currency}
+          currencySymbol={currencySymbol}
+          customerAddress={customerAddress}
           customerAddressError={customerAddressError}
           customerContact={customerContact}
           customerContactError={customerContactError}
@@ -521,7 +505,6 @@ export function InvoiceGenerator() {
           onInvoiceDateChange={setInvoiceDate}
           onInvoiceNumberChange={setInvoiceNumber}
           onLineItemBlur={(index, key) => markInvoiceFieldTouched(`items.${index}.${key}`)}
-          onNewInvoice={startNewInvoice}
           onNotesChange={setNotes}
           onPaymentChange={updatePayment}
           onPaymentFieldBlur={(field) => markInvoiceFieldTouched(`payment.${field}`)}
