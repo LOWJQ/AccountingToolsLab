@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmailSignup } from "@/components/home/EmailSignup";
 import { ToolsMarquee } from "@/components/home/ToolsMarquee";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -13,11 +14,17 @@ export const metadata = createMetadata({
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-hidden text-stone-950">
+    <main
+      className="min-h-screen overflow-hidden text-stone-950"
+      style={{
+        background:
+          "radial-gradient(circle at 50% 18%, rgba(220,245,238,0.5), transparent 34%), linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 42%, #F6F8FB 100%)"
+      }}
+    >
       <JsonLd data={createWebsiteSchema()} />
       <JsonLd data={createOrganizationSchema()} />
 
-      <section className="pb-16 pt-20 text-center sm:pb-20 sm:pt-24 lg:pt-28">
+      <section className="relative z-10 pb-2 pt-20 text-center sm:pb-4 sm:pt-24 lg:pb-6 lg:pt-28">
         <div className="mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-5xl">
             <h1 className="font-display text-4xl font-extrabold leading-[0.92] tracking-tight text-stone-950 sm:text-5xl lg:text-6xl xl:text-7xl">
@@ -44,42 +51,25 @@ export default function HomePage() {
         <ToolsMarquee />
       </section>
 
-      <section>
-        <div className="relative aspect-[1912/821] w-full overflow-hidden bg-white">
-          <div
-            className="absolute inset-0 bg-white bg-no-repeat"
-            style={{
-              backgroundImage:
-                "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.58) 34%, rgba(255,255,255,0.08) 68%), url('/landing-page-image.png')",
-              backgroundPosition: "center 58%",
-              backgroundSize: "100% auto"
-            }}
-          />
+      <section className="pointer-events-none relative z-0 -mt-6 flex min-h-[460px] items-center overflow-hidden py-8 sm:-mt-8 sm:min-h-[500px] sm:py-10 lg:-mt-10 lg:min-h-[540px] lg:py-12">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-full bg-no-repeat"
+          style={{
+            backgroundImage: "url('/landing-page-image.png')",
+            backgroundPosition: "center center",
+            backgroundSize: "100% auto",
+            transform: "translateY(48px)"
+          }}
+        />
+        <div className="absolute inset-x-0 top-0 z-[1] h-24 bg-gradient-to-b from-white via-white/80 to-transparent sm:h-28" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/55 via-white/15 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 z-[1] h-28 bg-gradient-to-t from-[#f6f8fb] via-white/20 to-transparent" />
 
-          <div className="relative z-10 mx-auto flex h-full max-w-3xl px-5 py-8 text-center sm:px-8 sm:py-10 lg:px-12 lg:py-14">
-            <div className="w-full">
-            <h2 className="text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-              Accounting workspace
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
-              Tools that help you create, calculate, check, and understand business numbers
-              faster.
-            </p>
-            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-full bg-stone-950 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300"
-                href="/tools/invoice-generator"
-              >
-                Create invoice
-              </Link>
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-full border border-stone-300 bg-white/40 px-6 text-sm font-semibold text-stone-950 transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-stone-300"
-                href="/tools"
-              >
-                Explore tools
-              </Link>
-            </div>
-            </div>
+        <div className="pointer-events-auto relative z-10 mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-8">
+          <div
+            className="mx-auto flex max-w-3xl justify-center rounded-[2rem] border border-white/70 bg-white/72 px-5 py-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-[6px] sm:px-8 sm:py-10 lg:px-12 lg:py-14"
+          >
+            <EmailSignup />
           </div>
         </div>
       </section>

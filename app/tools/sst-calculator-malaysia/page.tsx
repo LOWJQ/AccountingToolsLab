@@ -9,9 +9,9 @@ import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "SST Calculator Malaysia | Category Rates & Invoice Breakdown",
+  title: "SST Calculator Malaysia | Add or Remove SST by Category",
   description:
-    "Estimate Malaysia SST with quick add/remove calculations, suggested category rates, manual overrides, and invoice-style line item breakdowns.",
+    "Estimate Malaysia SST with add/remove calculations, suggested category rates, manual overrides, and a clean SST summary card.",
   path: "/tools/sst-calculator-malaysia"
 });
 
@@ -75,14 +75,14 @@ export default function SstCalculatorMalaysiaPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={sstFaqs} />
-      <div className="max-w-3xl">
+      <div className="max-w-6xl">
         <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
           SST Calculator Malaysia
         </h1>
         <p className="mt-3 text-base leading-7 text-stone-600">
-          Estimate Malaysia SST with quick add/remove calculations, suggested category rates,
-          manual overrides, and invoice-style line item breakdowns. Use it for arithmetic and
-          record-keeping checks, not official tax classification.
+          Estimate Malaysia SST with add/remove calculations, suggested category rates, and a
+          cleaner summary for business checks. Use it for arithmetic and record-keeping checks,
+          not official tax classification.
         </p>
       </div>
       <SstCalculatorMalaysia />
@@ -91,12 +91,11 @@ export default function SstCalculatorMalaysiaPage() {
         <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <p className="text-sm font-medium tracking-wide text-slate-500">What it helps with</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Quick SST checks and invoice breakdowns
+            Quick SST checks with category guidance
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use quick mode when you have one amount and want to add or remove SST. Use invoice
-            breakdown when an invoice or receipt has several line items with different common
-            SST categories or manual rates.
+            Use the calculator when you have one amount and need to add or remove SST using a
+            suggested category rate or a manual percentage for estimation.
           </p>
         </article>
 

@@ -1,15 +1,7 @@
 "use client";
 
 import { Check, ChevronDown } from "lucide-react";
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type ReactNode
-} from "react";
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
@@ -17,25 +9,11 @@ import { formatCurrency as formatCurrencyValue } from "@/lib/currency";
 import {
   calculateSstInvoiceMalaysia,
   getSstCategoryById,
-  isFixedSstCategory,
-  isPercentageSstCategory,
   SST_MALAYSIA_CATEGORIES,
   type SstCalculationMode,
   type SstCategoryId,
-  type SstInvoiceMalaysiaResult,
   type SstMalaysiaCategory
 } from "@/lib/calculators/sst-malaysia";
-
-type CalculatorView = "quick" | "invoice";
-
-type InvoiceLineForm = {
-  id: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-  categoryId: SstCategoryId;
-  manualRate: string;
-};
 
 type DropdownOption<T extends string> = {
   label: string;
@@ -48,18 +26,7 @@ type DropdownGroup<T extends string> = {
 };
 
 const inputClassName =
-  "h-12 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
-
-const smallInputClassName =
-  "h-11 w-full min-w-0 rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
-
-const mistakes = [
-  "Using the wrong SST rate for a product or service",
-  "Forgetting that some prices may already include SST",
-  "Treating this calculator as tax advice",
-  "Confusing SST with income tax",
-  "Rounding too early"
-];
+  "h-12 w-full min-w-0 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
 
 const groupedCategories = [
   {
@@ -76,11 +43,6 @@ const groupedCategories = [
   }
 ];
 
-const viewOptions: Array<DropdownOption<CalculatorView>> = [
-  { label: "Quick SST", value: "quick" },
-  { label: "Invoice breakdown", value: "invoice" }
-];
-
 const categoryDropdownGroups: Array<DropdownGroup<SstCategoryId>> = groupedCategories.map(
   (group) => ({
     label: group.label,
@@ -91,21 +53,12 @@ const categoryDropdownGroups: Array<DropdownGroup<SstCategoryId>> = groupedCateg
   })
 );
 
-function createInvoiceLine(): InvoiceLineForm {
-  const id =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `sst-line-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-  return {
-    id,
-    description: "",
-    quantity: "1",
-    unitPrice: "",
-    categoryId: "service_general_taxable",
-    manualRate: ""
-  };
-}
+const mistakes = [
+  "Confirm whether your entered amount is before SST or already includes SST.",
+  "Check the taxable category before using a suggested rate for invoicing or filing.",
+  "Use special fixed-amount categories carefully because they are not normal percentage SST.",
+  "Treat this tool as an estimate, not official tax advice."
+];
 
 function parseAmount(value: string): number | null {
   if (value.trim() === "") {
@@ -128,40 +81,22 @@ function shouldUseManualRate(category: SstMalaysiaCategory): boolean {
   return category.rateType === "manual";
 }
 
-function getCategoryRateLabel(category: SstMalaysiaCategory): string {
-  if (category.rateType === "manual") {
-    return "Manual rate required";
-  }
-
-  if (isPercentageSstCategory(category)) {
-    return `Suggested rate: ${category.suggestedRatePercent}%`;
-  }
-
-  if (isFixedSstCategory(category)) {
-    return `Special fixed amount: RM ${category.fixedAmount.toFixed(2)}`;
-  }
-
-  return "Manual handling required";
-}
-
 function formatPercent(value: number | null): string {
   return value === null ? "-" : `${value.toFixed(2)}%`;
 }
 
-function buildInvoiceItems(lines: InvoiceLineForm[]) {
-  return lines.map((line) => {
-    const category = getCategoryOrFallback(line.categoryId);
-    const useManualRate = shouldUseManualRate(category);
+function formatRateSummary(
+  line: { fixedAmount: number | null; rateType: "percentage" | "fixed"; sstRatePercent: number | null } | undefined
+): string {
+  if (!line) {
+    return "-";
+  }
 
-    return {
-      id: line.id,
-      description: line.description,
-      quantity: parseAmount(line.quantity),
-      unitPrice: parseAmount(line.unitPrice),
-      categoryId: line.categoryId,
-      manualRatePercent: useManualRate ? parseManualRate(line.manualRate) : undefined
-    };
-  });
+  if (line.rateType === "fixed") {
+    return `RM ${line.fixedAmount?.toFixed(2)} fixed`;
+  }
+
+  return formatPercent(line.sstRatePercent);
 }
 
 export function SstCalculatorMalaysia() {
@@ -175,38 +110,32 @@ export function SstCalculatorMalaysia() {
         }),
     [currency]
   );
-  const [view, setView] = useState<CalculatorView>("quick");
-  const [quickMode, setQuickMode] = useState<SstCalculationMode>("add");
-  const [quickAmount, setQuickAmount] = useState("0");
-  const [quickCategoryId, setQuickCategoryId] = useState<SstCategoryId>(
-    "service_general_taxable"
-  );
-  const [quickManualRate, setQuickManualRate] = useState("");
-  const [invoiceMode, setInvoiceMode] = useState<SstCalculationMode>("add");
-  const [invoiceLines, setInvoiceLines] = useState<InvoiceLineForm[]>([createInvoiceLine()]);
 
-  const quickCategory = getCategoryOrFallback(quickCategoryId);
-  const quickManualRateEnabled = shouldUseManualRate(quickCategory);
+  const [mode, setMode] = useState<SstCalculationMode>("add");
+  const [amount, setAmount] = useState("1000");
+  const [categoryId, setCategoryId] = useState<SstCategoryId>("service_general_taxable");
+  const [manualRate, setManualRate] = useState("");
 
-  const quickCalculation = useMemo(() => {
-    if (!quickAmount.trim()) {
+  const category = getCategoryOrFallback(categoryId);
+  const manualRateEnabled = shouldUseManualRate(category);
+
+  const calculation = useMemo(() => {
+    if (!amount.trim()) {
       return { result: null, message: "Enter an amount to estimate SST." };
     }
 
     try {
       return {
         result: calculateSstInvoiceMalaysia({
-          mode: quickMode,
+          mode,
           items: [
             {
-              id: "quick",
-              description: quickCategory.label,
+              id: "sst-summary",
+              description: category.label,
               quantity: 1,
-              unitPrice: parseAmount(quickAmount),
-              categoryId: quickCategoryId,
-              manualRatePercent: quickManualRateEnabled
-                ? parseManualRate(quickManualRate)
-                : undefined
+              unitPrice: parseAmount(amount),
+              categoryId,
+              manualRatePercent: manualRateEnabled ? parseManualRate(manualRate) : undefined
             }
           ]
         }),
@@ -218,188 +147,166 @@ export function SstCalculatorMalaysia() {
         message: error instanceof Error ? error.message : "Check the values and try again."
       };
     }
-  }, [
-    quickAmount,
-    quickCategory.label,
-    quickCategoryId,
-    quickManualRate,
-    quickManualRateEnabled,
-    quickMode
-  ]);
+  }, [amount, category.label, categoryId, manualRate, manualRateEnabled, mode]);
 
-  const invoiceCalculation = useMemo(() => {
-    if (invoiceLines.some((line) => !line.unitPrice.trim() || !line.quantity.trim())) {
-      return { result: null, message: "Enter quantity and unit price for each line item." };
-    }
+  const line = calculation.result?.lineItems[0];
 
-    try {
-      return {
-        result: calculateSstInvoiceMalaysia({
-          mode: invoiceMode,
-          items: buildInvoiceItems(invoiceLines)
-        }),
-        message: ""
-      };
-    } catch (error) {
-      return {
-        result: null,
-        message: error instanceof Error ? error.message : "Check the values and try again."
-      };
-    }
-  }, [invoiceLines, invoiceMode]);
-
-  function resetQuickCalculator() {
-    setQuickMode("add");
-    setQuickAmount("0");
-    setQuickCategoryId("service_general_taxable");
-    setQuickManualRate("");
-  }
-
-  function resetInvoiceCalculator() {
-    setInvoiceMode("add");
-    setInvoiceLines([createInvoiceLine()]);
-  }
-
-  function updateInvoiceLine(id: string, updates: Partial<InvoiceLineForm>) {
-    setInvoiceLines((currentLines) =>
-      currentLines.map((line) => (line.id === id ? { ...line, ...updates } : line))
-    );
-  }
-
-  function removeInvoiceLine(id: string) {
-    setInvoiceLines((currentLines) =>
-      currentLines.length === 1 ? currentLines : currentLines.filter((line) => line.id !== id)
-    );
-  }
-
-  function addInvoiceLine() {
-    setInvoiceLines((currentLines) => [...currentLines, createInvoiceLine()]);
+  function resetCalculator() {
+    setMode("add");
+    setAmount("1000");
+    setCategoryId("service_general_taxable");
+    setManualRate("");
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[980px] flex-col gap-8">
-      <Card className="w-full p-5 sm:p-8" variant="elevated">
-        <div className="flex flex-col gap-6">
-          <div className="grid gap-5">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+      <section className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+        <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex flex-col gap-6">
             <div>
-              <p className="text-sm font-medium tracking-wide text-slate-500">Calculator mode</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
-                Quick SST or invoice breakdown
+              <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+                SST Calculator Malaysia
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
-                Start with one amount, or switch to invoice breakdown for multiple line items
-                with different suggested categories or manual rates.
+              <p className="mt-3 max-w-xl text-sm leading-6 text-stone-600 sm:text-base">
+                Estimate SST amounts quickly for Malaysia business checks.
               </p>
             </div>
-            <div
-              aria-label="SST calculator mode"
-              className="grid gap-2 rounded-xl border border-stone-200 bg-stone-50 p-1 sm:max-w-md sm:grid-cols-2"
-              role="group"
-            >
-              {viewOptions.map((option) => (
-                <button
-                  aria-pressed={view === option.value}
-                  className={`h-10 rounded-lg px-4 text-sm font-semibold transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${
-                    view === option.value
-                      ? "bg-white text-stone-950 shadow-sm"
-                      : "text-stone-600 hover:bg-white/70"
-                  }`}
-                  key={option.value}
-                  onClick={() => {
-                    setView(option.value);
-                  }}
-                  type="button"
-                >
-                  {option.label}
-                </button>
-              ))}
+
+            <ModeSelect mode={mode} onModeChange={setMode} />
+
+            <label className="grid gap-2" htmlFor="sst-amount">
+              <span className="text-sm font-semibold text-stone-800">
+                {mode === "add" ? "Amount before SST" : "Amount including SST"}
+              </span>
+              <input
+                className={inputClassName}
+                id="sst-amount"
+                inputMode="decimal"
+                min="0"
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder={mode === "add" ? "1000" : "1080"}
+                step="0.01"
+                type="number"
+                value={amount}
+              />
+            </label>
+
+            <CategorySelect
+              categoryId={categoryId}
+              describedBy={manualRateEnabled ? undefined : "sst-category-note"}
+              id="sst-category"
+              label="Product or service category"
+              onChange={(nextCategoryId) => {
+                setCategoryId(nextCategoryId);
+                setManualRate("");
+              }}
+            />
+
+            <ManualRateControls
+              idPrefix="sst"
+              manualRate={manualRate}
+              manualRateEnabled={manualRateEnabled}
+              onManualRateChange={setManualRate}
+            />
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                className="inline-flex h-11 items-center justify-center rounded-2xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                onClick={resetCalculator}
+                type="button"
+              >
+                Reset
+              </button>
             </div>
           </div>
+        </Card>
 
-          {view === "quick" ? (
-            <QuickCalculatorView
-              amount={quickAmount}
-              calculation={quickCalculation}
-              category={quickCategory}
-              categoryId={quickCategoryId}
-              formatCurrency={formatCurrency}
-              manualRate={quickManualRate}
-              manualRateEnabled={quickManualRateEnabled}
-              mode={quickMode}
-              onAmountChange={setQuickAmount}
-              onCategoryChange={(categoryId) => {
-                setQuickCategoryId(categoryId);
-                setQuickManualRate("");
-              }}
-              onManualRateChange={setQuickManualRate}
-              onModeChange={setQuickMode}
-              onReset={resetQuickCalculator}
-            />
+        <Card
+          aria-live="polite"
+          className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+        >
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-stone-500">Result</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+            {mode === "add" ? "Add SST estimate" : "Remove SST estimate"}
+          </h2>
+
+          {line ? (
+            <div className="mt-6 grid gap-4">
+              <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5 sm:p-6">
+                <p className="text-sm font-medium text-stone-600">
+                  {mode === "add" ? "Total including SST" : "Amount before SST"}
+                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+                  {mode === "add"
+                    ? formatCurrency(line.totalIncludingSst)
+                    : formatCurrency(line.amountBeforeSst)}
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ResultStat label="SST rate" value={formatRateSummary(line)} />
+                <ResultStat
+                  accent
+                  label="SST amount"
+                  value={formatCurrency(line.sstAmount)}
+                />
+              </div>
+
+              <ResultStat
+                label={mode === "add" ? "Amount before SST" : "Total including SST"}
+                value={
+                  mode === "add"
+                    ? formatCurrency(line.amountBeforeSst)
+                    : formatCurrency(line.totalIncludingSst)
+                }
+              />
+            </div>
           ) : (
-            <InvoiceBreakdownView
-              calculation={invoiceCalculation}
-              formatCurrency={formatCurrency}
-              lines={invoiceLines}
-              mode={invoiceMode}
-              onAddLine={addInvoiceLine}
-              onModeChange={setInvoiceMode}
-              onRemoveLine={removeInvoiceLine}
-              onReset={resetInvoiceCalculator}
-              onUpdateLine={updateInvoiceLine}
-            />
+            <p className="mt-4 text-sm leading-6 text-stone-600">{calculation.message}</p>
           )}
-        </div>
-      </Card>
+        </Card>
+      </section>
 
-      <Card className="border-amber-200 bg-amber-50 p-6 sm:p-8">
+      <Card className="rounded-[1.5rem] border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
         <p className="text-sm font-medium tracking-wide text-amber-700">Important note</p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Estimation only
+          Use this as an estimate, not official tax advice
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-700 sm:text-base">
-          This calculator provides an estimate only. SST treatment may depend on taxable
-          service category, goods classification, exemption status, registration status, and
-          official RMCD/MySST updates. Please confirm with official guidance or your
-          accountant before issuing tax invoices.
+          SST treatment may depend on taxable service category, goods classification, exemption
+          status, registration status, and official RMCD/MySST updates. Confirm the applicable
+          treatment before issuing tax invoices or relying on the result for filing.
         </p>
       </Card>
 
-      <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Explanation</p>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-medium tracking-wide text-slate-500">How it works</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            How SST estimates work
+            Clear SST summary for fast checks
           </h2>
           <div className="mt-4 grid gap-3">
-            <p className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Add SST: SST Amount = Amount Before SST x SST Rate
+            <p className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
+              Add SST: total including SST = amount before SST + SST amount
             </p>
-            <p className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Add SST: Total = Amount Before SST + SST Amount
+            <p className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
+              Remove SST: amount before SST = amount including SST / (1 + SST rate)
             </p>
-            <p className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Remove SST: Amount Before SST = SST-Inclusive Amount / (1 + SST Rate)
-            </p>
-            <p className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Invoice breakdown: each line is calculated first, then rounded line totals are
-              grouped by category/rate.
-            </p>
-            <p className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Rounding note: amounts are rounded to 2 decimals per line so displayed rows and
-              totals stay consistent.
+            <p className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
+              Special fixed SST categories are shown separately and do not use a percentage formula.
             </p>
           </div>
         </Card>
 
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
+        <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-medium tracking-wide text-slate-500">Checks to make</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Mistakes to avoid
+            Before you rely on the estimate
           </h2>
           <div className="mt-5 grid gap-3">
             {mistakes.map((mistake) => (
               <div
-                className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
+                className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
                 key={mistake}
               >
                 {mistake}
@@ -409,15 +316,15 @@ export function SstCalculatorMalaysia() {
         </Card>
       </section>
 
-      <Card className="p-6 sm:p-8 lg:p-10">
+      <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Connect SST estimates with business records
+              Keep your records and estimates aligned
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use invoice, cash flow, and ratio tools for related business calculations.
+              Pair this SST estimate with your invoice, cash flow, and ratio checks.
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -438,391 +345,12 @@ export function SstCalculatorMalaysia() {
   );
 }
 
-function QuickCalculatorView({
-  amount,
-  calculation,
-  category,
-  categoryId,
-  formatCurrency,
-  manualRate,
-  manualRateEnabled,
-  mode,
-  onAmountChange,
-  onCategoryChange,
-  onManualRateChange,
-  onModeChange,
-  onReset
-}: {
-  amount: string;
-  calculation: { message: string; result: SstInvoiceMalaysiaResult | null };
-  category: SstMalaysiaCategory;
-  categoryId: SstCategoryId;
-  formatCurrency: (value: number) => string;
-  manualRate: string;
-  manualRateEnabled: boolean;
-  mode: SstCalculationMode;
-  onAmountChange: (value: string) => void;
-  onCategoryChange: (value: SstCategoryId) => void;
-  onManualRateChange: (value: string) => void;
-  onModeChange: (value: SstCalculationMode) => void;
-  onReset: () => void;
-}) {
-  const line = calculation.result?.lineItems[0];
-
-  return (
-    <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-      <div className="grid gap-5">
-        <ModeSelect mode={mode} onModeChange={onModeChange} />
-
-        <label className="grid gap-2" htmlFor="quick-sst-amount">
-          <span className="text-sm font-semibold text-stone-800">
-            {mode === "add" ? "Amount before SST" : "SST-inclusive amount"}
-          </span>
-          <input
-            className={inputClassName}
-            id="quick-sst-amount"
-            inputMode="decimal"
-            min="0"
-            onChange={(event) => onAmountChange(event.target.value)}
-            placeholder="100"
-            step="0.01"
-            type="number"
-            value={amount}
-          />
-        </label>
-
-        <CategorySelect
-          categoryId={categoryId}
-          describedBy={manualRateEnabled ? undefined : "quick-sst-category-note"}
-          id="quick-sst-category"
-          label="Product or service category"
-          onChange={onCategoryChange}
-        />
-
-        <ManualRateControls
-          idPrefix="quick-sst"
-          manualRate={manualRate}
-          manualRateEnabled={manualRateEnabled}
-          onManualRateChange={onManualRateChange}
-        />
-
-        <CategoryHint
-          category={category}
-          id="quick-sst-category-note"
-        />
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-            onClick={onReset}
-            type="button"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
-
-      <ResultPanel
-        heading={mode === "add" ? "Add SST estimate" : "Remove SST estimate"}
-        message={calculation.message}
-        result={calculation.result}
-      >
-        {line ? (
-          <>
-            <ResultMetric
-              label={mode === "add" ? "Total including SST" : "Amount before SST"}
-              value={
-                mode === "add"
-                  ? formatCurrency(line.totalIncludingSst)
-                  : formatCurrency(line.amountBeforeSst)
-              }
-              featured
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ResultMetric label="SST rate" value={formatPercent(line.sstRatePercent)} />
-              <ResultMetric label="SST amount" value={formatCurrency(line.sstAmount)} />
-            </div>
-            {mode === "add" ? (
-              <ResultMetric label="Amount before SST" value={formatCurrency(line.amountBeforeSst)} />
-            ) : (
-              <ResultMetric
-                label="Total including SST"
-                value={formatCurrency(line.totalIncludingSst)}
-              />
-            )}
-            <p className="text-sm leading-6 text-stone-600">{line.explanation}</p>
-            <p className="text-sm leading-6 text-stone-600">
-              Formula used:{" "}
-              {mode === "add"
-                ? "SST amount = amount before SST x selected rate."
-                : "Amount before SST = SST-inclusive amount / (1 + selected rate)."}
-            </p>
-            <WarningsList warnings={calculation.result?.warnings ?? []} />
-          </>
-        ) : null}
-      </ResultPanel>
-    </div>
-  );
-}
-
-function InvoiceBreakdownView({
-  calculation,
-  formatCurrency,
-  lines,
-  mode,
-  onAddLine,
-  onModeChange,
-  onRemoveLine,
-  onReset,
-  onUpdateLine
-}: {
-  calculation: { message: string; result: SstInvoiceMalaysiaResult | null };
-  formatCurrency: (value: number) => string;
-  lines: InvoiceLineForm[];
-  mode: SstCalculationMode;
-  onAddLine: () => void;
-  onModeChange: (value: SstCalculationMode) => void;
-  onRemoveLine: (id: string) => void;
-  onReset: () => void;
-  onUpdateLine: (id: string, updates: Partial<InvoiceLineForm>) => void;
-}) {
-  return (
-    <div className="grid gap-6">
-      <div className="grid gap-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <ModeSelect
-            addLabel="Prices entered are before SST"
-            mode={mode}
-            onModeChange={onModeChange}
-            removeLabel="Prices entered include SST"
-          />
-          <div className="flex flex-wrap gap-3">
-            <button
-              className="inline-flex h-10 w-fit items-center justify-center rounded-xl bg-slate-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              onClick={onAddLine}
-              type="button"
-            >
-              Add line item
-            </button>
-            <button
-              className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-white"
-              onClick={onReset}
-              type="button"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          {lines.map((line, index) => (
-            <InvoiceLineEditor
-              index={index}
-              key={line.id}
-              line={line}
-              onRemove={() => onRemoveLine(line.id)}
-              onUpdate={(updates) => onUpdateLine(line.id, updates)}
-              removeDisabled={lines.length === 1}
-            />
-          ))}
-        </div>
-      </div>
-
-      <ResultPanel
-        heading="Invoice SST breakdown"
-        message={calculation.message}
-        result={calculation.result}
-      >
-        {calculation.result ? (
-          <>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <ResultMetric
-                label="Subtotal before SST"
-                value={formatCurrency(calculation.result.subtotalBeforeSst)}
-              />
-              <ResultMetric label="SST total" value={formatCurrency(calculation.result.totalSst)} />
-              <ResultMetric
-                label="Grand total including SST"
-                value={formatCurrency(calculation.result.grandTotalIncludingSst)}
-                featured
-              />
-            </div>
-
-            <div className="grid gap-3">
-              <h3 className="text-base font-semibold text-stone-950">Line-by-line result</h3>
-              {calculation.result.lineItems.map((line) => (
-                <div
-                  className="rounded-xl border border-stone-200 bg-white p-4"
-                  key={line.id ?? line.description}
-                >
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-stone-950">{line.description}</p>
-                      <p className="mt-1 text-xs leading-5 text-stone-500">
-                        {line.categoryLabel} - {line.rateType === "fixed"
-                          ? `RM ${line.fixedAmount?.toFixed(2)} fixed`
-                          : formatPercent(line.sstRatePercent)}
-                      </p>
-                    </div>
-                    <p className="text-sm font-semibold text-stone-950">
-                      {formatCurrency(line.totalIncludingSst)}
-                    </p>
-                  </div>
-                  <div className="mt-3 grid gap-2 text-sm text-stone-600 sm:grid-cols-3">
-                    <span>Before SST: {formatCurrency(line.amountBeforeSst)}</span>
-                    <span>SST: {formatCurrency(line.sstAmount)}</span>
-                    <span>Total: {formatCurrency(line.totalIncludingSst)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid gap-3">
-              <h3 className="text-base font-semibold text-stone-950">Grouped SST totals</h3>
-              {calculation.result.groupedSst.map((group) => (
-                <div
-                  className="flex flex-col gap-2 rounded-xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
-                  key={group.key}
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-stone-950">{group.categoryLabel}</p>
-                    <p className="mt-1 text-xs text-stone-500">
-                      {group.rateType === "fixed"
-                        ? `Fixed RM ${group.fixedAmount?.toFixed(2)}`
-                        : formatPercent(group.sstRatePercent)}
-                    </p>
-                  </div>
-                  <div className="text-sm font-semibold text-stone-950">
-                    {formatCurrency(group.sstAmount)}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-sm leading-6 text-stone-600">{calculation.result.explanation}</p>
-            <p className="text-sm leading-6 text-stone-600">
-              Rounded line totals are summed for subtotal, SST total, and grand total so the
-              breakdown matches the displayed rows.
-            </p>
-            <WarningsList warnings={calculation.result.warnings} />
-          </>
-        ) : null}
-      </ResultPanel>
-    </div>
-  );
-}
-
-function InvoiceLineEditor({
-  index,
-  line,
-  onRemove,
-  onUpdate,
-  removeDisabled
-}: {
-  index: number;
-  line: InvoiceLineForm;
-  onRemove: () => void;
-  onUpdate: (updates: Partial<InvoiceLineForm>) => void;
-  removeDisabled: boolean;
-}) {
-  const category = getCategoryOrFallback(line.categoryId);
-  const manualRateEnabled = shouldUseManualRate(category);
-  const idPrefix = `sst-line-${index + 1}`;
-
-  return (
-    <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h3 className="text-base font-semibold text-stone-950">Line item {index + 1}</h3>
-        <button
-          className="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 px-3 text-sm font-semibold text-stone-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={removeDisabled}
-          onClick={onRemove}
-          type="button"
-        >
-          Remove line
-        </button>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-[minmax(13rem,1fr)_8rem_10rem_minmax(17rem,1.1fr)]">
-        <label className="grid min-w-0 gap-2" htmlFor={`${idPrefix}-description`}>
-          <span className="text-sm font-semibold text-stone-800">Description</span>
-          <input
-            className={smallInputClassName}
-            id={`${idPrefix}-description`}
-            onChange={(event) => onUpdate({ description: event.target.value })}
-            placeholder="Service or goods"
-            type="text"
-            value={line.description}
-          />
-        </label>
-
-        <label className="grid min-w-0 gap-2" htmlFor={`${idPrefix}-quantity`}>
-          <span className="text-sm font-semibold text-stone-800">Quantity</span>
-          <input
-            className={smallInputClassName}
-            id={`${idPrefix}-quantity`}
-            inputMode="decimal"
-            min="0.0001"
-            onChange={(event) => onUpdate({ quantity: event.target.value })}
-            placeholder="1"
-            step="0.0001"
-            type="number"
-            value={line.quantity}
-          />
-        </label>
-
-        <label className="grid min-w-0 gap-2" htmlFor={`${idPrefix}-unit-price`}>
-          <span className="text-sm font-semibold text-stone-800">Unit price</span>
-          <input
-            className={smallInputClassName}
-            id={`${idPrefix}-unit-price`}
-            inputMode="decimal"
-            min="0"
-            onChange={(event) => onUpdate({ unitPrice: event.target.value })}
-            placeholder="0.00"
-            step="0.01"
-            type="number"
-            value={line.unitPrice}
-          />
-        </label>
-
-        <CategorySelect
-          categoryId={line.categoryId}
-          id={`${idPrefix}-category`}
-          label="Category"
-          onChange={(categoryId) =>
-            onUpdate({
-              categoryId,
-              manualRate: ""
-            })
-          }
-          compact
-        />
-      </div>
-
-      <div className="mt-3 grid gap-3">
-        <ManualRateControls
-          idPrefix={idPrefix}
-          manualRate={line.manualRate}
-          manualRateEnabled={manualRateEnabled}
-          onManualRateChange={(value) => onUpdate({ manualRate: value })}
-        />
-        <CategoryHint category={category} />
-      </div>
-    </div>
-  );
-}
-
 function ModeSelect({
-  addLabel = "Add SST",
   mode,
-  onModeChange,
-  removeLabel = "Remove SST"
+  onModeChange
 }: {
-  addLabel?: string;
   mode: SstCalculationMode;
   onModeChange: (value: SstCalculationMode) => void;
-  removeLabel?: string;
 }) {
   return (
     <DropdownSelect
@@ -830,8 +358,8 @@ function ModeSelect({
       label="Calculation mode"
       onChange={onModeChange}
       options={[
-        { label: addLabel, value: "add" },
-        { label: removeLabel, value: "remove" }
+        { label: "Add SST", value: "add" },
+        { label: "Remove SST", value: "remove" }
       ]}
       value={mode}
     />
@@ -840,14 +368,12 @@ function ModeSelect({
 
 function CategorySelect({
   categoryId,
-  compact = false,
   describedBy,
   id,
   label,
   onChange
 }: {
   categoryId: SstCategoryId;
-  compact?: boolean;
   describedBy?: string;
   id: string;
   label: string;
@@ -855,7 +381,6 @@ function CategorySelect({
 }) {
   return (
     <DropdownSelect
-      compact={compact}
       describedBy={describedBy}
       groups={categoryDropdownGroups}
       id={id}
@@ -867,7 +392,6 @@ function CategorySelect({
 }
 
 function DropdownSelect<T extends string>({
-  compact = false,
   describedBy,
   groups,
   id,
@@ -876,7 +400,6 @@ function DropdownSelect<T extends string>({
   options,
   value
 }: {
-  compact?: boolean;
   describedBy?: string;
   groups?: Array<DropdownGroup<T>>;
   id: string;
@@ -906,7 +429,6 @@ function DropdownSelect<T extends string>({
   const labelId = `${id}-label`;
   const buttonId = `${id}-button`;
   const listboxId = `${reactId}-listbox`;
-  const triggerHeightClass = compact ? "h-11" : "h-12";
 
   function focusOption(index: number) {
     optionRefs.current[index]?.focus();
@@ -1020,7 +542,7 @@ function DropdownSelect<T extends string>({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-labelledby={`${labelId} ${buttonId}`}
-        className={`inline-flex ${triggerHeightClass} w-full items-center justify-between gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100`}
+        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
         id={buttonId}
         onClick={() => {
           setActiveIndex(selectedIndex);
@@ -1039,7 +561,7 @@ function DropdownSelect<T extends string>({
 
       {isOpen ? (
         <div
-          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
+          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-2xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
           id={listboxId}
           role="listbox"
         >
@@ -1089,27 +611,6 @@ function DropdownSelect<T extends string>({
   );
 }
 
-function CategoryHint({
-  category,
-  id
-}: {
-  category: SstMalaysiaCategory;
-  id?: string;
-}) {
-  return (
-    <div
-      className="rounded-xl border border-stone-200 bg-white p-3 text-sm leading-6 text-stone-600"
-      id={id}
-    >
-      <p className="break-words font-semibold text-stone-900">
-        {getCategoryRateLabel(category)}
-      </p>
-      <p className="mt-1">{category.description}</p>
-      {category.warning ? <p className="mt-2 text-amber-800">{category.warning}</p> : null}
-    </div>
-  );
-}
-
 function ManualRateControls({
   idPrefix,
   manualRate,
@@ -1129,7 +630,7 @@ function ManualRateControls({
     <label className="grid gap-2" htmlFor={`${idPrefix}-manual-rate`}>
       <span className="text-sm font-semibold text-stone-800">Manual SST rate (%)</span>
       <input
-        className={smallInputClassName}
+        className={inputClassName}
         id={`${idPrefix}-manual-rate`}
         inputMode="decimal"
         max="100"
@@ -1145,71 +646,25 @@ function ManualRateControls({
   );
 }
 
-function ResultPanel({
-  children,
-  heading,
-  message,
-  result
-}: {
-  children: ReactNode;
-  heading: string;
-  message: string;
-  result: SstInvoiceMalaysiaResult | null;
-}) {
-  return (
-    <div aria-live="polite" className="rounded-xl border border-stone-200 bg-stone-50 p-5">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Result</p>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight text-stone-950">
-          {heading}
-        </h2>
-      </div>
-
-      {result ? <div className="mt-5 grid gap-3">{children}</div> : (
-        <p className="mt-4 text-sm leading-6 text-stone-600">{message}</p>
-      )}
-    </div>
-  );
-}
-
-function ResultMetric({
-  featured = false,
+function ResultStat({
+  accent = false,
   label,
   value
 }: {
-  featured?: boolean;
+  accent?: boolean;
   label: string;
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-stone-200 bg-white p-4">
+    <div className="rounded-2xl border border-stone-200 bg-white p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
       <p
-        className={`mt-2 font-semibold tracking-tight text-stone-950 ${
-          featured ? "text-3xl" : "text-xl"
+        className={`mt-2 text-xl font-semibold tracking-tight ${
+          accent ? "text-teal-700" : "text-stone-950"
         }`}
       >
         {value}
       </p>
-    </div>
-  );
-}
-
-function WarningsList({ warnings }: { warnings: string[] }) {
-  if (warnings.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="grid gap-2">
-      {[...new Set(warnings)].map((warning) => (
-        <p
-          className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900"
-          key={warning}
-        >
-          {warning}
-        </p>
-      ))}
     </div>
   );
 }
