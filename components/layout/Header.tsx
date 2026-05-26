@@ -510,6 +510,11 @@ export function Header() {
       const target = event.target as Node;
       const activeButton =
         desktopMenu === "tools" ? toolsButtonRef.current : guidesButtonRef.current;
+      const targetMenu = toolsButtonRef.current?.contains(target)
+        ? "tools"
+        : guidesButtonRef.current?.contains(target)
+          ? "guides"
+          : null;
       const activeButtonRect = activeButton?.getBoundingClientRect();
       const panelRect = desktopMenuPanelRef.current?.getBoundingClientRect();
       const isBetweenActiveButtonAndPanel =
@@ -519,6 +524,11 @@ export function Header() {
         event.clientX <= panelRect.right &&
         event.clientY >= activeButtonRect.bottom &&
         event.clientY <= panelRect.top;
+
+      if (targetMenu) {
+        setDesktopMenu(targetMenu);
+        return;
+      }
 
       if (
         activeButton?.contains(target) ||
