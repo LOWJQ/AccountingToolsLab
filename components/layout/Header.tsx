@@ -2,16 +2,157 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ChevronDown, Menu, Search, X } from "lucide-react";
-import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  Search,
+  X
+} from "lucide-react";
+import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { getCompactCurrencyLabel, isCurrencyCode, searchCurrencies } from "@/lib/currency";
 
-const navItems = [
-  { label: "Tools", href: "/tools" },
-  { label: "Guides", href: "/guides" },
-  { label: "About", href: "/about" }
+type DesktopMenuKey = "guides" | "tools";
+
+type MenuItem = {
+  description: string;
+  href: string;
+  label: string;
+};
+
+type MegaMenuConfig = {
+  eyebrow: string;
+  items: MenuItem[];
+  summary: string;
+  title: string;
+  viewAllHref: string;
+  viewAllLabel: string;
+};
+
+const toolItems: MenuItem[] = [
+  {
+    label: "Invoice Generator",
+    href: "/tools/invoice-generator",
+    description: "Create professional invoices with MYR, SST, and PDF export."
+  },
+  {
+    label: "SST Calculator Malaysia",
+    href: "/tools/sst-calculator-malaysia",
+    description: "Calculate SST-inclusive and SST-exclusive prices."
+  },
+  {
+    label: "Trial Balance Calculator",
+    href: "/tools/trial-balance-calculator",
+    description: "Check debit and credit totals easily."
+  },
+  {
+    label: "Cash Flow Calculator",
+    href: "/tools/cash-flow-calculator",
+    description: "Review cash inflows, outflows, and net cash flow."
+  },
+  {
+    label: "Break-even Calculator",
+    href: "/tools/break-even-calculator",
+    description: "Find the sales needed to cover your costs."
+  },
+  {
+    label: "Accounting Equation Calculator",
+    href: "/tools/accounting-equation-calculator",
+    description: "Check assets, liabilities, and equity."
+  },
+  {
+    label: "Debit/Credit Checker",
+    href: "/tools/debit-credit-checker",
+    description: "Learn whether an account should be debited or credited."
+  },
+  {
+    label: "Financial Ratio Calculator",
+    href: "/tools/financial-ratio-calculator",
+    description: "Calculate useful business and accounting ratios."
+  },
+  {
+    label: "Depreciation Calculator",
+    href: "/tools/depreciation-calculator",
+    description: "Estimate depreciation using common methods."
+  },
+  {
+    label: "Journal Entry Checker",
+    href: "/tools/journal-entry-checker",
+    description: "Review simple journal entry logic."
+  }
 ];
+
+const guideItems: MenuItem[] = [
+  {
+    label: "How to Create a Simple Invoice",
+    href: "/guides/how-to-create-a-simple-invoice",
+    description: "Learn what to include in a basic invoice."
+  },
+  {
+    label: "SST Calculator Malaysia Guide",
+    href: "/guides/sst-calculator-malaysia-add-remove-sst",
+    description: "Understand SST calculations for Malaysian business checks."
+  },
+  {
+    label: "Debit vs Credit",
+    href: "/guides/debit-vs-credit",
+    description: "Learn the difference between debit and credit."
+  },
+  {
+    label: "Trial Balance Explained",
+    href: "/guides/trial-balance-explained",
+    description: "Understand how trial balance works."
+  },
+  {
+    label: "Cash Flow vs Profit",
+    href: "/guides/cash-flow-vs-profit",
+    description: "Learn why cash flow and profit are different."
+  },
+  {
+    label: "Break-even Point Explained",
+    href: "/guides/break-even-point-explained",
+    description: "Understand how break-even analysis works."
+  },
+  {
+    label: "Financial Ratios for Beginners",
+    href: "/guides/financial-ratios-for-beginners",
+    description: "Learn useful ratio basics for business checks."
+  },
+  {
+    label: "Journal Entries for Beginners",
+    href: "/guides/journal-entries-for-beginners",
+    description: "Learn how basic journal entries are structured."
+  }
+];
+
+const megaMenus: Record<DesktopMenuKey, MegaMenuConfig> = {
+  tools: {
+    eyebrow: "Tools",
+    title: "Accounting tools",
+    summary: "Open the calculators and checkers people use most for everyday accounting work.",
+    items: toolItems,
+    viewAllHref: "/tools",
+    viewAllLabel: "View all tools"
+  },
+  guides: {
+    eyebrow: "Guides",
+    title: "Accounting guides",
+    summary: "Browse practical walkthroughs for invoices, bookkeeping, SST, and accounting basics.",
+    items: guideItems,
+    viewAllHref: "/guides",
+    viewAllLabel: "View all guides"
+  }
+};
 
 function CurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,11 +192,7 @@ function CurrencySelector() {
   function selectCurrency(index: number) {
     const option = filteredCurrencies[index];
 
-    if (!option) {
-      return;
-    }
-
-    if (!isCurrencyCode(option.code)) {
+    if (!option || !isCurrencyCode(option.code)) {
       return;
     }
 
@@ -73,7 +210,6 @@ function CurrencySelector() {
     }
 
     const nextIndex = Math.min(Math.max(index, 0), lastIndex);
-
     setActiveIndex(nextIndex);
     optionRefs.current[nextIndex]?.scrollIntoView({ block: "nearest" });
   }
@@ -94,11 +230,10 @@ function CurrencySelector() {
 
   useEffect(() => {
     const nextSelectedIndex = filteredCurrencies.findIndex((option) => option.code === currency);
-
     setActiveIndex(nextSelectedIndex >= 0 ? nextSelectedIndex : 0);
   }, [currency, filteredCurrencies]);
 
-  function handleButtonKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  function handleButtonKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       openSelector(isOpen ? Math.min(activeIndex + 1, filteredCurrencies.length - 1) : selectedIndex);
@@ -120,7 +255,7 @@ function CurrencySelector() {
     }
   }
 
-  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function handleSearchKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       moveActiveOption(activeIndex + 1);
@@ -173,9 +308,7 @@ function CurrencySelector() {
       </button>
 
       {isOpen ? (
-        <div
-          className="absolute left-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60 sm:left-auto sm:right-0"
-        >
+        <div className="absolute left-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60 sm:left-auto sm:right-0">
           <div className="border-b border-stone-100 p-3">
             <label className="relative block" htmlFor={searchInputId}>
               <Search
@@ -203,11 +336,7 @@ function CurrencySelector() {
             </label>
           </div>
 
-          <div
-            className="max-h-80 overflow-y-auto py-1.5"
-            id={listboxId}
-            role="listbox"
-          >
+          <div className="max-h-80 overflow-y-auto py-1.5" id={listboxId} role="listbox">
             {filteredCurrencies.length > 0 ? (
               filteredCurrencies.map((option, index) => {
                 const isActive = activeIndex === index;
@@ -263,18 +392,91 @@ function CurrencySelector() {
   );
 }
 
+function MegaMenuPanel({
+  menuKey,
+  onNavigate,
+  panelRef
+}: {
+  menuKey: DesktopMenuKey;
+  onNavigate: () => void;
+  panelRef: RefObject<HTMLDivElement>;
+}) {
+  const menu = megaMenus[menuKey];
+
+  return (
+    <div className="absolute inset-x-0 top-full pt-1" ref={panelRef}>
+      <div className="mx-auto max-w-[1400px] px-3 sm:px-5 lg:px-6">
+        <div className="overflow-hidden border border-stone-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+          <div className="grid lg:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="border-b border-stone-100 bg-stone-50/70 p-6 lg:border-b-0 lg:border-r">
+              <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+                {menu.eyebrow}
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+                {menu.title}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-stone-600">{menu.summary}</p>
+            </div>
+
+            <div className="p-5 sm:p-6 lg:p-8">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {menu.items.map((item) => (
+                  <Link
+                    className="group rounded-2xl border border-transparent p-4 transition hover:border-stone-200 hover:bg-stone-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                    href={item.href}
+                    key={item.href}
+                    onClick={onNavigate}
+                  >
+                    <p className="text-sm font-semibold text-stone-950 transition group-hover:text-teal-700">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-stone-500">{item.description}</p>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-4 border-t border-stone-100 pt-4">
+                <Link
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 transition hover:text-teal-800 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                  href={menu.viewAllHref}
+                  onClick={onNavigate}
+                >
+                  {menu.viewAllLabel}
+                  <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [desktopMenu, setDesktopMenu] = useState<DesktopMenuKey | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileExpandedSection, setMobileExpandedSection] = useState<DesktopMenuKey | null>(null);
   const headerRef = useRef<HTMLElement>(null);
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const desktopMenuPanelRef = useRef<HTMLDivElement>(null);
+  const toolsButtonRef = useRef<HTMLButtonElement>(null);
+  const guidesButtonRef = useRef<HTMLButtonElement>(null);
+
+  function closeAllMenus() {
+    setDesktopMenu(null);
+    setIsMobileMenuOpen(false);
+    setMobileExpandedSection(null);
+  }
+
+  function openDesktopMenu(menu: DesktopMenuKey) {
+    setDesktopMenu(menu);
+  }
 
   useEffect(() => {
-    if (!isMenuOpen) {
-      return;
-    }
-
     function handlePointerDown(event: PointerEvent) {
       if (!headerRef.current?.contains(event.target as Node)) {
-        setIsMenuOpen(false);
+        closeAllMenus();
       }
     }
 
@@ -283,7 +485,82 @@ export function Header() {
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, [isMenuOpen]);
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(event: globalThis.KeyboardEvent) {
+      if (event.key === "Escape") {
+        closeAllMenus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handlePointerMove(event: PointerEvent) {
+      if (!desktopMenu) {
+        return;
+      }
+
+      const target = event.target as Node;
+      const activeButton =
+        desktopMenu === "tools" ? toolsButtonRef.current : guidesButtonRef.current;
+      const activeButtonRect = activeButton?.getBoundingClientRect();
+      const panelRect = desktopMenuPanelRef.current?.getBoundingClientRect();
+      const isBetweenActiveButtonAndPanel =
+        activeButtonRect &&
+        panelRect &&
+        event.clientX >= panelRect.left &&
+        event.clientX <= panelRect.right &&
+        event.clientY >= activeButtonRect.bottom &&
+        event.clientY <= panelRect.top;
+
+      if (
+        activeButton?.contains(target) ||
+        desktopMenuPanelRef.current?.contains(target) ||
+        isBetweenActiveButtonAndPanel
+      ) {
+        return;
+      }
+
+      setDesktopMenu(null);
+    }
+
+    document.addEventListener("pointermove", handlePointerMove);
+
+    return () => {
+      document.removeEventListener("pointermove", handlePointerMove);
+    };
+  }, [desktopMenu]);
+
+  useEffect(() => {
+    function closeDesktopMenu() {
+      setDesktopMenu(null);
+    }
+
+    window.addEventListener("scroll", closeDesktopMenu, { passive: true });
+    window.addEventListener("wheel", closeDesktopMenu, { passive: true });
+    window.addEventListener("touchmove", closeDesktopMenu, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", closeDesktopMenu);
+      window.removeEventListener("wheel", closeDesktopMenu);
+      window.removeEventListener("touchmove", closeDesktopMenu);
+    };
+  }, []);
+
+  function handleDesktopBlur() {
+    window.requestAnimationFrame(() => {
+      if (!desktopNavRef.current?.contains(document.activeElement)) {
+        setDesktopMenu(null);
+      }
+    });
+  }
 
   return (
     <header
@@ -302,13 +579,71 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden flex-1 items-center justify-center gap-7 text-sm font-medium text-stone-600 sm:flex">
-          {navItems.map((item) => (
-            <Link className="transition hover:text-stone-950" href={item.href} key={item.href}>
-              {item.label}
+        <div
+          className="hidden flex-1 sm:block"
+          onBlurCapture={handleDesktopBlur}
+          ref={desktopNavRef}
+        >
+          <nav className="flex items-center justify-center gap-2 text-sm font-medium text-stone-600">
+            <button
+              aria-expanded={desktopMenu === "tools"}
+              aria-haspopup="dialog"
+              className={`inline-flex h-10 items-center gap-1 rounded-full px-4 transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${
+                desktopMenu === "tools"
+                  ? "bg-stone-100 text-stone-950"
+                  : "hover:bg-stone-50 hover:text-stone-950"
+              }`}
+              onClick={() => openDesktopMenu("tools")}
+              onFocus={() => openDesktopMenu("tools")}
+              onMouseEnter={() => openDesktopMenu("tools")}
+              ref={toolsButtonRef}
+              type="button"
+            >
+              <span>Tools</span>
+              <ChevronDown
+                aria-hidden="true"
+                className={`h-4 w-4 transition ${desktopMenu === "tools" ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <button
+              aria-expanded={desktopMenu === "guides"}
+              aria-haspopup="dialog"
+              className={`inline-flex h-10 items-center gap-1 rounded-full px-4 transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${
+                desktopMenu === "guides"
+                  ? "bg-stone-100 text-stone-950"
+                  : "hover:bg-stone-50 hover:text-stone-950"
+              }`}
+              onClick={() => openDesktopMenu("guides")}
+              onFocus={() => openDesktopMenu("guides")}
+              onMouseEnter={() => openDesktopMenu("guides")}
+              ref={guidesButtonRef}
+              type="button"
+            >
+              <span>Guides</span>
+              <ChevronDown
+                aria-hidden="true"
+                className={`h-4 w-4 transition ${desktopMenu === "guides" ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <Link
+              className="inline-flex h-10 items-center rounded-full px-4 transition hover:bg-stone-50 hover:text-stone-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+              href="/about"
+              onMouseEnter={() => setDesktopMenu(null)}
+            >
+              About
             </Link>
-          ))}
-        </nav>
+          </nav>
+
+          {desktopMenu ? (
+            <MegaMenuPanel
+              menuKey={desktopMenu}
+              onNavigate={() => setDesktopMenu(null)}
+              panelRef={desktopMenuPanelRef}
+            />
+          ) : null}
+        </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <div className="hidden sm:block">
@@ -316,33 +651,85 @@ export function Header() {
           </div>
 
           <button
-            aria-expanded={isMenuOpen}
+            aria-expanded={isMobileMenuOpen}
             aria-label="Toggle navigation menu"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-stone-700 transition hover:border-stone-300 hover:text-stone-950 sm:hidden"
-            onClick={() => setIsMenuOpen((current) => !current)}
+            onClick={() => {
+              setIsMobileMenuOpen((current) => !current);
+              setDesktopMenu(null);
+            }}
             type="button"
           >
-            {isMenuOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
+            {isMobileMenuOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
           </button>
         </div>
       </div>
 
-      {isMenuOpen ? (
+      {isMobileMenuOpen ? (
         <nav className="absolute inset-x-0 top-16 z-20 border-b border-stone-200 bg-white px-4 py-3 shadow-sm sm:hidden">
-          <div className="mx-auto flex max-w-[1080px] flex-col text-sm font-medium text-stone-600">
-            <div className="border-b border-stone-100 pb-3">
+          <div className="mx-auto flex max-w-[1240px] flex-col rounded-3xl border border-stone-200 bg-white p-2 text-sm text-stone-600 shadow-lg shadow-stone-200/50">
+            <div className="border-b border-stone-100 p-2 pb-4">
               <CurrencySelector />
             </div>
-            {navItems.map((item) => (
-              <Link
-                className="py-3 transition hover:text-stone-950"
-                href={item.href}
-                key={item.href}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+
+            {(["tools", "guides"] as DesktopMenuKey[]).map((sectionKey) => {
+              const menu = megaMenus[sectionKey];
+              const isExpanded = mobileExpandedSection === sectionKey;
+
+              return (
+                <div className="border-b border-stone-100 last:border-b-0" key={sectionKey}>
+                  <button
+                    aria-expanded={isExpanded}
+                    className="flex w-full items-center justify-between px-2 py-4 text-left text-sm font-semibold text-stone-900"
+                    onClick={() =>
+                      setMobileExpandedSection((current) =>
+                        current === sectionKey ? null : sectionKey
+                      )
+                    }
+                    type="button"
+                  >
+                    <span className="flex items-center gap-2">
+                      {menu.eyebrow}
+                    </span>
+                    <ChevronDown
+                      aria-hidden="true"
+                      className={`h-4 w-4 text-stone-500 transition ${isExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {isExpanded ? (
+                    <div className="grid gap-1 px-2 pb-4">
+                      {menu.items.map((item) => (
+                        <Link
+                          className="rounded-2xl px-3 py-3 transition hover:bg-stone-50"
+                          href={item.href}
+                          key={item.href}
+                          onClick={() => closeAllMenus()}
+                        >
+                          <p className="font-semibold text-stone-900">{item.label}</p>
+                          <p className="mt-1 text-sm leading-6 text-stone-500">{item.description}</p>
+                        </Link>
+                      ))}
+                      <Link
+                        className="px-3 pt-2 text-sm font-semibold text-teal-700"
+                        href={menu.viewAllHref}
+                        onClick={() => closeAllMenus()}
+                      >
+                        {menu.viewAllLabel}
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+
+            <Link
+              className="px-4 py-4 text-sm font-semibold text-stone-900 transition hover:text-stone-950"
+              href="/about"
+              onClick={() => closeAllMenus()}
+            >
+              About
+            </Link>
           </div>
         </nav>
       ) : null}

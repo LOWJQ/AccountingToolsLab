@@ -2,15 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 type FooterLink = {
-  label: string;
   href: string;
+  label: string;
 };
 
-const footerSections: { title: string; links: FooterLink[] }[] = [
+const footerSections: Array<{ links: FooterLink[]; title: string }> = [
   {
     title: "Tools",
     links: [
-      { label: "Free Invoice Generator Malaysia", href: "/tools/invoice-generator" },
+      { label: "Invoice Generator", href: "/tools/invoice-generator" },
       { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" },
       { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
       { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
@@ -20,13 +20,10 @@ const footerSections: { title: string; links: FooterLink[] }[] = [
   {
     title: "Guides",
     links: [
-      { label: "Simple Invoice Guide", href: "/guides/how-to-create-a-simple-invoice" },
-      {
-        label: "SST Calculator Malaysia Guide",
-        href: "/guides/sst-calculator-malaysia-add-remove-sst"
-      },
+      { label: "How to Create a Simple Invoice", href: "/guides/how-to-create-a-simple-invoice" },
+      { label: "Debit vs Credit", href: "/guides/debit-vs-credit" },
+      { label: "Trial Balance Explained", href: "/guides/trial-balance-explained" },
       { label: "Cash Flow vs Profit", href: "/guides/cash-flow-vs-profit" },
-      { label: "Break-even Point Explained", href: "/guides/break-even-point-explained" },
       { label: "All Guides", href: "/guides" }
     ]
   },
@@ -41,49 +38,67 @@ const footerSections: { title: string; links: FooterLink[] }[] = [
   }
 ];
 
+const trustPoints = ["Free tools", "MYR support", "No sign-up needed"];
+
 export function Footer() {
   return (
-    <footer className="border-t border-stone-200 bg-white">
-      <div className="mx-auto grid max-w-[1080px] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_2fr] lg:px-8 lg:py-12">
-        <div>
-          <Link className="inline-flex items-center" href="/" aria-label="AccountingToolsLab home">
-            <Image
-              alt="AccountingToolsLab"
-              className="h-auto w-[220px]"
-              height={52}
-              src="/logo-optimized.png"
-              width={220}
-            />
-          </Link>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-stone-600">
-            Free invoice generator and accounting tools for freelancers, small businesses,
-            students, and beginners.
-          </p>
+    <footer className="border-t border-stone-200 bg-white text-stone-900">
+      <div className="mx-auto max-w-[1240px] px-3 py-12 sm:px-5 sm:py-14 lg:px-6 lg:py-16">
+        <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
+          <section aria-labelledby="footer-brand" className="max-w-[420px]">
+            <Link className="inline-flex items-center" href="/" aria-label="AccountingToolsLab home">
+              <Image
+                alt="AccountingToolsLab"
+                className="h-auto w-[190px] sm:w-[220px]"
+                height={52}
+                src="/logo-optimized.png"
+                width={220}
+              />
+            </Link>
+            <h2 className="sr-only" id="footer-brand">
+              AccountingToolsLab
+            </h2>
+            <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-[0.95rem]">
+              Free accounting tools and guides for small businesses, freelancers, students, and
+              beginners.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-stone-500">
+              {trustPoints.map((point, index) => (
+                <span className="inline-flex items-center" key={point}>
+                  {index > 0 ? <span className="mr-3 text-stone-300">·</span> : null}
+                  {point}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          <nav aria-label="Footer navigation" className="w-full max-w-[680px]">
+            <div className="grid gap-8 sm:grid-cols-3 sm:gap-10">
+              {footerSections.map((section) => (
+                <div key={section.title}>
+                  <h2 className="text-sm font-semibold text-stone-950">{section.title}</h2>
+                  <ul className="mt-4 space-y-3">
+                    {section.links.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          className="text-sm leading-6 text-stone-500 transition hover:text-stone-950 focus:outline-none focus:ring-2 focus:ring-stone-200 focus:ring-offset-2 focus:ring-offset-white"
+                          href={link.href}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </nav>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-3">
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h2 className="text-sm font-semibold text-stone-950">{section.title}</h2>
-              <ul className="mt-4 space-y-3">
-                {section.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      className="text-sm text-stone-500 transition hover:text-stone-900"
-                      href={link.href}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div className="mt-10 flex flex-col gap-3 border-t border-stone-200 pt-5 text-xs text-stone-500 sm:mt-12 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
+          <p>Copyright 2026 AccountingToolsLab. All rights reserved.</p>
+          <p>Built for simple invoices, business checks, and accounting learning.</p>
         </div>
-      </div>
-      <div className="mx-auto flex max-w-[1080px] flex-col gap-3 border-t border-stone-100 px-4 py-6 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <p>Copyright 2026 AccountingToolsLab. All rights reserved.</p>
-        <p>Built for simple invoices, business checks, and accounting learning.</p>
       </div>
     </footer>
   );
