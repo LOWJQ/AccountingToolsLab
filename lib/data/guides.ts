@@ -2,6 +2,7 @@ export type Guide = {
   slug: string;
   title: string;
   description: string;
+  menuDescription: string;
   category: string;
   status: "available" | "coming-soon";
   href: string;
@@ -13,6 +14,7 @@ export const guides: Guide[] = [
     title: "Debit vs Credit",
     description:
       "Learn debit and credit rules, normal balances, beginner examples, and how to know whether to debit or credit an account.",
+    menuDescription: "Learn debit and credit rules with simple beginner examples.",
     category: "Accounting Basics",
     status: "available",
     href: "/guides/debit-vs-credit"
@@ -22,6 +24,7 @@ export const guides: Guide[] = [
     title: "Journal Entries for Beginners",
     description:
       "Learn how journal entries work with simple debit and credit examples, common mistakes, and a step-by-step beginner checklist.",
+    menuDescription: "Learn how journal entries work with simple debit and credit examples.",
     category: "Accounting Basics",
     status: "available",
     href: "/guides/journal-entries-for-beginners"
@@ -31,6 +34,7 @@ export const guides: Guide[] = [
     title: "Trial Balance Explained",
     description:
       "Learn what a trial balance is, how to prepare one, the trial balance format, examples, common errors, and why total debits should equal total credits.",
+    menuDescription: "Learn what a trial balance is and how to prepare one.",
     category: "Bookkeeping Checks",
     status: "available",
     href: "/guides/trial-balance-explained"
@@ -40,6 +44,7 @@ export const guides: Guide[] = [
     title: "Why Is My Trial Balance Not Balancing?",
     description:
       "Learn common reasons a trial balance does not balance, how to use the difference amount, and how to check debit and credit errors step by step.",
+    menuDescription: "Learn common reasons a trial balance does not balance.",
     category: "Bookkeeping Checks",
     status: "available",
     href: "/guides/why-trial-balance-not-balancing"
@@ -49,6 +54,7 @@ export const guides: Guide[] = [
     title: "Financial Ratios for Beginners",
     description:
       "Learn basic financial ratio formulas, examples, and what ratios like current ratio, debt-to-equity, profit margin, and return on assets mean.",
+    menuDescription: "Learn basic financial ratio formulas for simple business checks.",
     category: "Financial Analysis",
     status: "available",
     href: "/guides/financial-ratios-for-beginners"
@@ -58,6 +64,7 @@ export const guides: Guide[] = [
     title: "Cash Flow vs Profit",
     description:
       "Learn the difference between cash flow and profit, why profitable businesses can run out of cash, and how to check simple cash movement.",
+    menuDescription: "Learn the difference between cash flow and profit.",
     category: "Business Planning",
     status: "available",
     href: "/guides/cash-flow-vs-profit"
@@ -67,6 +74,7 @@ export const guides: Guide[] = [
     title: "Break-even Point Explained",
     description:
       "Learn what break-even point means, how to calculate break-even units and sales, contribution margin, examples, and common beginner mistakes.",
+    menuDescription: "Learn what break-even point means and how it is calculated.",
     category: "Business Planning",
     status: "available",
     href: "/guides/break-even-point-explained"
@@ -76,6 +84,7 @@ export const guides: Guide[] = [
     title: "Straight-Line Depreciation Explained",
     description:
       "Learn straight-line depreciation with the formula, examples, salvage value, useful life, annual depreciation expense, and common beginner mistakes.",
+    menuDescription: "Learn straight-line depreciation with the formula and examples.",
     category: "Depreciation & Adjustments",
     status: "available",
     href: "/guides/straight-line-depreciation-explained"
@@ -85,6 +94,7 @@ export const guides: Guide[] = [
     title: "How to Create a Simple Invoice",
     description:
       "Learn what a simple invoice should include, invoice number, invoice date, due date, line items, totals, and common beginner mistakes.",
+    menuDescription: "Learn what a simple invoice should include before sending it.",
     category: "Business Documents",
     status: "available",
     href: "/guides/how-to-create-a-simple-invoice"
@@ -94,6 +104,7 @@ export const guides: Guide[] = [
     title: "SST Calculator Malaysia: Add or Remove SST",
     description:
       "Learn how to add or remove SST in Malaysia with formulas, examples, SST amount, total including SST, amount before SST, and common mistakes.",
+    menuDescription: "Learn how to add or remove SST in Malaysia with simple formulas.",
     category: "Malaysia Tax Basics",
     status: "available",
     href: "/guides/sst-calculator-malaysia-add-remove-sst"

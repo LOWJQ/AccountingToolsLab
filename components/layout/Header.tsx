@@ -21,6 +21,7 @@ import {
 } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { getCompactCurrencyLabel, isCurrencyCode, searchCurrencies } from "@/lib/currency";
+import { guides } from "@/lib/data/guides";
 
 type DesktopMenuKey = "guides" | "tools";
 
@@ -92,48 +93,13 @@ const toolItems: MenuItem[] = [
   }
 ];
 
-const guideItems: MenuItem[] = [
-  {
-    label: "How to Create a Simple Invoice",
-    href: "/guides/how-to-create-a-simple-invoice",
-    description: "Learn what to include in a basic invoice."
-  },
-  {
-    label: "SST Calculator Malaysia Guide",
-    href: "/guides/sst-calculator-malaysia-add-remove-sst",
-    description: "Understand SST calculations for Malaysian business checks."
-  },
-  {
-    label: "Debit vs Credit",
-    href: "/guides/debit-vs-credit",
-    description: "Learn the difference between debit and credit."
-  },
-  {
-    label: "Trial Balance Explained",
-    href: "/guides/trial-balance-explained",
-    description: "Understand how trial balance works."
-  },
-  {
-    label: "Cash Flow vs Profit",
-    href: "/guides/cash-flow-vs-profit",
-    description: "Learn why cash flow and profit are different."
-  },
-  {
-    label: "Break-even Point Explained",
-    href: "/guides/break-even-point-explained",
-    description: "Understand how break-even analysis works."
-  },
-  {
-    label: "Financial Ratios for Beginners",
-    href: "/guides/financial-ratios-for-beginners",
-    description: "Learn useful ratio basics for business checks."
-  },
-  {
-    label: "Journal Entries for Beginners",
-    href: "/guides/journal-entries-for-beginners",
-    description: "Learn how basic journal entries are structured."
-  }
-];
+const guideItems: MenuItem[] = guides
+  .filter((guide) => guide.status === "available")
+  .map((guide) => ({
+    label: guide.title,
+    href: guide.href,
+    description: guide.menuDescription
+  }));
 
 const megaMenus: Record<DesktopMenuKey, MegaMenuConfig> = {
   tools: {
@@ -418,7 +384,7 @@ function MegaMenuPanel({
               <p className="mt-3 text-sm leading-6 text-stone-600">{menu.summary}</p>
             </div>
 
-            <div className="p-5 sm:p-6 lg:p-8">
+            <div className="max-h-[calc(100vh-6rem)] overflow-y-auto overscroll-contain p-5 sm:p-6 lg:p-8">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {menu.items.map((item) => (
                   <Link
@@ -550,18 +516,14 @@ export function Header() {
   }, [desktopMenu]);
 
   useEffect(() => {
-    function closeDesktopMenu() {
+    function handleWindowScroll() {
       setDesktopMenu(null);
     }
 
-    window.addEventListener("scroll", closeDesktopMenu, { passive: true });
-    window.addEventListener("wheel", closeDesktopMenu, { passive: true });
-    window.addEventListener("touchmove", closeDesktopMenu, { passive: true });
+    window.addEventListener("scroll", handleWindowScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", closeDesktopMenu);
-      window.removeEventListener("wheel", closeDesktopMenu);
-      window.removeEventListener("touchmove", closeDesktopMenu);
+      window.removeEventListener("scroll", handleWindowScroll);
     };
   }, []);
 
@@ -607,12 +569,6 @@ export function Header() {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (desktopMenu || isMobileMenuOpen) {
-      setHeaderOffset(0);
-    }
-  }, [desktopMenu, isMobileMenuOpen]);
 
   function handleDesktopBlur() {
     window.requestAnimationFrame(() => {
