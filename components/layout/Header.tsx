@@ -457,6 +457,7 @@ export function Header() {
   const [desktopMenu, setDesktopMenu] = useState<DesktopMenuKey | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileExpandedSection, setMobileExpandedSection] = useState<DesktopMenuKey | null>(null);
+  const [headerOffset, setHeaderOffset] = useState(0);
   const headerRef = useRef<HTMLElement>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
   const desktopMenuPanelRef = useRef<HTMLDivElement>(null);
@@ -564,6 +565,55 @@ export function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    let frameId = 0;
+    let previousScrollY = window.scrollY;
+
+    function updateHeaderOffset() {
+      frameId = 0;
+
+      const currentScrollY = window.scrollY;
+      const headerHeight = headerRef.current?.offsetHeight ?? 0;
+
+      if (currentScrollY <= 0 || headerHeight <= 0) {
+        previousScrollY = 0;
+        setHeaderOffset(0);
+        return;
+      }
+
+      const scrollDelta = currentScrollY - previousScrollY;
+      previousScrollY = currentScrollY;
+
+      setHeaderOffset((currentOffset) => {
+        const nextOffset = currentOffset + scrollDelta;
+        return Math.min(Math.max(nextOffset, 0), headerHeight);
+      });
+    }
+
+    function handleScroll() {
+      if (frameId) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(updateHeaderOffset);
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (desktopMenu || isMobileMenuOpen) {
+      setHeaderOffset(0);
+    }
+  }, [desktopMenu, isMobileMenuOpen]);
+
   function handleDesktopBlur() {
     window.requestAnimationFrame(() => {
       if (!desktopNavRef.current?.contains(document.activeElement)) {
@@ -572,10 +622,17 @@ export function Header() {
     });
   }
 
+  const headerHeight = headerRef.current?.offsetHeight ?? 64;
+  const visibilityProgress = headerHeight > 0 ? 1 - headerOffset / headerHeight : 1;
+
   return (
     <header
-      className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur"
+      className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur transition-[transform,opacity] duration-300 ease-out will-change-transform"
       ref={headerRef}
+      style={{
+        opacity: Math.max(visibilityProgress, 0),
+        transform: `translateY(-${headerOffset}px)`
+      }}
     >
       <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-4 px-3 sm:px-5 lg:px-6">
         <Link className="flex shrink-0 items-center" href="/" aria-label="AccountingToolsLab home">

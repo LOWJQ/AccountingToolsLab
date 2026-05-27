@@ -87,72 +87,7 @@ export default function SstCalculatorMalaysiaPage() {
       </div>
       <SstCalculatorMalaysia />
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">What it helps with</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Quick SST checks with category guidance
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use the calculator when you have one amount and need to add or remove SST using a
-            suggested category rate or a manual percentage for estimation.
-          </p>
-        </article>
-
-        <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Add vs remove SST</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Choose the direction first
-          </h2>
-          <div className="mt-4 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>
-              Add SST when the amount entered is before SST and you want the SST amount plus
-              final total.
-            </p>
-            <p>
-              Remove SST when the amount entered already includes SST and you want to estimate
-              the amount before SST.
-            </p>
-          </div>
-        </article>
-      </section>
-
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Suggested category rates</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Common SST categories included
-        </h2>
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-          These are suggested/common rates for estimation. Goods and services can depend on
-          official classification, exemptions, registration status, and updated RMCD/MySST
-          guidance.
-        </p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {categorySummaries.map(([label, rate]) => (
-            <div
-              className="rounded-xl border border-stone-200 bg-stone-50 p-4"
-              key={label}
-            >
-              <h3 className="text-sm font-semibold text-stone-950">{label}</h3>
-              <p className="mt-2 text-sm leading-6 text-stone-600">{rate}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-amber-700">Malaysia SST disclaimer</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Check official guidance before relying on SST treatment
-        </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-700 sm:text-base">
-          This tool estimates arithmetic only. It does not decide whether a product or service
-          is taxable, exempt, or correctly classified. If you are unsure, check RMCD/MySST
-          guidance or speak with your accountant before issuing tax invoices.
-        </p>
-      </section>
-
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="border-t border-stone-200 pt-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
           Learn the SST arithmetic

@@ -4,7 +4,7 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
-import { RelatedLinks } from "@/components/ui/RelatedLinks";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -19,27 +19,27 @@ const trialBalanceFaqs = [
   {
     question: "What is a trial balance calculator?",
     answer:
-      "A trial balance calculator totals debit and credit amounts so you can check whether both sides match."
+      "A trial balance calculator helps total debit and credit balances in an accounting worksheet so you can quickly see whether the trial balance is balanced."
   },
   {
-    question: "What does it mean if my trial balance is unbalanced?",
+    question: "Why might a trial balance not balance?",
     answer:
-      "It means total debits and total credits do not match. The difference should be checked for missing accounts, wrong-side entries, or typing mistakes."
+      "A trial balance may not balance because of missing entries, wrong-side posting, duplicated amounts, typing mistakes, or balances taken from different periods."
   },
   {
     question: "Does a balanced trial balance mean there are no errors?",
     answer:
-      "No. A balanced trial balance means debits and credits match, but classification or posting errors can still exist."
+      "No. A balanced trial balance means total debit and credit amounts agree, but classification mistakes, omitted explanations, or posting errors can still exist."
   },
   {
-    question: "Can I use this calculator for homework?",
+    question: "What is the difference between debit and credit in a trial balance?",
     answer:
-      "Yes. It can help you check totals and understand differences, but you should still show your own working."
+      "Debit and credit are the two sides used to record account balances. In a trial balance, each account amount is placed on one side so the totals can be checked against each other."
   },
   {
-    question: "What causes trial balance differences?",
+    question: "When should I use a trial balance calculator?",
     answer:
-      "Common causes include entering amounts on the wrong side, missing an account, typing wrong digits, or mixing balances from different periods."
+      "Use a trial balance calculator before preparing financial statements, after posting ledger balances, or whenever you want to review whether your debit and credit totals agree."
   }
 ];
 
@@ -61,7 +61,7 @@ export default function TrialBalanceCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={trialBalanceFaqs} />
-      <div className="max-w-3xl">
+      <div>
         <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
           Trial Balance Calculator
         </h1>
@@ -71,31 +71,94 @@ export default function TrialBalanceCalculatorPage() {
         </p>
       </div>
       <TrialBalanceCalculator />
-      <RelatedLinks
-        title="Learn more about trial balances"
-        links={[
-          {
-            title: "Trial Balance Explained",
-            href: "/guides/trial-balance-explained",
-            description: "Learn what a trial balance is, how it works, and why debits should equal credits."
-          },
-          {
-            title: "Why Trial Balance Does Not Balance",
-            href: "/guides/why-trial-balance-not-balancing",
-            description: "Use common difference clues to find missing accounts, wrong-side entries, and typing mistakes."
-          },
-          {
-            title: "Journal Entries for Beginners",
-            href: "/guides/journal-entries-for-beginners",
-            description: "Review how debit and credit entries are created before they reach the trial balance."
-          },
-          {
-            title: "Debit vs Credit",
-            href: "/guides/debit-vs-credit",
-            description: "Learn the account rules that decide whether a balance belongs on the debit or credit side."
-          }
-        ]}
-      />
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Check debit and credit balances in a few steps
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            Use this trial balance calculator to review account balances in a simple accounting
+            worksheet format. It is useful when you want to check debit and credit totals quickly
+            before moving on to reports or further accounting work.
+          </p>
+          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
+            {[
+              "Enter an account name for each ledger balance you want to check.",
+              "Type the amount in either the debit or credit column for that row.",
+              "Review the running totals to see whether the trial balance is balanced.",
+              "Use the difference shown to spot entries that may need correction.",
+              "Add or remove rows as needed until your account list matches your worksheet."
+            ].map((item) => (
+              <li className="flex gap-3" key={item}>
+                <span aria-hidden="true" className="text-stone-400">
+                  {"\u2192"}
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+          Use the trial balance before preparing reports
+        </h2>
+        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+          A trial balance helps you check whether total debits equal total credits before
+          preparing financial statements. It does not replace full review work, but it gives you
+          a practical checkpoint before moving into income statements, balance sheets, or further
+          bookkeeping adjustments.
+        </p>
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Common trial balance checks
+          </h2>
+          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
+            {[
+              "Look for missing entries if an account balance was left out of the worksheet.",
+              "Check for wrong side posting when a debit is entered as a credit or the reverse.",
+              "Review duplicate amounts that may have been entered twice by mistake.",
+              "Compare the unbalanced totals and difference to narrow down where to investigate first."
+            ].map((item) => (
+              <li className="flex gap-3" key={item}>
+                <span aria-hidden="true" className="text-stone-400">
+                  {"\u2192"}
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Connect trial balance with other accounting tools
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            Use related accounting tools to continue checking the numbers after your trial balance
+            worksheet is reviewed, especially when you want to connect bookkeeping, cash flow, and
+            business analysis tasks.
+          </p>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <ButtonLink href="/tools/invoice-generator">Invoice Generator</ButtonLink>
+          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
+            Financial Ratio Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
+            Cash Flow Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools" variant="secondary">
+            All Tools
+          </ButtonLink>
+        </div>
+      </section>
       <FAQSection faqs={trialBalanceFaqs} title="Trial Balance Calculator FAQs" />
     </ToolPageLayout>
   );

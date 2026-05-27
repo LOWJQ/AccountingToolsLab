@@ -267,80 +267,78 @@ export function SstCalculatorMalaysia() {
         </Card>
       </section>
 
-      <Card className="rounded-[1.5rem] border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-amber-700">Important note</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Use this as an estimate, not official tax advice
-        </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-700 sm:text-base">
-          SST treatment may depend on taxable service category, goods classification, exemption
-          status, registration status, and official RMCD/MySST updates. Confirm the applicable
-          treatment before issuing tax invoices or relying on the result for filing.
-        </p>
-      </Card>
-
-      <section className="grid gap-6 lg:grid-cols-2">
-        <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="border-t border-stone-200 pt-8">
+        <div>
           <p className="text-sm font-medium tracking-wide text-slate-500">How it works</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             Clear SST summary for fast checks
           </h2>
-          <div className="mt-4 grid gap-3">
-            <p className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Add SST: total including SST = amount before SST + SST amount
-            </p>
-            <p className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Remove SST: amount before SST = amount including SST / (1 + SST rate)
-            </p>
-            <p className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-              Special fixed SST categories are shown separately and do not use a percentage formula.
-            </p>
-          </div>
-        </Card>
+          <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-stone-400">
+                {"\u2192"}
+              </span>
+              <span>Add SST: total including SST = amount before SST + SST amount</span>
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-stone-400">
+                {"\u2192"}
+              </span>
+              <span>Remove SST: amount before SST = amount including SST / (1 + SST rate)</span>
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-stone-400">
+                {"\u2192"}
+              </span>
+              <span>
+                Special fixed SST categories are shown separately and do not use a percentage
+                formula.
+              </span>
+            </li>
+          </ul>
+        </div>
 
-        <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="mt-8">
           <p className="text-sm font-medium tracking-wide text-slate-500">Checks to make</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
             Before you rely on the estimate
           </h2>
-          <div className="mt-5 grid gap-3">
+          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
             {mistakes.map((mistake) => (
-              <div
-                className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
-                key={mistake}
-              >
-                {mistake}
-              </div>
+              <li className="flex gap-3" key={mistake}>
+                <span aria-hidden="true" className="text-stone-400">
+                  {"\u2192"}
+                </span>
+                <span>{mistake}</span>
+              </li>
             ))}
-          </div>
-        </Card>
+          </ul>
+        </div>
       </section>
 
-      <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Keep your records and estimates aligned
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Pair this SST estimate with your invoice, cash flow, and ratio checks.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <ButtonLink href="/tools/invoice-generator">Create a PDF Invoice</ButtonLink>
-            <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-              Cash Flow Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-              Financial Ratio Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools" variant="secondary">
-              All Tools
-            </ButtonLink>
-          </div>
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Keep your records and estimates aligned
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            Pair this SST estimate with your invoice, cash flow, and ratio checks.
+          </p>
         </div>
-      </Card>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <ButtonLink href="/tools/invoice-generator">Create a PDF Invoice</ButtonLink>
+          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
+            Cash Flow Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
+            Financial Ratio Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools" variant="secondary">
+            All Tools
+          </ButtonLink>
+        </div>
+      </section>
     </div>
   );
 }
