@@ -2,67 +2,68 @@
 
 import { useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { calculateDepreciation } from "@/lib/calculators/depreciation";
 
-const mistakes = [
-  "Using purchase price without including necessary asset costs",
-  "Entering salvage value higher than cost",
-  "Using useful life of zero",
-  "Confusing annual depreciation with accumulated depreciation",
-  "Assuming all assets use straight-line depreciation"
-];
-
 function parseAmount(value: string): number | null {
   if (value.trim() === "") {
-    return null;
+    return 0;
   }
 
   const amount = Number(value);
-  return Number.isFinite(amount) ? amount : null;
+  return Number.isFinite(amount) ? amount : 0;
 }
 
 export function DepreciationCalculator() {
-  const [assetCost, setAssetCost] = useState("");
+  const [assetCost, setAssetCost] = useState("0");
   const { formatCurrency } = useCurrency();
-  const [salvageValue, setSalvageValue] = useState("");
-  const [usefulLifeYears, setUsefulLifeYears] = useState("");
+  const [salvageValue, setSalvageValue] = useState("0");
+  const [usefulLifeYears, setUsefulLifeYears] = useState("0");
 
   const calculation = useMemo(() => {
-    if (!assetCost.trim()) {
-      return { result: null, message: "Enter the asset cost to calculate depreciation." };
-    }
-
-    if (!salvageValue.trim()) {
-      return { result: null, message: "Enter the salvage value. Use 0 if there is no expected salvage value." };
-    }
-
-    if (!usefulLifeYears.trim()) {
-      return { result: null, message: "Enter the useful life in years." };
-    }
+    const parsedAssetCost = parseAmount(assetCost) ?? 0;
+    const parsedSalvageValue = parseAmount(salvageValue) ?? 0;
+    const parsedUsefulLifeYears = parseAmount(usefulLifeYears) ?? 0;
 
     try {
       return {
         result: calculateDepreciation({
-          assetCost: parseAmount(assetCost),
-          salvageValue: parseAmount(salvageValue),
-          usefulLifeYears: parseAmount(usefulLifeYears)
+          assetCost: parsedAssetCost,
+          salvageValue: parsedSalvageValue,
+          usefulLifeYears: parsedUsefulLifeYears
         }),
-        message: ""
+        status: "Ready"
       };
     } catch (error) {
+      const statusMessage =
+        parsedUsefulLifeYears <= 0
+          ? "Enter a useful life greater than 0"
+          : error instanceof Error
+            ? error.message
+            : "Check the values and try again.";
+
       return {
-        result: null,
-        message: error instanceof Error ? error.message : "Check the values and try again."
+        result: {
+          assetCost: parsedAssetCost,
+          salvageValue: parsedSalvageValue,
+          usefulLifeYears: parsedUsefulLifeYears,
+          depreciableAmount:
+            parsedAssetCost > 0 && parsedSalvageValue >= 0 && parsedSalvageValue <= parsedAssetCost
+              ? parsedAssetCost - parsedSalvageValue
+              : 0,
+          annualDepreciation: 0,
+          monthlyDepreciation: 0,
+          explanation: ""
+        },
+        status: statusMessage
       };
     }
   }, [assetCost, salvageValue, usefulLifeYears]);
 
   function resetCalculator() {
-    setAssetCost("");
-    setSalvageValue("");
-    setUsefulLifeYears("");
+    setAssetCost("0");
+    setSalvageValue("0");
+    setUsefulLifeYears("0");
   }
 
   return (
@@ -76,7 +77,7 @@ export function DepreciationCalculator() {
                 className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                 inputMode="decimal"
                 onChange={(event) => setAssetCost(event.target.value)}
-                placeholder="10000"
+                placeholder="0"
                 type="number"
                 value={assetCost}
               />
@@ -88,7 +89,7 @@ export function DepreciationCalculator() {
                 className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                 inputMode="decimal"
                 onChange={(event) => setSalvageValue(event.target.value)}
-                placeholder="1000"
+                placeholder="0"
                 type="number"
                 value={salvageValue}
               />
@@ -100,7 +101,7 @@ export function DepreciationCalculator() {
                 className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                 inputMode="decimal"
                 onChange={(event) => setUsefulLifeYears(event.target.value)}
-                placeholder="5"
+                placeholder="0"
                 type="number"
                 value={usefulLifeYears}
               />
@@ -115,158 +116,36 @@ export function DepreciationCalculator() {
             </button>
           </div>
 
-          <div className="rounded-xl border border-stone-200 bg-stone-50 p-5">
+          <div className="grid gap-5 rounded-xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6">
             <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Result</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-stone-950">
-              Straight-line depreciation
-            </h2>
 
-            {calculation.result ? (
-              <div className="mt-5 grid gap-3">
-                <div className="rounded-xl border border-stone-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                    Annual depreciation expense
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
-                    {formatCurrency(calculation.result.annualDepreciation)}
-                  </p>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-stone-200 bg-white p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                      Depreciable amount
-                    </p>
-                    <p className="mt-2 text-xl font-semibold text-stone-950">
-                      {formatCurrency(calculation.result.depreciableAmount)}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-stone-200 bg-white p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-                      Monthly depreciation
-                    </p>
-                    <p className="mt-2 text-xl font-semibold text-stone-950">
-                      {formatCurrency(calculation.result.monthlyDepreciation)}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm leading-6 text-stone-600">
-                  The depreciable amount is {formatCurrency(calculation.result.depreciableAmount)},
-                  spread evenly over {calculation.result.usefulLifeYears} year
-                  {calculation.result.usefulLifeYears === 1 ? "" : "s"}.
-                </p>
-                <p className="text-xs leading-5 text-stone-500">
-                  Rounded yearly amounts can differ by a cent when multiplied across several
-                  years.
-                </p>
-              </div>
-            ) : (
-              <p className="mt-4 text-sm leading-6 text-stone-600">{calculation.message}</p>
-            )}
+            <div>
+              <p className="text-sm font-semibold text-stone-800">Annual Depreciation Expense</p>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
+                {formatCurrency(calculation.result.annualDepreciation)}
+              </p>
+            </div>
 
-            <p className="mt-5 rounded-xl border border-stone-200 bg-white p-3 text-sm font-semibold text-stone-700">
+            <div>
+              <p className="text-sm font-semibold text-stone-800">Depreciable Amount</p>
+              <p className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
+                {formatCurrency(calculation.result.depreciableAmount)}
+              </p>
+            </div>
+
+            <p className="text-sm leading-6 text-stone-700">
+              <span className="font-semibold text-stone-800">Useful Life:</span>{" "}
+              {calculation.result.usefulLifeYears} year
+              {calculation.result.usefulLifeYears === 1 ? "" : "s"}
+            </p>
+
+            <p className="text-sm leading-6 text-stone-700">
+              <span className="font-semibold text-stone-800">Status:</span> {calculation.status}
+            </p>
+
+            <p className="text-sm font-medium text-stone-700">
               Annual Depreciation Expense = (Cost - Salvage Value) / Useful Life
             </p>
-          </div>
-        </div>
-      </Card>
-
-      <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Explanation</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Straight-line depreciation formula
-          </h2>
-          <p className="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-            Annual Depreciation Expense = (Cost - Salvage Value) / Useful Life
-          </p>
-          <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>
-              Cost is the amount assigned to the asset. Salvage value is the expected value
-              at the end of the asset&apos;s useful life.
-            </p>
-            <p>
-              Useful life is the number of years the asset is expected to help the business.
-              Depreciation expense spreads the depreciable amount evenly across those years.
-            </p>
-            <p>
-              This calculator is for simple straight-line depreciation, which uses the same
-              depreciation amount each year.
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Worked example</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Example calculation
-          </h2>
-          <div className="mt-5 grid gap-3">
-            {[
-              ["Cost", formatCurrency(10000)],
-              ["Salvage value", formatCurrency(1000)],
-              ["Useful life", "5 years"],
-              ["Depreciable amount", formatCurrency(9000)],
-              ["Annual depreciation", formatCurrency(1800)]
-            ].map(([label, value]) => (
-              <div
-                className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-b-0"
-                key={label}
-              >
-                <span className="text-sm text-stone-600">{label}</span>
-                <span className="text-sm font-semibold text-stone-950">{value}</span>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-sm leading-6 text-stone-600">
-            The asset has {formatCurrency(9000)} of depreciable amount. Dividing{" "}
-            {formatCurrency(9000)} by 5 years gives {formatCurrency(1800)} of depreciation
-            expense per year.
-          </p>
-        </Card>
-      </section>
-
-      <Card className="p-6 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Mistakes to avoid
-        </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {mistakes.map((mistake) => (
-            <div
-              className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
-              key={mistake}
-            >
-              {mistake}
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="p-6 sm:p-8 lg:p-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Connect depreciation with the rest of your accounting checks
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use the equation, ratio, and trial balance tools to keep practicing related
-              accounting basics.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <ButtonLink href="/tools/accounting-equation-calculator">
-              Accounting Equation Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-              Financial Ratio Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-              Trial Balance Calculator
-            </ButtonLink>
-            <ButtonLink href="/guides" variant="secondary">
-              Guides
-            </ButtonLink>
           </div>
         </div>
       </Card>

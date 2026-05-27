@@ -4,9 +4,9 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Break-even Calculator | Calculate Break-even Units and Sales",
@@ -66,7 +66,7 @@ export default function BreakEvenCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={breakEvenFaqs} />
-      <div className="max-w-3xl">
+      <div>
         <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
           Break-even Calculator
         </h1>
@@ -76,21 +76,98 @@ export default function BreakEvenCalculatorPage() {
         </p>
       </div>
       <BreakEvenCalculator />
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Learn the formula behind the result
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Calculate your break-even point in a few steps
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            This break-even calculator helps you estimate how many units a business needs to sell,
+            or how much break-even sales revenue it needs, before costs are fully covered. It uses
+            fixed costs, selling price per unit, and variable cost per unit to calculate the
+            break-even point in a simple format.
+          </p>
+          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
+            {[
+              "Enter fixed costs such as rent, salaries, or other costs that do not change with each unit sold.",
+              "Add the selling price per unit you expect to charge for each product or service.",
+              "Enter the variable cost per unit so the calculator can work out contribution margin.",
+              "Review the result to see break-even units, minimum whole units, contribution margin per unit, and break-even sales."
+            ].map((item) => (
+              <li className="flex gap-3" key={item}>
+                <span aria-hidden="true" className="text-stone-400">
+                  {"\u2192"}
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+          Understand what your break-even result means
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          If you want the full beginner explanation, read{" "}
-          <Link
-            className="font-semibold text-slate-700 hover:text-slate-900"
-            href="/guides/break-even-point-explained"
-          >
-            break-even point explained
-          </Link>{" "}
-          to see the formula, contribution margin, units, sales, and common mistakes.
+          Break-even units show how many units must be sold before the business covers its fixed
+          costs and variable costs. Contribution margin per unit is the amount left from each sale
+          after variable cost per unit is deducted. Minimum whole units round the result up to a
+          practical sales target, while break-even sales show the sales revenue needed to reach
+          that break-even point.
         </p>
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            When to use this break-even calculator
+          </h2>
+          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
+            {[
+              "Use it when testing pricing decisions to see how a higher or lower selling price changes the break-even point.",
+              "Use it for product planning when comparing whether a product can support its fixed costs.",
+              "Check costs when you want to review whether variable cost per unit is too close to the selling price.",
+              "Set sales targets by using break-even units and break-even sales as a starting benchmark.",
+              "Use it for small business planning before launching offers, promotions, or new services."
+            ].map((item) => (
+              <li className="flex gap-3" key={item}>
+                <span aria-hidden="true" className="text-stone-400">
+                  {"\u2192"}
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            Connect break-even planning with other accounting tools
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            Use related tools to connect break-even planning with invoicing, cash flow review, SST
+            calculations, and business analysis when you want a clearer picture of pricing,
+            collections, costs, and performance.
+          </p>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <ButtonLink href="/tools/invoice-generator">Free Invoice Generator Malaysia</ButtonLink>
+          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
+            Cash Flow Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools/sst-calculator-malaysia" variant="secondary">
+            SST Calculator Malaysia
+          </ButtonLink>
+          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
+            Financial Ratio Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools" variant="secondary">
+            All Tools
+          </ButtonLink>
+        </div>
       </section>
       <FAQSection faqs={breakEvenFaqs} title="Break-even Calculator FAQs" />
     </ToolPageLayout>

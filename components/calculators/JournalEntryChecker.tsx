@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { checkJournalEntry, type JournalEntryLine } from "@/lib/calculators/journal-entry";
 
@@ -12,14 +11,6 @@ type EditableJournalEntryLine = {
   debit: string;
   credit: string;
 };
-
-const mistakes = [
-  "Entering both debit and credit on the same line",
-  "Forgetting one side of the entry",
-  "Using the wrong account even though the entry balances",
-  "Confusing debit/credit rules with increase/decrease",
-  "Leaving blank lines in the entry"
-];
 
 function createLine(index: number): EditableJournalEntryLine {
   return {
@@ -43,6 +34,63 @@ const invalidAmountMessage = "Please enter valid numeric debit and credit amount
 
 function isBlankLine(line: EditableJournalEntryLine): boolean {
   return !line.accountName.trim() && !line.debit.trim() && !line.credit.trim();
+}
+
+function SummaryCard({
+  label,
+  value,
+  tone = "neutral"
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "success" | "error";
+}) {
+  const toneClass =
+    tone === "success"
+      ? "text-emerald-700"
+      : tone === "error"
+        ? "text-rose-700"
+        : "text-stone-950";
+
+  return (
+    <Card className="rounded-xl px-4 py-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
+      <p className={`mt-2 text-2xl font-semibold tracking-tight ${toneClass}`}>{value}</p>
+    </Card>
+  );
+}
+
+function getStatus({
+  hasResult,
+  isBalanced
+}: {
+  hasResult: boolean;
+  isBalanced: boolean;
+}) {
+  if (!hasResult) {
+    return {
+      label: "Waiting for lines",
+      cardClass: "border-stone-200 bg-stone-50",
+      labelClass: "text-stone-500",
+      badgeClass: "bg-white text-stone-600 ring-stone-200"
+    };
+  }
+
+  if (isBalanced) {
+    return {
+      label: "Balanced",
+      cardClass: "border-emerald-100 bg-emerald-50",
+      labelClass: "text-stone-500",
+      badgeClass: "bg-white text-emerald-700 ring-emerald-100"
+    };
+  }
+
+  return {
+    label: "Not balanced",
+    cardClass: "border-rose-100 bg-rose-50",
+    labelClass: "text-stone-500",
+    badgeClass: "bg-white text-rose-700 ring-rose-100"
+  };
 }
 
 export function JournalEntryChecker() {
@@ -148,84 +196,106 @@ export function JournalEntryChecker() {
   const totalDebit = calculation.result?.totalDebit ?? 0;
   const totalCredit = calculation.result?.totalCredit ?? 0;
   const difference = calculation.result?.difference ?? Math.abs(totalDebit - totalCredit);
+  const status = getStatus({
+    hasResult: Boolean(calculation.result),
+    isBalanced: calculation.result?.isBalanced ?? false
+  });
 
   return (
     <div className="flex flex-col gap-8">
       <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="flex flex-col gap-5 sm:flex-row sm:justify-end">
-          <button
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-            onClick={addLine}
-            type="button"
-          >
-            Add line
-          </button>
-        </div>
+        <div className="space-y-4">
+          <div className="hidden grid-cols-[1.4fr_1fr_1fr_3rem] gap-3 px-1 text-xs font-semibold uppercase tracking-wide text-stone-500 lg:grid">
+            <span>Account Name</span>
+            <span>Debit</span>
+            <span>Credit</span>
+            <span className="sr-only">Remove</span>
+          </div>
 
-        <div className="mt-8 overflow-x-auto">
-          <div className="min-w-[780px]">
-            <div className="grid grid-cols-[1.4fr_1fr_1fr_3rem] gap-3 px-1 pb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">
-              <span>Account name</span>
-              <span>Debit</span>
-              <span>Credit</span>
-              <span className="sr-only">Actions</span>
-            </div>
-            <div className="grid gap-3">
-              {lines.map((line, index) => {
-                const parsedDebit = parseAmount(line.debit);
-                const parsedCredit = parseAmount(line.credit);
-                const hasDebit = parsedDebit !== null && parsedDebit > 0;
-                const hasCredit = parsedCredit !== null && parsedCredit > 0;
+          <div className="flex flex-col gap-3">
+            {lines.map((line, index) => {
+              const parsedDebit = parseAmount(line.debit);
+              const parsedCredit = parseAmount(line.credit);
+              const hasDebit = parsedDebit !== null && parsedDebit > 0;
+              const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
-                return (
-                  <div
-                    className="grid grid-cols-[1.4fr_1fr_1fr_3rem] gap-3"
-                    key={line.id}
-                  >
-                    <input
-                      aria-label={`Line ${index + 1} account name`}
-                      className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                      onChange={(event) => updateLine(line.id, "accountName", event.target.value)}
-                      placeholder="Account name"
-                      value={line.accountName}
-                    />
-                    <input
-                      aria-label={`Line ${index + 1} debit amount`}
-                      className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                      disabled={hasCredit}
-                      inputMode="decimal"
-                      min="0"
-                      onChange={(event) => updateLine(line.id, "debit", event.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                      type="number"
-                      value={line.debit}
-                    />
-                    <input
-                      aria-label={`Line ${index + 1} credit amount`}
-                      className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                      disabled={hasDebit}
-                      inputMode="decimal"
-                      min="0"
-                      onChange={(event) => updateLine(line.id, "credit", event.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                      type="number"
-                      value={line.credit}
-                    />
-                    <button
-                      aria-label={`Remove line ${index + 1}`}
-                      className="flex h-12 items-center justify-center rounded-xl border border-stone-200 text-sm font-semibold text-stone-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
-                      disabled={lines.length === 1}
-                      onClick={() => removeLine(line.id)}
-                      type="button"
-                    >
-                      X
-                    </button>
+              return (
+                <div
+                  className="rounded-2xl border border-stone-200 bg-stone-50/50 p-3 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0"
+                  key={line.id}
+                >
+                  <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_3rem]">
+                    <div className="grid gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-stone-500 lg:hidden">
+                        Account Name
+                      </span>
+                      <input
+                        aria-label={`Line ${index + 1} account name`}
+                        className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                        onChange={(event) => updateLine(line.id, "accountName", event.target.value)}
+                        placeholder="Account name"
+                        value={line.accountName}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-stone-500 lg:hidden">
+                        Debit
+                      </span>
+                      <input
+                        aria-label={`Line ${index + 1} debit amount`}
+                        className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                        disabled={hasCredit}
+                        inputMode="decimal"
+                        min="0"
+                        onChange={(event) => updateLine(line.id, "debit", event.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                        type="number"
+                        value={line.debit}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-stone-500 lg:hidden">
+                        Credit
+                      </span>
+                      <input
+                        aria-label={`Line ${index + 1} credit amount`}
+                        className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-right text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                        disabled={hasDebit}
+                        inputMode="decimal"
+                        min="0"
+                        onChange={(event) => updateLine(line.id, "credit", event.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                        type="number"
+                        value={line.credit}
+                      />
+                    </div>
+                    <div className="flex items-end lg:items-center">
+                      <button
+                        aria-label={`Remove line ${index + 1}`}
+                        className="flex h-12 w-full items-center justify-center rounded-xl border border-stone-200 text-sm font-semibold text-stone-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-12"
+                        disabled={lines.length === 1}
+                        onClick={() => removeLine(line.id)}
+                        type="button"
+                      >
+                        X
+                      </button>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-stretch lg:justify-end">
+            <button
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:w-auto"
+              onClick={addLine}
+              type="button"
+            >
+              Add line
+            </button>
           </div>
         </div>
 
@@ -234,58 +304,21 @@ export function JournalEntryChecker() {
         ) : null}
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-xl px-4 py-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-              Total debits
+          <SummaryCard label="Total Debits" value={formatCurrency(totalDebit)} />
+          <SummaryCard label="Total Credits" value={formatCurrency(totalCredit)} />
+          <SummaryCard
+            label="Difference"
+            tone={difference > 0 ? "error" : "neutral"}
+            value={formatCurrency(difference)}
+          />
+          <div className={`rounded-xl border px-4 py-4 shadow-sm ${status.cardClass}`}>
+            <p className={`text-xs font-medium uppercase tracking-wide ${status.labelClass}`}>
+              Status
             </p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
-              {formatCurrency(totalDebit)}
-            </p>
-          </Card>
-          <Card className="rounded-xl px-4 py-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-              Total credits
-            </p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
-              {formatCurrency(totalCredit)}
-            </p>
-          </Card>
-          <Card className="rounded-xl px-4 py-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-              Difference
-            </p>
-            <p
-              className={`mt-2 text-2xl font-semibold tracking-tight ${
-                difference > 0 ? "text-rose-700" : "text-stone-950"
-              }`}
-            >
-              {formatCurrency(difference)}
-            </p>
-          </Card>
-          <div
-            className={`rounded-xl border px-4 py-4 shadow-sm ${
-              calculation.result?.isBalanced
-                ? "border-emerald-100 bg-emerald-50"
-                : calculation.result
-                  ? "border-rose-100 bg-rose-50"
-                  : "border-stone-200 bg-stone-50"
-            }`}
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Status</p>
             <div
-              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ring-1 ${
-                calculation.result?.isBalanced
-                  ? "bg-white text-emerald-700 ring-emerald-100"
-                  : calculation.result
-                    ? "bg-white text-rose-700 ring-rose-100"
-                    : "bg-white text-stone-600 ring-stone-200"
-              }`}
+              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ring-1 ${status.badgeClass}`}
             >
-              {calculation.result?.isBalanced
-                ? "Balanced"
-                : calculation.result
-                  ? "Not balanced"
-                  : "Waiting for lines"}
+              {status.label}
             </div>
           </div>
         </div>
@@ -308,100 +341,6 @@ export function JournalEntryChecker() {
           >
             Reset
           </button>
-        </div>
-      </Card>
-
-      <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Explanation</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            What a journal entry checks
-          </h2>
-          <p className="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm font-semibold text-stone-800">
-            Total Debits = Total Credits
-          </p>
-          <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>
-              A journal entry records the debit and credit sides of a transaction before it is
-              posted to accounts.
-            </p>
-            <p>
-              Debits and credits must balance because double-entry accounting records equal
-              value on both sides of the entry.
-            </p>
-            <p>
-              This checker confirms the math balance only. It does not prove every account
-              choice or debit/credit treatment is correct.
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Worked example</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Balanced journal entry
-          </h2>
-          <div className="mt-5 grid gap-3">
-            {[
-              ["Debit Cash", formatCurrency(1000)],
-              ["Credit Service Revenue", formatCurrency(1000)],
-              ["Total debits", formatCurrency(1000)],
-              ["Total credits", formatCurrency(1000)],
-              ["Status", "Entry balances"]
-            ].map(([label, value]) => (
-              <div
-                className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-b-0"
-                key={label}
-              >
-                <span className="text-sm text-stone-600">{label}</span>
-                <span className="text-sm font-semibold text-stone-950">{value}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </section>
-
-      <Card className="p-6 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Mistakes to avoid
-        </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {mistakes.map((mistake) => (
-            <div
-              className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
-              key={mistake}
-            >
-              {mistake}
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="p-6 sm:p-8 lg:p-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Keep practicing debit and credit checks
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use the debit/credit checker, trial balance calculator, and accounting equation
-              calculator to review related accounting basics.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <ButtonLink href="/tools/debit-credit-checker">Debit/Credit Checker</ButtonLink>
-            <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-              Trial Balance Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools/accounting-equation-calculator" variant="secondary">
-              Accounting Equation Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools" variant="secondary">
-              All Tools
-            </ButtonLink>
-          </div>
         </div>
       </Card>
     </div>

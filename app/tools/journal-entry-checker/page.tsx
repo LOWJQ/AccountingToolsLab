@@ -3,8 +3,8 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
-import { RelatedLinks } from "@/components/ui/RelatedLinks";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -76,31 +76,82 @@ export default function JournalEntryCheckerPage() {
         </p>
       </div>
       <JournalEntryChecker />
-      <RelatedLinks
-        title="Learn how journal entries work"
-        links={[
-          {
-            title: "Journal Entries for Beginners",
-            href: "/guides/journal-entries-for-beginners",
-            description: "Learn journal entry format, debit and credit examples, and the balancing rule."
-          },
-          {
-            title: "Debit vs Credit",
-            href: "/guides/debit-vs-credit",
-            description: "Review which account types increase with debits and which increase with credits."
-          },
-          {
-            title: "Trial Balance Explained",
-            href: "/guides/trial-balance-explained",
-            description: "See how ledger balances from journal entries are checked in a trial balance."
-          },
-          {
-            title: "Why Trial Balance Does Not Balance",
-            href: "/guides/why-trial-balance-not-balancing",
-            description: "Learn what to check when debit and credit totals do not match later."
-          }
-        ]}
-      />
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+          Check journal entries in a few steps
+        </h2>
+        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
+          <p>
+            Use this journal entry checker to enter account names, debit amounts, and credit
+            amounts, then review whether total debits and credits balance in a basic double-entry
+            accounting entry.
+          </p>
+          <p>→ Enter the account name for each journal entry line.</p>
+          <p>→ Fill in the debit amount or the credit amount for that line.</p>
+          <p>→ Add more lines when the transaction needs multiple accounts.</p>
+          <p>→ Review the total debits and credits, difference, and status instantly.</p>
+        </div>
+      </section>
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+          Understand balanced journal entries
+        </h2>
+        <div className="mt-4 space-y-4 text-sm leading-6 text-stone-600 sm:text-base">
+          <p>
+            A journal entry is balanced when total debits equal total credits. This is a core rule
+            of double-entry accounting because each transaction records equal value on both sides of
+            the entry.
+          </p>
+          <p>
+            A balanced journal entry checks the math, but it does not always confirm that the
+            correct accounts were used. An entry can balance and still contain the wrong account
+            choice or incorrect debit and credit treatment.
+          </p>
+          <p>
+            That is why a journal entry balance check is helpful for reviewing totals first, then
+            following up with a debit and credit checker or other accounting review when needed.
+          </p>
+        </div>
+      </section>
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+          When to use this journal entry checker
+        </h2>
+        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
+          <p>→ Check accounting homework that requires total debits and credits to balance.</p>
+          <p>→ Review bookkeeping entries before posting them to accounts.</p>
+          <p>→ Practice double-entry accounting with simple transaction examples.</p>
+          <p>→ Recheck debit and credit totals when an entry looks incomplete or uneven.</p>
+          <p>→ Find entry mistakes such as missing values or unbalanced lines.</p>
+        </div>
+      </section>
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+          Connect journal entry checks with other accounting tools
+        </h2>
+        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+          After using this journal entry checker, you can continue with related tools to confirm
+          debit and credit direction, review trial balance totals, connect entries to the accounting
+          equation, and explore broader financial analysis.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <ButtonLink href="/tools/debit-credit-checker" variant="secondary">
+            Debit/Credit Checker
+          </ButtonLink>
+          <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
+            Trial Balance Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools/accounting-equation-calculator" variant="secondary">
+            Accounting Equation Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
+            Financial Ratio Calculator
+          </ButtonLink>
+          <ButtonLink href="/tools" variant="secondary">
+            All Tools
+          </ButtonLink>
+        </div>
+      </section>
       <FAQSection faqs={journalEntryFaqs} title="Journal Entry Checker FAQs" />
     </ToolPageLayout>
   );

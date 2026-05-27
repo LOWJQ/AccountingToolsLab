@@ -78,15 +78,15 @@ export default function CashFlowCalculatorPage() {
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
             This cash flow calculator helps you review how cash moves through a period by combining
-            beginning cash balance, cash inflows, and cash outflows. It gives you a quick view of
-            net cash flow and the ending cash balance without adding extra worksheet steps.
+            beginning cash balance, cash inflows, and cash outflows. It gives you a quick way to
+            calculate net cash flow and ending cash balance without building a separate worksheet.
           </p>
           <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
             {[
               "Enter the beginning cash balance available at the start of the period.",
-              "Add total cash inflows such as customer collections or other cash received.",
-              "Enter cash outflows such as payments, expenses, or supplier settlements.",
-              "Review the result to see net cash flow and the ending cash balance."
+              "Add cash inflows such as customer collections, cash sales, or other money received.",
+              "Enter cash outflows such as supplier payments, expenses, wages, or loan repayments.",
+              "Review the result to see net cash flow and the ending cash balance for the period."
             ].map((item) => (
               <li className="flex gap-3" key={item}>
                 <span aria-hidden="true" className="text-stone-400">
@@ -105,10 +105,9 @@ export default function CashFlowCalculatorPage() {
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
           Positive cash flow means cash inflows are higher than cash outflows for the period.
-          Negative cash flow means more cash left the business than came in. The ending cash
-          balance shows what remains after net cash flow is added to the starting cash amount, so
-          it can help you see whether the business has enough cash available at the end of the
-          period.
+          Negative cash flow means more cash left the business than came in. Ending cash balance
+          shows what remains after net cash flow is added to the starting cash amount, which makes
+          it useful for simple business planning, payment timing, and short-term cash decisions.
         </p>
       </section>
 
@@ -119,9 +118,10 @@ export default function CashFlowCalculatorPage() {
           </h2>
           <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
             {[
-              "Use it for small business planning when you want a quick view of expected cash movement.",
+              "Use it for monthly cash review when you want a quick summary of cash inflows and cash outflows.",
+              "Use it for small business planning before making hiring, purchasing, or payment decisions.",
               "Check invoice collections against outgoing payments to see whether cash is staying healthy.",
-              "Review monthly cash flow totals before making spending or payment decisions.",
+              "Track expenses against incoming cash to spot periods where outflows may be growing too quickly.",
               "Use it as a simple budgeting check when comparing expected inflows and outflows."
             ].map((item) => (
               <li className="flex gap-3" key={item}>
@@ -141,15 +141,18 @@ export default function CashFlowCalculatorPage() {
             Connect cash flow with other accounting tools
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use related tools to connect cash flow checks with invoicing, SST arithmetic, and
-            broader business analysis when you need a clearer picture around collections, payments,
-            and performance.
+            Use related tools to connect cash flow checks with invoicing, SST calculations, break-even
+            planning, and business analysis when you want a clearer picture around collections,
+            payments, pricing, and performance.
           </p>
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/invoice-generator">Invoice Generator</ButtonLink>
+          <ButtonLink href="/tools/invoice-generator">Free Invoice Generator Malaysia</ButtonLink>
           <ButtonLink href="/tools/sst-calculator-malaysia" variant="secondary">
             SST Calculator Malaysia
+          </ButtonLink>
+          <ButtonLink href="/tools/break-even-calculator" variant="secondary">
+            Break-even Calculator
           </ButtonLink>
           <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
             Financial Ratio Calculator

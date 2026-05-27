@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ButtonLink } from "@/components/ui/ButtonLink";
+import { Check, ChevronDown } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Card } from "@/components/ui/Card";
 import {
   checkDebitCredit,
-  normalBalances,
   type AccountEffect,
   type AccountType
 } from "@/lib/calculators/debit-credit";
 
-const accountOptions: Array<{ label: string; value: AccountType }> = [
+type DropdownOption<T extends string> = {
+  label: string;
+  value: T;
+};
+
+const accountOptions: Array<DropdownOption<AccountType | "">> = [
+  { label: "Select account type", value: "" },
   { label: "Asset", value: "asset" },
   { label: "Liability", value: "liability" },
   { label: "Equity", value: "equity" },
@@ -19,28 +24,10 @@ const accountOptions: Array<{ label: string; value: AccountType }> = [
   { label: "Dividends/Drawings", value: "dividends" }
 ];
 
-const effectOptions: Array<{ label: string; value: AccountEffect }> = [
+const effectOptions: Array<DropdownOption<AccountEffect | "">> = [
+  { label: "Select increase or decrease", value: "" },
   { label: "Increase", value: "increase" },
   { label: "Decrease", value: "decrease" }
-];
-
-const examples = [
-  {
-    title: "Buying equipment with cash",
-    text: "Equipment is an asset, so increasing equipment means debit Equipment. Cash is also an asset, so decreasing cash means credit Cash."
-  },
-  {
-    title: "Earning service revenue",
-    text: "Revenue has a normal credit balance, so increasing service revenue means recording a credit."
-  }
-];
-
-const mistakes = [
-  "Thinking debit always means increase",
-  "Thinking credit always means decrease",
-  "Mixing up assets and expenses",
-  "Forgetting that revenue has a normal credit balance",
-  "Forgetting that liabilities increase with credits"
 ];
 
 export function DebitCreditChecker() {
@@ -74,37 +61,21 @@ export function DebitCreditChecker() {
       <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="grid gap-5">
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">Account type</span>
-              <select
-                className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                onChange={(event) => setAccountType(event.target.value as AccountType | "")}
-                value={accountType}
-              >
-                <option value="">Select account type</option>
-                {accountOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <DropdownSelect
+              id="debit-credit-account-type"
+              label="Account type"
+              onChange={(value) => setAccountType(value as AccountType | "")}
+              options={accountOptions}
+              value={accountType}
+            />
 
-            <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">Effect</span>
-              <select
-                className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
-                onChange={(event) => setEffect(event.target.value as AccountEffect | "")}
-                value={effect}
-              >
-                <option value="">Select increase or decrease</option>
-                {effectOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <DropdownSelect
+              id="debit-credit-effect"
+              label="Effect"
+              onChange={(value) => setEffect(value as AccountEffect | "")}
+              options={effectOptions}
+              value={effect}
+            />
 
             <button
               className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
@@ -131,120 +102,202 @@ export function DebitCreditChecker() {
           </div>
         </div>
       </Card>
+    </div>
+  );
+}
 
-      <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Rules</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Debit and credit rules
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Debits and credits do not always mean increase or decrease. The effect depends on
-            the account type and its normal balance.
-          </p>
+function DropdownSelect<T extends string>({
+  id,
+  label,
+  onChange,
+  options,
+  value
+}: {
+  id: string;
+  label: string;
+  onChange: (value: T) => void;
+  options: Array<DropdownOption<T>>;
+  value: T;
+}) {
+  const selectedIndex = Math.max(
+    options.findIndex((option) => option.value === value),
+    0
+  );
+  const selectedOption = options[selectedIndex];
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(selectedIndex);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const reactId = useId();
+  const labelId = `${id}-label`;
+  const buttonId = `${id}-button`;
+  const listboxId = `${reactId}-listbox`;
 
-          <div className="mt-6 grid gap-3 sm:hidden">
-            {accountOptions.map((option) => (
-              <div
-                className="rounded-xl border border-stone-200 bg-stone-50 p-4"
-                key={option.value}
+  function focusOption(index: number) {
+    optionRefs.current[index]?.focus();
+  }
+
+  function openAndFocusOption(index: number) {
+    setIsOpen(true);
+    setActiveIndex(index);
+    window.requestAnimationFrame(() => focusOption(index));
+  }
+
+  function closeAndFocusButton() {
+    setIsOpen(false);
+    buttonRef.current?.focus();
+  }
+
+  function selectOption(index: number) {
+    const option = options[index];
+
+    if (!option) {
+      return;
+    }
+
+    onChange(option.value);
+    setIsOpen(false);
+    buttonRef.current?.focus();
+  }
+
+  function moveOptionFocus(index: number) {
+    const lastIndex = options.length - 1;
+    const nextIndex = Math.min(Math.max(index, 0), lastIndex);
+
+    setActiveIndex(nextIndex);
+    focusOption(nextIndex);
+  }
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    setActiveIndex(selectedIndex);
+  }, [selectedIndex]);
+
+  function handleButtonKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      openAndFocusOption(isOpen ? Math.min(activeIndex + 1, options.length - 1) : selectedIndex);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      openAndFocusOption(isOpen ? Math.max(activeIndex - 1, 0) : selectedIndex);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      openAndFocusOption(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      openAndFocusOption(options.length - 1);
+    } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      openAndFocusOption(isOpen ? activeIndex : selectedIndex);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+    }
+  }
+
+  function handleOptionKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveOptionFocus(index + 1);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveOptionFocus(index - 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      moveOptionFocus(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      moveOptionFocus(options.length - 1);
+    } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      selectOption(index);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closeAndFocusButton();
+    }
+  }
+
+  return (
+    <div className="relative grid min-w-0 gap-2" ref={rootRef}>
+      <span className="text-sm font-semibold text-stone-800" id={labelId}>
+        {label}
+      </span>
+      <button
+        aria-controls={isOpen ? listboxId : undefined}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-labelledby={`${labelId} ${buttonId}`}
+        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        id={buttonId}
+        onClick={() => {
+          setActiveIndex(selectedIndex);
+          setIsOpen((current) => !current);
+        }}
+        onKeyDown={handleButtonKeyDown}
+        ref={buttonRef}
+        type="button"
+      >
+        <span className="min-w-0 truncate">{selectedOption?.label ?? "Select"}</span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`h-4 w-4 shrink-0 text-stone-500 transition ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isOpen ? (
+        <div
+          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-2xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
+          id={listboxId}
+          role="listbox"
+        >
+          {options.map((option, optionIndex) => {
+            const isSelected = option.value === value;
+
+            return (
+              <button
+                aria-selected={isSelected}
+                className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition ${
+                  isSelected
+                    ? "bg-slate-50 font-semibold text-slate-800"
+                    : "font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                }`}
+                id={`${listboxId}-${optionIndex}`}
+                key={`${id}-${option.value || "empty"}`}
+                onClick={() => selectOption(optionIndex)}
+                onFocus={() => setActiveIndex(optionIndex)}
+                onKeyDown={(event) => handleOptionKeyDown(event, optionIndex)}
+                ref={(element) => {
+                  optionRefs.current[optionIndex] = element;
+                }}
+                role="option"
+                tabIndex={activeIndex === optionIndex ? 0 : -1}
+                type="button"
               >
-                <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Account type
-                </p>
-                <p className="mt-1 text-sm font-semibold text-stone-900">{option.label}</p>
-                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Normal balance
-                </p>
-                <p className="mt-1 text-sm font-semibold text-stone-900">
-                  {normalBalances[option.value]}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 hidden sm:block">
-            <table className="w-full border-separate border-spacing-y-2 text-left text-sm">
-              <thead className="text-xs font-semibold uppercase tracking-wide text-stone-500">
-                <tr>
-                  <th className="px-4 py-2">Account type</th>
-                  <th className="px-4 py-2">Normal balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accountOptions.map((option) => (
-                  <tr className="bg-stone-50" key={option.value}>
-                    <td className="rounded-l-xl border-y border-l border-stone-200 px-4 py-3 text-stone-700">
-                      {option.label}
-                    </td>
-                    <td className="rounded-r-xl border-y border-r border-stone-200 px-4 py-3 font-semibold text-stone-900">
-                      {normalBalances[option.value]}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-
-        <Card className="p-6 sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Worked examples</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Simple examples
-          </h2>
-          <div className="mt-5 divide-y divide-stone-100">
-            {examples.map((example) => (
-              <article className="py-4 first:pt-0 last:pb-0" key={example.title}>
-                <h3 className="text-base font-semibold text-stone-950">{example.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-600">{example.text}</p>
-              </article>
-            ))}
-          </div>
-        </Card>
-      </section>
-
-      <Card className="p-6 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Common mistakes</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Mistakes to avoid
-        </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {mistakes.map((mistake) => (
-            <div
-              className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
-              key={mistake}
-            >
-              {mistake}
-            </div>
-          ))}
+                <span className="min-w-0">{option.label}</span>
+                {isSelected ? <Check aria-hidden="true" className="h-4 w-4 shrink-0" /> : null}
+              </button>
+            );
+          })}
         </div>
-      </Card>
-
-      <Card className="p-6 sm:p-8 lg:p-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Continue checking accounting basics
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Use the accounting equation and trial balance tools to keep practicing the same
-              double-entry ideas.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <ButtonLink href="/tools/accounting-equation-calculator">
-              Accounting Equation Calculator
-            </ButtonLink>
-            <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-              Trial Balance Calculator
-            </ButtonLink>
-            <ButtonLink href="/guides" variant="secondary">
-              Guides
-            </ButtonLink>
-          </div>
-        </div>
-      </Card>
+      ) : null}
     </div>
   );
 }
