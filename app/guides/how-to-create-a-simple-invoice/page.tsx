@@ -4,6 +4,7 @@ import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { FAQSection } from "@/components/tools/FAQSection";
 import { createMetadata } from "@/lib/seo/metadata";
 import { buildAssetUrl, siteConfig } from "@/lib/seo/site";
 
@@ -284,12 +285,6 @@ export default function HowToCreateSimpleInvoicePage() {
       />
 
       <Container as="main">
-        <Link
-          className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
-          href="/guides"
-        >
-          ← All guides
-        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Business Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -582,43 +577,7 @@ export default function HowToCreateSimpleInvoicePage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" id="faq">
-          <p className="text-sm font-medium tracking-wide text-slate-500">FAQ</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Simple Invoice FAQs
-          </h2>
-          <div className="mt-6 divide-y divide-stone-100">
-            {faqs.map((faq) => (
-              <details className="group py-5 first:pt-0 last:pb-0" key={faq.question}>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-stone-950">
-                  <span>{faq.question}</span>
-                  <span
-                    aria-hidden="true"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-stone-200 text-stone-500 transition group-open:rotate-180"
-                  >
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      viewBox="0 0 16 16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3.5 6L8 10.5L12.5 6"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2.25"
-                      />
-                    </svg>
-                  </span>
-                </summary>
-                <p className="mt-3 text-sm leading-6 text-stone-600 sm:text-base">
-                  {faq.answer}
-                </p>
-              </details>
-            ))}
-          </div>
-        </section>
+        <FAQSection faqs={faqs} id="faq" title="Simple Invoice FAQs" />
       </Container>
     </div>
   );

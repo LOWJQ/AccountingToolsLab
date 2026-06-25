@@ -6,16 +6,18 @@ export type FAQItem = {
 type FAQSectionProps = {
   faqs: FAQItem[];
   eyebrow?: string;
+  id?: string;
   title?: string;
 };
 
 export function FAQSection({
   eyebrow = "FAQ",
   faqs,
+  id,
   title = "Frequently Asked Questions"
 }: FAQSectionProps) {
   return (
-    <section className="border-t border-stone-200 pt-8">
+    <section className="border-t border-stone-200 pt-8" id={id}>
       {eyebrow ? <p className="text-sm font-medium tracking-wide text-slate-500">{eyebrow}</p> : null}
       <h2 className={`${eyebrow ? "mt-3" : ""} text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl`}>
         {title}

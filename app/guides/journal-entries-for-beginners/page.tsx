@@ -2,6 +2,7 @@ import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { FAQSection } from "@/components/tools/FAQSection";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
@@ -267,12 +268,6 @@ export default function JournalEntriesForBeginnersPage() {
       />
 
       <Container as="main">
-        <Link
-          className="text-sm font-semibold text-slate-600 transition hover:text-slate-900"
-          href="/guides"
-        >
-          ← All guides
-        </Link>
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
           <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
@@ -567,22 +562,7 @@ export default function JournalEntriesForBeginnersPage() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">FAQ</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Journal Entries for Beginners FAQs
-          </h2>
-          <div className="mt-6 divide-y divide-stone-100">
-            {faqs.map((faq) => (
-              <article className="py-5 first:pt-0 last:pb-0" key={faq.question}>
-                <h3 className="text-base font-semibold text-stone-950">{faq.question}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
-                  {faq.answer}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <FAQSection faqs={faqs} title="Journal Entries for Beginners FAQs" />
       </Container>
     </div>
   );
