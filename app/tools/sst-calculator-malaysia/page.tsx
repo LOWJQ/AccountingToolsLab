@@ -9,13 +9,28 @@ import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "SST Calculator Malaysia | Add or Remove SST by Category",
+  title: "SST Calculator Malaysia | Calculate 6%, 8% & 10% SST",
   description:
-    "Estimate Malaysia SST with add/remove calculations, suggested category rates, manual overrides, and a clean SST summary card.",
+    "Use this SST calculator Malaysia tool to calculate SST, add SST to a price, or remove SST from an inclusive total with 6%, 8%, 10%, and manual rates.",
   path: "/tools/sst-calculator-malaysia"
 });
 
 const sstFaqs = [
+  {
+    question: "How do I calculate SST in Malaysia?",
+    answer:
+      "To add SST, multiply the amount before SST by the SST rate, then add that SST amount to the original amount. To remove SST from an inclusive total, divide the total by 1 plus the SST rate, then subtract the amount before SST from the total."
+  },
+  {
+    question: "Can I calculate 6%, 8%, and 10% SST?",
+    answer:
+      "Yes. The calculator includes suggested category rates such as 6%, 8%, 10%, 5%, 0%, and a manual rate option for quick SST arithmetic checks."
+  },
+  {
+    question: "Can I use this as a service tax calculator for Malaysia?",
+    answer:
+      "Yes, you can use it as a service tax calculator for Malaysia to estimate service tax amounts, including adding SST to an amount or removing SST from an amount that already includes SST."
+  },
   {
     question: "Can this calculator tell me the official SST rate for my product?",
     answer:
@@ -80,9 +95,9 @@ export default function SstCalculatorMalaysiaPage() {
           SST Calculator Malaysia
         </h1>
         <p className="mt-3 text-base leading-7 text-stone-600">
-          Estimate Malaysia SST with add/remove calculations, suggested category rates, and a
-          cleaner summary for business checks. Use it for arithmetic and record-keeping checks,
-          not official tax classification.
+          Use this SST calculator Malaysia tool to calculate SST, add SST to an amount, or remove
+          SST from a total that already includes SST. Choose suggested category rates such as 6%,
+          8%, 10%, 5%, 0%, or enter a manual rate for arithmetic and record-keeping checks.
         </p>
       </div>
       <SstCalculatorMalaysia />
@@ -90,10 +105,10 @@ export default function SstCalculatorMalaysiaPage() {
       <section className="border-t border-stone-200 pt-8">
         <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          Learn the SST arithmetic
+          How to calculate SST in Malaysia
         </h2>
         <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          If you want a walkthrough of the formulas, read{" "}
+          If you want a walkthrough of the add SST and remove SST formulas, read{" "}
           <Link
             className="font-semibold text-slate-700 hover:text-slate-900"
             href="/guides/sst-calculator-malaysia-add-remove-sst"

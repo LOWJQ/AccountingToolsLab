@@ -533,7 +533,7 @@ export function EditableInvoiceLineItems({
 >) {
   return (
     <section className="mt-7">
-      <div className="overflow-hidden rounded-xl border border-stone-300">
+      <div className="overflow-hidden border border-stone-300">
         <div className="hidden border-b border-slate-800 bg-slate-700 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:gap-3 sm:px-4">
           <span>No</span>
           <span>Description</span>
@@ -574,6 +574,7 @@ export function EditableInvoiceLineItems({
                   </span>
                   <EditableInput
                     ariaLabel={`Line item ${index + 1} description`}
+                    className="rounded-none"
                     error={descriptionError}
                     errorId={`line-item-${index}-description-error`}
                     maxLength={INVOICE_TEXT_MAX_LENGTHS.lineItemDescription}
@@ -589,7 +590,7 @@ export function EditableInvoiceLineItems({
                   </span>
                   <EditableInput
                     ariaLabel={`Line item ${index + 1} unit price`}
-                    className="tabular-nums sm:text-right"
+                    className="rounded-none tabular-nums sm:text-right"
                     error={unitPriceError}
                     errorId={`line-item-${index}-unit-price-error`}
                     inputMode="decimal"
@@ -605,7 +606,7 @@ export function EditableInvoiceLineItems({
                   </span>
                   <EditableInput
                     ariaLabel={`Line item ${index + 1} quantity`}
-                    className="tabular-nums sm:text-right"
+                    className="rounded-none tabular-nums sm:text-right"
                     error={quantityError}
                     errorId={`line-item-${index}-quantity-error`}
                     inputMode="decimal"

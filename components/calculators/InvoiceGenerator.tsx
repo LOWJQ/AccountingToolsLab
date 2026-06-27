@@ -547,7 +547,7 @@ export function InvoiceGenerator() {
             {featureHighlights.map((feature) => (
               <li className="flex gap-3" key={feature}>
                 <span aria-hidden="true" className="text-stone-400">
-                  →
+                  -&gt;
                 </span>
                 <span>{feature}</span>
               </li>

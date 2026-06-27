@@ -9,9 +9,9 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "Free Trial Balance Calculator | Check Debits and Credits",
+  title: "Free Trial Balance Calculator | Trial Balance Generator",
   description:
-    "Use this free trial balance calculator to total debits and credits, check whether your trial balance is balanced, and find the difference instantly.",
+    "Use this free trial balance calculator to total debit and credit balances, generate a simple trial balance worksheet, and find the difference instantly.",
   path: "/tools/trial-balance-calculator"
 });
 
@@ -20,6 +20,16 @@ const trialBalanceFaqs = [
     question: "What is a trial balance calculator?",
     answer:
       "A trial balance calculator helps total debit and credit balances in an accounting worksheet so you can quickly see whether the trial balance is balanced."
+  },
+  {
+    question: "Can I use this as a trial balance generator?",
+    answer:
+      "Yes. Enter account names and debit or credit balances, then the tool generates a simple trial balance layout with total debits, total credits, the difference, and a balanced or unbalanced status."
+  },
+  {
+    question: "How do I calculate trial balance in accounting?",
+    answer:
+      "List each ledger account balance, place each amount in either the debit or credit column, add the debit column, add the credit column, and compare the totals. A trial balance is balanced when total debits equal total credits."
   },
   {
     question: "Why might a trial balance not balance?",
@@ -63,23 +73,23 @@ export default function TrialBalanceCalculatorPage() {
       <FAQJsonLd faqs={trialBalanceFaqs} />
       <div>
         <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-          Trial Balance Calculator
+          Free Trial Balance Calculator
         </h1>
         <p className="mt-3 text-base leading-7 text-stone-600">
-          Enter account balances in the debit or credit column to preview a clean trial balance
-          worksheet layout.
+          Enter account balances in the debit or credit column to generate a clean trial balance
+          worksheet layout, total both sides, and check whether the trial balance is balanced.
         </p>
       </div>
       <TrialBalanceCalculator />
       <section className="border-t border-stone-200 pt-8">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Check debit and credit balances in a few steps
+            Calculate a trial balance in a few steps
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use this trial balance calculator to review account balances in a simple accounting
-            worksheet format. It is useful when you want to check debit and credit totals quickly
-            before moving on to reports or further accounting work.
+            Use this trial balance calculator or generator to review account balances in a simple
+            accounting worksheet format. It is useful when you want to check debit and credit
+            totals quickly before moving on to reports or further accounting work.
           </p>
           <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
             {[

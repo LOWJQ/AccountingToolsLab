@@ -299,7 +299,7 @@ export function TrialBalanceCalculator() {
         </div>
 
         <p className="mt-5 text-sm text-stone-500">
-          A trial balance is balanced when total debits equal total credits.
+          Use this generated trial balance summary to check whether total debits equal total credits.
         </p>
       </Card>
     </div>

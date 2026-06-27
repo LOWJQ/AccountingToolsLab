@@ -271,7 +271,7 @@ export function SstCalculatorMalaysia() {
         <div>
           <p className="text-sm font-medium tracking-wide text-slate-500">How it works</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Clear SST summary for fast checks
+            Calculate SST with add and remove formulas
           </h2>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
             <li className="flex gap-3">
