@@ -85,13 +85,7 @@ function ToolShowcaseCard({
 
 export default function HomePage() {
   return (
-    <main
-      className="min-h-screen overflow-hidden text-stone-950"
-      style={{
-        background:
-          "radial-gradient(circle at 50% 18%, rgba(220,245,238,0.5), transparent 34%), linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 42%, #F6F8FB 100%)"
-      }}
-    >
+    <main className="min-h-screen overflow-hidden bg-white text-stone-950">
       <JsonLd data={createWebsiteSchema()} />
       <JsonLd data={createOrganizationSchema()} />
 
@@ -151,7 +145,7 @@ export default function HomePage() {
         />
         <div className="absolute inset-x-0 top-0 z-[1] h-24 bg-gradient-to-b from-white via-white/80 to-transparent sm:h-28" />
         <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/55 via-white/15 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 z-[1] h-28 bg-gradient-to-t from-[#f6f8fb] via-white/20 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 z-[1] h-28 bg-gradient-to-t from-white via-white/20 to-transparent" />
 
         <div className="pointer-events-auto relative z-10 mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-8">
           <div

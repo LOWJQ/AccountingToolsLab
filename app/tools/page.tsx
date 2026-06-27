@@ -3,7 +3,6 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { InvoiceMockPreview } from "@/components/tools/InvoiceMockPreview";
 import { createItemListSchema } from "@/lib/seo/schema";
 import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
@@ -14,21 +13,6 @@ export const metadata = createMetadata({
     "Create invoices, calculate SST, check cash flow, estimate break-even points, and use free accounting calculators for small businesses, freelancers, and learners.",
   path: "/tools"
 });
-
-const categories = [
-  {
-    title: "Main Business Tool",
-    description: "Start with the invoice generator for practical small business documents."
-  },
-  {
-    title: "Business Calculators",
-    description: "Estimate SST, review cash flow, calculate break-even points, and check ratios."
-  },
-  {
-    title: "Accounting Learning Tools",
-    description: "Practice trial balances, journal entries, debits, credits, and core concepts."
-  }
-];
 
 const availableTools = tools.filter((tool) => tool.status === "mvp");
 const invoiceTool = tools.find((tool) => tool.slug === "invoice-generator");
@@ -138,48 +122,38 @@ export default function ToolsPage() {
       />
       <JsonLd data={createItemListSchema(toolItemList)} />
       <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">
-              Invoice and Accounting Tools
-            </p>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-              Free Invoice Generator and Accounting Tools
-            </h1>
-            <p className="mt-5 text-base leading-7 text-stone-600">
-              Create simple invoices, calculate SST, check cash flow, estimate break-even points,
-              and use beginner-friendly accounting calculators for small business and learning.
-            </p>
-            <div className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
-              {availableTools.length} available tools
-            </div>
-          </div>
+        <section className="max-w-5xl">
+          <p className="text-sm font-medium tracking-wide text-slate-500">
+            Invoice and Accounting Tools
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
+            Free Invoice Generator and Accounting Tools
+          </h1>
+          <p className="mt-5 text-base leading-7 text-stone-600">
+            Create simple invoices, calculate SST, check cash flow, estimate break-even points,
+            and use beginner-friendly accounting calculators for small business and learning.
+          </p>
         </section>
 
         {invoiceTool ? (
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-              <div>
-                <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
-                  Most Useful for Small Businesses
-                </span>
-                <h2 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-                  PDF Invoice Generator Malaysia
-                </h2>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
-                  Create simple invoices with business and customer details, line items,
-                  subtotal, optional SST / tax, total, and 10 supported currencies including MYR.
-                  Preview your invoice and download it as a PDF when it is ready.
-                </p>
-                <Link
-                  className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                  href="/tools/invoice-generator"
-                >
-                  Create a PDF Invoice
-                </Link>
-              </div>
-              <InvoiceMockPreview />
-            </div>
+          <section className="border-t border-stone-200 pt-8">
+            <p className="text-sm font-medium tracking-wide text-slate-500">
+              Most Useful for Small Businesses
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+              PDF Invoice Generator Malaysia
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+              Create simple invoices with business and customer details, line items, subtotal,
+              optional SST / tax, total, and 10 supported currencies including MYR. Preview your
+              invoice and download it as a PDF when it is ready.
+            </p>
+            <Link
+              className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              href="/tools/invoice-generator"
+            >
+              Create a PDF Invoice
+            </Link>
           </section>
         ) : null}
 
@@ -191,10 +165,6 @@ export default function ToolsPage() {
                 Business calculators
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-stone-600">
-              After invoices, use these calculators to estimate tax, cash flow, break-even
-              points, performance, and depreciation.
-            </p>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -214,10 +184,6 @@ export default function ToolsPage() {
                 Beginner-friendly accounting tools
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-stone-600">
-              Keep learning with practical checks for trial balances, journals, debits, credits,
-              and the accounting equation.
-            </p>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -227,51 +193,6 @@ export default function ToolsPage() {
           </div>
         </section>
 
-        <section>
-          <div>
-            <p className="text-sm font-medium tracking-wide text-slate-500">Use cases</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Accounting tool categories
-            </h2>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <article
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
-                key={category.title}
-              >
-                <h3 className="text-sm font-semibold text-stone-950">{category.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{category.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">
-              Recommended starting point
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Need to bill a customer? Start with the free invoice generator.
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              It gives small businesses and freelancers a simple path from customer details and
-              line items to a clean downloadable PDF invoice.
-            </p>
-            <Link
-              className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-semibold text-white transition hover:bg-stone-800"
-              href="/tools/invoice-generator"
-            >
-              Open PDF Invoice Generator
-            </Link>
-          </div>
-        </section>
-
-        <aside className="rounded-xl border border-stone-200 bg-white/80 p-5 text-sm leading-6 text-stone-600 shadow-sm">
-          Accounting learning resources still matter here. Start with invoices for business tasks,
-          then use the calculators when you need tax, cash, planning, or bookkeeping checks.
-        </aside>
       </Container>
     </div>
   );

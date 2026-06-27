@@ -370,7 +370,7 @@ function MegaMenuPanel({
   const menu = megaMenus[menuKey];
 
   return (
-    <div className="absolute inset-x-0 top-full pt-1" ref={panelRef}>
+    <div className="absolute inset-x-0 top-full z-30 pt-1" ref={panelRef}>
       <div className="mx-auto max-w-[1400px] px-3 sm:px-5 lg:px-6">
         <div className="overflow-hidden border border-stone-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
           <div className="grid lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -427,6 +427,7 @@ export function Header() {
   const headerRef = useRef<HTMLElement>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
   const desktopMenuPanelRef = useRef<HTMLDivElement>(null);
+  const desktopMenuOverlayRef = useRef<HTMLButtonElement>(null);
   const toolsButtonRef = useRef<HTMLButtonElement>(null);
   const guidesButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -500,6 +501,7 @@ export function Header() {
       if (
         activeButton?.contains(target) ||
         desktopMenuPanelRef.current?.contains(target) ||
+        desktopMenuOverlayRef.current?.contains(target) ||
         isBetweenActiveButtonAndPanel
       ) {
         return;
@@ -582,14 +584,25 @@ export function Header() {
   const visibilityProgress = headerHeight > 0 ? 1 - headerOffset / headerHeight : 1;
 
   return (
-    <header
-      className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur transition-[transform,opacity] duration-300 ease-out will-change-transform"
-      ref={headerRef}
-      style={{
-        opacity: Math.max(visibilityProgress, 0),
-        transform: `translateY(-${headerOffset}px)`
-      }}
-    >
+    <>
+      {desktopMenu ? (
+        <button
+          aria-label="Close navigation menu"
+          className="fixed inset-x-0 bottom-0 top-16 z-40 hidden cursor-default bg-black/25 backdrop-blur-sm sm:block"
+          onClick={() => setDesktopMenu(null)}
+          ref={desktopMenuOverlayRef}
+          type="button"
+        />
+      ) : null}
+
+      <header
+        className="sticky top-0 z-50 border-b border-stone-200 bg-white transition-[transform,opacity] duration-300 ease-out will-change-transform"
+        ref={headerRef}
+        style={{
+          opacity: Math.max(visibilityProgress, 0),
+          transform: `translateY(-${headerOffset}px)`
+        }}
+      >
       <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-4 px-3 sm:px-5 lg:px-6">
         <Link className="flex shrink-0 items-center" href="/" aria-label="AccountingToolsLab home">
           <Image
@@ -756,6 +769,7 @@ export function Header() {
           </div>
         </nav>
       ) : null}
-    </header>
+      </header>
+    </>
   );
 }
