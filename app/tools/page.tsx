@@ -1,6 +1,5 @@
 import { tools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
-import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { createItemListSchema } from "@/lib/seo/schema";
@@ -46,35 +45,11 @@ function getToolsBySlugOrder(slugs: string[]) {
 const businessTools = getToolsBySlugOrder(businessToolSlugs);
 const learningTools = getToolsBySlugOrder(learningToolSlugs);
 
-function StatusBadge({ status }: { status: "mvp" | "planned" }) {
-  const isAvailable = status === "mvp";
-
-  return (
-    <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ${
-        isAvailable
-          ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
-          : "bg-stone-100 text-stone-500 ring-stone-200"
-      }`}
-    >
-      {isAvailable ? "Available" : "Coming Soon"}
-    </span>
-  );
-}
-
 function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
   const isAvailable = tool.status === "mvp";
   const content = (
     <>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-            {tool.category}
-          </p>
-          <h3 className="mt-2 text-base font-semibold text-stone-950">{tool.name}</h3>
-        </div>
-        <StatusBadge status={tool.status} />
-      </div>
+      <h3 className="text-base font-semibold text-stone-950">{tool.name}</h3>
       <p className="mt-4 text-sm leading-6 text-stone-600">{tool.description}</p>
       {tool.bestFor ? (
         <p className="mt-4 text-sm leading-6 text-stone-500">
@@ -95,7 +70,7 @@ function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
 
   return isAvailable ? (
     <Link
-      className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+      className="rounded-xl border border-stone-200 bg-[#f5f5f5] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
       href={tool.href}
       key={tool.slug}
     >
@@ -103,7 +78,7 @@ function ToolCard({ tool }: { tool: (typeof tools)[number] }) {
     </Link>
   ) : (
     <article
-      className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
+      className="rounded-xl border border-stone-200 bg-[#f5f5f5] p-5 shadow-sm"
       key={tool.slug}
     >
       {content}
@@ -121,79 +96,96 @@ export default function ToolsPage() {
         ]}
       />
       <JsonLd data={createItemListSchema(toolItemList)} />
-      <Container as="main">
-        <section className="max-w-5xl">
-          <p className="text-sm font-medium tracking-wide text-slate-500">
-            Invoice and Accounting Tools
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Free Invoice Generator and Accounting Tools
-          </h1>
-          <p className="mt-5 text-base leading-7 text-stone-600">
-            Create simple invoices, calculate SST, check cash flow, estimate break-even points,
-            and use beginner-friendly accounting calculators for small business and learning.
-          </p>
+      <main>
+        <section className="bg-white">
+          <div className="mx-auto w-full max-w-[1080px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+            <div className="max-w-5xl">
+              <p className="text-sm font-medium tracking-wide text-slate-500">
+                Invoice and Accounting Tools
+              </p>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
+                Free Accounting Tools
+              </h1>
+              <p className="mt-5 text-base leading-7 text-stone-600">
+                Create simple invoices, calculate SST, check cash flow, estimate break-even points,
+                and use beginner-friendly accounting calculators for small business and learning.
+              </p>
+            </div>
+          </div>
         </section>
 
         {invoiceTool ? (
-          <section className="border-t border-stone-200 pt-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">
-              Most Useful for Small Businesses
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-              PDF Invoice Generator Malaysia
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              Create simple invoices with business and customer details, line items, subtotal,
-              optional SST / tax, total, and 10 supported currencies including MYR. Preview your
-              invoice and download it as a PDF when it is ready.
-            </p>
-            <Link
-              className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              href="/tools/invoice-generator"
-            >
-              Create a PDF Invoice
-            </Link>
-          </section>
+          <>
+            <div className="mx-auto w-full max-w-[1080px] px-4 sm:px-6 lg:px-8">
+              <div className="border-t border-stone-200" />
+            </div>
+            <section className="bg-white">
+              <div className="mx-auto w-full max-w-[1080px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+                <p className="text-sm font-medium tracking-wide text-slate-500">
+                  Most Useful for Small Businesses
+                </p>
+                <h2 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+                  PDF Invoice Generator Malaysia
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+                  Create simple invoices with business and customer details, line items, subtotal,
+                  optional SST / tax, total, and 10 supported currencies including MYR. Preview your
+                  invoice and download it as a PDF when it is ready.
+                </p>
+                <Link
+                  className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  href="/tools/invoice-generator"
+                >
+                  Create a PDF Invoice
+                </Link>
+              </div>
+            </section>
+          </>
         ) : null}
 
-        <section>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-medium tracking-wide text-slate-500">Directory</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Business calculators
-              </h2>
-            </div>
-          </div>
+        <div className="mx-auto w-full max-w-[1080px] px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-stone-200" />
+        </div>
+        <section className="bg-white">
+          <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-10 px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+            <section>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium tracking-wide text-slate-500">Directory</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+                    Business calculators
+                  </h2>
+                </div>
+              </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {businessTools.map((tool) => (
-              <ToolCard key={tool.slug} tool={tool} />
-            ))}
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {businessTools.map((tool) => (
+                  <ToolCard key={tool.slug} tool={tool} />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium tracking-wide text-slate-500">
+                    Accounting learning
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+                    Beginner-friendly accounting tools
+                  </h2>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {learningTools.map((tool) => (
+                  <ToolCard key={tool.slug} tool={tool} />
+                ))}
+              </div>
+            </section>
           </div>
         </section>
-
-        <section>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-medium tracking-wide text-slate-500">
-                Accounting learning
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Beginner-friendly accounting tools
-              </h2>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {learningTools.map((tool) => (
-              <ToolCard key={tool.slug} tool={tool} />
-            ))}
-          </div>
-        </section>
-
-      </Container>
+      </main>
     </div>
   );
 }

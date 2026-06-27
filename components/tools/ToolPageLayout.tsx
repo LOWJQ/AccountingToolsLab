@@ -6,13 +6,10 @@ type ToolPageLayoutProps = {
   children?: ReactNode;
 };
 
-export function ToolPageLayout({ eyebrow, children }: ToolPageLayoutProps) {
+export function ToolPageLayout({ children }: ToolPageLayoutProps) {
   return (
     <div>
       <Container as="main">
-        {eyebrow ? (
-          <p className="text-sm font-medium tracking-wide text-slate-500">{eyebrow}</p>
-        ) : null}
         {children}
       </Container>
     </div>
