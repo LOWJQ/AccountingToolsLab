@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -162,6 +163,18 @@ export default function CashFlowCalculatorPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn the difference between cash flow and profit, why profitable businesses can run out of cash, and how to check simple cash movement.",
+            href: "/guides/cash-flow-vs-profit",
+            label: "Cash flow guide",
+            title: "Cash Flow vs Profit"
+          }
+        ]}
+        toolName="Cash Flow Calculator"
+      />
       <FAQSection faqs={cashFlowFaqs} title="Cash Flow Calculator FAQs" />
     </ToolPageLayout>
   );

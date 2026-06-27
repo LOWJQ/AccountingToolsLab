@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -152,6 +153,18 @@ export default function JournalEntryCheckerPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn how journal entries work with simple debit and credit examples, common mistakes, and a step-by-step beginner checklist.",
+            href: "/guides/journal-entries-for-beginners",
+            label: "Journal entry guide",
+            title: "Journal Entries for Beginners"
+          }
+        ]}
+        toolName="Journal Entry Checker"
+      />
       <FAQSection faqs={journalEntryFaqs} title="Journal Entry Checker FAQs" />
     </ToolPageLayout>
   );

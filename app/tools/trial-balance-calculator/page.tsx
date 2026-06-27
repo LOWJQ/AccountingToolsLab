@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -169,6 +170,18 @@ export default function TrialBalanceCalculatorPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn what a trial balance is, how to prepare one, the trial balance format, examples, common errors, and why total debits should equal total credits.",
+            href: "/guides/trial-balance-explained",
+            label: "Trial balance guide",
+            title: "Trial Balance Explained"
+          }
+        ]}
+        toolName="Trial Balance Calculator"
+      />
       <FAQSection faqs={trialBalanceFaqs} title="Trial Balance Calculator FAQs" />
     </ToolPageLayout>
   );

@@ -3,10 +3,10 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "SST Calculator Malaysia | Calculate 6%, 8% & 10% SST",
@@ -102,29 +102,18 @@ export default function SstCalculatorMalaysiaPage() {
       </div>
       <SstCalculatorMalaysia />
 
-      <section className="border-t border-stone-200 pt-8">
-        <p className="text-sm font-medium tracking-wide text-slate-500">Related guide</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-          How to calculate SST in Malaysia
-        </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          If you want a walkthrough of the add SST and remove SST formulas, read{" "}
-          <Link
-            className="font-semibold text-slate-700 hover:text-slate-900"
-            href="/guides/sst-calculator-malaysia-add-remove-sst"
-          >
-            how to add or remove SST in Malaysia
-          </Link>
-          . If you are preparing a simple invoice, review{" "}
-          <Link
-            className="font-semibold text-slate-700 hover:text-slate-900"
-            href="/guides/how-to-create-a-simple-invoice"
-          >
-            how to create a simple invoice
-          </Link>{" "}
-          and confirm the SST treatment separately.
-        </p>
-      </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn how to add or remove SST in Malaysia with formulas, examples, SST amount, total including SST, and amount before SST.",
+            href: "/guides/sst-calculator-malaysia-add-remove-sst",
+            label: "SST guide",
+            title: "SST Calculator Malaysia: Add or Remove SST"
+          }
+        ]}
+        toolName="SST Calculator"
+      />
 
       <FAQSection faqs={sstFaqs} title="SST Calculator Malaysia FAQs" />
     </ToolPageLayout>

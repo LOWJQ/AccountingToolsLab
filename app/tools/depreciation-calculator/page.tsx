@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -152,6 +153,18 @@ export default function DepreciationCalculatorPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn straight-line depreciation with the formula, examples, salvage value, useful life, annual depreciation expense, and common beginner mistakes.",
+            href: "/guides/straight-line-depreciation-explained",
+            label: "Depreciation guide",
+            title: "Straight-Line Depreciation Explained"
+          }
+        ]}
+        toolName="Depreciation Calculator"
+      />
       <FAQSection faqs={depreciationFaqs} title="Depreciation Calculator FAQs" />
     </ToolPageLayout>
   );

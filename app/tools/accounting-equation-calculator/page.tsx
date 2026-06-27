@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -153,6 +154,18 @@ export default function AccountingEquationCalculatorPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn debit and credit rules, normal balances, beginner examples, and how account changes connect with basic accounting logic.",
+            href: "/guides/debit-vs-credit",
+            label: "Accounting basics guide",
+            title: "Debit vs Credit"
+          }
+        ]}
+        toolName="Accounting Equation Calculator"
+      />
       <FAQSection
         faqs={accountingEquationFaqs}
         title="Accounting Equation Calculator FAQs"

@@ -3,10 +3,10 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Free Invoice Generator Malaysia | Online PDF Invoice Maker",
@@ -119,45 +119,18 @@ export default function InvoiceGeneratorPage() {
           submission questions separate.
         </p>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Invoice Generator Related Guide Article
-        </h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <Link
-            className="group flex min-h-[220px] flex-col rounded-2xl border border-stone-200 bg-[#f5f5f5] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
-            href="/guides/how-to-create-a-simple-invoice"
-          >
-            <p className="text-sm font-medium tracking-wide text-slate-500">Invoice guide</p>
-            <h3 className="mt-3 text-xl font-semibold tracking-tight text-stone-950">
-              How to Create a Simple Invoice
-            </h3>
-            <p className="mt-4 flex-1 text-sm leading-6 text-stone-600 sm:text-base">
-              Learn what to include in a simple invoice, from business and customer details to line
-              items, invoice numbers, payment terms, and notes.
-            </p>
-            <span className="mt-5 inline-flex text-sm font-semibold text-slate-700 group-hover:text-slate-950">
-              Read guide -&gt;
-            </span>
-          </Link>
-          <Link
-            className="group flex min-h-[220px] flex-col rounded-2xl border border-stone-200 bg-[#f5f5f5] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
-            href="/guides/sst-calculator-malaysia-add-remove-sst"
-          >
-            <p className="text-sm font-medium tracking-wide text-slate-500">SST guide</p>
-            <h3 className="mt-3 text-xl font-semibold tracking-tight text-stone-950">
-              How to Add or Remove SST in Malaysia
-            </h3>
-            <p className="mt-4 flex-1 text-sm leading-6 text-stone-600 sm:text-base">
-              Review the SST add and remove formulas before using tax or SST amounts on a simple
-              invoice.
-            </p>
-            <span className="mt-5 inline-flex text-sm font-semibold text-slate-700 group-hover:text-slate-950">
-              Read guide -&gt;
-            </span>
-          </Link>
-        </div>
-      </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn what to include in a simple invoice, from business and customer details to line items, invoice numbers, payment terms, and notes.",
+            href: "/guides/how-to-create-a-simple-invoice",
+            label: "Invoice guide",
+            title: "How to Create a Simple Invoice"
+          }
+        ]}
+        toolName="Invoice Generator"
+      />
       <FAQSection eyebrow="" faqs={invoiceFaqs} title="Free Online Invoice Generator Malaysia FAQs" />
     </ToolPageLayout>
   );

@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -156,6 +157,18 @@ export default function FinancialRatioCalculatorPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn basic financial ratio formulas, examples, and what ratios like current ratio, debt-to-equity, profit margin, and return on assets mean.",
+            href: "/guides/financial-ratios-for-beginners",
+            label: "Financial ratio guide",
+            title: "Financial Ratios for Beginners"
+          }
+        ]}
+        toolName="Financial Ratio Calculator"
+      />
       <FAQSection faqs={financialRatioFaqs} title="Financial Ratio Calculator FAQs" />
     </ToolPageLayout>
   );

@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -169,6 +170,18 @@ export default function BreakEvenCalculatorPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn what break-even point means, how to calculate break-even units and sales, contribution margin, examples, and common beginner mistakes.",
+            href: "/guides/break-even-point-explained",
+            label: "Break-even guide",
+            title: "Break-even Point Explained"
+          }
+        ]}
+        toolName="Break-even Calculator"
+      />
       <FAQSection faqs={breakEvenFaqs} title="Break-even Calculator FAQs" />
     </ToolPageLayout>
   );

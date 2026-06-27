@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -152,6 +153,18 @@ export default function DebitCreditCheckerPage() {
           </ButtonLink>
         </div>
       </section>
+      <RelatedGuideArticleSection
+        articles={[
+          {
+            description:
+              "Learn debit and credit rules, normal balances, beginner examples, and how to know whether to debit or credit an account.",
+            href: "/guides/debit-vs-credit",
+            label: "Debit and credit guide",
+            title: "Debit vs Credit"
+          }
+        ]}
+        toolName="Debit/Credit Checker"
+      />
       <FAQSection faqs={debitCreditFaqs} title="Debit/Credit Checker FAQs" />
     </ToolPageLayout>
   );
