@@ -361,18 +361,23 @@ function CurrencySelector() {
 function MegaMenuPanel({
   menuKey,
   onNavigate,
-  panelRef
+  panelRef,
+  surfaceRef
 }: {
   menuKey: DesktopMenuKey;
   onNavigate: () => void;
   panelRef: RefObject<HTMLDivElement>;
+  surfaceRef: RefObject<HTMLDivElement>;
 }) {
   const menu = megaMenus[menuKey];
 
   return (
     <div className="absolute inset-x-0 top-full z-30 pt-1" ref={panelRef}>
       <div className="mx-auto max-w-[1400px] px-3 sm:px-5 lg:px-6">
-        <div className="overflow-hidden border border-stone-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+        <div
+          className="overflow-hidden border border-stone-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]"
+          ref={surfaceRef}
+        >
           <div className="grid lg:grid-cols-[280px_minmax(0,1fr)]">
             <div className="border-b border-stone-100 bg-stone-50/70 p-6 lg:border-b-0 lg:border-r">
               <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
@@ -427,6 +432,7 @@ export function Header() {
   const headerRef = useRef<HTMLElement>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
   const desktopMenuPanelRef = useRef<HTMLDivElement>(null);
+  const desktopMenuSurfaceRef = useRef<HTMLDivElement>(null);
   const desktopMenuOverlayRef = useRef<HTMLButtonElement>(null);
   const toolsButtonRef = useRef<HTMLButtonElement>(null);
   const guidesButtonRef = useRef<HTMLButtonElement>(null);
@@ -484,14 +490,18 @@ export function Header() {
           ? "guides"
           : null;
       const activeButtonRect = activeButton?.getBoundingClientRect();
-      const panelRect = desktopMenuPanelRef.current?.getBoundingClientRect();
+      const surfaceRect = desktopMenuSurfaceRef.current?.getBoundingClientRect();
+      const bridgeTop = Math.min(
+        activeButtonRect?.bottom ?? Number.POSITIVE_INFINITY,
+        headerRef.current?.getBoundingClientRect().bottom ?? Number.POSITIVE_INFINITY
+      );
       const isBetweenActiveButtonAndPanel =
         activeButtonRect &&
-        panelRect &&
-        event.clientX >= panelRect.left &&
-        event.clientX <= panelRect.right &&
-        event.clientY >= activeButtonRect.bottom &&
-        event.clientY <= panelRect.top;
+        surfaceRect &&
+        event.clientX >= surfaceRect.left &&
+        event.clientX <= surfaceRect.right &&
+        event.clientY >= bridgeTop &&
+        event.clientY <= surfaceRect.top + 12;
 
       if (targetMenu) {
         setDesktopMenu(targetMenu);
@@ -500,8 +510,7 @@ export function Header() {
 
       if (
         activeButton?.contains(target) ||
-        desktopMenuPanelRef.current?.contains(target) ||
-        desktopMenuOverlayRef.current?.contains(target) ||
+        desktopMenuSurfaceRef.current?.contains(target) ||
         isBetweenActiveButtonAndPanel
       ) {
         return;
@@ -677,6 +686,7 @@ export function Header() {
               menuKey={desktopMenu}
               onNavigate={() => setDesktopMenu(null)}
               panelRef={desktopMenuPanelRef}
+              surfaceRef={desktopMenuSurfaceRef}
             />
           ) : null}
         </div>
