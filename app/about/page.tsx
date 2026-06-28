@@ -32,11 +32,11 @@ const audiences = [
 ];
 
 const provides = [
-  "Free invoice generator",
-  "PDF invoice download",
-  "SST and tax math",
-  "Business calculators",
-  "Beginner-friendly explanations"
+  "Free invoice generator with PDF download",
+  "Malaysia SST and tax math helpers",
+  "Business calculators for cash flow, break-even points, ratios, and depreciation",
+  "Accounting learning tools for trial balances, journal entries, debits, credits, and the accounting equation",
+  "Beginner-friendly explanations and practical guide articles"
 ];
 
 const currentTools = [
@@ -54,9 +54,9 @@ const currentTools = [
 
 export default function AboutPage() {
   return (
-    <div>
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
+    <main>
+      <section className="w-full border-b border-stone-200 bg-[#eef6f5]">
+        <Container className="gap-0 py-10 sm:py-12 lg:py-14">
           <p className="text-sm font-medium tracking-wide text-slate-500">
             About AccountingToolsLab
           </p>
@@ -68,66 +68,57 @@ export default function AboutPage() {
             create simple invoices, calculate SST, check cash flow, and understand basic
             accounting concepts with free online tools.
           </p>
-        </section>
+        </Container>
+      </section>
 
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Mission</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Our mission
-            </h2>
-            <p className="mt-4 text-base leading-7 text-stone-600">
+      <Container className="py-12 sm:py-16">
+        <section className="space-y-8">
+          <article>
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950">Our mission</h2>
+            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
               Our mission is to make everyday accounting tasks easier with free tools for
               invoices, SST, cash flow, break-even checks, and accounting basics.
             </p>
           </article>
 
-          <section>
-            <p className="text-sm font-medium tracking-wide text-slate-500">Who it is for</p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <article>
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950">Who it is for</h2>
+            <ul className="mt-4 grid gap-4 text-sm leading-6 text-stone-600 sm:text-base">
               {audiences.map((audience) => (
-                <article
-                  className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
-                  key={audience.title}
-                >
-                  <h3 className="text-base font-semibold text-stone-950">{audience.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-stone-600">
-                    {audience.description}
-                  </p>
-                </article>
+                <li className="flex gap-3" key={audience.title}>
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
+                  <span>
+                    <span className="font-semibold text-stone-950">{audience.title}</span>
+                    <span className="block">{audience.description}</span>
+                  </span>
+                </li>
               ))}
-            </div>
-          </section>
+            </ul>
+          </article>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium tracking-wide text-slate-500">What it provides</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Practical support for accounting basics
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              The site focuses on useful business tools and learning aids rather than complicated
-              software features. Each tool is intended to make a specific invoice, tax, planning,
-              or accounting check easier to complete.
-            </p>
-          </div>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <section>
+          <h2 className="text-xl font-semibold tracking-tight text-stone-950">
+            Practical support for accounting basics
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            The site focuses on useful business tools and learning aids rather than complicated
+            software features. Each tool is intended to make a specific invoice, tax, planning,
+            or accounting check easier to complete.
+          </p>
+          <ul className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
             {provides.map((item) => (
-              <div
-                className="flex min-h-24 items-center justify-center rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-center text-sm font-semibold text-stone-700"
-                key={item}
-              >
+              <li className="flex gap-3" key={item}>
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
                 {item}
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Current status</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+        <section>
+          <article>
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
               Current project status
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
@@ -135,30 +126,14 @@ export default function AboutPage() {
               flow calculator, break-even calculator, and focused accounting learning tools. New
               guide content and practical tool improvements continue to be added over time.
             </p>
-            <div className="mt-6 flex flex-wrap gap-2">
+            <ul className="mt-5 grid gap-2 text-sm leading-6 text-stone-600 sm:grid-cols-2 sm:text-base lg:grid-cols-3">
               {currentTools.map((tool) => (
-                <span
-                  className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200"
-                  key={tool}
-                >
+                <li className="flex gap-3" key={tool}>
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
                   {tool}
-                </span>
+                </li>
               ))}
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">
-              Educational note
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Simple tools, not professional advice
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              These tools are designed for simple business tasks, learning, and basic checking.
-              They do not replace advice from a qualified accountant, tax professional, or
-              financial adviser.
-            </p>
+            </ul>
           </article>
         </section>
 
@@ -191,6 +166,6 @@ export default function AboutPage() {
           </div>
         </section>
       </Container>
-    </div>
+    </main>
   );
 }

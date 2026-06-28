@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata = createMetadata({
   title: "Privacy Policy | AccountingToolsLab",
   description:
-    "Read the Privacy Policy for AccountingToolsLab, including analytics, local preferences, and calculator input handling.",
+    "Read the Privacy Policy for AccountingToolsLab, including invoice drafts, contact form handling, local preferences, analytics, and calculator input handling.",
   path: "/privacy-policy"
 });
 
@@ -13,74 +13,82 @@ const privacySections = [
   {
     title: "Current status",
     content: [
-      "AccountingToolsLab provides free accounting tools and informational content.",
-      "No account is required to use the site.",
-      "The site does not process payments or store calculator entries in a user account."
+      "AccountingToolsLab provides free accounting calculators, an invoice generator, and practical accounting guides for learning and basic business checks.",
+      "You do not need an account to use the website. The site does not currently offer login, user dashboards, subscriptions, paid checkout, ads, or AI features.",
+      "The homepage email signup currently validates the email address in your browser and shows a confirmation message. It is not connected to a mailing list or database at this time."
     ]
   },
   {
     title: "Information you provide",
     content: [
-      "If you contact the site by email, AccountingToolsLab may receive the email address, subject, and message content you provide.",
-      "If you submit the contact form, AccountingToolsLab may receive the name, email address, topic, subject, message, page/tool URL, and basic technical information needed to process the message.",
-      "Calculator inputs are processed in the browser where applicable to show results. Do not enter sensitive personal, financial, or confidential business information into calculators."
+      "If you email AccountingToolsLab directly, the site owner may receive your email address, subject line, and message content.",
+      "If you use the contact form, AccountingToolsLab receives the name, email address, topic, subject, message, optional page or tool URL, and spam-check information needed to send and protect the message.",
+      "When you use calculators, the numbers you enter are used to calculate results for that page. The general calculator pages are designed to work without creating an account or saving your entries on the server.",
+      "When you use the invoice generator, the invoice details you type may be saved in your own browser as a draft so you can continue editing on the same device. Uploaded logo and payment QR images are used for the current preview and PDF workflow, but they are intentionally excluded from saved browser drafts."
     ]
   },
   {
     title: "Automatically collected information",
     content: [
-      "The site may collect basic technical information through hosting logs, such as browser type, device type, pages visited, and approximate technical usage data.",
-      "AccountingToolsLab uses Vercel Analytics to understand general page usage and Vercel Speed Insights to understand site performance."
+      "The site may receive basic technical information through hosting and security logs, such as IP address, browser type, device type, requested pages, timestamps, and error information.",
+      "AccountingToolsLab uses Vercel Analytics to understand aggregate page usage and Vercel Speed Insights to understand site performance. These tools help identify which pages are useful and where the website needs speed or usability improvements.",
+      "The contact form may use technical signals such as IP address and user agent for rate limiting, spam prevention, and Cloudflare Turnstile verification."
     ]
   },
   {
     title: "Local storage and similar technologies",
     content: [
-      "The site may save your selected currency preference in the browser using localStorage so the same currency remains selected after refresh.",
-      "Analytics and performance services may use privacy-conscious technical signals to measure site usage and speed."
+      "AccountingToolsLab uses browser localStorage to remember your selected currency preference, so the same currency can remain selected after refresh.",
+      "The invoice generator may use browser localStorage to save an invoice draft and the last invoice number on the same device. This is local browser storage, not an AccountingToolsLab account.",
+      "Invoice logo and payment QR image files are not saved into the localStorage invoice draft. Clearing the draft or clearing your browser storage can remove locally saved invoice data.",
+      "Analytics, hosting, security, and performance services may use technical signals or similar technologies to measure usage, protect the contact form, and keep the website working."
     ]
   },
   {
     title: "How information is used",
     content: [
-      "Information may be used to operate and improve the website, respond to messages, fix bugs, improve tools, and understand general site performance."
+      "Information is used to run the website, calculate tool results, remember local preferences, generate invoice previews and PDFs, respond to contact messages, prevent abuse, debug errors, and improve content and performance.",
+      "AccountingToolsLab does not sell personal information. The site does not use your calculator or invoice entries to create a user profile."
     ]
   },
   {
     title: "Third-party services",
     content: [
-      "The site uses Vercel for hosting and deployment.",
-      "The site uses Vercel Analytics and Vercel Speed Insights for aggregate usage and performance information."
+      "AccountingToolsLab uses Vercel for hosting, deployment, analytics, and speed insights.",
+      "The contact form uses Cloudflare Turnstile to help prevent spam and automated abuse.",
+      "The contact form uses Resend to deliver contact messages by email to AccountingToolsLab.",
+      "These third-party services may process technical information needed to provide hosting, security, analytics, performance measurement, and email delivery."
     ]
   },
   {
     title: "Educational use",
     content: [
-      "AccountingToolsLab is designed for learning and basic checking.",
-      "Users should not submit sensitive personal, financial, or confidential business information into calculators."
+      "AccountingToolsLab is designed for learning, rough checking, and simple small-business workflows. The tools and guides are not professional accounting, tax, legal, or financial advice.",
+      "Do not enter sensitive personal information, confidential business information, bank passwords, government login details, or official tax submission credentials into the calculators or contact form.",
+      "The invoice generator creates a practical PDF invoice for record-keeping and customer billing. It does not submit invoices to LHDN, MyInvois, or any official tax system."
     ]
   },
   {
     title: "Children and students",
     content: [
-      "The site is intended as an educational resource, and users should avoid submitting personal information unnecessarily.",
-      "If a user is below the age required by their local law to consent to data processing, they should use the site with guidance from a parent, guardian, or teacher."
+      "AccountingToolsLab can be used as a learning resource, but students and younger users should avoid submitting personal information unnecessarily.",
+      "If you are below the age required by your local law to consent to data processing, use the site with guidance from a parent, guardian, teacher, or school."
     ]
   },
   {
     title: "Changes to this policy",
     content: [
-      "This Privacy Policy may be updated as new features are added.",
-      "The Last updated date should be changed when updates are made."
+      "This Privacy Policy may be updated when AccountingToolsLab adds new tools, contact features, storage behavior, analytics, or third-party services.",
+      "When meaningful changes are made, the Last updated date on this page should be changed."
     ]
   }
 ];
 
 export default function PrivacyPolicyPage() {
   return (
-    <div>
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
+    <main>
+      <section className="w-full border-b border-stone-200 bg-[#eef6f5]">
+        <Container className="gap-0 py-10 sm:py-12 lg:py-14">
           <p className="text-sm font-medium tracking-wide text-slate-500">Privacy Policy</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
             How AccountingToolsLab handles privacy
@@ -89,17 +97,18 @@ export default function PrivacyPolicyPage() {
             This Privacy Policy explains what information AccountingToolsLab may collect, how it
             is used, and how browser-based preferences and analytics are handled.
           </p>
-          <p className="mt-6 inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">
-            Last updated: May 7, 2026
+          <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
+            <span>Last updated</span>
+            <span className="text-stone-950">June 28, 2026</span>
           </p>
-        </section>
+        </Container>
+      </section>
 
-        <section className="grid gap-4">
+      <Container className="py-12 sm:py-16">
+        <section className="space-y-8">
           {privacySections.map((section) => (
-            <article
-              className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6"
-              key={section.title}
-            >
+            <article key={section.title}>
               <h2 className="text-xl font-semibold tracking-tight text-stone-950">
                 {section.title}
               </h2>
@@ -130,6 +139,6 @@ export default function PrivacyPolicyPage() {
           </Link>
         </section>
       </Container>
-    </div>
+    </main>
   );
 }

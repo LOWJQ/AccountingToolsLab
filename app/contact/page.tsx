@@ -1,7 +1,6 @@
 import { Container } from "@/components/layout/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { createMetadata } from "@/lib/seo/metadata";
-import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Contact AccountingToolsLab",
@@ -15,29 +14,23 @@ const contactEmail = "accttoolslab@gmail.com";
 const contactOptions = [
   {
     title: "Feedback and suggestions",
-    text: "Share ideas for new accounting calculators, page improvements, or beginner-friendly explanations.",
-    action: "Use feedback form",
-    href: "#contact-form"
+    text: "Share ideas for new accounting calculators, page improvements, or beginner-friendly explanations."
   },
   {
     title: "Report an issue",
-    text: "Found a calculation problem, broken page, or confusing explanation? Report it so it can be reviewed.",
-    action: "Use issue form",
-    href: "#contact-form"
+    text: "Found a calculation problem, broken page, or confusing explanation? Report it so it can be reviewed."
   },
   {
     title: "General contact",
-    text: `For general questions about AccountingToolsLab. Direct email: ${contactEmail}.`,
-    action: "Use contact form",
-    href: "#contact-form"
+    text: `For general questions about AccountingToolsLab. Direct email: ${contactEmail}.`
   }
 ];
 
 export default function ContactPage() {
   return (
-    <div>
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
+    <main>
+      <section className="w-full border-b border-stone-200 bg-[#eef6f5]">
+        <Container className="gap-0 py-10 sm:py-12 lg:py-14">
           <p className="text-sm font-medium tracking-wide text-slate-500">Contact</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
             Get in touch about AccountingToolsLab
@@ -46,83 +39,67 @@ export default function ContactPage() {
             Have feedback, found an issue, or want to suggest a new accounting tool? You can
             reach out and help improve AccountingToolsLab.
           </p>
-        </section>
+        </Container>
+      </section>
 
+      <Container className="py-12 sm:py-16">
         <section
-          className="scroll-mt-24 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10"
+          className="scroll-mt-24 overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-sm"
           id="contact-form"
         >
-          <div className="max-w-3xl">
+          <div className="border-b border-stone-200 bg-stone-50 px-5 py-4 sm:px-6">
             <p className="text-sm font-medium tracking-wide text-slate-500">Send a message</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
               Send feedback, report an issue, or ask a question
             </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
               Use the form below for feedback, issue reports, tool suggestions, or general
               questions. If the form is unavailable, email{" "}
               <span className="font-semibold text-slate-700">{contactEmail}</span> directly.
             </p>
           </div>
-          <ContactForm />
+          <div className="p-5 sm:p-6 lg:p-8">
+            <ContactForm />
+          </div>
         </section>
 
-        <section>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-medium tracking-wide text-slate-500">Contact options</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                How to reach out
-              </h2>
-            </div>
-            <p className="max-w-xl text-sm leading-6 text-stone-600">
+        <section className="space-y-8">
+          <article>
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
+              How to reach out
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
               Keep messages specific where possible so feedback can be reviewed clearly.
             </p>
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <ul className="mt-5 grid gap-4 text-sm leading-6 text-stone-600 sm:text-base">
             {contactOptions.map((option) => (
-              <article
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
-                key={option.title}
-              >
-                <h3 className="text-base font-semibold text-stone-950">{option.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{option.text}</p>
-                <a
-                  className="mt-5 inline-flex rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-600 ring-1 ring-stone-200 transition hover:text-stone-900"
-                  href={option.href}
-                >
-                  {option.action}
-                </a>
-              </article>
+              <li className="flex gap-3" key={option.title}>
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
+                <span>
+                  <span className="font-semibold text-stone-950">{option.title}</span>
+                  <span className="block">{option.text}</span>
+                </span>
+              </li>
             ))}
-          </div>
-        </section>
+            </ul>
+          </article>
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Email tips</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          <article>
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
               What to include
             </h2>
-            <p className="mt-3 text-sm leading-6 text-stone-600">
+            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
               If you are reporting a calculator issue, include the tool name, the values you
               entered, the result you expected, and the result shown.
             </p>
-            <a
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              href="#contact-form"
-            >
-              Use issue report form
-            </a>
             <p className="mt-4 text-sm leading-6 text-stone-500">
               Direct email fallback:{" "}
               <span className="font-semibold text-stone-700">{contactEmail}</span>
             </p>
           </article>
 
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Helpful note</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
+          <article>
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
               Before you contact
             </h2>
             <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
@@ -132,35 +109,7 @@ export default function ContactPage() {
           </article>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium tracking-wide text-slate-500">Keep exploring</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Create an invoice first
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Start with the free Invoice Generator, or explore the full set of accounting
-                tools.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools/invoice-generator"
-              >
-                Create Free Invoice
-              </Link>
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/tools"
-              >
-                Explore Tools
-              </Link>
-            </div>
-          </div>
-        </section>
       </Container>
-    </div>
+    </main>
   );
 }

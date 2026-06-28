@@ -83,9 +83,9 @@ const termsSections = [
 
 export default function TermsPage() {
   return (
-    <div>
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
+    <main>
+      <section className="w-full border-b border-stone-200 bg-[#eef6f5]">
+        <Container className="gap-0 py-10 sm:py-12 lg:py-14">
           <p className="text-sm font-medium tracking-wide text-slate-500">Terms</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
             Terms for using AccountingToolsLab
@@ -94,17 +94,18 @@ export default function TermsPage() {
             These Terms explain the basic rules for using AccountingToolsLab&apos;s free accounting
             tools and educational content.
           </p>
-          <p className="mt-6 inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">
-            Last updated: May 4, 2026
+          <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
+            <span>Last updated</span>
+            <span className="text-stone-950">May 4, 2026</span>
           </p>
-        </section>
+        </Container>
+      </section>
 
-        <section className="grid gap-4">
+      <Container className="py-12 sm:py-16">
+        <section className="space-y-8">
           {termsSections.map((section) => (
-            <article
-              className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6"
-              key={section.title}
-            >
+            <article key={section.title}>
               <h2 className="text-xl font-semibold tracking-tight text-stone-950">
                 {section.title}
               </h2>
@@ -135,6 +136,6 @@ export default function TermsPage() {
           </Link>
         </section>
       </Container>
-    </div>
+    </main>
   );
 }

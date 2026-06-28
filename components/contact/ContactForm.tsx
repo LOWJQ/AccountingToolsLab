@@ -1,7 +1,15 @@
 "use client";
 
 import Script from "next/script";
-import { FormEvent, useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
+import {
+  FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState
+} from "react";
 import type { ReactNode } from "react";
 
 const topics = [
@@ -98,6 +106,183 @@ function isSafeOptionalUrl(value: string) {
   } catch {
     return false;
   }
+}
+
+function TopicSelect({
+  error,
+  id,
+  onChange,
+  value
+}: {
+  error?: string;
+  id: string;
+  onChange: (value: "" | Topic) => void;
+  value: "" | Topic;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedIndex = topics.findIndex((topic) => topic === value);
+  const [activeIndex, setActiveIndex] = useState(selectedIndex >= 0 ? selectedIndex : 0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const listboxId = useId();
+
+  function openSelector(index = selectedIndex >= 0 ? selectedIndex : 0) {
+    setIsOpen(true);
+    setActiveIndex(Math.min(Math.max(index, 0), topics.length - 1));
+  }
+
+  function closeSelector({ returnFocus = true }: { returnFocus?: boolean } = {}) {
+    setIsOpen(false);
+
+    if (returnFocus) {
+      window.requestAnimationFrame(() => {
+        buttonRef.current?.focus();
+      });
+    }
+  }
+
+  function moveActiveOption(index: number) {
+    const nextIndex = Math.min(Math.max(index, 0), topics.length - 1);
+    setActiveIndex(nextIndex);
+    optionRefs.current[nextIndex]?.scrollIntoView({ block: "nearest" });
+  }
+
+  function selectTopic(index: number) {
+    const topic = topics[index];
+
+    if (!topic) {
+      return;
+    }
+
+    onChange(topic);
+    closeSelector();
+  }
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        closeSelector({ returnFocus: false });
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+  }, [selectedIndex]);
+
+  function handleButtonKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (isOpen) {
+        moveActiveOption(activeIndex + 1);
+      } else {
+        openSelector(selectedIndex >= 0 ? selectedIndex : 0);
+      }
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (isOpen) {
+        moveActiveOption(activeIndex - 1);
+      } else {
+        openSelector(selectedIndex >= 0 ? selectedIndex : topics.length - 1);
+      }
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      openSelector(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      openSelector(topics.length - 1);
+    } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      if (isOpen) {
+        selectTopic(activeIndex);
+      } else {
+        openSelector(selectedIndex >= 0 ? selectedIndex : 0);
+      }
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closeSelector();
+    }
+  }
+
+  return (
+    <div className="relative" ref={rootRef}>
+      <input name="topic" type="hidden" value={value} />
+      <button
+        aria-controls={isOpen ? listboxId : undefined}
+        aria-describedby={error ? `${id}-error` : undefined}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className={`${inputClassName} flex items-center justify-between gap-3 text-left ${
+          error ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-100" : ""
+        }`}
+        id={id}
+        onClick={() => {
+          if (isOpen) {
+            closeSelector();
+          } else {
+            openSelector(selectedIndex >= 0 ? selectedIndex : 0);
+          }
+        }}
+        onKeyDown={handleButtonKeyDown}
+        ref={buttonRef}
+        type="button"
+      >
+        <span className={value ? "text-stone-900" : "text-stone-400"}>
+          {value || "Choose a topic"}
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`h-4 w-4 shrink-0 text-stone-500 transition ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isOpen ? (
+        <div className="absolute left-0 top-full z-30 mt-2 w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60">
+          <div className="max-h-72 overflow-y-auto py-1.5" id={listboxId} role="listbox">
+            {topics.map((topic, index) => {
+              const isActive = activeIndex === index;
+              const isSelected = topic === value;
+
+              return (
+                <button
+                  aria-selected={isSelected}
+                  className={`grid w-full grid-cols-[1fr_auto] items-center gap-3 px-3 py-2.5 text-left text-sm transition ${
+                    isSelected
+                      ? "bg-slate-50 text-slate-800"
+                      : isActive
+                        ? "bg-stone-50 text-stone-950"
+                        : "text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                  }`}
+                  id={`${listboxId}-${index}`}
+                  key={topic}
+                  onClick={() => selectTopic(index)}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  ref={(element) => {
+                    optionRefs.current[index] = element;
+                  }}
+                  role="option"
+                  tabIndex={-1}
+                  type="button"
+                >
+                  <span className="font-medium">{topic}</span>
+                  {isSelected ? (
+                    <Check aria-hidden="true" className="h-4 w-4 text-slate-700" />
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function ContactForm() {
@@ -227,7 +412,7 @@ export function ContactForm() {
           strategy="afterInteractive"
         />
       ) : null}
-      <form className="mt-6 grid gap-5" onSubmit={handleSubmit} noValidate>
+      <form className="grid gap-5" onSubmit={handleSubmit} noValidate>
       <div className="hidden" aria-hidden="true">
         <label htmlFor="companyWebsite">Company website</label>
         <input
@@ -282,22 +467,12 @@ export function ContactForm() {
 
       <div className="grid gap-5 md:grid-cols-2">
         <FormField error={errors.topic} id="topic" label="Topic / reason">
-          <select
-            className={inputClassName}
+          <TopicSelect
+            error={errors.topic}
             id="topic"
-            name="topic"
             value={form.topic}
-            onChange={(event) => updateField("topic", event.target.value)}
-            aria-describedby={errors.topic ? "topic-error" : undefined}
-            aria-invalid={Boolean(errors.topic)}
-          >
-            <option value="">Choose a topic</option>
-            {topics.map((topic) => (
-              <option value={topic} key={topic}>
-                {topic}
-              </option>
-            ))}
-          </select>
+            onChange={(topic) => updateField("topic", topic)}
+          />
         </FormField>
 
         <FormField error={errors.pageUrl} id="pageUrl" label="Page or tool URL">
@@ -339,17 +514,10 @@ export function ContactForm() {
           maxLength={3000}
           value={form.message}
           onChange={(event) => updateField("message", event.target.value)}
-          aria-describedby={errors.message ? "message-error contact-form-note" : "contact-form-note"}
+          aria-describedby={errors.message ? "message-error" : undefined}
           aria-invalid={Boolean(errors.message)}
         />
       </FormField>
-
-      <p
-        className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"
-        id="contact-form-note"
-      >
-        Please avoid sending sensitive personal, financial, or confidential business information.
-      </p>
 
       {status ? (
         <div
@@ -376,7 +544,7 @@ export function ContactForm() {
       )}
 
       <button
-        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
+        className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
         type="submit"
         disabled={isSubmitting || isTurnstileUnavailable}
       >
@@ -388,7 +556,7 @@ export function ContactForm() {
 }
 
 const inputClassName =
-  "h-12 w-full rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
+  "h-12 w-full rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 hover:border-solid hover:border-stone-300 hover:bg-stone-50 focus:border-solid focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100";
 
 function getTurnstileUnavailableMessage(isConfigured: boolean): string {
   if (process.env.NODE_ENV === "development" && !isConfigured) {
