@@ -1,6 +1,5 @@
 import { Container } from "@/components/layout/Container";
 import { createMetadata } from "@/lib/seo/metadata";
-import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "About AccountingToolsLab | Free Invoice and Accounting Tools",
@@ -137,34 +136,6 @@ export default function AboutPage() {
           </article>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium tracking-wide text-slate-500">Start here</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Start with a free invoice
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Create a simple invoice first, or explore the full set of accounting tools and
-                guides.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools/invoice-generator"
-              >
-                Create Free Invoice
-              </Link>
-              <Link
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/tools"
-              >
-                Explore Tools
-              </Link>
-            </div>
-          </div>
-        </section>
       </Container>
     </main>
   );

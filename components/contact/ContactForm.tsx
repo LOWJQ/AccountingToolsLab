@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, RotateCcw } from "lucide-react";
 import {
   FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -306,6 +306,13 @@ export function ContactForm() {
     window.turnstile?.reset();
   }
 
+  function clearEverything() {
+    setForm(initialFormState);
+    setErrors({});
+    setStatus(null);
+    resetTurnstile();
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus(null);
@@ -314,10 +321,6 @@ export function ContactForm() {
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
-      setStatus({
-        type: "error",
-        message: "Please fix the highlighted fields before sending your message."
-      });
       return;
     }
 
@@ -388,7 +391,7 @@ export function ContactForm() {
       setErrors({});
       setStatus({
         type: "success",
-        message: "Thanks — your message was sent."
+        message: "Thanks - your message was sent."
       });
       resetTurnstile();
     } catch {
@@ -412,7 +415,19 @@ export function ContactForm() {
           strategy="afterInteractive"
         />
       ) : null}
-      <form className="grid gap-5" onSubmit={handleSubmit} noValidate>
+      <div className="flex flex-col gap-3 border-b border-stone-200 bg-stone-50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+            onClick={clearEverything}
+            type="button"
+          >
+            <RotateCcw aria-hidden="true" className="h-4 w-4" />
+            Reset / Clear everything
+          </button>
+        </div>
+      </div>
+      <form className="grid gap-5 p-5 sm:p-6 lg:p-8" onSubmit={handleSubmit} noValidate>
       <div className="hidden" aria-hidden="true">
         <label htmlFor="companyWebsite">Company website</label>
         <input

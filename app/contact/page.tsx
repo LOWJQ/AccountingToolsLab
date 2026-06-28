@@ -47,20 +47,7 @@ export default function ContactPage() {
           className="scroll-mt-24 overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-sm"
           id="contact-form"
         >
-          <div className="border-b border-stone-200 bg-stone-50 px-5 py-4 sm:px-6">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Send a message</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Send feedback, report an issue, or ask a question
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-              Use the form below for feedback, issue reports, tool suggestions, or general
-              questions. If the form is unavailable, email{" "}
-              <span className="font-semibold text-slate-700">{contactEmail}</span> directly.
-            </p>
-          </div>
-          <div className="p-5 sm:p-6 lg:p-8">
-            <ContactForm />
-          </div>
+          <ContactForm />
         </section>
 
         <section className="space-y-8">
