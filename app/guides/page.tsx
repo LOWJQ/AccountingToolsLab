@@ -1,5 +1,4 @@
 import { guides } from "@/lib/data/guides";
-import { Container } from "@/components/layout/Container";
 import { createMetadata } from "@/lib/seo/metadata";
 import Link from "next/link";
 
@@ -181,204 +180,135 @@ const learningPaths = [
   }
 ];
 
-function StatusBadge({ children }: { children: string }) {
-  return (
-    <span className="inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">
-      {children}
-    </span>
-  );
-}
-
 export default function GuidesPage() {
-  const availableGuideCount = guides.filter((guide) => guide.status === "available").length;
-  const comingSoonGuideCount = guides.length - availableGuideCount;
-
   return (
     <div>
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
-          <p className="text-sm font-medium tracking-wide text-slate-500">
-            Invoice and Accounting Guides
-          </p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Invoice and accounting guides for small businesses
-          </h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            Learn how to create simple invoices, understand SST, check cash flow, estimate
-            break-even points, and review beginner-friendly accounting concepts.
-          </p>
-          <p className="mt-7 inline-flex rounded-full bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
-            {availableGuideCount} available guides; {comingSoonGuideCount} coming soon
-          </p>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium tracking-wide text-slate-500">Invoice Generator</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Need to create an invoice now?
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Use the free Invoice Generator to add business details, customer details, line
-                items, optional SST or tax, and download a PDF invoice.
+      <main>
+        <section className="bg-white">
+          <div className="mx-auto w-full max-w-[1080px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+            <div className="max-w-5xl">
+              <p className="text-sm font-medium tracking-wide text-slate-500">
+                Invoice and Accounting Guides
               </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-              <Link
-                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools/invoice-generator"
-              >
-                Create Free Invoice
-              </Link>
-              <Link
-                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/guides/how-to-create-a-simple-invoice"
-              >
-                Read Simple Invoice Guide
-              </Link>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
+                Invoice and Accounting Guides
+              </h1>
+              <p className="mt-5 text-base leading-7 text-stone-600">
+                Learn how to create simple invoices, understand SST, check cash flow, estimate
+                break-even points, and review beginner-friendly accounting concepts.
+              </p>
             </div>
           </div>
         </section>
 
-        <section>
-          <div className="flex flex-col gap-3">
-            <div className="w-full">
-              <p className="text-sm font-medium tracking-wide text-slate-500">Featured guides</p>
+        <div className="mx-auto w-full max-w-[1080px] px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-stone-200" />
+        </div>
+
+        <section className="bg-white">
+          <div className="mx-auto w-full max-w-[1080px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-sm font-medium tracking-wide text-slate-500">Directory</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
                 Start with practical business guides
               </h2>
-            </div>
-            <p className="w-full text-sm leading-6 text-stone-600">
-              Begin with invoice, SST, cash flow, and break-even topics, then explore accounting
-              basics when you need them.
-            </p>
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {orderedGuides.map((guide) => {
-              const isAvailable = guide.status === "available";
-              const content = (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    <StatusBadge>{guide.category}</StatusBadge>
-                    <StatusBadge>{isAvailable ? "Available guide" : "Coming soon"}</StatusBadge>
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold tracking-tight text-stone-950">
-                    {guide.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-stone-600">{guide.description}</p>
-                  <p
-                    className={`mt-6 text-sm font-semibold ${
-                      isAvailable ? "text-slate-700" : "text-stone-400"
-                    }`}
-                  >
-                    {isAvailable ? "Read guide" : "Guide coming soon"}
-                  </p>
-                </>
-              );
-
-              return isAvailable ? (
-                <Link
-                  className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
-                  href={guide.href}
-                  key={guide.slug}
-                >
-                  {content}
-                </Link>
-              ) : (
-                <article
-                  className="rounded-xl border border-stone-200 bg-white/70 p-5 shadow-sm"
-                  key={guide.slug}
-                >
-                  {content}
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <section>
-          <div>
-            <p className="text-sm font-medium tracking-wide text-slate-500">Learning paths</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Suggested learning paths
-            </h2>
-          </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            {learningPaths.map((path) => (
-              <article
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
-                key={path.title}
-              >
-                <h3 className="text-base font-semibold text-stone-950">{path.title}</h3>
-                <ol className="mt-5 space-y-3">
-                  {path.steps.map((step, index) => (
-                    <li className="flex gap-3 text-sm leading-6" key={step.label}>
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-                        {index + 1}
-                      </span>
-                      <span>
-                        {step.href ? (
-                          <Link
-                            className="font-semibold text-stone-800 hover:text-slate-700"
-                            href={step.href}
-                          >
-                            {step.label}
-                          </Link>
-                        ) : (
-                          <span className="font-semibold text-stone-500">{step.label}</span>
-                        )}
-                        <span className="ml-2 text-xs font-medium text-stone-400">
-                          {step.status}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium tracking-wide text-slate-500">Guides and tools</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-                Create an invoice, then explore the tools
-              </h2>
               <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                Start with the free Invoice Generator, or explore calculators for SST, cash flow,
-                break-even, and accounting basics.
+                Begin with invoice, SST, cash flow, and break-even topics, then explore accounting
+                basics when you need them.
               </p>
             </div>
-            <div className="flex flex-col gap-3">
-              <Link
-                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                href="/tools/invoice-generator"
-              >
-                Create Free Invoice
-              </Link>
-              <Link
-                className="inline-flex h-11 min-w-64 items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                href="/tools"
-              >
-                Explore Tools
-              </Link>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {orderedGuides.map((guide) => {
+                const isAvailable = guide.status === "available";
+
+                const content = (
+                  <>
+                    <p className="text-sm font-medium tracking-wide text-slate-500">
+                      {guide.category}
+                    </p>
+                    <h3 className="mt-4 text-base font-semibold text-stone-950">
+                      {guide.title}
+                    </h3>
+                    <p className="mt-4 text-sm leading-6 text-stone-600">{guide.description}</p>
+                    {isAvailable ? (
+                      <div className="mt-6 inline-flex h-10 items-center justify-center rounded-xl bg-slate-700 px-4 text-sm font-semibold text-white">
+                        Read guide
+                      </div>
+                    ) : (
+                      <div className="mt-6 inline-flex h-10 items-center justify-center rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm font-semibold text-stone-400">
+                        Guide coming soon
+                      </div>
+                    )}
+                  </>
+                );
+
+                return isAvailable ? (
+                  <Link
+                    className="rounded-xl border border-stone-200 bg-[#f5f5f5] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+                    href={guide.href}
+                    key={guide.slug}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <article
+                    className="rounded-xl border border-stone-200 bg-[#f5f5f5] p-5 shadow-sm"
+                    key={guide.slug}
+                  >
+                    {content}
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <aside className="rounded-xl border border-stone-200 bg-white/80 p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-stone-950">More guides may be added</h2>
-          <p className="mt-2 text-sm leading-6 text-stone-600">
-            The current guide library starts with practical business topics and keeps accounting
-            basics available for students, beginners, and self-learners.
-          </p>
-        </aside>
-      </Container>
+        <div className="mx-auto w-full max-w-[1080px] px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-stone-200" />
+        </div>
+
+        <section className="bg-white">
+          <div className="mx-auto w-full max-w-[1080px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+            <div>
+              <p className="text-sm font-medium tracking-wide text-slate-500">Learning paths</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+                Suggested learning paths
+              </h2>
+            </div>
+
+            <div className="mt-6 grid gap-4 lg:grid-cols-3">
+              {learningPaths.map((path) => (
+                <article className="rounded-xl border border-stone-200 bg-white p-5" key={path.title}>
+                  <h3 className="text-base font-semibold text-stone-950">{path.title}</h3>
+                  <ol className="mt-5 space-y-4">
+                    {path.steps.map((step, index) => (
+                      <li className="flex gap-3 text-sm leading-6" key={step.label}>
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+                          {index + 1}
+                        </span>
+                        <span>
+                          {step.href ? (
+                            <Link
+                              className="rounded-sm font-semibold text-stone-800 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+                              href={step.href}
+                            >
+                              {step.label}
+                            </Link>
+                          ) : (
+                            <span className="font-semibold text-stone-500">{step.label}</span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 }

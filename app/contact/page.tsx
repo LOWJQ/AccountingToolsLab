@@ -35,7 +35,7 @@ export default function ContactPage() {
           <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
             Get in touch about AccountingToolsLab
           </h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
+          <p className="mt-5 text-base leading-7 text-stone-600">
             Have feedback, found an issue, or want to suggest a new accounting tool? You can
             reach out and help improve AccountingToolsLab.
           </p>
