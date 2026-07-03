@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Briefcase, GraduationCap, UserRound } from "lucide-react";
 import { Container } from "@/components/layout/Container";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
+import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
   title: "About AccountingToolsLab | Free Invoice and Accounting Tools",
@@ -59,22 +61,42 @@ const currentTools = [
 
 export default function AboutPage() {
   return (
-    <main className="bg-white">
-      <section className="w-full bg-white">
-        <Container className="gap-0 pt-12 pb-8 sm:pt-16 sm:pb-10 lg:pt-20 lg:pb-12">
-          <h1 className="mx-auto max-w-4xl text-center text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-            This is Accounting Tools Lab
-          </h1>
-          <p className="mx-auto mt-5 max-w-3xl text-center text-base leading-7 text-black">
-            Accounting Tools Lab helps freelancers, small business owners, students, and beginners
-            create simple invoices, calculate SST, check cash flow, and understand basic accounting
-            concepts with free online tools.
-          </p>
-          <div className="mt-12 border-t border-slate-200" />
-        </Container>
-      </section>
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteConfig.url },
+          { name: "About", url: `${siteConfig.url}/about` }
+        ]}
+      />
 
-      <Container className="gap-0 pt-8 pb-12 sm:pt-10 sm:pb-16">
+      <main className="bg-white">
+        <section className="w-full bg-white">
+          <Container className="gap-0 pt-12 pb-8 sm:pt-16 sm:pb-10 lg:pt-20 lg:pb-12">
+            <nav aria-label="Breadcrumb" className="mb-10 text-sm text-slate-500">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link className="transition hover:text-slate-900" href="/">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">&gt;</li>
+                <li className="font-medium text-slate-700">About</li>
+              </ol>
+            </nav>
+
+            <h1 className="mx-auto max-w-4xl text-center text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              This is Accounting Tools Lab
+            </h1>
+            <p className="mx-auto mt-5 max-w-3xl text-center text-base leading-7 text-black">
+              Accounting Tools Lab helps freelancers, small business owners, students, and beginners
+              create simple invoices, calculate SST, check cash flow, and understand basic accounting
+              concepts with free online tools.
+            </p>
+            <div className="mt-12 border-t border-slate-200" />
+          </Container>
+        </section>
+
+        <Container className="gap-0 pt-8 pb-12 sm:pt-10 sm:pb-16">
         <section className="grid gap-8 border-b border-slate-200 pb-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12 md:pb-12">
           <article>
             <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Our mission</h2>
@@ -183,7 +205,8 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-      </Container>
-    </main>
+        </Container>
+      </main>
+    </>
   );
 }

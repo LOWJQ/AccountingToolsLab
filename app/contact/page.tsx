@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
+import { siteConfig } from "@/lib/seo/site";
 import { Bug, Mail, MessageSquareText } from "lucide-react";
 
 export const metadata = createMetadata({
@@ -55,21 +58,41 @@ const includeItems = [
 
 export default function ContactPage() {
   return (
-    <main className="bg-white">
-      <section className="w-full bg-white">
-        <Container className="gap-0 pt-12 pb-10 sm:pt-16 sm:pb-12">
-          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-            Get in touch about Accounting Tools Lab
-          </h1>
-          <p className="mt-5 text-base leading-7 text-black">
-            Have feedback, found an issue, or want to suggest a new accounting tool? You can
-            reach out and help improve Accounting Tools Lab.
-          </p>
-          <div className="mt-10 border-t border-slate-200" />
-        </Container>
-      </section>
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteConfig.url },
+          { name: "Contact", url: `${siteConfig.url}/contact` }
+        ]}
+      />
 
-      <Container className="gap-0 pb-12 pt-0 sm:pb-16">
+      <main className="bg-white">
+        <section className="w-full bg-white">
+          <Container className="gap-0 pt-12 pb-10 sm:pt-16 sm:pb-12">
+            <nav aria-label="Breadcrumb" className="mb-10 text-sm text-slate-500">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link className="transition hover:text-slate-900" href="/">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">&gt;</li>
+                <li className="font-medium text-slate-700">Contact</li>
+              </ol>
+            </nav>
+
+            <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              Get in touch about Accounting Tools Lab
+            </h1>
+            <p className="mt-5 text-base leading-7 text-black">
+              Have feedback, found an issue, or want to suggest a new accounting tool? You can
+              reach out and help improve Accounting Tools Lab.
+            </p>
+            <div className="mt-10 border-t border-slate-200" />
+          </Container>
+        </section>
+
+        <Container className="gap-0 pb-12 pt-0 sm:pb-16">
         <section
           className="grid scroll-mt-24 gap-10 border-b border-slate-200 pb-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.85fr)] lg:gap-12 lg:pb-12"
           id="contact-form"
@@ -151,7 +174,8 @@ export default function ContactPage() {
             personal, financial, or confidential business information by email.
           </p>
         </section>
-      </Container>
-    </main>
+        </Container>
+      </main>
+    </>
   );
 }

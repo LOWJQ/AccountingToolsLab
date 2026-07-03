@@ -1,5 +1,7 @@
 import { Container } from "@/components/layout/Container";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
+import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -83,26 +85,46 @@ const termsSections = [
 
 export default function TermsPage() {
   return (
-    <main className="bg-white">
-      <section className="w-full bg-white">
-        <Container className="gap-0 pb-0 pt-12 sm:pb-0 sm:pt-16">
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-            Terms for using Accounting Tools Lab
-          </h1>
-          <p className="mt-5 text-base leading-7 text-black">
-            These Terms explain the basic rules for using Accounting Tools Lab&apos;s free accounting
-            tools and educational content.
-          </p>
-          <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
-            <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
-            <span>Last updated</span>
-            <span className="text-slate-950">May 4, 2026</span>
-          </p>
-          <div className="mt-8 border-t border-slate-200" />
-        </Container>
-      </section>
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteConfig.url },
+          { name: "Terms", url: `${siteConfig.url}/terms` }
+        ]}
+      />
 
-      <Container className="gap-0 pb-12 pt-0 sm:pb-16 sm:pt-0">
+      <main className="bg-white">
+        <section className="w-full bg-white">
+          <Container className="gap-0 pb-0 pt-12 sm:pb-0 sm:pt-16">
+            <nav aria-label="Breadcrumb" className="mb-10 text-sm text-slate-500">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link className="transition hover:text-slate-900" href="/">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">&gt;</li>
+                <li className="font-medium text-slate-700">Terms</li>
+              </ol>
+            </nav>
+
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              Terms for using Accounting Tools Lab
+            </h1>
+            <p className="mt-5 text-base leading-7 text-black">
+              These Terms explain the basic rules for using Accounting Tools Lab&apos;s free
+              accounting tools and educational content.
+            </p>
+            <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+              <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
+              <span>Last updated</span>
+              <span className="text-slate-950">May 4, 2026</span>
+            </p>
+            <div className="mt-8 border-t border-slate-200" />
+          </Container>
+        </section>
+
+        <Container className="gap-0 pb-12 pt-0 sm:pb-16 sm:pt-0">
         <article>
           {termsSections.map((section, index) => (
             <section
@@ -151,7 +173,8 @@ export default function TermsPage() {
             </Link>
           </div>
         </section>
-      </Container>
-    </main>
+        </Container>
+      </main>
+    </>
   );
 }

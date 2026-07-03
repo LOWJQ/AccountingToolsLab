@@ -1,5 +1,7 @@
 import { Container } from "@/components/layout/Container";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { createMetadata } from "@/lib/seo/metadata";
+import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -86,26 +88,46 @@ const privacySections = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="bg-white">
-      <section className="w-full bg-white">
-        <Container className="gap-0 pb-0 pt-12 sm:pb-0 sm:pt-16">
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-            How Accounting Tools Lab handles privacy
-          </h1>
-          <p className="mt-5 text-base leading-7 text-black">
-            This Privacy Policy explains what information Accounting Tools Lab may collect, how it
-            is used, and how browser-based preferences and analytics are handled.
-          </p>
-          <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
-            <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
-            <span>Last updated</span>
-            <span className="text-slate-950">June 28, 2026</span>
-          </p>
-          <div className="mt-8 border-t border-slate-200" />
-        </Container>
-      </section>
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteConfig.url },
+          { name: "Privacy Policy", url: `${siteConfig.url}/privacy-policy` }
+        ]}
+      />
 
-      <Container className="gap-0 pb-12 pt-0 sm:pb-16 sm:pt-0">
+      <main className="bg-white">
+        <section className="w-full bg-white">
+          <Container className="gap-0 pb-0 pt-12 sm:pb-0 sm:pt-16">
+            <nav aria-label="Breadcrumb" className="mb-10 text-sm text-slate-500">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link className="transition hover:text-slate-900" href="/">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">&gt;</li>
+                <li className="font-medium text-slate-700">Privacy Policy</li>
+              </ol>
+            </nav>
+
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              How Accounting Tools Lab handles privacy
+            </h1>
+            <p className="mt-5 text-base leading-7 text-black">
+              This Privacy Policy explains what information Accounting Tools Lab may collect, how it
+              is used, and how browser-based preferences and analytics are handled.
+            </p>
+            <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+              <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
+              <span>Last updated</span>
+              <span className="text-slate-950">June 28, 2026</span>
+            </p>
+            <div className="mt-8 border-t border-slate-200" />
+          </Container>
+        </section>
+
+        <Container className="gap-0 pb-12 pt-0 sm:pb-16 sm:pt-0">
         <article>
           {privacySections.map((section, index) => (
             <section
@@ -154,7 +176,8 @@ export default function PrivacyPolicyPage() {
             </Link>
           </div>
         </section>
-      </Container>
-    </main>
+        </Container>
+      </main>
+    </>
   );
 }
