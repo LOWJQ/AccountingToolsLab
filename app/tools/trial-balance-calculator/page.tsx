@@ -4,9 +4,10 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import { ArrowRight, BarChart3, Check, CircleDollarSign, FileText, Grid2X2 } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -80,22 +81,22 @@ const commonChecks = [
 const relatedTools = [
   {
     href: "/tools/invoice-generator",
-    icon: FileText,
+    icon: toolIcons.invoice,
     label: "Invoice Generator"
   },
   {
     href: "/tools/financial-ratio-calculator",
-    icon: BarChart3,
+    icon: toolIcons.financialRatio,
     label: "Financial Ratio Calculator"
   },
   {
     href: "/tools/cash-flow-calculator",
-    icon: CircleDollarSign,
+    icon: toolIcons.cashFlow,
     label: "Cash Flow Calculator"
   },
   {
     href: "/tools",
-    icon: Grid2X2,
+    icon: toolIcons.allTools,
     label: "All Tools"
   }
 ];

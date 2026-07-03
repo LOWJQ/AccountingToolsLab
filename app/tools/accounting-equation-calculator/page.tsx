@@ -4,16 +4,10 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import {
-  ArrowRight,
-  Check,
-  CircleDollarSign,
-  FileText,
-  Grid2X2,
-  Table2
-} from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -79,22 +73,22 @@ const whenToUseItems = [
 const relatedTools = [
   {
     href: "/tools/trial-balance-calculator",
-    icon: Table2,
+    icon: toolIcons.trialBalance,
     label: "Trial Balance Calculator"
   },
   {
     href: "/tools/cash-flow-calculator",
-    icon: CircleDollarSign,
+    icon: toolIcons.cashFlow,
     label: "Cash Flow Calculator"
   },
   {
     href: "/tools/invoice-generator",
-    icon: FileText,
+    icon: toolIcons.invoice,
     label: "Create a PDF Invoice"
   },
   {
     href: "/tools",
-    icon: Grid2X2,
+    icon: toolIcons.allTools,
     label: "All Tools"
   }
 ];

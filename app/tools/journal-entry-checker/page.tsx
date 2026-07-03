@@ -4,9 +4,10 @@ import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
+import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import { ArrowRight, BarChart3, Check, Grid2X2, ListChecks, Scale, Table2 } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -73,27 +74,27 @@ const whenToUseItems = [
 const relatedTools = [
   {
     href: "/tools/debit-credit-checker",
-    icon: Scale,
+    icon: toolIcons.debitCredit,
     label: "Debit/Credit Checker"
   },
   {
     href: "/tools/trial-balance-calculator",
-    icon: Table2,
+    icon: toolIcons.trialBalance,
     label: "Trial Balance Calculator"
   },
   {
     href: "/tools/accounting-equation-calculator",
-    icon: ListChecks,
+    icon: toolIcons.accountingEquation,
     label: "Accounting Equation Calculator"
   },
   {
     href: "/tools/financial-ratio-calculator",
-    icon: BarChart3,
+    icon: toolIcons.financialRatio,
     label: "Financial Ratio Calculator"
   },
   {
     href: "/tools",
-    icon: Grid2X2,
+    icon: toolIcons.allTools,
     label: "All Tools"
   }
 ];

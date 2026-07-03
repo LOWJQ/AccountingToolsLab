@@ -813,7 +813,7 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
           ))}
         </div>
         <button
-          className="inline-flex h-9 items-center gap-1.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-100"
+          className="flex h-9 w-fit items-center gap-1.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-100"
           onClick={props.onAddTax}
           type="button"
         >
@@ -823,11 +823,12 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
 
         {!props.discount.enabled ? (
           <button
-            className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            className="flex h-9 w-fit items-center gap-1.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-100"
             onClick={() => props.onDiscountEnabledChange(true)}
             type="button"
           >
-            + Add discount
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Add discount
           </button>
         ) : (
           <div className="grid gap-2 py-1.5 text-slate-700 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_2.5rem] sm:items-start">
@@ -923,11 +924,12 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
 
         {!props.shipping.enabled ? (
           <button
-            className="block py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            className="flex h-9 w-fit items-center gap-1.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:text-slate-950 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-100"
             onClick={() => props.onShippingEnabledChange(true)}
             type="button"
           >
-            + Add shipping
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Add shipping
           </button>
         ) : (
           <div className="grid gap-2 py-1.5 text-slate-700 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,18rem)_2.5rem] sm:items-start">
