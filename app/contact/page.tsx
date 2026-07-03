@@ -1,6 +1,7 @@
 import { Container } from "@/components/layout/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { createMetadata } from "@/lib/seo/metadata";
+import { Bug, Mail, MessageSquareText } from "lucide-react";
 
 export const metadata = createMetadata({
   title: "Contact AccountingToolsLab",
@@ -14,88 +15,142 @@ const contactEmail = "accttoolslab@gmail.com";
 const contactOptions = [
   {
     title: "Feedback and suggestions",
-    text: "Share ideas for new accounting calculators, page improvements, or beginner-friendly explanations."
+    text: "Share ideas for new accounting calculators, page improvements, or beginner-friendly explanations.",
+    icon: MessageSquareText
   },
   {
     title: "Report an issue",
-    text: "Found a calculation problem, broken page, or confusing explanation? Report it so it can be reviewed."
+    text: "Found a calculation problem, broken page, or confusing explanation? Report it so it can be reviewed.",
+    icon: Bug
   },
   {
     title: "General contact",
-    text: `For general questions about AccountingToolsLab. Direct email: ${contactEmail}.`
+    text: "For general questions about AccountingToolsLab.",
+    icon: Mail
+  }
+];
+
+const includeItems = [
+  {
+    title: "Tool name",
+    text: "Which tool or page you were using."
+  },
+  {
+    title: "Values entered",
+    text: "The input values you entered."
+  },
+  {
+    title: "Expected result",
+    text: "What result you expected to see."
+  },
+  {
+    title: "Actual result",
+    text: "What result you got."
+  },
+  {
+    title: "Additional notes",
+    text: "Anything else that might help."
   }
 ];
 
 export default function ContactPage() {
   return (
-    <main>
-      <section className="w-full border-b border-stone-200 bg-[#eef6f5]">
-        <Container className="gap-0 py-10 sm:py-12 lg:py-14">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Contact</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Get in touch about AccountingToolsLab
+    <main className="bg-white">
+      <section className="w-full bg-white">
+        <Container className="gap-0 pt-12 pb-10 sm:pt-16 sm:pb-12">
+          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+            Get in touch about Accounting Tools Lab
           </h1>
-          <p className="mt-5 text-base leading-7 text-stone-600">
+          <p className="mt-5 text-base leading-7 text-black">
             Have feedback, found an issue, or want to suggest a new accounting tool? You can
-            reach out and help improve AccountingToolsLab.
+            reach out and help improve Accounting Tools Lab.
           </p>
+          <div className="mt-10 border-t border-slate-200" />
         </Container>
       </section>
 
-      <Container className="py-12 sm:py-16">
+      <Container className="gap-0 pb-12 pt-0 sm:pb-16">
         <section
-          className="scroll-mt-24 overflow-hidden rounded-2xl border border-stone-300 bg-white shadow-sm"
+          className="grid scroll-mt-24 gap-10 border-b border-slate-200 pb-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.85fr)] lg:gap-12 lg:pb-12"
           id="contact-form"
         >
-          <ContactForm />
-        </section>
+          <div>
+            <ContactForm />
+          </div>
 
-        <section className="space-y-8">
-          <article>
-            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
+          <aside className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
               How to reach out
             </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+            <p className="mt-4 text-base leading-7 text-black">
               Keep messages specific where possible so feedback can be reviewed clearly.
             </p>
-            <ul className="mt-5 grid gap-4 text-sm leading-6 text-stone-600 sm:text-base">
-            {contactOptions.map((option) => (
-              <li className="flex gap-3" key={option.title}>
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
-                <span>
-                  <span className="font-semibold text-stone-950">{option.title}</span>
-                  <span className="block">{option.text}</span>
-                </span>
-              </li>
-            ))}
-            </ul>
-          </article>
+            <div className="mt-8">
+              {contactOptions.map((option, index) => {
+                const Icon = option.icon;
 
-          <article>
-            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
-              What to include
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              If you are reporting a calculator issue, include the tool name, the values you
-              entered, the result you expected, and the result shown.
-            </p>
-            <p className="mt-4 text-sm leading-6 text-stone-500">
-              Direct email fallback:{" "}
-              <span className="font-semibold text-stone-700">{contactEmail}</span>
-            </p>
-          </article>
-
-          <article>
-            <h2 className="text-xl font-semibold tracking-tight text-stone-950">
-              Before you contact
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-              AccountingToolsLab is a free educational tools site. Please avoid sending
-              sensitive personal, financial, or confidential business information by email.
-            </p>
-          </article>
+                return (
+                  <article
+                    className={index === 0 ? "pb-7" : "border-t border-slate-200 py-7"}
+                    key={option.title}
+                  >
+                    <div className="flex gap-4">
+                      <Icon aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-slate-900" />
+                      <div>
+                        <h3 className="text-base font-semibold leading-6 text-slate-950">
+                          {option.title}
+                        </h3>
+                        <p className="mt-3 text-base leading-7 text-black">{option.text}</p>
+                        {option.title === "General contact" ? (
+                          <p className="mt-2 text-base leading-7 text-black">
+                            Direct email:{" "}
+                            <a
+                              className="font-medium text-teal-700 underline-offset-4 hover:underline"
+                              href={`mailto:${contactEmail}`}
+                            >
+                              {contactEmail}
+                            </a>
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </aside>
         </section>
 
+        <section className="border-b border-slate-200 py-10 md:py-12">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">What to include</h2>
+          <p className="mt-4 text-base leading-7 text-black">
+            If you are reporting a calculator issue, include the details below to help us reproduce
+            the problem.
+          </p>
+          <ul className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {includeItems.map((item) => (
+              <li className="text-base leading-7 text-black" key={item.title}>
+                <div className="flex gap-3">
+                  <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
+                  <div>
+                    <h3 className="font-semibold text-slate-950">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-black">{item.text}</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="py-10 md:py-12">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Before you contact
+          </h2>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-black">
+            AccountingToolsLab is a free educational tools site. Please avoid sending sensitive
+            personal, financial, or confidential business information by email.
+          </p>
+        </section>
       </Container>
     </main>
   );

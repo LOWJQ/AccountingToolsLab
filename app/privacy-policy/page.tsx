@@ -86,57 +86,73 @@ const privacySections = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <main>
-      <section className="w-full border-b border-stone-200 bg-[#eef6f5]">
-        <Container className="gap-0 py-10 sm:py-12 lg:py-14">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Privacy Policy</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            How AccountingToolsLab handles privacy
+    <main className="bg-white">
+      <section className="w-full bg-white">
+        <Container className="gap-0 pb-0 pt-12 sm:pb-0 sm:pt-16">
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+            How Accounting Tools Lab handles privacy
           </h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            This Privacy Policy explains what information AccountingToolsLab may collect, how it
+          <p className="mt-5 text-base leading-7 text-black">
+            This Privacy Policy explains what information Accounting Tools Lab may collect, how it
             is used, and how browser-based preferences and analytics are handled.
           </p>
-          <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
+          <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
             <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
             <span>Last updated</span>
-            <span className="text-stone-950">June 28, 2026</span>
+            <span className="text-slate-950">June 28, 2026</span>
           </p>
+          <div className="mt-8 border-t border-slate-200" />
         </Container>
       </section>
 
-      <Container className="py-12 sm:py-16">
-        <section className="space-y-8">
-          {privacySections.map((section) => (
-            <article key={section.title}>
-              <h2 className="text-xl font-semibold tracking-tight text-stone-950">
-                {section.title}
-              </h2>
-              <div className="mt-4 space-y-3">
-                {section.content.map((paragraph) => (
-                  <p className="text-sm leading-6 text-stone-600 sm:text-base" key={paragraph}>
-                    {paragraph}
-                  </p>
-                ))}
+      <Container className="gap-0 pb-12 pt-0 sm:pb-16 sm:pt-0">
+        <article>
+          {privacySections.map((section, index) => (
+            <section
+              className={`grid gap-4 py-5 md:grid-cols-[4rem_minmax(0,1fr)] md:gap-8 md:py-6 ${
+                index < privacySections.length - 1 ? "border-b border-slate-200" : ""
+              }`}
+              key={section.title}
+            >
+              <div>
+                <span className="text-base font-semibold tabular-nums text-teal-700">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
               </div>
-            </article>
+              <div className="border-slate-200 md:border-l md:pl-8">
+                <h2 className="text-xl font-semibold tracking-tight text-slate-950">
+                  {section.title}
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {section.content.map((paragraph) => (
+                    <p className="text-base leading-7 text-black" key={paragraph}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </section>
           ))}
-        </section>
+        </article>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Contact</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Questions about privacy?
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use the contact page for questions about this Privacy Policy.
-          </p>
-          <Link
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-            href="/contact"
-          >
-            Contact AccountingToolsLab
-          </Link>
+        <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-teal-700">Contact</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                Questions about privacy?
+              </h2>
+              <p className="mt-3 text-base leading-7 text-black">
+                Use the contact page for questions about this Privacy Policy.
+              </p>
+            </div>
+            <Link
+              className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-100 sm:w-fit"
+              href="/contact"
+            >
+              Contact AccountingToolsLab
+            </Link>
+          </div>
         </section>
       </Container>
     </main>

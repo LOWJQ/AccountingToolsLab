@@ -234,17 +234,17 @@ function TopicSelect({
         ref={buttonRef}
         type="button"
       >
-        <span className={value ? "text-stone-900" : "text-stone-400"}>
+        <span className={value ? "text-slate-950" : "text-slate-400"}>
           {value || "Choose a topic"}
         </span>
         <ChevronDown
           aria-hidden="true"
-          className={`h-4 w-4 shrink-0 text-stone-500 transition ${isOpen ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-slate-500 transition ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 top-full z-30 mt-2 w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60">
+        <div className="absolute left-0 top-full z-30 mt-2 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-200/60">
           <div className="max-h-72 overflow-y-auto py-1.5" id={listboxId} role="listbox">
             {topics.map((topic, index) => {
               const isActive = activeIndex === index;
@@ -257,8 +257,8 @@ function TopicSelect({
                     isSelected
                       ? "bg-slate-50 text-slate-800"
                       : isActive
-                        ? "bg-stone-50 text-stone-950"
-                        : "text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                        ? "bg-slate-50 text-slate-950"
+                        : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
                   }`}
                   id={`${listboxId}-${index}`}
                   key={topic}
@@ -296,6 +296,9 @@ export function ContactForm() {
   } | null>(null);
   const isTurnstileConfigured = turnstileSiteKey.trim().length > 0;
   const isTurnstileUnavailable = !isTurnstileConfigured || turnstileScriptFailed;
+  const isVerificationError = status?.type === "error" && isVerificationStatus(status.message);
+  const generalStatus = status && !isVerificationError ? status : null;
+  const showVerificationError = isTurnstileUnavailable || isVerificationError;
 
   function updateField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -415,19 +418,17 @@ export function ContactForm() {
           strategy="afterInteractive"
         />
       ) : null}
-      <div className="flex flex-col gap-3 border-b border-stone-200 bg-stone-50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-        <div className="flex flex-wrap gap-2">
-          <button
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
-            onClick={clearEverything}
-            type="button"
-          >
-            <RotateCcw aria-hidden="true" className="h-4 w-4" />
-            Reset / Clear everything
-          </button>
-        </div>
+      <div className="mb-8 flex flex-wrap gap-2">
+        <button
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+          onClick={clearEverything}
+          type="button"
+        >
+          <RotateCcw aria-hidden="true" className="h-4 w-4" />
+          Reset / Clear everything
+        </button>
       </div>
-      <form className="grid gap-5 p-5 sm:p-6 lg:p-8" onSubmit={handleSubmit} noValidate>
+      <form className="grid gap-5" onSubmit={handleSubmit} noValidate>
       <div className="hidden" aria-hidden="true">
         <label htmlFor="companyWebsite">Company website</label>
         <input
@@ -450,6 +451,7 @@ export function ContactForm() {
             className={inputClassName}
             id="name"
             name="name"
+            placeholder="Your name"
             type="text"
             autoComplete="name"
             maxLength={80}
@@ -469,6 +471,7 @@ export function ContactForm() {
             className={inputClassName}
             id="email"
             name="email"
+            placeholder="Your email address"
             type="email"
             autoComplete="email"
             maxLength={120}
@@ -490,7 +493,7 @@ export function ContactForm() {
           />
         </FormField>
 
-        <FormField error={errors.pageUrl} id="pageUrl" label="Page or tool URL">
+        <FormField error={errors.pageUrl} id="pageUrl" label="Page or tool URL (optional)">
           <input
             className={inputClassName}
             id="pageUrl"
@@ -498,7 +501,7 @@ export function ContactForm() {
             type="text"
             inputMode="url"
             maxLength={300}
-            placeholder="Optional"
+            placeholder="e.g. /tools/cash-flow-calculator"
             value={form.pageUrl}
             onChange={(event) => updateField("pageUrl", event.target.value)}
             aria-describedby={errors.pageUrl ? "pageUrl-error" : undefined}
@@ -512,6 +515,7 @@ export function ContactForm() {
           className={inputClassName}
           id="subject"
           name="subject"
+          placeholder="Short subject"
           type="text"
           maxLength={120}
           value={form.subject}
@@ -527,6 +531,7 @@ export function ContactForm() {
           id="message"
           name="message"
           maxLength={3000}
+          placeholder="Describe your message here..."
           value={form.message}
           onChange={(event) => updateField("message", event.target.value)}
           aria-describedby={errors.message ? "message-error" : undefined}
@@ -534,32 +539,27 @@ export function ContactForm() {
         />
       </FormField>
 
-      {status ? (
+      {generalStatus ? (
         <div
-          className={`rounded-xl border p-4 text-sm leading-6 ${
-            status.type === "success"
+          className={`rounded-lg border p-4 text-sm leading-6 ${
+            generalStatus.type === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-800"
               : "border-rose-200 bg-rose-50 text-rose-800"
           }`}
           role="status"
         >
-          {status.message}
+          {generalStatus.message}
         </div>
       ) : null}
 
-      {isTurnstileUnavailable ? (
-        <div
-          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"
-          role="status"
-        >
-          {getTurnstileUnavailableMessage(isTurnstileConfigured)}
-        </div>
-      ) : (
+      {isTurnstileConfigured ? (
         <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
-      )}
+      ) : null}
+
+      {showVerificationError ? <VerificationInlineError /> : null}
 
       <button
-        className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
+        className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
         type="submit"
         disabled={isSubmitting || isTurnstileUnavailable}
       >
@@ -571,7 +571,7 @@ export function ContactForm() {
 }
 
 const inputClassName =
-  "h-12 w-full rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 hover:border-solid hover:border-stone-300 hover:bg-stone-50 focus:border-solid focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100";
+  "h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-500 focus:ring-4 focus:ring-slate-100";
 
 function getTurnstileUnavailableMessage(isConfigured: boolean): string {
   if (process.env.NODE_ENV === "development" && !isConfigured) {
@@ -583,6 +583,35 @@ function getTurnstileUnavailableMessage(isConfigured: boolean): string {
   }
 
   return "Contact verification could not load. Please refresh the page or email accttoolslab@gmail.com directly.";
+}
+
+function isVerificationStatus(message: string): boolean {
+  return message.toLowerCase().includes("verification");
+}
+
+function VerificationInlineError() {
+  return (
+    <div
+      aria-live="polite"
+      className="mt-1 flex max-w-[520px] items-start gap-2.5 text-sm"
+      role="alert"
+    >
+      <span
+        aria-hidden="true"
+        className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-red-600 text-[10px] font-bold leading-none text-red-600"
+      >
+        !
+      </span>
+      <div>
+        <strong className="block font-bold leading-snug text-slate-950">
+          Verification could not connect.
+        </strong>
+        <p className="mt-1 leading-6 text-slate-600">
+          Please refresh the page or try again later.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function FormField({
@@ -598,7 +627,7 @@ function FormField({
 }) {
   return (
     <div className="grid gap-2">
-      <label className="text-sm font-semibold text-stone-800" htmlFor={id}>
+      <label className="text-sm font-semibold text-slate-950" htmlFor={id}>
         {label}
       </label>
       {children}
