@@ -65,13 +65,14 @@ function normalizeDiscount(value: unknown): InvoiceDiscount {
   };
 }
 
-function normalizeTax(value: unknown): InvoiceTax {
+function normalizeTax(value: unknown, index = 0): InvoiceTax {
   const tax = isRecord(value) ? value : {};
   const legacyRate = readString(tax.rate);
   const nextValue = readString(tax.value) || legacyRate || DEFAULT_INVOICE_TAX.value;
   const nextLabel = readString(tax.label);
 
   return {
+    id: readString(tax.id) || `tax-${index + 1}`,
     enabled: tax.enabled === true,
     label: ["SST 6%", "SST 8%", "Custom tax rate"].includes(nextLabel)
       ? DEFAULT_INVOICE_TAX.label
@@ -79,6 +80,19 @@ function normalizeTax(value: unknown): InvoiceTax {
     type: tax.type === "fixed" ? "fixed" : "percentage",
     value: nextValue
   };
+}
+
+function normalizeTaxRows(value: unknown): InvoiceTax[] {
+  if (Array.isArray(value)) {
+    return value.map((tax, index) => normalizeTax(tax, index));
+  }
+
+  if (!isRecord(value)) {
+    return [];
+  }
+
+  const tax = normalizeTax(value, 0);
+  return tax.enabled ? [tax] : [];
 }
 
 function normalizeShipping(value: unknown): InvoiceShipping {
@@ -130,7 +144,7 @@ function normalizeInvoice(value: unknown): InvoiceData | null {
     currency: readString(value.currency),
     items,
     discount: normalizeDiscount(value.discount),
-    tax: normalizeTax(value.tax),
+    tax: normalizeTaxRows(value.tax),
     shipping: normalizeShipping(value.shipping),
     payment: normalizePayment(value.payment, value.paymentDetails),
     notes: readString(value.notes),

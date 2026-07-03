@@ -37,12 +37,15 @@ function createReusableInvoice(): InvoiceData {
       type: "fixed",
       value: "50"
     },
-    tax: {
-      enabled: true,
-      label: "SST",
-      type: "percentage",
-      value: "6"
-    },
+    tax: [
+      {
+        id: "tax-old",
+        enabled: true,
+        label: "SST",
+        type: "percentage",
+        value: "6"
+      }
+    ],
     shipping: {
       enabled: true,
       label: "Delivery",
@@ -89,12 +92,7 @@ test("clear everything defaults reset all reusable fields", () => {
     type: "percentage",
     value: "0"
   });
-  assert.deepEqual(emptyInvoice.tax, {
-    enabled: false,
-    label: "Tax",
-    type: "percentage",
-    value: "0"
-  });
+  assert.deepEqual(emptyInvoice.tax, []);
 });
 
 test("clear everything defaults fall back to the default invoice number", () => {

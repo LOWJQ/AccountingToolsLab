@@ -13,11 +13,12 @@ function test(name: string, run: () => Promise<void> | void) {
   tests.push([name, run]);
 }
 
+type InvoiceTaxOverride = Partial<InvoiceData["tax"][number]>;
 type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "shipping" | "tax">> & {
   discount?: Partial<InvoiceData["discount"]>;
   payment?: Partial<InvoiceData["payment"]>;
   shipping?: Partial<InvoiceData["shipping"]>;
-  tax?: Partial<InvoiceData["tax"]>;
+  tax?: InvoiceTaxOverride | InvoiceTaxOverride[];
 };
 
 function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
@@ -46,12 +47,7 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
       type: "percentage",
       value: "0"
     },
-    tax: {
-      enabled: false,
-      label: "Tax",
-      type: "percentage",
-      value: "0"
-    },
+    tax: [],
     shipping: {
       enabled: false,
       label: "Shipping",
@@ -69,6 +65,11 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     terms: ""
   };
   const baseShipping = invoice.shipping ?? { enabled: false, label: "Shipping", amount: "0" };
+  const taxOverrides = overrides.tax
+    ? Array.isArray(overrides.tax)
+      ? overrides.tax
+      : [overrides.tax]
+    : undefined;
 
   return {
     ...invoice,
@@ -77,10 +78,16 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
       ...invoice.discount,
       ...overrides.discount
     },
-    tax: {
-      ...invoice.tax,
-      ...overrides.tax
-    },
+    tax: taxOverrides
+      ? taxOverrides.map((tax, index) => ({
+          id: `tax-${index + 1}`,
+          enabled: false,
+          label: "Tax",
+          type: "percentage" as const,
+          value: "0",
+          ...tax
+        }))
+      : invoice.tax,
     shipping: {
       enabled: overrides.shipping?.enabled ?? baseShipping.enabled,
       label: overrides.shipping?.label ?? baseShipping.label,

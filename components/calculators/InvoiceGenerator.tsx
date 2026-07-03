@@ -9,7 +9,6 @@ import {
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { EditableInvoiceCanvas } from "@/components/invoice/EditableInvoiceCanvas";
 import { InvoiceModals } from "@/components/invoice/InvoiceModals";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { getCurrencyOption, isCurrencyCode } from "@/lib/currency";
 import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 import {
@@ -32,17 +31,9 @@ import {
   type InvoiceDiscount,
   type InvoiceLineItem,
   type InvoicePaymentDetails,
-  type InvoiceShipping
+  type InvoiceShipping,
+  type InvoiceTax
 } from "@/lib/invoice/invoice-types";
-
-const featureHighlights = [
-  "Malaysia-friendly for simple record-keeping.",
-  "Free to use with no sign-up required.",
-  "Enter line items with quantity, unit price, subtotal, and total.",
-  "Apply optional SST, other tax rates, and discounts when needed.",
-  "Include payment details and an optional QR/payment image.",
-  "Preview the invoice, download the PDF, and keep drafts on this device."
-];
 
 function createLineItem(index: number): InvoiceLineItem {
   return {
@@ -62,6 +53,29 @@ function normalizeLegacyTaxLabel(label: string) {
   return ["SST 6%", "SST 8%", "Custom tax rate"].includes(label) ? "Tax" : label;
 }
 
+function createTaxRow(index: number): InvoiceTax {
+  return {
+    ...DEFAULT_INVOICE_TAX,
+    id: `tax-${Date.now()}-${index}`,
+    enabled: true,
+    label: index === 1 ? DEFAULT_INVOICE_TAX.label : `Tax ${index}`,
+    type: "percentage",
+    value: DEFAULT_INVOICE_TAX.value
+  };
+}
+
+function normalizeRestoredTaxRows(taxRows: InvoiceTax[]): InvoiceTax[] {
+  return taxRows.map((tax, index) => ({
+    ...DEFAULT_INVOICE_TAX,
+    ...tax,
+    id: tax.id || `tax-${Date.now()}-${index + 1}`,
+    enabled: tax.enabled === true,
+    label: normalizeLegacyTaxLabel(tax.label || DEFAULT_INVOICE_TAX.label),
+    type: tax.type === "fixed" ? "fixed" : "percentage",
+    value: tax.value || DEFAULT_INVOICE_TAX.value
+  }));
+}
+
 export function InvoiceGenerator() {
   const { currency, formatCurrency, setCurrency } = useCurrency();
   const currencySymbol = getCurrencyOption(currency)?.symbol ?? currency;
@@ -79,7 +93,7 @@ export function InvoiceGenerator() {
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState(DEFAULT_INVOICE_TERMS);
   const [payment, setPayment] = useState<InvoicePaymentDetails>(DEFAULT_INVOICE_PAYMENT_DETAILS);
-  const [tax, setTax] = useState(DEFAULT_INVOICE_TAX);
+  const [tax, setTax] = useState<InvoiceTax[]>([]);
   const [discount, setDiscount] = useState<InvoiceDiscount>(DEFAULT_INVOICE_DISCOUNT);
   const [shipping, setShipping] = useState<InvoiceShipping>(DEFAULT_INVOICE_SHIPPING);
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([createLineItem(1)]);
@@ -170,10 +184,7 @@ export function InvoiceGenerator() {
       setNotes(restoredInvoice.notes);
       setTerms(restoredInvoice.terms);
       setPayment(restoredInvoice.payment);
-      setTax({
-        ...restoredInvoice.tax,
-        label: normalizeLegacyTaxLabel(restoredInvoice.tax.label)
-      });
+      setTax(normalizeRestoredTaxRows(restoredInvoice.tax));
       setDiscount(restoredInvoice.discount);
       setShipping(restoredInvoice.shipping ?? DEFAULT_INVOICE_SHIPPING);
       setLineItems(restoredInvoice.items);
@@ -252,34 +263,30 @@ export function InvoiceGenerator() {
     }));
   }
 
-  function updateTaxEnabled(enabled: boolean) {
-    setTax((currentTax) => ({
-      ...currentTax,
-      enabled,
-      label: currentTax.label || DEFAULT_INVOICE_TAX.label,
-      value: currentTax.value || DEFAULT_INVOICE_TAX.value
-    }));
+  function addTaxRow() {
+    setTax((currentTaxRows) => [...currentTaxRows, createTaxRow(currentTaxRows.length + 1)]);
   }
 
-  function updateTaxLabel(value: string) {
-    setTax((currentTax) => ({
-      ...currentTax,
-      label: value
-    }));
+  function removeTaxRow(id: string) {
+    setTax((currentTaxRows) => currentTaxRows.filter((taxRow) => taxRow.id !== id));
   }
 
-  function updateTaxValue(value: string) {
-    setTax((currentTax) => ({
-      ...currentTax,
-      value
-    }));
+  function updateTaxLabel(id: string, value: string) {
+    setTax((currentTaxRows) =>
+      currentTaxRows.map((taxRow) => (taxRow.id === id ? { ...taxRow, label: value } : taxRow))
+    );
   }
 
-  function toggleTaxType() {
-    setTax((currentTax) => ({
-      ...currentTax,
-      type: currentTax.type === "percentage" ? "fixed" : "percentage"
-    }));
+  function updateTaxValue(id: string, value: string) {
+    setTax((currentTaxRows) =>
+      currentTaxRows.map((taxRow) => (taxRow.id === id ? { ...taxRow, value } : taxRow))
+    );
+  }
+
+  function updateTaxType(id: string, type: InvoiceTax["type"]) {
+    setTax((currentTaxRows) =>
+      currentTaxRows.map((taxRow) => (taxRow.id === id ? { ...taxRow, type } : taxRow))
+    );
   }
 
   function updateDiscountEnabled(enabled: boolean) {
@@ -429,8 +436,6 @@ export function InvoiceGenerator() {
   const dueDateError = getValidationMessage("dueDate");
   const notesError = getValidationMessage("notes");
   const termsError = getValidationMessage("terms");
-  const taxLabelError = getValidationMessage("tax.label");
-  const taxValueError = getValidationMessage("tax.value");
   const discountError = getValidationMessage("discount.value");
   const discountLabelError = getValidationMessage("discount.label");
   const shippingError = getValidationMessage("shipping.amount");
@@ -449,7 +454,7 @@ export function InvoiceGenerator() {
       : "";
 
   return (
-    <div className="flex flex-col gap-8">
+    <div>
       <div className="scroll-mt-24" ref={invoiceGeneratorTopRef}>
         <EditableInvoiceCanvas
           autosaveError={autosaveError}
@@ -512,9 +517,10 @@ export function InvoiceGenerator() {
           onShippingAmountChange={updateShippingAmount}
           onShippingEnabledChange={updateShippingEnabled}
           onShippingLabelChange={updateShippingLabel}
-          onTaxEnabledChange={updateTaxEnabled}
+          onAddTax={addTaxRow}
+          onRemoveTax={removeTaxRow}
           onTaxLabelChange={updateTaxLabel}
-          onTaxTypeToggle={toggleTaxType}
+          onTaxTypeChange={updateTaxType}
           onTaxValueChange={updateTaxValue}
           onTermsChange={setTerms}
           onUpdateLineItem={updateLineItem}
@@ -526,62 +532,12 @@ export function InvoiceGenerator() {
           shippingError={shippingError}
           shippingLabelError={shippingLabelError}
           tax={tax}
-          taxLabelError={taxLabelError}
-          taxValueError={taxValueError}
+          getTaxError={(index, key) => getValidationMessage(`tax.${index}.${key}`)}
           terms={terms}
           termsError={termsError}
           validationSummaryMessage={validationSummaryMessage}
         />
       </div>
-
-      <section className="space-y-8 border-t border-stone-200 pt-8">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-            Create PDF invoices for Malaysia in a few steps
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Build the invoice details, check the preview, then download a clean PDF invoice for
-            your records or customer.
-          </p>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
-            {featureHighlights.map((feature) => (
-              <li className="flex gap-3" key={feature}>
-                <span aria-hidden="true" className="text-stone-400">
-                  -&gt;
-                </span>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="border-t border-stone-200 pt-8">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Connect invoices with SST, cash flow, and business checks
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use the SST, cash flow, break-even, and ratio calculators to review the numbers
-            around an invoice before and after it is issued.
-          </p>
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/sst-calculator-malaysia">SST Calculator Malaysia</ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/break-even-calculator" variant="secondary">
-            Break-even Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-            Financial Ratio Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
-        </div>
-      </section>
 
       <InvoiceModals
         hasValidInvoice={hasValidInvoice}

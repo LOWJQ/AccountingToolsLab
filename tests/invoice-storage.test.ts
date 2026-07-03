@@ -31,11 +31,12 @@ function test(name: string, run: () => void) {
   console.log(`PASS ${name}`);
 }
 
+type InvoiceTaxOverride = Partial<InvoiceData["tax"][number]>;
 type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "shipping" | "tax">> & {
   discount?: Partial<InvoiceData["discount"]>;
   payment?: Partial<InvoiceData["payment"]>;
   shipping?: Partial<InvoiceData["shipping"]>;
-  tax?: Partial<InvoiceData["tax"]>;
+  tax?: InvoiceTaxOverride | InvoiceTaxOverride[];
 };
 
 function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
@@ -64,12 +65,7 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
       type: "percentage",
       value: "0"
     },
-    tax: {
-      enabled: false,
-      label: "Tax",
-      type: "percentage",
-      value: "0"
-    },
+    tax: [],
     shipping: {
       enabled: false,
       label: "Shipping",
@@ -87,6 +83,11 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     terms: ""
   };
   const baseShipping = baseInvoice.shipping ?? { enabled: false, label: "Shipping", amount: "0" };
+  const taxOverrides = overrides.tax
+    ? Array.isArray(overrides.tax)
+      ? overrides.tax
+      : [overrides.tax]
+    : undefined;
 
   return {
     ...baseInvoice,
@@ -95,10 +96,16 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
       ...baseInvoice.discount,
       ...overrides.discount
     },
-    tax: {
-      ...baseInvoice.tax,
-      ...overrides.tax
-    },
+    tax: taxOverrides
+      ? taxOverrides.map((tax, index) => ({
+          id: `tax-${index + 1}`,
+          enabled: false,
+          label: "Tax",
+          type: "percentage" as const,
+          value: "0",
+          ...tax
+        }))
+      : baseInvoice.tax,
     shipping: {
       enabled: overrides.shipping?.enabled ?? baseShipping.enabled,
       label: overrides.shipping?.label ?? baseShipping.label,
@@ -696,4 +703,54 @@ test("clearInvoiceDraft removes a draft with discount fields", () => {
 
   assert.deepEqual(clearInvoiceDraft(), { ok: true });
   assert.equal(entries[ATL_INVOICE_DRAFT_KEY], undefined);
+});
+
+test("old draft with single enabled tax migrates to one tax row", () => {
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice: {
+          ...createInvoice(),
+          tax: {
+            enabled: true,
+            label: "SST 6%",
+            rate: "6",
+            type: "percentage"
+          }
+        }
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.tax, [
+    {
+      id: "tax-1",
+      enabled: true,
+      label: "Tax",
+      type: "percentage",
+      value: "6"
+    }
+  ]);
+});
+
+test("new draft with multiple tax rows loads correctly", () => {
+  const invoice = createInvoice({
+    tax: [
+      { id: "tax-sst", enabled: true, label: "SST", type: "percentage", value: "8" },
+      { id: "tax-service", enabled: true, label: "Service tax", type: "fixed", value: "25" }
+    ]
+  });
+  installStorage(
+    createStorage({
+      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
+        version: ATL_INVOICE_DRAFT_VERSION,
+        savedAt: "2026-05-08T00:00:00.000Z",
+        invoice
+      })
+    }).storage
+  );
+
+  assert.deepEqual(loadInvoiceDraft()?.invoice.tax, invoice.tax);
 });

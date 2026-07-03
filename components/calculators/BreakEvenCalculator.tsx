@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { Card } from "@/components/ui/Card";
 import { calculateBreakEven } from "@/lib/calculators/break-even";
+import { RotateCcw } from "lucide-react";
 
 function parseAmount(value: string): number | null {
   if (value.trim() === "") {
@@ -23,7 +23,7 @@ function formatAmount(value: number): string {
 
 export function BreakEvenCalculator() {
   const [fixedCosts, setFixedCosts] = useState("0");
-  const { formatCurrency } = useCurrency();
+  const { currency, formatCurrency } = useCurrency();
   const [sellingPricePerUnit, setSellingPricePerUnit] = useState("0");
   const [variableCostPerUnit, setVariableCostPerUnit] = useState("0");
 
@@ -71,102 +71,120 @@ export function BreakEvenCalculator() {
     setVariableCostPerUnit("0");
   }
 
+  const isReadyToCalculate =
+    parseAmount(fixedCosts) === 0 &&
+    parseAmount(sellingPricePerUnit) === 0 &&
+    parseAmount(variableCostPerUnit) === 0;
+  const statusLabel = isReadyToCalculate
+    ? "Ready to calculate"
+    : calculation.isValid
+      ? "Break-even point calculated"
+      : calculation.message;
+  const statusClass = isReadyToCalculate
+    ? "bg-slate-50 text-slate-700 ring-slate-200"
+    : calculation.isValid
+      ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+      : "bg-rose-50 text-rose-700 ring-rose-100";
+
   return (
     <div className="flex flex-col gap-8">
-      <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-          <div className="grid min-w-0 gap-4">
+      <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
+        <div className="grid gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-start">
+          <div className="grid min-w-0 gap-5 lg:pr-8">
             <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">Fixed Costs</span>
+              <span className="text-sm font-medium text-slate-950">Fixed Costs ({currency})</span>
               <input
-                className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 inputMode="decimal"
+                min="0"
                 onChange={(event) => setFixedCosts(event.target.value)}
-                placeholder="10000"
+                placeholder="0.00"
                 type="number"
                 value={fixedCosts}
               />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">
-                Selling Price per Unit
+              <span className="text-sm font-medium text-slate-950">
+                Selling Price per Unit ({currency})
               </span>
               <input
-                className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 inputMode="decimal"
+                min="0"
                 onChange={(event) => setSellingPricePerUnit(event.target.value)}
-                placeholder="50"
+                placeholder="0.00"
                 type="number"
                 value={sellingPricePerUnit}
               />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-semibold text-stone-800">
-                Variable Cost per Unit
+              <span className="text-sm font-medium text-slate-950">
+                Variable Cost per Unit ({currency})
               </span>
               <input
-                className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 inputMode="decimal"
+                min="0"
                 onChange={(event) => setVariableCostPerUnit(event.target.value)}
-                placeholder="30"
+                placeholder="0.00"
                 type="number"
                 value={variableCostPerUnit}
               />
             </label>
 
             <button
-              className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+              className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
               onClick={resetCalculator}
               type="button"
             >
+              <RotateCcw aria-hidden="true" className="h-4 w-4" />
               Reset
             </button>
           </div>
 
-          <div className="grid min-w-0 gap-5 rounded-xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Result</p>
+          <div className="min-w-0 border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <div className="grid gap-4">
+              {[
+                ["Break-even Units", `${formatAmount(calculation.result.breakEvenUnits)} units`],
+                [
+                  "Minimum Whole Units",
+                  `${calculation.result.minimumWholeUnits.toLocaleString("en-US")} units`
+                ],
+                [
+                  "Contribution Margin per Unit",
+                  formatCurrency(calculation.result.contributionMarginPerUnit)
+                ],
+                ["Break-even Sales", formatCurrency(calculation.result.breakEvenSales)]
+              ].map(([label, value], index) => (
+                <div
+                  className={`${index === 0 ? "" : "border-t border-slate-200 pt-4"}`}
+                  key={label}
+                >
+                  <p className="text-sm font-medium text-slate-700">{label}</p>
+                  <p className="mt-1 break-words text-2xl font-semibold tracking-tight text-slate-950">
+                    {value}
+                  </p>
+                </div>
+              ))}
 
-            <div>
-              <p className="text-sm font-semibold text-stone-800">Break-even Units</p>
-              <p className="mt-2 break-words text-3xl font-semibold tracking-tight text-stone-950">
-                {formatAmount(calculation.result.breakEvenUnits)}
+              <div className="border-t border-slate-200 pt-5">
+                <p className="text-sm font-medium text-slate-700">Status</p>
+                <span
+                  className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ring-1 ${statusClass}`}
+                >
+                  {statusLabel}
+                </span>
+              </div>
+
+              <p className="text-base leading-7 text-black">
+                Break-even Units = Fixed Costs / Contribution Margin per Unit
               </p>
             </div>
-
-            <div>
-              <p className="text-sm font-semibold text-stone-800">Minimum Whole Units</p>
-              <p className="mt-2 break-words text-2xl font-semibold tracking-tight text-stone-950">
-                {calculation.result.minimumWholeUnits.toLocaleString("en-US")}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-stone-800">Contribution Margin per Unit</p>
-              <p className="mt-2 break-words text-2xl font-semibold tracking-tight text-stone-950">
-                {formatCurrency(calculation.result.contributionMarginPerUnit)}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-stone-800">Break-even Sales</p>
-              <p className="mt-2 break-words text-2xl font-semibold tracking-tight text-stone-950">
-                {formatCurrency(calculation.result.breakEvenSales)}
-              </p>
-            </div>
-
-            <p className="min-w-0 text-sm leading-6 text-stone-700">
-              <span className="font-semibold text-stone-800">Status:</span>{" "}
-              {calculation.isValid ? "Valid break-even point" : calculation.message}
-            </p>
-
-            <p className="text-sm font-medium text-stone-700">
-              Break-even Units = Fixed Costs / Contribution Margin per Unit
-            </p>
           </div>
         </div>
-      </Card>
+      </section>
     </div>
   );
 }

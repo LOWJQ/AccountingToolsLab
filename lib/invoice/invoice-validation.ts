@@ -159,7 +159,15 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
   validateTextLength(errors, "notes", "Notes", invoice.notes, limits.notes);
   validateTextLength(errors, "terms", "Terms and conditions", invoice.terms, limits.terms);
   validateTextLength(errors, "discount.label", "Discount label", invoice.discount.label, limits.discountLabel);
-  validateTextLength(errors, "tax.label", "Tax label", invoice.tax.label, limits.taxLabel);
+  invoice.tax.forEach((tax, index) => {
+    validateTextLength(
+      errors,
+      `tax.${index}.label`,
+      `Tax ${index + 1} label`,
+      tax.label,
+      limits.taxLabel
+    );
+  });
   validateTextLength(
     errors,
     "shipping.label",
@@ -360,31 +368,38 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
     }
   }
 
-  if (invoice.tax.enabled) {
+  invoice.tax.forEach((tax, index) => {
+    if (!tax.enabled) {
+      return;
+    }
+
+    const valueField = `tax.${index}.value`;
     const taxValue = parseRequiredFiniteNumber(
       errors,
-      "tax.value",
-      invoice.tax.type === "fixed" ? "Tax amount" : "Tax rate",
-      invoice.tax.value,
-      invoice.tax.type === "fixed" ? parseInvoiceMoneyAmount : parseInvoicePercentage
+      valueField,
+      tax.type === "fixed" ? "Tax amount" : "Tax rate",
+      tax.value,
+      tax.type === "fixed" ? parseInvoiceMoneyAmount : parseInvoicePercentage
     );
 
-    if (taxValue !== null) {
-      if (invoice.tax.type === "percentage" && (taxValue < 0 || taxValue > 100)) {
-        errors.push({
-          field: "tax.value",
-          message: "Tax rate must be between 0 and 100."
-        });
-      }
-
-      if (invoice.tax.type === "fixed" && taxValue < 0) {
-        errors.push({
-          field: "tax.value",
-          message: "Tax amount cannot be negative."
-        });
-      }
+    if (taxValue === null) {
+      return;
     }
-  }
+
+    if (tax.type === "percentage" && (taxValue < 0 || taxValue > 100)) {
+      errors.push({
+        field: valueField,
+        message: "Tax rate must be between 0 and 100."
+      });
+    }
+
+    if (tax.type === "fixed" && taxValue < 0) {
+      errors.push({
+        field: valueField,
+        message: "Tax amount cannot be negative."
+      });
+    }
+  });
 
   if (invoice.shipping?.enabled === true) {
     const shippingAmount = parseRequiredFiniteNumber(

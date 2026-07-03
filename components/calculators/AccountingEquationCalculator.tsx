@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { Card } from "@/components/ui/Card";
 import {
   calculateAccountingEquation,
   type AccountingEquationSolveFor
 } from "@/lib/calculators/accounting-equation";
+import { RotateCcw } from "lucide-react";
 
 type FieldName = "assets" | "liabilities" | "equity";
 
@@ -48,7 +48,7 @@ function parseAmount(value: string): number {
 
 export function AccountingEquationCalculator() {
   const [solveFor, setSolveFor] = useState<AccountingEquationSolveFor>("assets");
-  const { formatCurrency } = useCurrency();
+  const { currency, formatCurrency } = useCurrency();
   const [values, setValues] = useState<Record<FieldName, string>>({
     assets: "0",
     liabilities: "0",
@@ -91,17 +91,18 @@ export function AccountingEquationCalculator() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
+      <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
         <div className="grid gap-6">
           <div className="grid gap-3">
-            <p className="text-sm font-semibold text-stone-900">Choose what to calculate</p>
-            <div className="inline-grid grid-cols-3 rounded-xl border border-stone-200 bg-stone-50 p-1">
+            <p className="text-sm font-semibold text-slate-950">Choose what to calculate</p>
+            <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3">
               {solveOptions.map((option) => (
                 <button
-                  className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                  aria-pressed={solveFor === option.value}
+                  className={`h-11 px-4 text-sm font-semibold transition ${
                     solveFor === option.value
-                      ? "bg-white text-slate-900 shadow-sm ring-1 ring-stone-200"
-                      : "text-stone-600 hover:bg-white/80 hover:text-stone-900"
+                      ? "bg-slate-900 text-white"
+                      : "border-t border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-950 sm:border-l sm:border-t-0"
                   }`}
                   key={option.value}
                   onClick={() => setSolveFor(option.value)}
@@ -113,52 +114,55 @@ export function AccountingEquationCalculator() {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
-            <div className="grid gap-4">
+          <div className="grid gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-start">
+            <div className="grid gap-5 lg:pr-8">
               {activeFields.map((field) => (
                 <label className="grid gap-2" key={field}>
-                  <span className="text-sm font-semibold text-stone-800">{fieldLabels[field]}</span>
+                  <span className="text-sm font-medium text-slate-950">
+                    {fieldLabels[field]} ({currency})
+                  </span>
                   <input
-                    className="h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                    className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                     inputMode="decimal"
                     onChange={(event) => updateValue(field, event.target.value)}
                     placeholder="0.00"
                     type="number"
                     value={values[field]}
                   />
-                  <span className="text-xs leading-5 text-stone-500">{fieldHelp[field]}</span>
+                  <span className="text-sm leading-6 text-slate-600">{fieldHelp[field]}</span>
                 </label>
               ))}
 
               <button
-                className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
                 onClick={resetCalculator}
                 type="button"
               >
+                <RotateCcw aria-hidden="true" className="h-4 w-4" />
                 Reset
               </button>
             </div>
 
-            <div className="grid gap-5 rounded-xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6">
-              <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Result</p>
+            <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Result</p>
 
               <div>
-                <p className="text-sm font-semibold text-stone-800">
+                <p className="mt-5 text-sm font-medium text-slate-700">
                   Calculated {fieldLabels[solveFor]}
                 </p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
                   {formatCurrency(calculation.result.value)}
                 </p>
               </div>
 
-              <p className="text-sm leading-6 text-stone-700">
-                <span className="font-semibold text-stone-800">Formula:</span>{" "}
+              <p className="mt-5 text-base leading-7 text-black">
+                <span className="font-semibold text-black">Formula:</span>{" "}
                 {calculation.result.formula}
               </p>
             </div>
           </div>
         </div>
-      </Card>
+      </section>
     </div>
   );
 }

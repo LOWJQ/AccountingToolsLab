@@ -1,8 +1,7 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, RotateCcw } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { Card } from "@/components/ui/Card";
 import {
   checkDebitCredit,
   type AccountEffect,
@@ -57,52 +56,51 @@ export function DebitCreditChecker() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <Card className="p-5 sm:p-8 lg:p-10" variant="elevated">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="grid gap-5">
-            <DropdownSelect
-              id="debit-credit-account-type"
-              label="Account type"
-              onChange={(value) => setAccountType(value as AccountType | "")}
-              options={accountOptions}
-              value={accountType}
-            />
+    <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
+      <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <div className="grid gap-5">
+          <DropdownSelect
+            id="debit-credit-account-type"
+            label="Account type"
+            onChange={(value) => setAccountType(value as AccountType | "")}
+            options={accountOptions}
+            value={accountType}
+          />
 
-            <DropdownSelect
-              id="debit-credit-effect"
-              label="Effect"
-              onChange={(value) => setEffect(value as AccountEffect | "")}
-              options={effectOptions}
-              value={effect}
-            />
+          <DropdownSelect
+            id="debit-credit-effect"
+            label="Effect"
+            onChange={(value) => setEffect(value as AccountEffect | "")}
+            options={effectOptions}
+            value={effect}
+          />
 
-            <button
-              className="inline-flex h-10 w-fit items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-              onClick={resetChecker}
-              type="button"
-            >
-              Reset
-            </button>
-          </div>
-
-          <div className="rounded-xl border border-stone-200 bg-stone-50 p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Answer</p>
-            <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-950">
-              {result.value ? `${result.value.answer} the account` : "-"}
-            </p>
-            <p className="mt-3 text-sm leading-6 text-stone-600">
-              {result.value ? result.value.explanation : result.message}
-            </p>
-            {result.value ? (
-              <p className="mt-5 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-stone-600 ring-1 ring-stone-200">
-                Normal balance: {result.value.normalBalance}
-              </p>
-            ) : null}
-          </div>
+          <button
+            className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            onClick={resetChecker}
+            type="button"
+          >
+            <RotateCcw aria-hidden="true" className="h-4 w-4" />
+            Reset
+          </button>
         </div>
-      </Card>
-    </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <p className="text-xs font-semibold uppercase text-slate-500">Answer</p>
+          <p className="mt-4 text-4xl font-semibold tracking-tight text-slate-950">
+            {result.value ? result.value.answer : "—"}
+          </p>
+          <p className="mt-4 text-base leading-7 text-black">
+            {result.value ? result.value.explanation : result.message}
+          </p>
+          {result.value ? (
+            <p className="mt-5 text-base leading-7 text-black">
+              <span className="font-semibold">Normal balance:</span> {result.value.normalBalance}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -237,7 +235,7 @@ function DropdownSelect<T extends string>({
 
   return (
     <div className="relative grid min-w-0 gap-2" ref={rootRef}>
-      <span className="text-sm font-semibold text-stone-800" id={labelId}>
+      <span className="text-sm font-semibold text-slate-900" id={labelId}>
         {label}
       </span>
       <button
@@ -245,7 +243,7 @@ function DropdownSelect<T extends string>({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-labelledby={`${labelId} ${buttonId}`}
-        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className="inline-flex h-11 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 text-left text-base font-medium text-black transition hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100"
         id={buttonId}
         onClick={() => {
           setActiveIndex(selectedIndex);
@@ -258,13 +256,13 @@ function DropdownSelect<T extends string>({
         <span className="min-w-0 truncate">{selectedOption?.label ?? "Select"}</span>
         <ChevronDown
           aria-hidden="true"
-          className={`h-4 w-4 shrink-0 text-stone-500 transition ${isOpen ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-slate-500 transition ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       {isOpen ? (
         <div
-          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-2xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
+          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1.5 shadow-lg shadow-slate-200/60"
           id={listboxId}
           role="listbox"
         >
@@ -277,7 +275,7 @@ function DropdownSelect<T extends string>({
                 className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition ${
                   isSelected
                     ? "bg-slate-50 font-semibold text-slate-800"
-                    : "font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                    : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-950"
                 }`}
                 id={`${listboxId}-${optionIndex}`}
                 key={`${id}-${option.value || "empty"}`}

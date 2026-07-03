@@ -6,7 +6,8 @@ import {
   DEFAULT_INVOICE_TAX,
   DEFAULT_INVOICE_TERMS,
   type InvoiceData,
-  type InvoiceLineItem
+  type InvoiceLineItem,
+  type InvoiceTax
 } from "./invoice-types";
 
 export const DEFAULT_INVOICE_NUMBER = "INV-001";
@@ -18,6 +19,18 @@ export function createDefaultInvoiceLineItem(id = "item-1"): InvoiceLineItem {
     quantity: "1",
     unitPrice: ""
   };
+}
+
+function normalizeInvoiceTaxRows(taxRows: InvoiceTax[] | undefined): InvoiceTax[] {
+  return (taxRows ?? []).map((tax, index) => ({
+    ...DEFAULT_INVOICE_TAX,
+    ...tax,
+    id: tax.id || `tax-${index + 1}`,
+    enabled: tax.enabled === true,
+    label: tax.label || DEFAULT_INVOICE_TAX.label,
+    type: tax.type === "fixed" ? "fixed" : "percentage",
+    value: tax.value || "0"
+  }));
 }
 
 export function createEmptyInvoiceDefaults({
@@ -45,7 +58,7 @@ export function createEmptyInvoiceDefaults({
     currency,
     items: [createDefaultInvoiceLineItem(lineItemId)],
     discount: DEFAULT_INVOICE_DISCOUNT,
-    tax: DEFAULT_INVOICE_TAX,
+    tax: [],
     shipping: DEFAULT_INVOICE_SHIPPING,
     payment: DEFAULT_INVOICE_PAYMENT_DETAILS,
     notes: "",
@@ -76,14 +89,7 @@ export function prepareInvoiceForFormRestore(
       ...DEFAULT_INVOICE_DISCOUNT,
       ...invoice.discount
     },
-    tax: {
-      ...DEFAULT_INVOICE_TAX,
-      ...invoice.tax,
-      enabled: invoice.tax.enabled === true,
-      label: invoice.tax.label || DEFAULT_INVOICE_TAX.label,
-      type: invoice.tax.type === "fixed" ? "fixed" : "percentage",
-      value: invoice.tax.value || "0"
-    },
+    tax: normalizeInvoiceTaxRows(invoice.tax),
     shipping: {
       ...DEFAULT_INVOICE_SHIPPING,
       ...invoice.shipping,

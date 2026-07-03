@@ -1,12 +1,21 @@
-import type { InvoiceData, InvoiceLineItem } from "./invoice-types";
+import type { InvoiceData, InvoiceLineItem, InvoiceTax } from "./invoice-types";
 
 export type InvoiceCalculationResult = {
   subtotal: number;
   discountAmount: number;
   taxableAmount: number;
   taxAmount: number;
+  taxLines: InvoiceTaxCalculationResult[];
   shippingAmount: number;
   total: number;
+};
+
+export type InvoiceTaxCalculationResult = {
+  id: string;
+  label: string;
+  type: InvoiceTax["type"];
+  value: number;
+  amount: number;
 };
 
 export type InvoiceLineCalculationResult = {
@@ -68,6 +77,22 @@ function toSafePercentage(value: string): number {
   return parseInvoicePercentage(value) ?? 0;
 }
 
+function calculateTaxLine(tax: InvoiceTax, taxableAmount: number): InvoiceTaxCalculationResult {
+  const rawTaxValue =
+    tax.type === "fixed" ? toSafeMoneyAmount(tax.value) : toSafePercentage(tax.value);
+  const safeTaxValue = Math.max(rawTaxValue, 0);
+
+  return {
+    id: tax.id,
+    label: tax.label || "Tax",
+    type: tax.type,
+    value: safeTaxValue,
+    amount: roundMoney(
+      tax.type === "fixed" ? safeTaxValue : taxableAmount * (safeTaxValue / 100)
+    )
+  };
+}
+
 export function calculateInvoiceLineItems(
   items: InvoiceLineItem[]
 ): InvoiceLineCalculationResult[] {
@@ -103,17 +128,11 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
     : 0;
   const discountAmount = roundMoney(Math.min(Math.max(rawDiscountAmount, 0), subtotal));
   const taxableAmount = roundMoney(Math.max(subtotal - discountAmount, 0));
-  const rawTaxValue = invoice.tax.enabled
-    ? invoice.tax.type === "fixed"
-      ? toSafeMoneyAmount(invoice.tax.value)
-      : toSafePercentage(invoice.tax.value)
-    : 0;
+  const taxLines = invoice.tax
+    .filter((tax) => tax.enabled)
+    .map((tax) => calculateTaxLine(tax, taxableAmount));
   const taxAmount = roundMoney(
-    invoice.tax.enabled
-      ? invoice.tax.type === "fixed"
-        ? Math.max(rawTaxValue, 0)
-        : taxableAmount * (Math.max(rawTaxValue, 0) / 100)
-      : 0
+    taxLines.reduce((sum, taxLine) => sum + taxLine.amount, 0)
   );
   const rawShippingAmount =
     invoice.shipping?.enabled === true ? toSafeMoneyAmount(invoice.shipping.amount) : 0;
@@ -124,6 +143,7 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
     discountAmount,
     taxableAmount,
     taxAmount,
+    taxLines,
     shippingAmount,
     total: roundMoney(taxableAmount + taxAmount + shippingAmount)
   };

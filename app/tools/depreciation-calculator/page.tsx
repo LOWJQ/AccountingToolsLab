@@ -3,11 +3,19 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
-import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import {
+  ArrowRight,
+  BarChart3,
+  Check,
+  CircleDollarSign,
+  Grid2X2,
+  Scale,
+  Table2
+} from "lucide-react";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Depreciation Calculator | Straight-Line Depreciation",
@@ -34,8 +42,7 @@ const depreciationFaqs = [
   },
   {
     question: "What is salvage value?",
-    answer:
-      "Salvage value is the estimated value of the asset at the end of its useful life."
+    answer: "Salvage value is the estimated value of the asset at the end of its useful life."
   },
   {
     question: "What is useful life?",
@@ -46,6 +53,57 @@ const depreciationFaqs = [
     question: "Can this calculator help with accounting homework?",
     answer:
       "Yes. It can help check simple straight-line depreciation calculations, but you should still show your working."
+  }
+];
+
+const depreciationSteps = [
+  "Enter the asset cost assigned to the fixed asset.",
+  "Add the expected salvage value at the end of its useful life.",
+  "Enter the useful life in years to calculate annual depreciation expense.",
+  "Review the straight-line depreciation result and summary instantly."
+];
+
+const depreciationBenefits = [
+  "Plan fixed asset costs over time with a simple straight-line depreciation estimate.",
+  "Check accounting homework that uses asset cost, salvage value, and useful life.",
+  "Review bookkeeping entries tied to depreciation expense.",
+  "Estimate annual depreciation expense for budgeting or internal review.",
+  "Support simple financial reporting for assets that use straight-line depreciation."
+];
+
+const whenToUseItems = [
+  "Plan fixed asset costs over time with a simple straight-line depreciation estimate.",
+  "Check accounting homework that uses asset cost, salvage value, and useful life.",
+  "Review bookkeeping entries tied to depreciation expense.",
+  "Estimate annual depreciation expense for budgeting or internal review.",
+  "Support simple financial reporting for assets that use straight-line depreciation."
+];
+
+const relatedTools = [
+  {
+    href: "/tools/financial-ratio-calculator",
+    icon: BarChart3,
+    label: "Financial Ratio Calculator"
+  },
+  {
+    href: "/tools/trial-balance-calculator",
+    icon: Table2,
+    label: "Trial Balance Calculator"
+  },
+  {
+    href: "/tools/accounting-equation-calculator",
+    icon: Scale,
+    label: "Accounting Equation Calculator"
+  },
+  {
+    href: "/tools/cash-flow-calculator",
+    icon: CircleDollarSign,
+    label: "Cash Flow Calculator"
+  },
+  {
+    href: "/tools",
+    icon: Grid2X2,
+    label: "All Tools"
   }
 ];
 
@@ -67,105 +125,132 @@ export default function DepreciationCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={depreciationFaqs} />
-      <div className="max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link className="transition hover:text-slate-900" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li>
+            <Link className="transition hover:text-slate-900" href="/tools">
+              Tools
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li className="font-medium text-slate-700">Depreciation Calculator</li>
+        </ol>
+      </nav>
+
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Depreciation Calculator
         </h1>
-        <p className="mt-3 text-base leading-7 text-stone-600">
+        <p className="mt-3 text-base leading-7 text-black">
           Calculate straight-line depreciation from asset cost, salvage value, and useful life.
         </p>
       </div>
+
       <DepreciationCalculator />
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Calculate depreciation in a few steps
-        </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Use this depreciation calculator to enter asset cost, salvage value, and useful life,
-            then review the annual straight-line depreciation result for simple accounting checks,
-            bookkeeping work, or planning.
-          </p>
-          <p>→ Enter the asset cost assigned to the fixed asset.</p>
-          <p>→ Add the expected salvage value at the end of its useful life.</p>
-          <p>→ Enter the useful life in years to calculate annual depreciation expense.</p>
-          <p>→ Review the straight-line depreciation result and summary instantly.</p>
+
+      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
+        <div className="lg:pr-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Calculate depreciation in a few steps
+          </h2>
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
+            {depreciationSteps.map((step) => (
+              <li className="pl-2" key={step}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Why use this depreciation calculator?
+          </h2>
+          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+            {depreciationBenefits.map((benefit) => (
+              <li className="flex items-start gap-3" key={benefit}>
+                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Understand straight-line depreciation
-        </h2>
-        <div className="mt-4 space-y-4 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Straight-line depreciation spreads an asset&apos;s depreciable amount evenly across its
-            useful life. This makes it one of the simplest ways to estimate annual depreciation
-            expense for basic accounting and financial reporting.
-          </p>
-          <p>
-            Asset cost is the amount assigned to the asset at the start. Salvage value is the
-            estimated value left at the end of use. The depreciable amount is the difference
-            between asset cost and salvage value.
-          </p>
-          <p>
-            Useful life is the number of years the asset is expected to help the business. Annual
-            depreciation expense is then calculated by spreading the depreciable amount evenly over
-            those years.
-          </p>
-        </div>
-      </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
           When to use this depreciation calculator
         </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>→ Plan fixed asset costs over time with a simple straight-line depreciation estimate.</p>
-          <p>→ Check accounting homework that uses asset cost, salvage value, and useful life.</p>
-          <p>→ Review bookkeeping entries tied to depreciation expense.</p>
-          <p>→ Estimate annual depreciation expense for budgeting or internal review.</p>
-          <p>→ Support simple financial reporting for assets that use straight-line depreciation.</p>
-        </div>
+        <ul className="mt-5 list-disc space-y-2 pl-5 text-base leading-7 text-black">
+          {whenToUseItems.map((item) => (
+            <li className="pl-1" key={item}>
+              {item}
+            </li>
+          ))}
+        </ul>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Connect depreciation with other accounting tools
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Tools
         </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          After using this depreciation calculator, you can continue with related tools to review
-          financial performance, check balances, understand the accounting equation, and see how
-          asset-related expenses connect with broader business cash activity.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-            Financial Ratio Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-            Trial Balance Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/accounting-equation-calculator" variant="secondary">
-            Accounting Equation Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {relatedTools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                href={tool.href}
+                key={tool.href}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
+                <span className="min-w-0 flex-1">{tool.label}</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
-      <RelatedGuideArticleSection
-        articles={[
-          {
-            description:
-              "Learn straight-line depreciation with the formula, examples, salvage value, useful life, annual depreciation expense, and common beginner mistakes.",
-            href: "/guides/straight-line-depreciation-explained",
-            label: "Depreciation guide",
-            title: "Straight-Line Depreciation Explained"
-          }
-        ]}
-        toolName="Depreciation Calculator"
-      />
-      <FAQSection faqs={depreciationFaqs} title="Depreciation Calculator FAQs" />
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+         Related Guide Article
+        </h2>
+        <Link
+          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          href="/guides/straight-line-depreciation-explained"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-medium leading-7 text-black">Depreciation guide</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Straight-Line Depreciation Explained
+            </h3>
+            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
+              Learn straight-line depreciation with the formula, examples, salvage value, useful
+              life, annual depreciation expense, and common beginner mistakes.
+            </p>
+          </div>
+          <ArrowRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+          />
+        </Link>
+      </section>
+
+      <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
+        <FAQSection eyebrow="" faqs={depreciationFaqs} title="Depreciation Calculator FAQs" />
+      </section>
     </ToolPageLayout>
   );
 }

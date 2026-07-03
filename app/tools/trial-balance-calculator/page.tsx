@@ -3,11 +3,11 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
-import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import { ArrowRight, BarChart3, Check, CircleDollarSign, FileText, Grid2X2 } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Free Trial Balance Calculator | Trial Balance Generator",
@@ -54,6 +54,52 @@ const trialBalanceFaqs = [
   }
 ];
 
+const trialBalanceSteps = [
+  "Enter an account name for each ledger balance you want to check.",
+  "Type the amount in either the debit or credit column for that row.",
+  "Review the running totals to see whether the trial balance is balanced.",
+  "Use the difference shown to spot entries that may need correction.",
+  "Add or remove rows as needed until your account list matches your worksheet."
+];
+
+const trialBalanceBenefits = [
+  "Quickly check whether total debits equal total credits.",
+  "Simple worksheet layout for students and small businesses.",
+  "Helps identify missing, duplicate, or incorrect entries.",
+  "Useful before preparing financial statements.",
+  "Supports accurate bookkeeping and reporting."
+];
+
+const commonChecks = [
+  "Look for missing entries if an account balance was left out of the worksheet.",
+  "Check for wrong-side posting when a debit is entered as a credit or the reverse.",
+  "Review duplicate amounts that may have been entered twice by mistake.",
+  "Compare the unbalanced totals and difference to narrow down where to investigate first."
+];
+
+const relatedTools = [
+  {
+    href: "/tools/invoice-generator",
+    icon: FileText,
+    label: "Invoice Generator"
+  },
+  {
+    href: "/tools/financial-ratio-calculator",
+    icon: BarChart3,
+    label: "Financial Ratio Calculator"
+  },
+  {
+    href: "/tools/cash-flow-calculator",
+    icon: CircleDollarSign,
+    label: "Cash Flow Calculator"
+  },
+  {
+    href: "/tools",
+    icon: Grid2X2,
+    label: "All Tools"
+  }
+];
+
 export default function TrialBalanceCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/trial-balance-calculator`;
 
@@ -72,117 +118,135 @@ export default function TrialBalanceCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={trialBalanceFaqs} />
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link className="transition hover:text-slate-900" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li>
+            <Link className="transition hover:text-slate-900" href="/tools">
+              Tools
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li className="font-medium text-slate-700">Trial Balance Calculator</li>
+        </ol>
+      </nav>
+
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Free Trial Balance Calculator
         </h1>
-        <p className="mt-3 text-base leading-7 text-stone-600">
+        <p className="mt-3 text-base leading-7 text-black">
           Enter account balances in the debit or credit column to generate a clean trial balance
           worksheet layout, total both sides, and check whether the trial balance is balanced.
         </p>
       </div>
       <TrialBalanceCalculator />
-      <section className="border-t border-stone-200 pt-8">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+
+      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
+        <div className="lg:pr-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
             Calculate a trial balance in a few steps
           </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use this trial balance calculator or generator to review account balances in a simple
-            accounting worksheet format. It is useful when you want to check debit and credit
-            totals quickly before moving on to reports or further accounting work.
-          </p>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
-            {[
-              "Enter an account name for each ledger balance you want to check.",
-              "Type the amount in either the debit or credit column for that row.",
-              "Review the running totals to see whether the trial balance is balanced.",
-              "Use the difference shown to spot entries that may need correction.",
-              "Add or remove rows as needed until your account list matches your worksheet."
-            ].map((item) => (
-              <li className="flex gap-3" key={item}>
-                <span aria-hidden="true" className="text-stone-400">
-                  {"\u2192"}
-                </span>
-                <span>{item}</span>
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
+            {trialBalanceSteps.map((step) => (
+              <li className="pl-2" key={step}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Why use this trial balance calculator?
+          </h2>
+          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+            {trialBalanceBenefits.map((benefit) => (
+              <li className="flex items-start gap-3" key={benefit}>
+                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+                <span>{benefit}</span>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-          Use the trial balance before preparing reports
-        </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          A trial balance helps you check whether total debits equal total credits before
-          preparing financial statements. It does not replace full review work, but it gives you
-          a practical checkpoint before moving into income statements, balance sheets, or further
-          bookkeeping adjustments.
-        </p>
-      </section>
-
-      <section className="border-t border-stone-200 pt-8">
+      <section className="border-t border-slate-200 pt-8">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
             Common trial balance checks
           </h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
-            {[
-              "Look for missing entries if an account balance was left out of the worksheet.",
-              "Check for wrong side posting when a debit is entered as a credit or the reverse.",
-              "Review duplicate amounts that may have been entered twice by mistake.",
-              "Compare the unbalanced totals and difference to narrow down where to investigate first."
-            ].map((item) => (
-              <li className="flex gap-3" key={item}>
-                <span aria-hidden="true" className="text-stone-400">
-                  {"\u2192"}
-                </span>
-                <span>{item}</span>
+          <ul className="mt-5 list-disc space-y-2 pl-5 text-base leading-7 text-black">
+            {commonChecks.map((check) => (
+              <li className="pl-1" key={check}>
+                {check}
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="border-t border-stone-200 pt-8">
+      <section className="border-t border-slate-200 pt-8">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Connect trial balance with other accounting tools
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Related Tools
           </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Use related accounting tools to continue checking the numbers after your trial balance
-            worksheet is reviewed, especially when you want to connect bookkeeping, cash flow, and
-            business analysis tasks.
-          </p>
         </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/invoice-generator">Invoice Generator</ButtonLink>
-          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-            Financial Ratio Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {relatedTools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                href={tool.href}
+                key={tool.href}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
+                <span className="min-w-0 flex-1">{tool.label}</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
-      <RelatedGuideArticleSection
-        articles={[
-          {
-            description:
-              "Learn what a trial balance is, how to prepare one, the trial balance format, examples, common errors, and why total debits should equal total credits.",
-            href: "/guides/trial-balance-explained",
-            label: "Trial balance guide",
-            title: "Trial Balance Explained"
-          }
-        ]}
-        toolName="Trial Balance Calculator"
-      />
-      <FAQSection faqs={trialBalanceFaqs} title="Trial Balance Calculator FAQs" />
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Guide Article
+        </h2>
+        <Link
+          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          href="/guides/trial-balance-explained"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-medium leading-7 text-black">Trial balance guide</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Trial Balance Explained
+            </h3>
+            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
+              Learn what a trial balance is, how to prepare one, the trial balance format,
+              examples, common errors, and why total debits should equal total credits.
+            </p>
+          </div>
+          <ArrowRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+          />
+        </Link>
+      </section>
+
+      <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
+        <FAQSection eyebrow="" faqs={trialBalanceFaqs} title="Trial Balance Calculator FAQs" />
+      </section>
     </ToolPageLayout>
   );
 }

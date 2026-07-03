@@ -1,6 +1,7 @@
 import type {
   InvoiceCalculationResult,
-  InvoiceLineCalculationResult
+  InvoiceLineCalculationResult,
+  InvoiceTaxCalculationResult
 } from "./invoice-calculations";
 import { parseInvoicePercentage } from "./invoice-calculations";
 import { buildInvoicePdfFileName } from "./invoice-pdf";
@@ -24,6 +25,12 @@ function formatAmount(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
+}
+
+function formatTaxLineLabel(taxLine: InvoiceTaxCalculationResult): string {
+  return taxLine.type === "percentage"
+    ? `${formatAmount(taxLine.value)}% ${taxLine.label || "Tax"}`
+    : taxLine.label || "Tax";
 }
 
 function getLogoImageType(dataUrl: string): "PNG" | "JPEG" | null {
@@ -99,23 +106,14 @@ export async function generateInvoicePdf(
     invoiceData.discount.enabled && invoiceData.discount.type === "percentage"
       ? parseInvoicePercentage(invoiceData.discount.value) ?? 0
       : 0;
-  const taxRate =
-    invoiceData.tax.enabled && invoiceData.tax.type === "percentage"
-      ? parseInvoicePercentage(invoiceData.tax.value) ?? 0
-      : 0;
-  const taxAmount = calculation.taxAmount;
+  const taxLines = calculation.taxLines;
   const shippingAmount = calculation.shippingAmount;
   const total = calculation.total;
-  const hasTax = taxAmount > 0;
   const hasShipping = shippingAmount > 0;
   const discountLabel =
     invoiceData.discount.type === "percentage"
       ? `${formatAmount(discountRate)}% ${invoiceData.discount.label || "Discount"}`
       : invoiceData.discount.label || "Discount";
-  const taxLabel =
-    invoiceData.tax.type === "percentage"
-      ? `${formatAmount(taxRate)}% ${invoiceData.tax.label || "Tax"}`
-      : invoiceData.tax.label || "Tax";
   const paymentDetailRows = [
     ["Bank", payment.bankName],
     ["Account name", payment.accountName],
@@ -479,9 +477,9 @@ export async function generateInvoicePdf(
   if (hasDiscount) {
     totalsRows.push([discountLabel, `-${formatCurrency(discountAmount)}`]);
   }
-  if (hasTax) {
-    totalsRows.push([taxLabel, formatCurrency(taxAmount)]);
-  }
+  taxLines.forEach((taxLine) => {
+    totalsRows.push([formatTaxLineLabel(taxLine), formatCurrency(taxLine.amount)]);
+  });
   if (hasShipping) {
     totalsRows.push([invoiceData.shipping?.label || "Shipping", formatCurrency(shippingAmount)]);
   }

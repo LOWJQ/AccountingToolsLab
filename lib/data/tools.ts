@@ -4,6 +4,7 @@ export const tools: Tool[] = [
   {
     slug: "trial-balance-calculator",
     name: "Trial Balance Calculator",
+    emoji: "\u2696\uFE0F",
     description: "Check whether total debits equal total credits and see the difference instantly.",
     category: "Bookkeeping Checks",
     bestFor: "Checking ledger balances before preparing financial statements.",
@@ -13,6 +14,7 @@ export const tools: Tool[] = [
   {
     slug: "accounting-equation-calculator",
     name: "Accounting Equation Calculator",
+    emoji: "\u{1F9E9}",
     description: "Review assets, liabilities, and equity using the basic accounting equation.",
     category: "Accounting Basics",
     bestFor: "Understanding how assets, liabilities, and equity relate.",
@@ -22,6 +24,7 @@ export const tools: Tool[] = [
   {
     slug: "debit-credit-checker",
     name: "Debit/Credit Checker",
+    emoji: "\u{1F501}",
     description: "Practice whether common account changes should be recorded as debits or credits.",
     category: "Accounting Basics",
     bestFor: "Learning normal balances and basic journal entry direction.",
@@ -31,6 +34,7 @@ export const tools: Tool[] = [
   {
     slug: "financial-ratio-calculator",
     name: "Financial Ratio Calculator",
+    emoji: "\u{1F4CA}",
     description: "Calculate beginner-friendly liquidity, profitability, and solvency ratios.",
     category: "Financial Analysis",
     bestFor: "Reviewing financial statement performance and position.",
@@ -40,6 +44,7 @@ export const tools: Tool[] = [
   {
     slug: "depreciation-calculator",
     name: "Depreciation Calculator",
+    emoji: "\u{1F4C9}",
     description: "Calculate straight-line depreciation from cost, salvage value, and useful life.",
     category: "Depreciation & Adjustments",
     bestFor: "Understanding asset cost allocation over time.",
@@ -49,6 +54,7 @@ export const tools: Tool[] = [
   {
     slug: "break-even-calculator",
     name: "Break-even Calculator",
+    emoji: "\u{1F3AF}",
     description:
       "Calculate contribution margin, break-even units, and break-even sales for a simple business scenario.",
     category: "Business Planning",
@@ -59,6 +65,7 @@ export const tools: Tool[] = [
   {
     slug: "cash-flow-calculator",
     name: "Cash Flow Calculator",
+    emoji: "\u{1F4B5}",
     description:
       "Calculate net cash flow and ending cash balance from cash inflows and outflows.",
     category: "Business Planning",
@@ -69,6 +76,7 @@ export const tools: Tool[] = [
   {
     slug: "invoice-generator",
     name: "Invoice Generator",
+    emoji: "\u{1F4C4}",
     description:
       "Create a simple PDF invoice with business details, customer details, line items, optional SST/tax, and totals.",
     category: "Business Documents",
@@ -79,6 +87,7 @@ export const tools: Tool[] = [
   {
     slug: "sst-calculator-malaysia",
     name: "SST Calculator Malaysia",
+    emoji: "\u{1F9FE}",
     description:
       "Estimate Malaysian SST amount, total including SST, or amount before SST using a selected rate.",
     category: "Malaysia Tax Tools",
@@ -89,6 +98,7 @@ export const tools: Tool[] = [
   {
     slug: "journal-entry-checker",
     name: "Journal Entry Checker",
+    emoji: "\u{1F9EE}",
     description:
       "Total debits and credits to check whether a basic journal entry balances.",
     category: "Accounting Basics",

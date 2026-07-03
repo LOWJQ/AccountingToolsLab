@@ -20,6 +20,7 @@ export const DEFAULT_INVOICE_DISCOUNT: InvoiceDiscount = {
 };
 
 export type InvoiceTax = {
+  id: string;
   enabled: boolean;
   label: string;
   type: "percentage" | "fixed";
@@ -27,6 +28,7 @@ export type InvoiceTax = {
 };
 
 export const DEFAULT_INVOICE_TAX: InvoiceTax = {
+  id: "tax-1",
   enabled: false,
   label: "Tax",
   type: "percentage",
@@ -81,7 +83,7 @@ export type InvoiceData = {
   currency: string;
   items: InvoiceLineItem[];
   discount: InvoiceDiscount;
-  tax: InvoiceTax;
+  tax: InvoiceTax[];
   shipping?: InvoiceShipping;
   payment: InvoicePaymentDetails;
   notes: string;

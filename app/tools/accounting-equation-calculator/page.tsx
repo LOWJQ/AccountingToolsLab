@@ -3,11 +3,18 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
-import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import {
+  ArrowRight,
+  Check,
+  CircleDollarSign,
+  FileText,
+  Grid2X2,
+  Table2
+} from "lucide-react";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Accounting Equation Calculator | Assets, Liabilities and Equity",
@@ -24,18 +31,15 @@ const accountingEquationFaqs = [
   },
   {
     question: "How do you calculate assets?",
-    answer:
-      "Add liabilities and equity together. Assets = Liabilities + Equity."
+    answer: "Add liabilities and equity together. Assets = Liabilities + Equity."
   },
   {
     question: "How do you calculate liabilities?",
-    answer:
-      "Subtract equity from assets. Liabilities = Assets - Equity."
+    answer: "Subtract equity from assets. Liabilities = Assets - Equity."
   },
   {
     question: "How do you calculate equity?",
-    answer:
-      "Subtract liabilities from assets. Equity = Assets - Liabilities."
+    answer: "Subtract liabilities from assets. Equity = Assets - Liabilities."
   },
   {
     question: "Can this calculator help with accounting homework?",
@@ -46,6 +50,52 @@ const accountingEquationFaqs = [
     question: "Why must the accounting equation balance?",
     answer:
       "It balances because every business resource is funded either by amounts owed to others or by the owner's claim."
+  }
+];
+
+const equationSteps = [
+  "Select Assets, Liabilities, or Equity at the top of the calculator.",
+  "Enter the two known amounts shown for that selection.",
+  "Review the instant result and formula summary below the inputs.",
+  "Reset the fields anytime to start a new calculation."
+];
+
+const equationBenefits = [
+  "Instantly solve for assets, liabilities, or equity.",
+  "Useful for homework help and accounting practice.",
+  "Helps verify calculations and balance accuracy.",
+  "Shows how the accounting equation works.",
+  "Quick financial review for any business or project."
+];
+
+const whenToUseItems = [
+  "Check homework answers for assets, liabilities, and equity questions.",
+  "Practice basic accounting equation exercises and rearranged formulas.",
+  "Review simple business balance checks before preparing a balance sheet.",
+  "Learn how assets, liabilities, and equity relationships work in accounting.",
+  "Do a quick financial review when you need to calculate assets, liabilities, or equity."
+];
+
+const relatedTools = [
+  {
+    href: "/tools/trial-balance-calculator",
+    icon: Table2,
+    label: "Trial Balance Calculator"
+  },
+  {
+    href: "/tools/cash-flow-calculator",
+    icon: CircleDollarSign,
+    label: "Cash Flow Calculator"
+  },
+  {
+    href: "/tools/invoice-generator",
+    icon: FileText,
+    label: "Create a PDF Invoice"
+  },
+  {
+    href: "/tools",
+    icon: Grid2X2,
+    label: "All Tools"
   }
 ];
 
@@ -67,109 +117,137 @@ export default function AccountingEquationCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={accountingEquationFaqs} />
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link className="transition hover:text-slate-900" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li>
+            <Link className="transition hover:text-slate-900" href="/tools">
+              Tools
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li className="font-medium text-slate-700">Accounting Equation Calculator</li>
+        </ol>
+      </nav>
+
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Accounting Equation Calculator
         </h1>
-        <p className="mt-3 text-base leading-7 text-stone-600">
+        <p className="mt-3 text-base leading-7 text-black">
           Solve for assets, liabilities, or equity using the basic accounting equation: Assets =
           Liabilities + Equity.
         </p>
       </div>
+
       <AccountingEquationCalculator />
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Solve the accounting equation in a few steps
-        </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Use this accounting equation calculator to choose whether you want to calculate assets,
-            calculate liabilities, or calculate equity. After that, enter the two known values and
-            the tool solves the missing part of the basic accounting equation for you.
-          </p>
-          <p>→ Select `Assets`, `Liabilities`, or `Equity` at the top of the calculator.</p>
-          <p>→ Enter the two known amounts shown for that selection.</p>
-          <p>→ Review the instant result and formula summary below the inputs.</p>
-          <p>→ Reset the fields anytime to start a new accounting equation calculation.</p>
+
+      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
+        <div className="lg:pr-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Solve the accounting equation in a few steps
+          </h2>
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
+            {equationSteps.map((step) => (
+              <li className="pl-2" key={step}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Why use this accounting equation calculator?
+          </h2>
+          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+            {equationBenefits.map((benefit) => (
+              <li className="flex items-start gap-3" key={benefit}>
+                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Understand assets, liabilities, and equity
-        </h2>
-        <div className="mt-4 space-y-4 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            The basic accounting equation is `Assets = Liabilities + Equity`. It shows that
-            everything a business owns is funded either by money it owes or by the owner&apos;s
-            interest in the business.
-          </p>
-          <p>
-            Assets are the resources a business controls, such as cash, inventory, equipment, or
-            receivables. Liabilities are obligations like loans, payables, or other amounts owed.
-            Equity is the remaining value after liabilities are taken away from assets.
-          </p>
-          <p>
-            That is why you can also calculate equity as `Assets - Liabilities`. In the same way,
-            you can rearrange the equation to calculate assets or calculate liabilities depending on
-            which two values you already know.
-          </p>
-        </div>
-      </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
           When to use this accounting equation calculator
         </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>→ Check homework answers for assets, liabilities, and equity questions.</p>
-          <p>→ Practice basic accounting equation exercises and rearranged formulas.</p>
-          <p>→ Review simple business balance checks before preparing a balance sheet.</p>
-          <p>→ Learn how assets liabilities equity relationships work in accounting.</p>
-          <p>→ Do a quick financial review when you need to calculate assets, liabilities, or equity.</p>
-        </div>
+        <ul className="mt-5 list-disc space-y-2 pl-5 text-base leading-7 text-black">
+          {whenToUseItems.map((item) => (
+            <li className="pl-1" key={item}>
+              {item}
+            </li>
+          ))}
+        </ul>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Connect the accounting equation with other accounting tools
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Tools
         </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          After using this accounting equation calculator, you can continue with related tools to
-          check balances, review business performance, understand cash movement, or create simple
-          documents for day-to-day operations.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-            Trial Balance Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-            Financial Ratio Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/invoice-generator" variant="secondary">
-            Free Invoice Generator Malaysia
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {relatedTools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                href={tool.href}
+                key={tool.href}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
+                <span className="min-w-0 flex-1">{tool.label}</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
-      <RelatedGuideArticleSection
-        articles={[
-          {
-            description:
-              "Learn debit and credit rules, normal balances, beginner examples, and how account changes connect with basic accounting logic.",
-            href: "/guides/debit-vs-credit",
-            label: "Accounting basics guide",
-            title: "Debit vs Credit"
-          }
-        ]}
-        toolName="Accounting Equation Calculator"
-      />
-      <FAQSection
-        faqs={accountingEquationFaqs}
-        title="Accounting Equation Calculator FAQs"
-      />
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Guide Article
+        </h2>
+        <Link
+          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          href="/guides/debit-vs-credit"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-medium leading-7 text-black">Accounting basics guide</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Debit vs Credit
+            </h3>
+            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
+              Learn debit and credit rules, normal balances, beginner examples, and how account
+              changes connect with basic accounting logic.
+            </p>
+          </div>
+          <ArrowRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+          />
+        </Link>
+      </section>
+
+      <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
+        <FAQSection
+          eyebrow=""
+          faqs={accountingEquationFaqs}
+          title="Accounting Equation Calculator FAQs"
+        />
+      </section>
+
     </ToolPageLayout>
   );
 }

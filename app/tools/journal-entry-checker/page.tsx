@@ -3,11 +3,11 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
-import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import { ArrowRight, BarChart3, Check, Grid2X2, ListChecks, Scale, Table2 } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Journal Entry Checker | Check Debits and Credits",
@@ -24,8 +24,7 @@ const journalEntryFaqs = [
   },
   {
     question: "How do I know if a journal entry balances?",
-    answer:
-      "A journal entry balances when total debit amounts equal total credit amounts."
+    answer: "A journal entry balances when total debit amounts equal total credit amounts."
   },
   {
     question: "Does a balanced journal entry mean it is correct?",
@@ -49,6 +48,56 @@ const journalEntryFaqs = [
   }
 ];
 
+const journalEntrySteps = [
+  "Enter the account name for each journal entry line.",
+  "Fill in the debit amount or the credit amount for that line.",
+  "Add more lines when the transaction needs multiple accounts.",
+  "Review the total debits and credits, difference, and status instantly."
+];
+
+const journalEntryBenefits = [
+  "Quickly confirm that total debits equal total credits.",
+  "Catch math errors before posting to your books.",
+  "Practice double-entry accounting with simple examples.",
+  "Useful for homework, bookkeeping reviews, and exam prep."
+];
+
+const whenToUseItems = [
+  "Check accounting homework that requires total debits and credits to balance.",
+  "Review bookkeeping entries before posting them to accounts.",
+  "Practice double-entry accounting with simple transaction examples.",
+  "Recheck debit and credit totals when an entry looks incomplete or uneven.",
+  "Find entry mistakes such as missing values or unbalanced lines."
+];
+
+const relatedTools = [
+  {
+    href: "/tools/debit-credit-checker",
+    icon: Scale,
+    label: "Debit/Credit Checker"
+  },
+  {
+    href: "/tools/trial-balance-calculator",
+    icon: Table2,
+    label: "Trial Balance Calculator"
+  },
+  {
+    href: "/tools/accounting-equation-calculator",
+    icon: ListChecks,
+    label: "Accounting Equation Calculator"
+  },
+  {
+    href: "/tools/financial-ratio-calculator",
+    icon: BarChart3,
+    label: "Financial Ratio Calculator"
+  },
+  {
+    href: "/tools",
+    icon: Grid2X2,
+    label: "All Tools"
+  }
+];
+
 export default function JournalEntryCheckerPage() {
   const pageUrl = `${siteConfig.url}/tools/journal-entry-checker`;
 
@@ -67,105 +116,134 @@ export default function JournalEntryCheckerPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={journalEntryFaqs} />
-      <div className="max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link className="transition hover:text-slate-900" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li>
+            <Link className="transition hover:text-slate-900" href="/tools">
+              Tools
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li className="font-medium text-slate-700">Journal Entry Checker</li>
+        </ol>
+      </nav>
+
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Journal Entry Checker
         </h1>
-        <p className="mt-3 text-base leading-7 text-stone-600">
-          Enter debit and credit lines to check whether total debits equal total credits in a
-          basic journal entry.
+        <p className="mt-3 text-base leading-7 text-black">
+          Enter debit and credit lines to check whether total debits equal total credits in a basic
+          journal entry.
         </p>
       </div>
+
       <JournalEntryChecker />
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Check journal entries in a few steps
-        </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Use this journal entry checker to enter account names, debit amounts, and credit
-            amounts, then review whether total debits and credits balance in a basic double-entry
-            accounting entry.
-          </p>
-          <p>→ Enter the account name for each journal entry line.</p>
-          <p>→ Fill in the debit amount or the credit amount for that line.</p>
-          <p>→ Add more lines when the transaction needs multiple accounts.</p>
-          <p>→ Review the total debits and credits, difference, and status instantly.</p>
+
+      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
+        <div className="lg:pr-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Check journal entries in a few steps
+          </h2>
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
+            {journalEntrySteps.map((step) => (
+              <li className="pl-2" key={step}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Why use this journal entry checker?
+          </h2>
+          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+            {journalEntryBenefits.map((benefit) => (
+              <li className="flex items-start gap-3" key={benefit}>
+                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Understand balanced journal entries
-        </h2>
-        <div className="mt-4 space-y-4 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            A journal entry is balanced when total debits equal total credits. This is a core rule
-            of double-entry accounting because each transaction records equal value on both sides of
-            the entry.
-          </p>
-          <p>
-            A balanced journal entry checks the math, but it does not always confirm that the
-            correct accounts were used. An entry can balance and still contain the wrong account
-            choice or incorrect debit and credit treatment.
-          </p>
-          <p>
-            That is why a journal entry balance check is helpful for reviewing totals first, then
-            following up with a debit and credit checker or other accounting review when needed.
-          </p>
-        </div>
-      </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
           When to use this journal entry checker
         </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>→ Check accounting homework that requires total debits and credits to balance.</p>
-          <p>→ Review bookkeeping entries before posting them to accounts.</p>
-          <p>→ Practice double-entry accounting with simple transaction examples.</p>
-          <p>→ Recheck debit and credit totals when an entry looks incomplete or uneven.</p>
-          <p>→ Find entry mistakes such as missing values or unbalanced lines.</p>
-        </div>
+        <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+          {whenToUseItems.map((item) => (
+            <li className="flex items-start gap-3" key={item}>
+              <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Connect journal entry checks with other accounting tools
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Tools
         </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          After using this journal entry checker, you can continue with related tools to confirm
-          debit and credit direction, review trial balance totals, connect entries to the accounting
-          equation, and explore broader financial analysis.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/debit-credit-checker" variant="secondary">
-            Debit/Credit Checker
-          </ButtonLink>
-          <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-            Trial Balance Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/accounting-equation-calculator" variant="secondary">
-            Accounting Equation Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-            Financial Ratio Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {relatedTools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                href={tool.href}
+                key={tool.href}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
+                <span className="min-w-0 flex-1">{tool.label}</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
-      <RelatedGuideArticleSection
-        articles={[
-          {
-            description:
-              "Learn how journal entries work with simple debit and credit examples, common mistakes, and a step-by-step beginner checklist.",
-            href: "/guides/journal-entries-for-beginners",
-            label: "Journal entry guide",
-            title: "Journal Entries for Beginners"
-          }
-        ]}
-        toolName="Journal Entry Checker"
-      />
-      <FAQSection faqs={journalEntryFaqs} title="Journal Entry Checker FAQs" />
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Guide Article
+        </h2>
+        <Link
+          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          href="/guides/journal-entries-for-beginners"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-medium leading-7 text-black">Journal entry guide</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Journal Entries for Beginners
+            </h3>
+            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
+              Learn how journal entries work with simple debit and credit examples, common
+              mistakes, and a step-by-step beginner checklist.
+            </p>
+          </div>
+          <ArrowRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+          />
+        </Link>
+      </section>
+
+      <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
+        <FAQSection eyebrow="FAQ" faqs={journalEntryFaqs} title="Journal Entry Checker FAQs" />
+      </section>
     </ToolPageLayout>
   );
 }

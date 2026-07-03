@@ -16,11 +16,12 @@ function test(name: string, run: () => void) {
   console.log(`PASS ${name}`);
 }
 
+type InvoiceTaxOverride = Partial<InvoiceData["tax"][number]>;
 type InvoiceTestOverrides = Partial<Omit<InvoiceData, "discount" | "payment" | "shipping" | "tax">> & {
   discount?: Partial<InvoiceData["discount"]>;
   payment?: Partial<InvoiceData["payment"]>;
   shipping?: Partial<InvoiceData["shipping"]>;
-  tax?: Partial<InvoiceData["tax"]>;
+  tax?: InvoiceTaxOverride | InvoiceTaxOverride[];
 };
 
 function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
@@ -49,12 +50,7 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
       type: "percentage",
       value: "0"
     },
-    tax: {
-      enabled: false,
-      label: "Tax",
-      type: "percentage",
-      value: "0"
-    },
+    tax: [],
     shipping: {
       enabled: false,
       label: "Shipping",
@@ -72,6 +68,11 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     terms: ""
   };
   const baseShipping = baseInvoice.shipping ?? { enabled: false, label: "Shipping", amount: "0" };
+  const taxOverrides = overrides.tax
+    ? Array.isArray(overrides.tax)
+      ? overrides.tax
+      : [overrides.tax]
+    : undefined;
 
   return {
     ...baseInvoice,
@@ -80,10 +81,16 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
       ...baseInvoice.discount,
       ...overrides.discount
     },
-    tax: {
-      ...baseInvoice.tax,
-      ...overrides.tax
-    },
+    tax: taxOverrides
+      ? taxOverrides.map((tax, index) => ({
+          id: `tax-${index + 1}`,
+          enabled: false,
+          label: "Tax",
+          type: "percentage" as const,
+          value: "0",
+          ...tax
+        }))
+      : baseInvoice.tax,
     shipping: {
       enabled: overrides.shipping?.enabled ?? baseShipping.enabled,
       label: overrides.shipping?.label ?? baseShipping.label,
@@ -113,6 +120,7 @@ test("calculates no tax and no discount", () => {
     discountAmount: 0,
     taxableAmount: 200,
     taxAmount: 0,
+    taxLines: [],
     shippingAmount: 0,
     total: 200
   });
@@ -128,6 +136,33 @@ test("calculates tax enabled and no discount", () => {
   assert.equal(result.taxableAmount, 200);
   assert.equal(result.taxAmount, 12);
   assert.equal(result.total, 212);
+});
+
+test("calculates multiple percentage and fixed tax rows", () => {
+  const result = calculateInvoiceTotals(
+    createInvoice({
+      tax: [
+        { enabled: true, label: "SST", type: "percentage", value: "6" },
+        { enabled: true, label: "Service tax", type: "percentage", value: "2" },
+        { enabled: true, label: "Additional tax", type: "fixed", value: "5" }
+      ]
+    })
+  );
+
+  assert.equal(result.taxAmount, 21);
+  assert.deepEqual(
+    result.taxLines.map((taxLine) => ({
+      label: taxLine.label,
+      type: taxLine.type,
+      amount: taxLine.amount
+    })),
+    [
+      { label: "SST", type: "percentage", amount: 12 },
+      { label: "Service tax", type: "percentage", amount: 4 },
+      { label: "Additional tax", type: "fixed", amount: 5 }
+    ]
+  );
+  assert.equal(result.total, 221);
 });
 
 test("calculates 10 percent discount before tax", () => {
@@ -268,7 +303,7 @@ test("invalid numeric values do not produce NaN", () => {
     })
   );
 
-  Object.values(result).forEach((value) => {
+  Object.values(result).filter((value) => typeof value === "number").forEach((value) => {
     assert.equal(Number.isNaN(value), false);
     assert.equal(Number.isFinite(value), true);
   });

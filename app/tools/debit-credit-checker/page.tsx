@@ -3,11 +3,11 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
-import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import { ArrowRight, Check, CircleDollarSign, FileText, Grid2X2, Scale, Table2 } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Debit/Credit Checker | Know Whether to Debit or Credit",
@@ -34,18 +34,67 @@ const debitCreditFaqs = [
   },
   {
     question: "Which accounts increase with debits?",
-    answer:
-      "Assets, expenses, and dividends or drawings increase with debits."
+    answer: "Assets, expenses, and dividends or drawings increase with debits."
   },
   {
     question: "Which accounts increase with credits?",
-    answer:
-      "Liabilities, equity, and revenue increase with credits."
+    answer: "Liabilities, equity, and revenue increase with credits."
   },
   {
     question: "Can this checker help with accounting homework?",
     answer:
       "Yes. It can help you check the direction of an account change, but you should still explain your reasoning."
+  }
+];
+
+const checkerSteps = [
+  "Select the account type you want to review.",
+  "Choose whether the account is increasing or decreasing.",
+  "See whether you should debit or credit the account.",
+  "Review the short explanation and normal balance shown with the result."
+];
+
+const checkerBenefits = [
+  "Quickly check whether to debit or credit an account.",
+  "Helps with homework and journal entry practice.",
+  "Clarifies normal balance and account direction rules.",
+  "Useful before moving on to journal entry or trial balance work.",
+  "Helps reduce beginner mistakes in double-entry accounting."
+];
+
+const whenToUseItems = [
+  "Check accounting homework when you need to confirm debit or credit treatment.",
+  "Practice journal entry logic before writing a full transaction.",
+  "Review bookkeeping changes and make sure the account direction is correct.",
+  "Learn the patterns behind double-entry accounting in a simple way.",
+  "Recheck transaction treatment before moving on to a journal entry checker or trial balance."
+];
+
+const relatedTools = [
+  {
+    href: "/tools/accounting-equation-calculator",
+    icon: Scale,
+    label: "Accounting Equation Calculator"
+  },
+  {
+    href: "/tools/trial-balance-calculator",
+    icon: Table2,
+    label: "Trial Balance Calculator"
+  },
+  {
+    href: "/tools/invoice-generator",
+    icon: FileText,
+    label: "Create a PDF Invoice"
+  },
+  {
+    href: "/tools/cash-flow-calculator",
+    icon: CircleDollarSign,
+    label: "Cash Flow Calculator"
+  },
+  {
+    href: "/tools",
+    icon: Grid2X2,
+    label: "All Tools"
   }
 ];
 
@@ -67,105 +116,133 @@ export default function DebitCreditCheckerPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={debitCreditFaqs} />
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link className="transition hover:text-slate-900" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li>
+            <Link className="transition hover:text-slate-900" href="/tools">
+              Tools
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li className="font-medium text-slate-700">Debit/Credit Checker</li>
+        </ol>
+      </nav>
+
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Debit/Credit Checker
         </h1>
-        <p className="mt-3 text-base leading-7 text-stone-600">
+        <p className="mt-3 text-base leading-7 text-black">
           Choose an account type and whether it increases or decreases to see whether you should
           debit or credit the account.
         </p>
       </div>
+
       <DebitCreditChecker />
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Check debit or credit treatment in a few steps
-        </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Use this debit credit checker when you need a quick way to see whether to debit or
-            credit account changes. Choose the account type, decide whether the account increases
-            or decreases, and the tool shows the treatment immediately.
-          </p>
-          <p>→ Select the account type you want to review.</p>
-          <p>→ Choose whether the account is increasing or decreasing.</p>
-          <p>→ See whether you should debit or credit the account.</p>
-          <p>→ Review the short explanation and normal balance shown with the result.</p>
+
+      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
+        <div className="lg:pr-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Check debit or credit treatment in a few steps
+          </h2>
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
+            {checkerSteps.map((step) => (
+              <li className="pl-2" key={step}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Why use this debit/credit checker?
+          </h2>
+          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+            {checkerBenefits.map((benefit) => (
+              <li className="flex items-start gap-3" key={benefit}>
+                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Understand debit and credit rules
-        </h2>
-        <div className="mt-4 space-y-4 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Basic accounting debit and credit rules become easier when you focus on account type.
-            Assets and expenses usually increase with a debit. Liabilities, equity, and income
-            usually increase with a credit.
-          </p>
-          <p>
-            The opposite side usually decreases the account. That means a credit often reduces an
-            asset or expense, while a debit often reduces a liability, equity, or income account.
-          </p>
-          <p>
-            This is why a debit or credit account decision depends on what kind of account you are
-            working with, not just whether the number is going up or down. That same logic supports
-            journal entries and double-entry accounting.
-          </p>
-        </div>
-      </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
           When to use this debit and credit checker
         </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>→ Check accounting homework when you need to confirm debit or credit treatment.</p>
-          <p>→ Practice journal entry logic before writing a full transaction.</p>
-          <p>→ Review bookkeeping changes and make sure the account direction is correct.</p>
-          <p>→ Learn the patterns behind double-entry accounting in a simple way.</p>
-          <p>→ Recheck transaction treatment before moving on to a journal entry checker or trial balance.</p>
-        </div>
+        <ul className="mt-5 list-disc space-y-2 pl-5 text-base leading-7 text-black">
+          {whenToUseItems.map((item) => (
+            <li className="pl-1" key={item}>
+              {item}
+            </li>
+          ))}
+        </ul>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Connect debit and credit checks with other accounting tools
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Tools
         </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          After using this debit credit checker, you can continue with other tools to connect
-          account direction with equation checks, balance reviews, cash analysis, and simple
-          business documents.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/accounting-equation-calculator" variant="secondary">
-            Accounting Equation Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-            Trial Balance Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/invoice-generator" variant="secondary">
-            Free Invoice Generator Malaysia
-          </ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {relatedTools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                href={tool.href}
+                key={tool.href}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
+                <span className="min-w-0 flex-1">{tool.label}</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
-      <RelatedGuideArticleSection
-        articles={[
-          {
-            description:
-              "Learn debit and credit rules, normal balances, beginner examples, and how to know whether to debit or credit an account.",
-            href: "/guides/debit-vs-credit",
-            label: "Debit and credit guide",
-            title: "Debit vs Credit"
-          }
-        ]}
-        toolName="Debit/Credit Checker"
-      />
-      <FAQSection faqs={debitCreditFaqs} title="Debit/Credit Checker FAQs" />
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Guide Article
+        </h2>
+        <Link
+          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          href="/guides/debit-vs-credit"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-medium leading-7 text-black">Debit and credit guide</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Debit vs Credit
+            </h3>
+            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
+              Learn debit and credit rules, normal balances, beginner examples, and how to know
+              whether to debit or credit an account.
+            </p>
+          </div>
+          <ArrowRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+          />
+        </Link>
+      </section>
+
+      <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
+        <FAQSection eyebrow="" faqs={debitCreditFaqs} title="Debit/Credit Checker FAQs" />
+      </section>
     </ToolPageLayout>
   );
 }

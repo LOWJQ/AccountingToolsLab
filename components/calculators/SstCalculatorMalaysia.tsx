@@ -1,10 +1,16 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { Check, ChevronDown, RefreshCcw } from "lucide-react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode
+} from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { ButtonLink } from "@/components/ui/ButtonLink";
-import { Card } from "@/components/ui/Card";
 import { formatCurrency as formatCurrencyValue } from "@/lib/currency";
 import {
   calculateSstInvoiceMalaysia,
@@ -26,7 +32,7 @@ type DropdownGroup<T extends string> = {
 };
 
 const inputClassName =
-  "h-12 w-full min-w-0 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100";
+  "h-11 w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-4 focus:ring-slate-100";
 
 const groupedCategories = [
   {
@@ -47,18 +53,11 @@ const categoryDropdownGroups: Array<DropdownGroup<SstCategoryId>> = groupedCateg
   (group) => ({
     label: group.label,
     options: group.categories.map((category) => ({
-      label: category.label,
+      label: getCategorySelectLabel(category),
       value: category.id
     }))
   })
 );
-
-const mistakes = [
-  "Confirm whether your entered amount is before SST or already includes SST.",
-  "Check the taxable category before using a suggested rate for invoicing or filing.",
-  "Use special fixed-amount categories carefully because they are not normal percentage SST.",
-  "Treat this tool as an estimate, not official tax advice."
-];
 
 function parseAmount(value: string): number | null {
   if (value.trim() === "") {
@@ -81,8 +80,20 @@ function shouldUseManualRate(category: SstMalaysiaCategory): boolean {
   return category.rateType === "manual";
 }
 
+function getCategorySelectLabel(category: SstMalaysiaCategory): string {
+  if (category.rateType === "fixed") {
+    return `${category.label} (RM ${category.fixedAmount?.toFixed(0)} fixed)`;
+  }
+
+  if (category.rateType === "percentage") {
+    return `${category.label} (${category.suggestedRatePercent}%)`;
+  }
+
+  return category.label;
+}
+
 function formatPercent(value: number | null): string {
-  return value === null ? "-" : `${value.toFixed(2)}%`;
+  return value === null ? "-" : `${Number.isInteger(value) ? value.toFixed(0) : value.toFixed(2)}%`;
 }
 
 function formatRateSummary(
@@ -159,187 +170,88 @@ export function SstCalculatorMalaysia() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-      <section className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-        <Card className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="flex flex-col gap-6">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-                SST Calculator Malaysia
-              </h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-stone-600 sm:text-base">
-                Estimate SST amounts quickly for Malaysia business checks.
-              </p>
-            </div>
+    <section
+      aria-labelledby="sst-calculator-heading"
+      className="mx-auto w-full max-w-6xl overflow-visible rounded-lg border border-slate-200 bg-white"
+    >
+      <h2 className="sr-only" id="sst-calculator-heading">
+        SST calculator inputs and results
+      </h2>
 
-            <ModeSelect mode={mode} onModeChange={setMode} />
+      <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] md:p-6">
+        <ModeSelect mode={mode} onModeChange={setMode} />
 
-            <label className="grid gap-2" htmlFor="sst-amount">
-              <span className="text-sm font-semibold text-stone-800">
-                {mode === "add" ? "Amount before SST" : "Amount including SST"}
-              </span>
-              <input
-                className={inputClassName}
-                id="sst-amount"
-                inputMode="decimal"
-                min="0"
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder={mode === "add" ? "1000" : "1080"}
-                step="0.01"
-                type="number"
-                value={amount}
-              />
-            </label>
+        <CategorySelect
+          categoryId={categoryId}
+          id="sst-category"
+          label="Product or service category"
+          onChange={(nextCategoryId) => {
+            setCategoryId(nextCategoryId);
+            setManualRate("");
+          }}
+        />
 
-            <CategorySelect
-              categoryId={categoryId}
-              describedBy={manualRateEnabled ? undefined : "sst-category-note"}
-              id="sst-category"
-              label="Product or service category"
-              onChange={(nextCategoryId) => {
-                setCategoryId(nextCategoryId);
-                setManualRate("");
-              }}
+        <label className="grid min-w-0 gap-2" htmlFor="sst-amount">
+          <span className="text-xs font-medium text-slate-600">
+            {mode === "add" ? "Amount before SST" : "Amount including SST"}
+          </span>
+          <span className="flex h-11 min-w-0 overflow-hidden rounded-lg border border-stone-300 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
+            <span className="flex h-full items-center border-r border-stone-200 bg-slate-50 px-3 text-sm font-medium text-slate-500">
+              {currency}
+            </span>
+            <input
+              className="h-full min-w-0 flex-1 border-0 bg-white px-3 text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400"
+              id="sst-amount"
+              inputMode="decimal"
+              min="0"
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder={mode === "add" ? "1000" : "1080"}
+              step="0.01"
+              type="number"
+              value={amount}
             />
+          </span>
+        </label>
 
-            <ManualRateControls
-              idPrefix="sst"
-              manualRate={manualRate}
-              manualRateEnabled={manualRateEnabled}
-              onManualRateChange={setManualRate}
-            />
+        <ManualRateControls
+          idPrefix="sst"
+          manualRate={manualRate}
+          manualRateEnabled={manualRateEnabled}
+          onManualRateChange={setManualRate}
+        />
+      </div>
 
-            <div className="flex flex-wrap gap-3">
+      <div
+        aria-live="polite"
+        className="border-t border-slate-200 p-5 md:p-6"
+      >
+        {line ? (
+          <div className="grid gap-5 md:grid-cols-3">
+            <ResultStat label="SST amount" value={formatCurrency(line.sstAmount)}>
               <button
-                className="inline-flex h-11 items-center justify-center rounded-2xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
+                className="mt-5 inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
                 onClick={resetCalculator}
                 type="button"
               >
+                <RefreshCcw aria-hidden="true" className="h-4 w-4" />
                 Reset
               </button>
-            </div>
+            </ResultStat>
+            <ResultStat
+              label={mode === "add" ? "Total including SST" : "Amount before SST"}
+              value={
+                mode === "add"
+                  ? formatCurrency(line.totalIncludingSst)
+                  : formatCurrency(line.amountBeforeSst)
+              }
+            />
+            <ResultStat label="SST rate" value={formatRateSummary(line)} />
           </div>
-        </Card>
-
-        <Card
-          aria-live="polite"
-          className="rounded-[1.5rem] border-stone-200 bg-white p-6 shadow-sm sm:p-8"
-        >
-          <p className="text-xs font-medium uppercase tracking-[0.24em] text-stone-500">Result</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            {mode === "add" ? "Add SST estimate" : "Remove SST estimate"}
-          </h2>
-
-          {line ? (
-            <div className="mt-6 grid gap-4">
-              <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5 sm:p-6">
-                <p className="text-sm font-medium text-stone-600">
-                  {mode === "add" ? "Total including SST" : "Amount before SST"}
-                </p>
-                <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
-                  {mode === "add"
-                    ? formatCurrency(line.totalIncludingSst)
-                    : formatCurrency(line.amountBeforeSst)}
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <ResultStat label="SST rate" value={formatRateSummary(line)} />
-                <ResultStat
-                  accent
-                  label="SST amount"
-                  value={formatCurrency(line.sstAmount)}
-                />
-              </div>
-
-              <ResultStat
-                label={mode === "add" ? "Amount before SST" : "Total including SST"}
-                value={
-                  mode === "add"
-                    ? formatCurrency(line.amountBeforeSst)
-                    : formatCurrency(line.totalIncludingSst)
-                }
-              />
-            </div>
-          ) : (
-            <p className="mt-4 text-sm leading-6 text-stone-600">{calculation.message}</p>
-          )}
-        </Card>
-      </section>
-
-      <section className="border-t border-stone-200 pt-8">
-        <div>
-          <p className="text-sm font-medium tracking-wide text-slate-500">How it works</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Calculate SST with add and remove formulas
-          </h2>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-stone-400">
-                {"\u2192"}
-              </span>
-              <span>Add SST: total including SST = amount before SST + SST amount</span>
-            </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-stone-400">
-                {"\u2192"}
-              </span>
-              <span>Remove SST: amount before SST = amount including SST / (1 + SST rate)</span>
-            </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-stone-400">
-                {"\u2192"}
-              </span>
-              <span>
-                Special fixed SST categories are shown separately and do not use a percentage
-                formula.
-              </span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="mt-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Checks to make</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Before you rely on the estimate
-          </h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 sm:text-base">
-            {mistakes.map((mistake) => (
-              <li className="flex gap-3" key={mistake}>
-                <span aria-hidden="true" className="text-stone-400">
-                  {"\u2192"}
-                </span>
-                <span>{mistake}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="border-t border-stone-200 pt-8">
-        <div>
-          <p className="text-sm font-medium tracking-wide text-slate-500">Related tools</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Keep your records and estimates aligned
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-            Pair this SST estimate with your invoice, cash flow, and ratio checks.
-          </p>
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/invoice-generator">Create a PDF Invoice</ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/financial-ratio-calculator" variant="secondary">
-            Financial Ratio Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
-        </div>
-      </section>
-    </div>
+        ) : (
+          <p className="text-sm leading-6 text-slate-600">{calculation.message}</p>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -356,8 +268,8 @@ function ModeSelect({
       label="Calculation mode"
       onChange={onModeChange}
       options={[
-        { label: "Add SST", value: "add" },
-        { label: "Remove SST", value: "remove" }
+        { label: "Add SST (Amount before SST to Total including SST)", value: "add" },
+        { label: "Remove SST (Total including SST to Amount before SST)", value: "remove" }
       ]}
       value={mode}
     />
@@ -531,7 +443,7 @@ function DropdownSelect<T extends string>({
 
   return (
     <div className="relative grid min-w-0 gap-2" ref={rootRef}>
-      <span className="text-sm font-semibold text-stone-800" id={labelId}>
+      <span className="text-xs font-medium text-slate-600" id={labelId}>
         {label}
       </span>
       <button
@@ -540,7 +452,7 @@ function DropdownSelect<T extends string>({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-labelledby={`${labelId} ${buttonId}`}
-        className="inline-flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className="inline-flex h-11 w-full min-w-0 items-center justify-between gap-3 overflow-hidden rounded-lg border border-stone-300 bg-white px-3 text-left text-sm font-semibold text-slate-950 transition hover:border-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100"
         id={buttonId}
         onClick={() => {
           setActiveIndex(selectedIndex);
@@ -550,7 +462,9 @@ function DropdownSelect<T extends string>({
         ref={buttonRef}
         type="button"
       >
-        <span className="min-w-0 truncate">{selectedOption?.label ?? "Select"}</span>
+        <span className="block min-w-0 flex-1 overflow-hidden truncate whitespace-nowrap">
+          {selectedOption?.label ?? "Select"}
+        </span>
         <ChevronDown
           aria-hidden="true"
           className={`h-4 w-4 shrink-0 text-stone-500 transition ${isOpen ? "rotate-180" : ""}`}
@@ -559,14 +473,14 @@ function DropdownSelect<T extends string>({
 
       {isOpen ? (
         <div
-          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-2xl border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
+          className="absolute left-0 top-full z-40 mt-2 max-h-72 w-full min-w-full overflow-y-auto rounded-lg border border-stone-200 bg-white py-1.5 shadow-lg shadow-stone-200/60"
           id={listboxId}
           role="listbox"
         >
           {normalizedGroups.map((group) => (
             <div key={group.label ?? "options"}>
               {group.label ? (
-                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-stone-400">
+                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
                   {group.label}
                 </p>
               ) : null}
@@ -581,8 +495,8 @@ function DropdownSelect<T extends string>({
                     aria-selected={isSelected}
                     className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition ${
                       isSelected
-                        ? "bg-slate-50 font-semibold text-slate-800"
-                        : "font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-950"
+                        ? "bg-slate-50 font-semibold text-slate-900"
+                        : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-950"
                     }`}
                     id={`${listboxId}-${option.value}`}
                     key={option.value}
@@ -625,8 +539,8 @@ function ManualRateControls({
   }
 
   return (
-    <label className="grid gap-2" htmlFor={`${idPrefix}-manual-rate`}>
-      <span className="text-sm font-semibold text-stone-800">Manual SST rate (%)</span>
+    <label className="grid gap-2 md:col-start-3" htmlFor={`${idPrefix}-manual-rate`}>
+      <span className="text-xs font-medium text-slate-600">Manual SST rate (%)</span>
       <input
         className={inputClassName}
         id={`${idPrefix}-manual-rate`}
@@ -645,24 +559,21 @@ function ManualRateControls({
 }
 
 function ResultStat({
-  accent = false,
+  children,
   label,
   value
 }: {
-  accent?: boolean;
+  children?: ReactNode;
   label: string;
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
-      <p
-        className={`mt-2 text-xl font-semibold tracking-tight ${
-          accent ? "text-teal-700" : "text-stone-950"
-        }`}
-      >
+    <div className="border-t border-slate-200 pt-4 first:border-t-0 first:pt-0 md:border-l md:border-t-0 md:pl-8 md:pt-0 md:first:border-l-0 md:first:pl-0">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
         {value}
       </p>
+      {children}
     </div>
   );
 }

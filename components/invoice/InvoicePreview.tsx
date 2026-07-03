@@ -3,7 +3,8 @@
 import Image from "next/image";
 import type {
   InvoiceCalculationResult,
-  InvoiceLineCalculationResult
+  InvoiceLineCalculationResult,
+  InvoiceTaxCalculationResult
 } from "@/lib/invoice/invoice-calculations";
 import { parseInvoicePercentage } from "@/lib/invoice/invoice-calculations";
 import type { InvoiceData } from "@/lib/invoice/invoice-types";
@@ -20,6 +21,12 @@ function formatAmount(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
+}
+
+function formatTaxLineLabel(taxLine: InvoiceTaxCalculationResult): string {
+  return taxLine.type === "percentage"
+    ? `${formatAmount(taxLine.value)}% ${taxLine.label || "Tax"}`
+    : taxLine.label || "Tax";
 }
 
 export function InvoicePreview({
@@ -48,24 +55,15 @@ export function InvoicePreview({
     invoiceData.discount.enabled && invoiceData.discount.type === "percentage"
       ? parseInvoicePercentage(invoiceData.discount.value) ?? 0
       : 0;
-  const taxRate =
-    invoiceData.tax.enabled && invoiceData.tax.type === "percentage"
-      ? parseInvoicePercentage(invoiceData.tax.value) ?? 0
-      : 0;
-  const taxAmount = calculation.taxAmount;
+  const taxLines = calculation.taxLines;
   const shippingAmount = calculation.shippingAmount;
   const total = calculation.total;
   const hasDiscount = discountAmount > 0;
-  const hasTax = taxAmount > 0;
   const hasShipping = shippingAmount > 0;
   const discountLabel =
     invoiceData.discount.type === "percentage"
       ? `${formatAmount(discountRate)}% ${invoiceData.discount.label || "Discount"}`
       : invoiceData.discount.label || "Discount";
-  const taxLabel =
-    invoiceData.tax.type === "percentage"
-      ? `${formatAmount(taxRate)}% ${invoiceData.tax.label || "Tax"}`
-      : invoiceData.tax.label || "Tax";
   const paymentDetailRows = [
     ["Bank", payment.bankName],
     ["Account name", payment.accountName],
@@ -166,7 +164,7 @@ export function InvoicePreview({
           <div className="divide-y divide-stone-200 bg-white">
             {previewItems.map((item, index) => (
               <div
-                className="invoice-preview-line grid min-w-0 gap-3 px-3 py-3 text-sm odd:bg-white even:bg-slate-50 sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4"
+                className="invoice-preview-line grid min-w-0 gap-3 bg-white px-3 py-3 text-sm sm:grid-cols-[3rem_minmax(0,1.6fr)_6.5rem_4.5rem_7rem] sm:gap-3 sm:px-4"
                 key={`${item.description}-${index}`}
               >
                 <div className="min-w-0">
@@ -230,14 +228,17 @@ export function InvoicePreview({
                 </span>
               </div>
             ) : null}
-            {hasTax ? (
-              <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
-                <span className="invoice-total-label">{taxLabel}</span>
+            {taxLines.map((taxLine) => (
+              <div
+                className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600"
+                key={taxLine.id}
+              >
+                <span className="invoice-total-label">{formatTaxLineLabel(taxLine)}</span>
                 <span className="invoice-total-amount font-semibold text-stone-950">
-                  {formatCurrency(taxAmount)}
+                  {formatCurrency(taxLine.amount)}
                 </span>
               </div>
-            ) : null}
+            ))}
             {hasShipping ? (
               <div className="invoice-total-row mt-2.5 flex justify-between gap-4 text-sm text-stone-600">
                 <span className="invoice-total-label">{invoiceData.shipping?.label || "Shipping"}</span>

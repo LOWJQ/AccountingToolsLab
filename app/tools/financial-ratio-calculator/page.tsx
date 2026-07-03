@@ -3,11 +3,19 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
-import { RelatedGuideArticleSection } from "@/components/tools/RelatedGuideArticleSection";
-import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import {
+  ArrowRight,
+  Calculator,
+  Check,
+  CircleDollarSign,
+  FileText,
+  Grid2X2,
+  Table2
+} from "lucide-react";
+import Link from "next/link";
 
 export const metadata = createMetadata({
   title: "Financial Ratio Calculator | Calculate Common Accounting Ratios",
@@ -49,6 +57,58 @@ const financialRatioFaqs = [
   }
 ];
 
+const ratioSteps = [
+  "Choose a ratio such as current ratio, debt-to-equity ratio, or profit margin.",
+  "Enter the values requested for that ratio.",
+  "Review the calculated result, explanation, and formula summary.",
+  "Reset the fields anytime to check another ratio quickly."
+];
+
+const ratioBenefits = [
+  "Helpful for beginner accounting review.",
+  "Makes common ratio formulas easier to check.",
+  "Useful for homework, business analysis, and quick comparisons.",
+  "Provides formula context with the result.",
+  "Keeps the page simple and easy to use."
+];
+
+const whenToUseItems = [
+  "Review business performance with quick ratio-based comparisons.",
+  "Check homework answers for current ratio, debt-to-equity ratio, and return on assets.",
+  "Run simple liquidity checks using current assets and current liabilities.",
+  "Review profitability with gross profit margin and net profit margin.",
+  "Compare debt levels with owner funding using debt-to-equity ratio.",
+  "Support simple financial analysis before deeper reporting or discussion."
+];
+
+const relatedTools = [
+  {
+    href: "/tools/invoice-generator",
+    icon: FileText,
+    label: "Create a PDF Invoice"
+  },
+  {
+    href: "/tools/cash-flow-calculator",
+    icon: CircleDollarSign,
+    label: "Cash Flow Calculator"
+  },
+  {
+    href: "/tools/break-even-calculator",
+    icon: Calculator,
+    label: "Break-even Calculator"
+  },
+  {
+    href: "/tools/trial-balance-calculator",
+    icon: Table2,
+    label: "Trial Balance Calculator"
+  },
+  {
+    href: "/tools",
+    icon: Grid2X2,
+    label: "All Tools"
+  }
+];
+
 export default function FinancialRatioCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/financial-ratio-calculator`;
 
@@ -67,109 +127,137 @@ export default function FinancialRatioCalculatorPage() {
         url={pageUrl}
       />
       <FAQJsonLd faqs={financialRatioFaqs} />
-      <div className="max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">
+
+      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link className="transition hover:text-slate-900" href="/">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li>
+            <Link className="transition hover:text-slate-900" href="/tools">
+              Tools
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          <li className="font-medium text-slate-700">Financial Ratio Calculator</li>
+        </ol>
+      </nav>
+
+      <div className="max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Financial Ratio Calculator
         </h1>
-        <p className="mt-3 text-base leading-7 text-stone-600">
+        <p className="mt-3 text-base leading-7 text-black">
           Calculate common financial ratios for beginner accounting, business review, and
           homework checks.
         </p>
       </div>
+
       <FinancialRatioCalculator />
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Calculate financial ratios in a few steps
-        </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            Use this financial ratio calculator to choose the ratio you want, enter the required
-            values, and review the result instantly for simple financial analysis, beginner
-            accounting practice, or business review.
-          </p>
-          <p>→ Choose a ratio such as current ratio, debt-to-equity ratio, or profit margin.</p>
-          <p>→ Enter the values requested for that ratio.</p>
-          <p>→ Review the calculated result, explanation, and formula summary.</p>
-          <p>→ Reset the fields anytime to check another ratio quickly.</p>
+
+      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
+        <div className="lg:pr-10">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Calculate financial ratios in a few steps
+          </h2>
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
+            {ratioSteps.map((step) => (
+              <li className="pl-2" key={step}>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="border-t border-slate-200 pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Why use this financial ratio calculator?
+          </h2>
+          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
+            {ratioBenefits.map((benefit) => (
+              <li className="flex items-start gap-3" key={benefit}>
+                <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Understand what each financial ratio means
-        </h2>
-        <div className="mt-4 space-y-4 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>
-            The current ratio compares short-term assets with short-term liabilities to show
-            whether a business may be able to cover near-term obligations. The debt-to-equity
-            ratio compares liabilities with owner funding to show how much the business relies on
-            debt versus equity.
-          </p>
-          <p>
-            Gross profit margin shows how much of each sales amount remains after direct costs.
-            Net profit margin goes further by showing how much profit remains after overall
-            expenses. These profit margin measures can help you review cost control and operating
-            performance.
-          </p>
-          <p>
-            Return on assets compares profit with total assets to show how effectively a business
-            is using its resources. Together, these ratios support a clearer view of liquidity,
-            debt, profitability, and overall financial analysis.
-          </p>
-        </div>
-      </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
           When to use this financial ratio calculator
         </h2>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-          <p>→ Review business performance with quick ratio-based comparisons.</p>
-          <p>→ Check homework answers for current ratio, debt-to-equity ratio, and return on assets.</p>
-          <p>→ Run simple liquidity checks using current assets and current liabilities.</p>
-          <p>→ Review profitability with gross profit margin and net profit margin.</p>
-          <p>→ Compare debt levels with owner funding using debt-to-equity ratio.</p>
-          <p>→ Support simple financial analysis before deeper reporting or discussion.</p>
-        </div>
+        <ul className="mt-5 list-disc space-y-2 pl-5 text-base leading-7 text-black">
+          {whenToUseItems.map((item) => (
+            <li className="pl-1" key={item}>
+              {item}
+            </li>
+          ))}
+        </ul>
       </section>
-      <section className="border-t border-stone-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
-          Connect ratio analysis with other accounting tools
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Tools
         </h2>
-        <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-          After using this financial ratio calculator, you can continue with related tools to
-          create business documents, review cash movement, estimate break-even targets, or check
-          balances before doing broader financial analysis.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/tools/invoice-generator" variant="secondary">
-            Free Invoice Generator Malaysia
-          </ButtonLink>
-          <ButtonLink href="/tools/cash-flow-calculator" variant="secondary">
-            Cash Flow Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/break-even-calculator" variant="secondary">
-            Break-even Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools/trial-balance-calculator" variant="secondary">
-            Trial Balance Calculator
-          </ButtonLink>
-          <ButtonLink href="/tools" variant="secondary">
-            All Tools
-          </ButtonLink>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {relatedTools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+                href={tool.href}
+                key={tool.href}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
+                <span className="min-w-0 flex-1">{tool.label}</span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
-      <RelatedGuideArticleSection
-        articles={[
-          {
-            description:
-              "Learn basic financial ratio formulas, examples, and what ratios like current ratio, debt-to-equity, profit margin, and return on assets mean.",
-            href: "/guides/financial-ratios-for-beginners",
-            label: "Financial ratio guide",
-            title: "Financial Ratios for Beginners"
-          }
-        ]}
-        toolName="Financial Ratio Calculator"
-      />
-      <FAQSection faqs={financialRatioFaqs} title="Financial Ratio Calculator FAQs" />
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Related Guide Article
+        </h2>
+        <Link
+          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          href="/guides/financial-ratios-for-beginners"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-medium leading-7 text-black">Financial ratio guide</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Financial Ratios for Beginners
+            </h3>
+            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
+              Learn basic financial ratio formulas, examples, and what ratios like current ratio,
+              debt-to-equity, profit margin, and return on assets mean.
+            </p>
+          </div>
+          <ArrowRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+          />
+        </Link>
+      </section>
+
+      <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
+        <FAQSection
+          eyebrow=""
+          faqs={financialRatioFaqs}
+          title="Financial Ratio Calculator FAQs"
+        />
+      </section>
     </ToolPageLayout>
   );
 }
