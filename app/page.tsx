@@ -3,16 +3,12 @@ import type { ReactNode } from "react";
 import {
   ArrowRight,
   Calculator,
-  CheckCircle2,
   CircleDollarSign,
-  ClipboardList,
   FileText,
   Gauge,
   LockKeyhole,
   MapPin,
-  PenLine,
   QrCode,
-  ReceiptText,
   Scale,
   UserRound
 } from "lucide-react";
@@ -110,18 +106,15 @@ const benefits = [
 const steps = [
   {
     title: "Pick a tool",
-    description: "Choose the tool that matches your task.",
-    icon: ClipboardList
+    description: "Choose the tool that matches your task."
   },
   {
     title: "Enter your details",
-    description: "Input your numbers or business information.",
-    icon: PenLine
+    description: "Input your numbers or business information."
   },
   {
     title: "Review your result",
-    description: "See results instantly, or generate an output when available.",
-    icon: CheckCircle2
+    description: "See results instantly, or generate an output when available."
   }
 ] as const;
 
@@ -543,8 +536,6 @@ export default function HomePage() {
         <h2 className="text-center font-display text-3xl font-bold text-slate-950">How It Works</h2>
         <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-center">
           {steps.map((step, index) => {
-            const Icon = step.icon;
-
             return (
               <div className="contents" key={step.title}>
                 <article className="p-5">
@@ -552,7 +543,6 @@ export default function HomePage() {
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-300 text-sm font-semibold text-slate-950">
                       {index + 1}
                     </span>
-                    <Icon aria-hidden="true" className="h-9 w-9 text-slate-950" strokeWidth={1.5} />
                     <div>
                       <h3 className="text-base font-semibold text-slate-950">{step.title}</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-600">{step.description}</p>
@@ -585,8 +575,7 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-[1240px] px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
         <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70 sm:p-8">
-          <div className="grid gap-6 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
-            <ReceiptText aria-hidden="true" className="hidden h-14 w-14 text-slate-950 lg:block" strokeWidth={1.5} />
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div>
               <h2 className="font-display text-3xl font-bold text-slate-950">
                 Ready to Create Your First Invoice?
