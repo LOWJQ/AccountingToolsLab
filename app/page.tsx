@@ -460,8 +460,7 @@ export default function HomePage() {
               Simple Accounting Tools for Everyday Business Work
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg sm:leading-8">
-              Create invoices, calculate SST, check cash flow, and verify accounts&mdash;anytime,
-              in one clean workspace.
+              Create invoices, calculate SST, check cash flow, review ratios, and handle everyday accounting checks from one clean workspace.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
