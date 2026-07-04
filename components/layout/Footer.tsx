@@ -12,28 +12,28 @@ const footerSections: Array<{ links: FooterLink[]; title: string }> = [
     links: [
       { label: "Invoice Generator", href: "/tools/invoice-generator" },
       { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" },
+      { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" },
       { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
-      { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
       { label: "All Tools", href: "/tools" }
     ]
   },
   {
     title: "Guides",
     links: [
-      { label: "How to Create a Simple Invoice", href: "/guides/how-to-create-a-simple-invoice" },
+      { label: "How to Create an Invoice", href: "/guides/how-to-create-a-simple-invoice" },
+      { label: "SST Guide for Businesses", href: "/guides/sst-calculator-malaysia-add-remove-sst" },
       { label: "Debit vs Credit", href: "/guides/debit-vs-credit" },
-      { label: "Trial Balance Explained", href: "/guides/trial-balance-explained" },
-      { label: "Cash Flow vs Profit", href: "/guides/cash-flow-vs-profit" },
+      { label: "Accounting Basics", href: "/guides" },
       { label: "All Guides", href: "/guides" }
     ]
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "/about" },
+      { label: "About Us", href: "/about" },
       { label: "Contact", href: "/contact" },
       { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms", href: "/terms" }
+      { label: "Terms of Use", href: "/terms" }
     ]
   }
 ];
