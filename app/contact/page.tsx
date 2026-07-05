@@ -169,9 +169,8 @@ export default function ContactPage() {
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
             Before you contact
           </h2>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-black">
-            AccountingToolsLab is a free educational tools site. Please avoid sending sensitive
-            personal, financial, or confidential business information by email.
+          <p className="mt-4 text-base leading-7 text-black">
+            Accounting Tools Lab is a free tools site. Please avoid sending sensitive personal, financial, or confidential business information by email.
           </p>
         </section>
         </Container>

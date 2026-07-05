@@ -20,7 +20,7 @@ const footerSections: Array<{ links: FooterLink[]; title: string }> = [
   {
     title: "Guides",
     links: [
-      { label: "How to Create an Invoice", href: "/guides/how-to-create-a-simple-invoice" },
+      { label: "What an Invoice Includes", href: "/guides/what-should-an-invoice-include-before-you-send-it" },
       { label: "SST Guide for Businesses", href: "/guides/sst-calculator-malaysia-add-remove-sst" },
       { label: "Debit vs Credit", href: "/guides/debit-vs-credit" },
       { label: "Accounting Basics", href: "/guides" },

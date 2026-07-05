@@ -201,7 +201,7 @@ export default function InvoiceGeneratorPage() {
         </h2>
         <Link
           className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/how-to-create-a-simple-invoice"
+          href="/guides/what-should-an-invoice-include-before-you-send-it"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Invoice guide</p>

@@ -122,7 +122,7 @@ const guideCards = [
   {
     title: "How to Create a Simple Invoice",
     description: "Step-by-step guide to create clear, professional invoices for your business.",
-    href: "/guides/how-to-create-a-simple-invoice",
+    href: "/guides/what-should-an-invoice-include-before-you-send-it",
     cta: "Read guide",
     icon: toolIcons.invoice
   },

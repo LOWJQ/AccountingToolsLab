@@ -75,7 +75,7 @@ const toolLinks = [
   },
   {
     title: "How to Create a Simple Invoice",
-    href: "/guides/how-to-create-a-simple-invoice",
+    href: "/guides/what-should-an-invoice-include-before-you-send-it",
     description: "Learn why invoicing and collecting cash are not always the same moment."
   },
   {
@@ -499,7 +499,7 @@ export default function CashFlowVsProfitGuidePage() {
             To connect cash flow with invoices, sales targets, and profitability measures, read{" "}
             <Link
               className="font-semibold text-slate-700 hover:text-slate-900"
-              href="/guides/how-to-create-a-simple-invoice"
+              href="/guides/what-should-an-invoice-include-before-you-send-it"
             >
               how to create a simple invoice
             </Link>

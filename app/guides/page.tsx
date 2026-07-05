@@ -10,7 +10,7 @@ export const metadata = createMetadata({
 });
 
 const guideOrder = [
-  "how-to-create-a-simple-invoice",
+  "what-should-an-invoice-include-before-you-send-it",
   "sst-calculator-malaysia-add-remove-sst",
   "trial-balance-explained",
   "cash-flow-vs-profit",
@@ -32,8 +32,8 @@ const learningPaths = [
     title: "Business Documents",
     steps: [
       {
-        label: "How to Create a Simple Invoice",
-        href: "/guides/how-to-create-a-simple-invoice",
+        label: "What Should an Invoice Include?",
+        href: "/guides/what-should-an-invoice-include-before-you-send-it",
         status: "Available"
       },
       {

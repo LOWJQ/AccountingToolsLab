@@ -96,7 +96,7 @@ tests/              Lightweight TypeScript/Node tests for calculators, invoice l
 /guides/cash-flow-vs-profit                   Cash Flow vs Profit guide
 /guides/break-even-point-explained            Break-even Point Explained guide
 /guides/straight-line-depreciation-explained  Straight-Line Depreciation Explained guide
-/guides/how-to-create-a-simple-invoice        How to Create a Simple Invoice guide
+/guides/what-should-an-invoice-include-before-you-send-it        What Should an Invoice Include guide
 /guides/sst-calculator-malaysia-add-remove-sst SST Calculator Malaysia guide
 /about                                        About page
 /contact                                      Contact page

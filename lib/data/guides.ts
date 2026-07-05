@@ -10,14 +10,14 @@ export type Guide = {
 
 export const guides: Guide[] = [
   {
-    slug: "how-to-create-a-simple-invoice",
+    slug: "what-should-an-invoice-include-before-you-send-it",
     title: "What Should an Invoice Include?",
     description:
       "Learn what to include before sending an invoice, including business details, customer details, invoice number, dates, line items, totals, payment details, and tax notes.",
     menuDescription: "Check what to include before sending an invoice.",
     category: "Business Documents",
     status: "available",
-    href: "/guides/how-to-create-a-simple-invoice"
+    href: "/guides/what-should-an-invoice-include-before-you-send-it"
   },
   {
     slug: "sst-calculator-malaysia-add-remove-sst",

@@ -68,7 +68,7 @@ const toolLinks = [
   },
   {
     title: "How to Create a Simple Invoice",
-    href: "/guides/how-to-create-a-simple-invoice",
+    href: "/guides/what-should-an-invoice-include-before-you-send-it",
     description: "Learn which basic fields usually appear on a simple invoice."
   },
   {
@@ -446,7 +446,7 @@ export default function SstCalculatorMalaysiaGuidePage() {
                 and{" "}
                 <Link
                   className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/guides/how-to-create-a-simple-invoice"
+                  href="/guides/what-should-an-invoice-include-before-you-send-it"
                 >
                   learn how to create a simple invoice
                 </Link>
