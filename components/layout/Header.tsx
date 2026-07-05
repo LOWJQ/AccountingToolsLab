@@ -633,7 +633,7 @@ export function Header() {
             <button
               aria-expanded={desktopMenu === "tools"}
               aria-haspopup="dialog"
-              className={`inline-flex h-10 items-center gap-1 rounded-full px-4 transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${
+              className={`inline-flex h-10 items-center gap-1 rounded-full px-4 transition focus:outline-none ${
                 desktopMenu === "tools"
                   ? "bg-stone-100 text-stone-950"
                   : "hover:bg-stone-50 hover:text-stone-950"
@@ -654,7 +654,7 @@ export function Header() {
             <button
               aria-expanded={desktopMenu === "guides"}
               aria-haspopup="dialog"
-              className={`inline-flex h-10 items-center gap-1 rounded-full px-4 transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${
+              className={`inline-flex h-10 items-center gap-1 rounded-full px-4 transition focus:outline-none ${
                 desktopMenu === "guides"
                   ? "bg-stone-100 text-stone-950"
                   : "hover:bg-stone-50 hover:text-stone-950"
@@ -673,7 +673,7 @@ export function Header() {
             </button>
 
             <Link
-              className="inline-flex h-10 items-center rounded-full px-4 transition hover:bg-stone-50 hover:text-stone-950 focus:outline-none focus:ring-4 focus:ring-slate-100"
+              className="inline-flex h-10 items-center rounded-full px-4 transition hover:bg-stone-50 hover:text-stone-950 focus:outline-none"
               href="/about"
               onMouseEnter={() => setDesktopMenu(null)}
             >

@@ -10,24 +10,24 @@ export type Guide = {
 
 export const guides: Guide[] = [
   {
-    slug: "debit-vs-credit",
-    title: "Debit vs Credit",
+    slug: "how-to-create-a-simple-invoice",
+    title: "What Should an Invoice Include?",
     description:
-      "Learn debit and credit rules, normal balances, beginner examples, and how to know whether to debit or credit an account.",
-    menuDescription: "Learn debit and credit rules with simple beginner examples.",
-    category: "Accounting Basics",
+      "Learn what to include before sending an invoice, including business details, customer details, invoice number, dates, line items, totals, payment details, and tax notes.",
+    menuDescription: "Check what to include before sending an invoice.",
+    category: "Business Documents",
     status: "available",
-    href: "/guides/debit-vs-credit"
+    href: "/guides/how-to-create-a-simple-invoice"
   },
   {
-    slug: "journal-entries-for-beginners",
-    title: "Journal Entries for Beginners",
+    slug: "sst-calculator-malaysia-add-remove-sst",
+    title: "SST Calculator Malaysia: Add or Remove SST",
     description:
-      "Learn how journal entries work with simple debit and credit examples, common mistakes, and a step-by-step beginner checklist.",
-    menuDescription: "Learn how journal entries work with simple debit and credit examples.",
-    category: "Accounting Basics",
+      "Learn how to add or remove SST in Malaysia with formulas, examples, SST amount, total including SST, amount before SST, and common mistakes.",
+    menuDescription: "Learn how to add or remove SST in Malaysia with simple formulas.",
+    category: "Malaysia Tax Basics",
     status: "available",
-    href: "/guides/journal-entries-for-beginners"
+    href: "/guides/sst-calculator-malaysia-add-remove-sst"
   },
   {
     slug: "trial-balance-explained",
@@ -38,26 +38,6 @@ export const guides: Guide[] = [
     category: "Bookkeeping Checks",
     status: "available",
     href: "/guides/trial-balance-explained"
-  },
-  {
-    slug: "why-trial-balance-not-balancing",
-    title: "Why Is My Trial Balance Not Balancing?",
-    description:
-      "Learn common reasons a trial balance does not balance, how to use the difference amount, and how to check debit and credit errors step by step.",
-    menuDescription: "Learn common reasons a trial balance does not balance.",
-    category: "Bookkeeping Checks",
-    status: "available",
-    href: "/guides/why-trial-balance-not-balancing"
-  },
-  {
-    slug: "financial-ratios-for-beginners",
-    title: "Financial Ratios for Beginners",
-    description:
-      "Learn basic financial ratio formulas, examples, and what ratios like current ratio, debt-to-equity, profit margin, and return on assets mean.",
-    menuDescription: "Learn basic financial ratio formulas for simple business checks.",
-    category: "Financial Analysis",
-    status: "available",
-    href: "/guides/financial-ratios-for-beginners"
   },
   {
     slug: "cash-flow-vs-profit",
@@ -80,6 +60,36 @@ export const guides: Guide[] = [
     href: "/guides/break-even-point-explained"
   },
   {
+    slug: "why-trial-balance-not-balancing",
+    title: "Why Is My Trial Balance Not Balancing?",
+    description:
+      "Learn common reasons a trial balance does not balance, how to use the difference amount, and how to check debit and credit errors step by step.",
+    menuDescription: "Learn common reasons a trial balance does not balance.",
+    category: "Bookkeeping Checks",
+    status: "available",
+    href: "/guides/why-trial-balance-not-balancing"
+  },
+  {
+    slug: "debit-vs-credit",
+    title: "Debit vs Credit",
+    description:
+      "Learn debit and credit rules, normal balances, beginner examples, and how to know whether to debit or credit an account.",
+    menuDescription: "Learn debit and credit rules with simple beginner examples.",
+    category: "Accounting Basics",
+    status: "available",
+    href: "/guides/debit-vs-credit"
+  },
+  {
+    slug: "financial-ratios-for-beginners",
+    title: "Financial Ratios for Beginners",
+    description:
+      "Learn basic financial ratio formulas, examples, and what ratios like current ratio, debt-to-equity, profit margin, and return on assets mean.",
+    menuDescription: "Learn basic financial ratio formulas for simple business checks.",
+    category: "Financial Analysis",
+    status: "available",
+    href: "/guides/financial-ratios-for-beginners"
+  },
+  {
     slug: "straight-line-depreciation-explained",
     title: "Straight-Line Depreciation Explained",
     description:
@@ -90,23 +100,13 @@ export const guides: Guide[] = [
     href: "/guides/straight-line-depreciation-explained"
   },
   {
-    slug: "how-to-create-a-simple-invoice",
-    title: "How to Create a Simple Invoice",
+    slug: "journal-entries-for-beginners",
+    title: "Journal Entries for Beginners",
     description:
-      "Learn what a simple invoice should include, invoice number, invoice date, due date, line items, totals, and common beginner mistakes.",
-    menuDescription: "Learn what a simple invoice should include before sending it.",
-    category: "Business Documents",
+      "Learn how journal entries work with simple debit and credit examples, common mistakes, and a step-by-step beginner checklist.",
+    menuDescription: "Learn how journal entries work with simple debit and credit examples.",
+    category: "Accounting Basics",
     status: "available",
-    href: "/guides/how-to-create-a-simple-invoice"
-  },
-  {
-    slug: "sst-calculator-malaysia-add-remove-sst",
-    title: "SST Calculator Malaysia: Add or Remove SST",
-    description:
-      "Learn how to add or remove SST in Malaysia with formulas, examples, SST amount, total including SST, amount before SST, and common mistakes.",
-    menuDescription: "Learn how to add or remove SST in Malaysia with simple formulas.",
-    category: "Malaysia Tax Basics",
-    status: "available",
-    href: "/guides/sst-calculator-malaysia-add-remove-sst"
+    href: "/guides/journal-entries-for-beginners"
   }
 ];

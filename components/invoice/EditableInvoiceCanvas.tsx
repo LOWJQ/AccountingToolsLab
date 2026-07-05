@@ -126,6 +126,7 @@ function FieldError({ error, id }: { error: string; id: string }) {
 
 function EditableInput({
   ariaLabel,
+  autoFocus = false,
   className = "",
   error = "",
   errorId,
@@ -140,6 +141,7 @@ function EditableInput({
   value
 }: {
   ariaLabel: string;
+  autoFocus?: boolean;
   className?: string;
   error?: string;
   errorId: string;
@@ -159,6 +161,7 @@ function EditableInput({
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
         aria-label={ariaLabel}
+        autoFocus={autoFocus}
         className={`${editableBaseClass} h-10 px-3 text-sm ${errorClass(error)} ${className}`}
         inputMode={inputMode}
         max={max}
@@ -371,6 +374,7 @@ export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
         <div className="grid gap-2">
           <EditableInput
             ariaLabel="Business name"
+            autoFocus
             className="h-11 text-base font-semibold"
             error={props.businessNameError}
             errorId="business-name-error"

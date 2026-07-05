@@ -172,7 +172,7 @@ export function SstCalculatorMalaysia() {
   return (
     <section
       aria-labelledby="sst-calculator-heading"
-      className="mx-auto w-full max-w-6xl overflow-visible rounded-lg border border-slate-200 bg-white"
+      className="w-full overflow-visible rounded-lg border border-slate-200 bg-white"
     >
       <h2 className="sr-only" id="sst-calculator-heading">
         SST calculator inputs and results

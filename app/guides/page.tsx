@@ -12,14 +12,14 @@ export const metadata = createMetadata({
 const guideOrder = [
   "how-to-create-a-simple-invoice",
   "sst-calculator-malaysia-add-remove-sst",
+  "trial-balance-explained",
   "cash-flow-vs-profit",
   "break-even-point-explained",
+  "why-trial-balance-not-balancing",
+  "debit-vs-credit",
   "financial-ratios-for-beginners",
   "straight-line-depreciation-explained",
-  "trial-balance-explained",
-  "why-trial-balance-not-balancing",
-  "journal-entries-for-beginners",
-  "debit-vs-credit"
+  "journal-entries-for-beginners"
 ];
 
 const orderedGuides = [...guides].sort(
@@ -185,7 +185,7 @@ export default function GuidesPage() {
     <div>
       <main>
         <section className="bg-white">
-          <div className="mx-auto w-full max-w-[1080px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+          <div className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
             <div className="max-w-5xl">
               <p className="text-sm font-medium tracking-wide text-slate-500">
                 Invoice and Accounting Guides
@@ -201,12 +201,12 @@ export default function GuidesPage() {
           </div>
         </section>
 
-        <div className="mx-auto w-full max-w-[1080px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
           <div className="border-t border-stone-200" />
         </div>
 
         <section className="bg-white">
-          <div className="mx-auto w-full max-w-[1080px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+          <div className="mx-auto w-full max-w-[1240px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
             <div className="max-w-3xl">
               <p className="text-sm font-medium tracking-wide text-slate-500">Directory</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
@@ -264,12 +264,12 @@ export default function GuidesPage() {
           </div>
         </section>
 
-        <div className="mx-auto w-full max-w-[1080px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
           <div className="border-t border-stone-200" />
         </div>
 
         <section className="bg-white">
-          <div className="mx-auto w-full max-w-[1080px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+          <div className="mx-auto w-full max-w-[1240px] px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
             <div>
               <p className="text-sm font-medium tracking-wide text-slate-500">Learning paths</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">

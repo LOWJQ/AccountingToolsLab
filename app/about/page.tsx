@@ -72,18 +72,6 @@ export default function AboutPage() {
       <main className="bg-white">
         <section className="w-full bg-white">
           <Container className="gap-0 pt-12 pb-8 sm:pt-16 sm:pb-10 lg:pt-20 lg:pb-12">
-            <nav aria-label="Breadcrumb" className="mb-10 text-sm text-slate-500">
-              <ol className="flex flex-wrap items-center gap-2">
-                <li>
-                  <Link className="transition hover:text-slate-900" href="/">
-                    Home
-                  </Link>
-                </li>
-                <li aria-hidden="true">&gt;</li>
-                <li className="font-medium text-slate-700">About</li>
-              </ol>
-            </nav>
-
             <h1 className="mx-auto max-w-4xl text-center text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
               This is Accounting Tools Lab
             </h1>

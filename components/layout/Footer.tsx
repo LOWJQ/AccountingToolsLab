@@ -81,7 +81,7 @@ export function Footer() {
                     {section.links.map((link) => (
                       <li key={link.href}>
                         <Link
-                          className="text-sm leading-6 text-stone-500 transition hover:text-stone-950 focus:outline-none focus:ring-2 focus:ring-stone-200 focus:ring-offset-2 focus:ring-offset-white"
+                          className="text-sm leading-6 text-stone-500 transition hover:text-stone-950 focus:outline-none"
                           href={link.href}
                         >
                           {link.label}

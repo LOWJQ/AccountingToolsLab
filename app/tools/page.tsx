@@ -33,7 +33,7 @@ export default function ToolsPage() {
       <JsonLd data={createItemListSchema(toolItemList)} />
 
       <main className="bg-white">
-        <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-10 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-10 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
           <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
             <ol className="flex flex-wrap items-center gap-2">
               <li>

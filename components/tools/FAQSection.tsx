@@ -47,7 +47,7 @@ export function FAQSection({
                 </svg>
               </span>
             </summary>
-            <p className="mt-3 text-sm leading-6 text-stone-600">{faq.answer}</p>
+            <p className="mt-3 text-sm leading-6 text-stone-950">{faq.answer}</p>
           </details>
         ))}
       </div>
