@@ -181,6 +181,10 @@ function CurrencySelector() {
   }
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     function handlePointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         closeSelector({ returnFocus: false });
@@ -192,7 +196,7 @@ function CurrencySelector() {
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     const nextSelectedIndex = filteredCurrencies.findIndex((option) => option.code === currency);
@@ -428,7 +432,6 @@ export function Header() {
   const [desktopMenu, setDesktopMenu] = useState<DesktopMenuKey | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileExpandedSection, setMobileExpandedSection] = useState<DesktopMenuKey | null>(null);
-  const [headerOffset, setHeaderOffset] = useState(0);
   const headerRef = useRef<HTMLElement>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
   const desktopMenuPanelRef = useRef<HTMLDivElement>(null);
@@ -448,6 +451,10 @@ export function Header() {
   }
 
   useEffect(() => {
+    if (!desktopMenu && !isMobileMenuOpen) {
+      return;
+    }
+
     function handlePointerDown(event: PointerEvent) {
       if (!headerRef.current?.contains(event.target as Node)) {
         closeAllMenus();
@@ -459,9 +466,13 @@ export function Header() {
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, []);
+  }, [desktopMenu, isMobileMenuOpen]);
 
   useEffect(() => {
+    if (!desktopMenu && !isMobileMenuOpen) {
+      return;
+    }
+
     function handleKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key === "Escape") {
         closeAllMenus();
@@ -473,14 +484,14 @@ export function Header() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [desktopMenu, isMobileMenuOpen]);
 
   useEffect(() => {
-    function handlePointerMove(event: PointerEvent) {
-      if (!desktopMenu) {
-        return;
-      }
+    if (!desktopMenu) {
+      return;
+    }
 
+    function handlePointerMove(event: PointerEvent) {
       const target = event.target as Node;
       const activeButton =
         desktopMenu === "tools" ? toolsButtonRef.current : guidesButtonRef.current;
@@ -527,6 +538,10 @@ export function Header() {
   }, [desktopMenu]);
 
   useEffect(() => {
+    if (!desktopMenu) {
+      return;
+    }
+
     function handleWindowScroll() {
       setDesktopMenu(null);
     }
@@ -536,31 +551,38 @@ export function Header() {
     return () => {
       window.removeEventListener("scroll", handleWindowScroll);
     };
-  }, []);
+  }, [desktopMenu]);
 
   useEffect(() => {
     let frameId = 0;
+    let headerOffset = 0;
     let previousScrollY = window.scrollY;
+    const header = headerRef.current;
+
+    function applyHeaderOffset(header: HTMLElement, headerHeight: number, nextOffset: number) {
+      headerOffset = Math.min(Math.max(nextOffset, 0), headerHeight);
+      const visibilityProgress = headerHeight > 0 ? 1 - headerOffset / headerHeight : 1;
+      header.style.setProperty("--header-offset", `${headerOffset}px`);
+      header.style.setProperty("--header-visibility", `${Math.max(visibilityProgress, 0)}`);
+    }
 
     function updateHeaderOffset() {
       frameId = 0;
 
       const currentScrollY = window.scrollY;
-      const headerHeight = headerRef.current?.offsetHeight ?? 0;
+      const headerHeight = header?.offsetHeight ?? 0;
 
-      if (currentScrollY <= 0 || headerHeight <= 0) {
+      if (!header || currentScrollY <= 0 || headerHeight <= 0) {
         previousScrollY = 0;
-        setHeaderOffset(0);
+        if (header) {
+          applyHeaderOffset(header, headerHeight, 0);
+        }
         return;
       }
 
       const scrollDelta = currentScrollY - previousScrollY;
       previousScrollY = currentScrollY;
-
-      setHeaderOffset((currentOffset) => {
-        const nextOffset = currentOffset + scrollDelta;
-        return Math.min(Math.max(nextOffset, 0), headerHeight);
-      });
+      applyHeaderOffset(header, headerHeight, headerOffset + scrollDelta);
     }
 
     function handleScroll() {
@@ -578,6 +600,9 @@ export function Header() {
       if (frameId) {
         window.cancelAnimationFrame(frameId);
       }
+
+      header?.style.removeProperty("--header-offset");
+      header?.style.removeProperty("--header-visibility");
     };
   }, []);
 
@@ -588,9 +613,6 @@ export function Header() {
       }
     });
   }
-
-  const headerHeight = headerRef.current?.offsetHeight ?? 64;
-  const visibilityProgress = headerHeight > 0 ? 1 - headerOffset / headerHeight : 1;
 
   return (
     <>
@@ -608,8 +630,8 @@ export function Header() {
         className="sticky top-0 z-50 border-b border-stone-200 bg-white transition-[transform,opacity] duration-300 ease-out will-change-transform"
         ref={headerRef}
         style={{
-          opacity: Math.max(visibilityProgress, 0),
-          transform: `translateY(-${headerOffset}px)`
+          opacity: "var(--header-visibility, 1)",
+          transform: "translateY(calc(-1 * var(--header-offset, 0px)))"
         }}
       >
       <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-4 px-3 sm:px-5 lg:px-6">

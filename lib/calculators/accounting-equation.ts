@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals as roundAmount
+} from "./number-utils";
+
 export type AccountingEquationSolveFor = "assets" | "liabilities" | "equity";
 
 export type AccountingEquationInput = {
@@ -12,18 +17,6 @@ export type AccountingEquationResult = {
   value: number;
   formula: string;
 };
-
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 export function calculateAccountingEquation(
   input: AccountingEquationInput

@@ -175,8 +175,12 @@ const allCurrencyOptions = [
   { code: "ZWG", name: "Zimbabwe gold", symbol: "ZiG", countries: ["Zimbabwe"], locale: "en-ZW" }
 ] as const satisfies readonly CurrencyOption[];
 
+const currencyOptionByCode = new Map<string, CurrencyOption>(
+  allCurrencyOptions.map((option) => [option.code, option])
+);
+
 const popularCurrencyOptions = popularCurrencyCodes.map((code) => {
-  const option = allCurrencyOptions.find((currencyOption) => currencyOption.code === code);
+  const option = currencyOptionByCode.get(code);
 
   if (!option) {
     throw new Error(`Missing popular currency ${code}.`);
@@ -201,7 +205,7 @@ export const CURRENCY_CODES = currencyOptions.map((option) => option.code) as re
 export const defaultCurrency: CurrencyCode = "MYR";
 
 export function getCurrencyOption(currency: string): CurrencyOption | undefined {
-  return currencyOptions.find((option) => option.code === currency);
+  return currencyOptionByCode.get(currency);
 }
 
 export function isCurrencyCode(value: string): value is CurrencyCode {
@@ -245,6 +249,46 @@ function formatCurrencyFallback(value: number, currency: string): string {
   })}`;
 }
 
+const MAX_CURRENCY_FORMATTER_CACHE_SIZE = 256;
+const currencyFormatterCache = new Map<string, Intl.NumberFormat>();
+
+function getCurrencyFormatter(
+  locale: string,
+  currency: string,
+  options: Intl.NumberFormatOptions
+): Intl.NumberFormat {
+  const effectiveOptions: Intl.NumberFormatOptions = {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    ...options
+  };
+  const cacheKey = JSON.stringify([
+    locale,
+    Object.entries(effectiveOptions)
+      .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey))
+      .map(([key, value]) => [key, typeof value, String(value)])
+  ]);
+  const cachedFormatter = currencyFormatterCache.get(cacheKey);
+
+  if (cachedFormatter) {
+    return cachedFormatter;
+  }
+
+  const formatter = new Intl.NumberFormat(locale, effectiveOptions);
+
+  if (currencyFormatterCache.size >= MAX_CURRENCY_FORMATTER_CACHE_SIZE) {
+    const oldestCacheKey = currencyFormatterCache.keys().next().value;
+
+    if (oldestCacheKey !== undefined) {
+      currencyFormatterCache.delete(oldestCacheKey);
+    }
+  }
+
+  currencyFormatterCache.set(cacheKey, formatter);
+  return formatter;
+}
+
 export function formatCurrency(
   value: number,
   currency: string = defaultCurrency,
@@ -254,12 +298,7 @@ export function formatCurrency(
   const currencyCode = config?.code ?? defaultCurrency;
 
   try {
-    return new Intl.NumberFormat(config?.locale ?? "en-US", {
-      style: "currency",
-      currency: currencyCode,
-      currencyDisplay: "narrowSymbol",
-      ...options
-    })
+    return getCurrencyFormatter(config?.locale ?? "en-US", currencyCode, options)
       .formatToParts(value)
       .map((part) => (part.type === "currency" ? config?.symbol ?? currencyCode : part.value))
       .join("");

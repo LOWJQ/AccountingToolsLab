@@ -160,6 +160,10 @@ function TopicSelect({
   }
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     function handlePointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         closeSelector({ returnFocus: false });
@@ -171,7 +175,7 @@ function TopicSelect({
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);

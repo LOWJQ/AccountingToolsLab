@@ -97,7 +97,7 @@ export default function AccountingEquationCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/accounting-equation-calculator`;
 
   return (
-    <ToolPageLayout eyebrow="Accounting Calculator">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

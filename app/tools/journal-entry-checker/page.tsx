@@ -103,7 +103,7 @@ export default function JournalEntryCheckerPage() {
   const pageUrl = `${siteConfig.url}/tools/journal-entry-checker`;
 
   return (
-    <ToolPageLayout eyebrow="Accounting Checker">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

@@ -17,28 +17,3 @@ body {
 .font-display {
   font-family: var(--font-playfair), Georgia, serif;
 }
-
-@keyframes tools-marquee {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.tools-marquee-track {
-  animation: tools-marquee 45s linear infinite;
-}
-
-.tools-marquee:hover .tools-marquee-track,
-.tools-marquee:focus-within .tools-marquee-track {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tools-marquee-track {
-    animation: none;
-  }
-}

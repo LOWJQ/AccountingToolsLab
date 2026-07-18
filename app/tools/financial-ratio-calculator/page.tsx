@@ -106,7 +106,7 @@ export default function FinancialRatioCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/financial-ratio-calculator`;
 
   return (
-    <ToolPageLayout eyebrow="Accounting Calculator">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

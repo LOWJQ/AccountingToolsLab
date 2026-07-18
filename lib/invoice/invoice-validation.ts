@@ -117,7 +117,10 @@ function hasValidHttpUrl(value: string): boolean {
   }
 }
 
-export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] {
+function validateInvoiceWithOptionalSubtotal(
+  invoice: InvoiceData,
+  precomputedSubtotal?: number
+): InvoiceValidationError[] {
   const errors: InvoiceValidationError[] = [];
   const limits = INVOICE_TEXT_MAX_LENGTHS;
 
@@ -358,7 +361,9 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
           });
         }
 
-        if (discountValue > calculateInvoiceTotals(invoice).subtotal) {
+        const subtotal = precomputedSubtotal ?? calculateInvoiceTotals(invoice).subtotal;
+
+        if (discountValue > subtotal) {
           errors.push({
             field: "discount.value",
             message: "Discount amount cannot be greater than the subtotal."
@@ -437,4 +442,15 @@ export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] 
   }
 
   return errors;
+}
+
+export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] {
+  return validateInvoiceWithOptionalSubtotal(invoice);
+}
+
+export function validateInvoiceWithSubtotal(
+  invoice: InvoiceData,
+  subtotal: number
+): InvoiceValidationError[] {
+  return validateInvoiceWithOptionalSubtotal(invoice, subtotal);
 }

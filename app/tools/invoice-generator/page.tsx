@@ -95,7 +95,7 @@ export default function InvoiceGeneratorPage() {
   const pageUrl = `${siteConfig.url}/tools/invoice-generator`;
 
   return (
-    <ToolPageLayout eyebrow="Business Tool">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

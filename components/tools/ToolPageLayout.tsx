@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Container } from "@/components/layout/Container";
 
 type ToolPageLayoutProps = {
-  eyebrow?: string;
   children?: ReactNode;
 };
 

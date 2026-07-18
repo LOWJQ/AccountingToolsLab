@@ -2,8 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import {
-  calculateInvoiceLineItems,
-  calculateInvoiceTotals,
+  calculateInvoiceWithLineItems,
   parseInvoiceMoneyAmount,
   parseInvoiceQuantity
 } from "@/lib/invoice/invoice-calculations";
@@ -12,7 +11,7 @@ import {
   type InvoiceValidationDisplayOptions
 } from "@/lib/invoice/invoice-validation-display";
 import type { InvoiceData, InvoiceLineItem } from "@/lib/invoice/invoice-types";
-import { validateInvoice } from "@/lib/invoice/invoice-validation";
+import { validateInvoiceWithSubtotal } from "@/lib/invoice/invoice-validation";
 
 function getFallbackLineItemError(
   item: InvoiceLineItem | undefined,
@@ -53,8 +52,15 @@ export function useInvoiceValidation(
   lineItems: InvoiceLineItem[],
   displayOptions: InvoiceValidationDisplayOptions = {}
 ) {
-  const calculation = useMemo(() => calculateInvoiceTotals(invoiceData), [invoiceData]);
-  const validationErrors = useMemo(() => validateInvoice(invoiceData), [invoiceData]);
+  const invoiceCalculation = useMemo(
+    () => calculateInvoiceWithLineItems(invoiceData),
+    [invoiceData]
+  );
+  const { calculation, lineItems: calculatedLineItems } = invoiceCalculation;
+  const validationErrors = useMemo(
+    () => validateInvoiceWithSubtotal(invoiceData, calculation.subtotal),
+    [calculation.subtotal, invoiceData]
+  );
   const visibleValidationErrors = useMemo(
     () =>
       validationErrors.filter((error) =>
@@ -63,17 +69,25 @@ export function useInvoiceValidation(
     [displayOptions, validationErrors]
   );
   const lineItemPreviewTotals = useMemo(
-    () => calculateInvoiceLineItems(lineItems).map((item) => item.lineTotal),
-    [lineItems]
+    () => calculatedLineItems.map((item) => item.lineTotal),
+    [calculatedLineItems]
   );
-  const lineItemsMessage = useMemo(() => {
-    const lineItemError = visibleValidationErrors.find((error) => error.field === "items");
-    return lineItemError?.message ?? "";
+  const validationMessageByField = useMemo(() => {
+    const messages = new Map<string, string>();
+
+    visibleValidationErrors.forEach((error) => {
+      if (!messages.has(error.field)) {
+        messages.set(error.field, error.message);
+      }
+    });
+
+    return messages;
   }, [visibleValidationErrors]);
+  const lineItemsMessage = validationMessageByField.get("items") ?? "";
   const hasValidInvoice = validationErrors.length === 0;
   const getValidationMessage = useCallback(
-    (field: string) => visibleValidationErrors.find((error) => error.field === field)?.message ?? "",
-    [visibleValidationErrors]
+    (field: string) => validationMessageByField.get(field) ?? "",
+    [validationMessageByField]
   );
   const getLineItemError = useCallback(
     (index: number, key: "description" | "quantity" | "unitPrice") => {
@@ -99,8 +113,6 @@ export function useInvoiceValidation(
     getValidationMessage,
     hasValidInvoice,
     lineItemPreviewTotals,
-    lineItemsMessage,
-    visibleValidationErrors,
-    validationErrors
+    lineItemsMessage
   };
 }

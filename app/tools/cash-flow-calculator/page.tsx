@@ -100,7 +100,7 @@ export default function CashFlowCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/cash-flow-calculator`;
 
   return (
-    <ToolPageLayout eyebrow="Business Calculator">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

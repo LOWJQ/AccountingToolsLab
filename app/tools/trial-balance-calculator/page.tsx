@@ -105,7 +105,7 @@ export default function TrialBalanceCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/trial-balance-calculator`;
 
   return (
-    <ToolPageLayout eyebrow="Accounting Tools">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

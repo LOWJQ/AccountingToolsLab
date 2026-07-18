@@ -1,3 +1,5 @@
+import { roundToTwoDecimals as roundAmount } from "./number-utils";
+
 export type TrialBalanceRow = {
   id: string;
   accountName: string;
@@ -13,10 +15,6 @@ export type TrialBalanceResult = {
 };
 
 const BALANCE_TOLERANCE = 0.000001;
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 function assertValidAmount(value: number, label: string) {
   if (typeof value !== "number" || !Number.isFinite(value)) {

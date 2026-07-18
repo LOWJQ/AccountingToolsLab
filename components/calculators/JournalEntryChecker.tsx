@@ -1,7 +1,7 @@
 "use client";
 
 import { Info, Plus, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { checkJournalEntry, type JournalEntryLine } from "@/lib/calculators/journal-entry";
 
@@ -31,6 +31,92 @@ function parseAmount(value: string): number | null {
 }
 
 const invalidAmountMessage = "Please enter valid numeric debit and credit amounts.";
+
+type JournalEntryLineField = keyof Omit<EditableJournalEntryLine, "id">;
+
+const JournalEntryLineEditor = memo(function JournalEntryLineEditor({
+  canRemove,
+  index,
+  line,
+  onRemove,
+  onUpdate
+}: {
+  canRemove: boolean;
+  index: number;
+  line: EditableJournalEntryLine;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, field: JournalEntryLineField, value: string) => void;
+}) {
+  const parsedDebit = parseAmount(line.debit);
+  const parsedCredit = parseAmount(line.credit);
+  const hasDebit = parsedDebit !== null && parsedDebit > 0;
+  const hasCredit = parsedCredit !== null && parsedCredit > 0;
+
+  return (
+    <div className="grid min-w-0 gap-3 rounded-lg border border-slate-200 bg-white p-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_6rem] lg:border-0 lg:p-0">
+      <label className="grid min-w-0 gap-2">
+        <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
+          Account Name
+        </span>
+        <input
+          aria-label={`Line ${index + 1} account name`}
+          className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+          onChange={(event) => onUpdate(line.id, "accountName", event.target.value)}
+          placeholder="Account name"
+          value={line.accountName}
+        />
+      </label>
+
+      <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:contents">
+        <label className="grid min-w-0 gap-2">
+          <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
+            Debit
+          </span>
+          <input
+            aria-label={`Line ${index + 1} debit amount`}
+            className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-right text-base text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+            disabled={hasCredit}
+            inputMode="decimal"
+            min="0"
+            onChange={(event) => onUpdate(line.id, "debit", event.target.value)}
+            placeholder="0.00"
+            step="0.01"
+            type="number"
+            value={line.debit}
+          />
+        </label>
+
+        <label className="grid min-w-0 gap-2">
+          <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
+            Credit
+          </span>
+          <input
+            aria-label={`Line ${index + 1} credit amount`}
+            className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-right text-base text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+            disabled={hasDebit}
+            inputMode="decimal"
+            min="0"
+            onChange={(event) => onUpdate(line.id, "credit", event.target.value)}
+            placeholder="0.00"
+            step="0.01"
+            type="number"
+            value={line.credit}
+          />
+        </label>
+      </div>
+
+      <button
+        aria-label={`Remove line ${index + 1}`}
+        className="flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-base font-semibold text-transparent transition after:text-slate-500 after:content-['x'] hover:border-rose-200 hover:bg-rose-50 hover:after:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-24"
+        disabled={!canRemove}
+        onClick={() => onRemove(line.id)}
+        type="button"
+      >
+        ×
+      </button>
+    </div>
+  );
+});
 
 function isBlankLine(line: EditableJournalEntryLine): boolean {
   return !line.accountName.trim() && !line.debit.trim() && !line.credit.trim();
@@ -140,11 +226,11 @@ export function JournalEntryChecker() {
     }
   }, [lines]);
 
-  function updateLine(
+  const updateLine = useCallback((
     id: string,
-    field: keyof Omit<EditableJournalEntryLine, "id">,
+    field: JournalEntryLineField,
     value: string
-  ) {
+  ) => {
     if ((field === "debit" || field === "credit") && value.includes("-")) {
       return;
     }
@@ -177,17 +263,17 @@ export function JournalEntryChecker() {
         };
       })
     );
-  }
+  }, []);
 
   function addLine() {
     setLines((currentLines) => [...currentLines, createLine(currentLines.length + 1)]);
   }
 
-  function removeLine(id: string) {
+  const removeLine = useCallback((id: string) => {
     setLines((currentLines) =>
       currentLines.length === 1 ? currentLines : currentLines.filter((line) => line.id !== id)
     );
-  }
+  }, []);
 
   function resetChecker() {
     setLines([createLine(1), createLine(2)]);
@@ -230,80 +316,16 @@ export function JournalEntryChecker() {
             <span className="sr-only">Remove</span>
           </div>
 
-          {lines.map((line, index) => {
-            const parsedDebit = parseAmount(line.debit);
-            const parsedCredit = parseAmount(line.credit);
-            const hasDebit = parsedDebit !== null && parsedDebit > 0;
-            const hasCredit = parsedCredit !== null && parsedCredit > 0;
-
-            return (
-              <div
-                className="grid min-w-0 gap-3 rounded-lg border border-slate-200 bg-white p-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_6rem] lg:border-0 lg:p-0"
-                key={line.id}
-              >
-                <label className="grid min-w-0 gap-2">
-                  <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
-                    Account Name
-                  </span>
-                  <input
-                    aria-label={`Line ${index + 1} account name`}
-                    className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                    onChange={(event) => updateLine(line.id, "accountName", event.target.value)}
-                    placeholder="Account name"
-                    value={line.accountName}
-                  />
-                </label>
-
-                <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:contents">
-                  <label className="grid min-w-0 gap-2">
-                    <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
-                      Debit
-                    </span>
-                    <input
-                      aria-label={`Line ${index + 1} debit amount`}
-                      className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-right text-base text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                      disabled={hasCredit}
-                      inputMode="decimal"
-                      min="0"
-                      onChange={(event) => updateLine(line.id, "debit", event.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                      type="number"
-                      value={line.debit}
-                    />
-                  </label>
-
-                  <label className="grid min-w-0 gap-2">
-                    <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
-                      Credit
-                    </span>
-                    <input
-                      aria-label={`Line ${index + 1} credit amount`}
-                      className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-right text-base text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-                      disabled={hasDebit}
-                      inputMode="decimal"
-                      min="0"
-                      onChange={(event) => updateLine(line.id, "credit", event.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                      type="number"
-                      value={line.credit}
-                    />
-                  </label>
-                </div>
-
-                <button
-                  aria-label={`Remove line ${index + 1}`}
-                    className="flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-base font-semibold text-transparent transition after:text-slate-500 after:content-['x'] hover:border-rose-200 hover:bg-rose-50 hover:after:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-24"
-                  disabled={lines.length === 1}
-                  onClick={() => removeLine(line.id)}
-                  type="button"
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })}
+          {lines.map((line, index) => (
+            <JournalEntryLineEditor
+              canRemove={lines.length > 1}
+              index={index}
+              key={line.id}
+              line={line}
+              onRemove={removeLine}
+              onUpdate={updateLine}
+            />
+          ))}
 
           <button
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200"

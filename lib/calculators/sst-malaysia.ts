@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals
+} from "./number-utils";
+
 export type SstCalculationMode = "add" | "remove";
 
 export type SstCategoryGroup = "service" | "goods" | "manual";
@@ -198,16 +203,8 @@ export type SstInvoiceMalaysiaResult = {
   explanation: string;
 };
 
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
 export function roundSstMoneyAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+  return roundToTwoDecimals(value);
 }
 
 function assertValidPercentageRate(value: number | null | undefined, label: string): number {

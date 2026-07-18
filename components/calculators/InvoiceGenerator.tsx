@@ -10,7 +10,6 @@ import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { EditableInvoiceCanvas } from "@/components/invoice/EditableInvoiceCanvas";
 import { InvoiceModals } from "@/components/invoice/InvoiceModals";
 import { getCurrencyOption, isCurrencyCode } from "@/lib/currency";
-import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 import {
   createEmptyInvoiceDefaults,
   DEFAULT_INVOICE_NUMBER,
@@ -206,7 +205,7 @@ export function InvoiceGenerator() {
     restoreInvoiceState
   });
 
-  function markInvoiceFieldTouched(field: string) {
+  const markInvoiceFieldTouched = useCallback((field: string) => {
     setTouchedInvoiceFields((currentFields) => {
       if (currentFields.has(field)) {
         return currentFields;
@@ -216,7 +215,7 @@ export function InvoiceGenerator() {
       nextFields.add(field);
       return nextFields;
     });
-  }
+  }, []);
 
   function resetValidationDisplay() {
     setTouchedInvoiceFields(new Set());
@@ -228,11 +227,11 @@ export function InvoiceGenerator() {
     scrollInvoiceGeneratorToTop();
   }
 
-  function updateLineItem(id: string, key: keyof InvoiceLineItem, value: string) {
+  const updateLineItem = useCallback((id: string, key: keyof InvoiceLineItem, value: string) => {
     setLineItems((currentItems) =>
       currentItems.map((item) => (item.id === id ? { ...item, [key]: value } : item))
     );
-  }
+  }, []);
 
   function updatePayment(field: keyof InvoicePaymentDetails, value: string | undefined) {
     setPayment((currentPayment) => ({
@@ -326,11 +325,18 @@ export function InvoiceGenerator() {
     setLineItems((currentItems) => [...currentItems, createLineItem(currentItems.length + 1)]);
   }
 
-  function removeLineItem(id: string) {
+  const removeLineItem = useCallback((id: string) => {
     setLineItems((currentItems) =>
       currentItems.length === 1 ? currentItems : currentItems.filter((item) => item.id !== id)
     );
-  }
+  }, []);
+
+  const handleLineItemBlur = useCallback(
+    (index: number, key: "description" | "quantity" | "unitPrice") => {
+      markInvoiceFieldTouched(`items.${index}.${key}`);
+    },
+    [markInvoiceFieldTouched]
+  );
 
   function clearEverything() {
     setIsClearEverythingModalOpen(true);
@@ -388,27 +394,9 @@ export function InvoiceGenerator() {
     void downloadInvoicePdf();
   }
 
-  const previewItems = useMemo(
-    () =>
-      calculateInvoiceLineItems(lineItems).map((item, index) => ({
-        ...item,
-        description: lineItems[index]?.description.trim() || `Item ${index + 1}`
-      })),
-    [lineItems]
-  );
   const pdfParams = useMemo(
-    () => ({
-      calculation,
-      formatCurrency,
-      invoiceData,
-      previewItems
-    }),
-    [
-      calculation,
-      formatCurrency,
-      invoiceData,
-      previewItems
-    ]
+    () => ({ calculation, formatCurrency, invoiceData }),
+    [calculation, formatCurrency, invoiceData]
   );
   const handleDownloadComplete = useCallback(() => {
     setIsDownloadModalOpen(false);
@@ -466,7 +454,6 @@ export function InvoiceGenerator() {
           businessName={businessName}
           businessNameError={businessNameError}
           calculation={calculation}
-          currencyCode={currency}
           currencySymbol={currencySymbol}
           customerAddress={customerAddress}
           customerAddressError={customerAddressError}
@@ -509,7 +496,7 @@ export function InvoiceGenerator() {
           onFieldBlur={markInvoiceFieldTouched}
           onInvoiceDateChange={setInvoiceDate}
           onInvoiceNumberChange={setInvoiceNumber}
-          onLineItemBlur={(index, key) => markInvoiceFieldTouched(`items.${index}.${key}`)}
+          onLineItemBlur={handleLineItemBlur}
           onNotesChange={setNotes}
           onPaymentChange={updatePayment}
           onPaymentFieldBlur={(field) => markInvoiceFieldTouched(`payment.${field}`)}
@@ -527,7 +514,6 @@ export function InvoiceGenerator() {
           payment={payment}
           paymentErrors={paymentErrors}
           pdfStatus={pdfStatus}
-          previewItems={previewItems}
           shipping={shipping}
           shippingError={shippingError}
           shippingLabelError={shippingLabelError}

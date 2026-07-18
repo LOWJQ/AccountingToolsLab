@@ -104,7 +104,7 @@ export default function DepreciationCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/depreciation-calculator`;
 
   return (
-    <ToolPageLayout eyebrow="Accounting Calculator">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

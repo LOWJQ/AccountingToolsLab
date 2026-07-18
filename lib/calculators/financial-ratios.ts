@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals as roundAmount
+} from "./number-utils";
+
 export type FinancialRatioType =
   | "current-ratio"
   | "debt-to-equity"
@@ -106,18 +111,6 @@ export const ratioDefinitions: Record<FinancialRatioType, RatioDefinition> = {
       `Your return on assets is ${displayValue}. This shows how efficiently assets generate profit.`
   }
 };
-
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 export function formatRatioResult(value: number, format: "ratio" | "percentage"): string {
   const rounded = roundAmount(value);

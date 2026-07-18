@@ -100,7 +100,7 @@ export default function BreakEvenCalculatorPage() {
   const pageUrl = `${siteConfig.url}/tools/break-even-calculator`;
 
   return (
-    <ToolPageLayout eyebrow="Business Calculator">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

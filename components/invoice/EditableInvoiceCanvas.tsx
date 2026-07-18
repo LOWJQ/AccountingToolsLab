@@ -1,12 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { Download, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
-import type {
-  InvoiceCalculationResult,
-  InvoiceLineCalculationResult
-} from "@/lib/invoice/invoice-calculations";
+import type { InvoiceCalculationResult } from "@/lib/invoice/invoice-calculations";
 import { formatLineItemErrorForDisplay } from "@/lib/invoice/invoice-line-item-error-display";
 import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 import { processLogoFile } from "@/lib/invoice/invoice-logo";
@@ -29,7 +26,6 @@ type EditableInvoiceCanvasProps = {
   businessName: string;
   businessNameError: string;
   calculation: InvoiceCalculationResult;
-  currencyCode: string;
   currencySymbol: string;
   customerAddress: string;
   customerAddressError: string;
@@ -94,7 +90,6 @@ type EditableInvoiceCanvasProps = {
   payment: InvoicePaymentDetails;
   paymentErrors: Partial<Record<keyof InvoicePaymentDetails, string>>;
   pdfStatus?: { type: "error" | "warning"; message: string } | null;
-  previewItems: InvoiceLineCalculationResult[];
   shipping: InvoiceShipping;
   shippingError: string;
   shippingLabelError: string;
@@ -516,6 +511,106 @@ function EditableInvoiceCustomerAndDates(props: EditableInvoiceCanvasProps) {
   );
 }
 
+const EditableInvoiceLineItemRow = memo(function EditableInvoiceLineItemRow({
+  canRemove,
+  descriptionError,
+  formatCurrency,
+  index,
+  item,
+  lineTotal,
+  onLineItemBlur,
+  onRemoveLineItem,
+  onUpdateLineItem,
+  quantityError,
+  unitPriceError
+}: {
+  canRemove: boolean;
+  descriptionError: string;
+  formatCurrency: EditableInvoiceCanvasProps["formatCurrency"];
+  index: number;
+  item: InvoiceLineItem;
+  lineTotal: number;
+  onLineItemBlur: EditableInvoiceCanvasProps["onLineItemBlur"];
+  onRemoveLineItem: EditableInvoiceCanvasProps["onRemoveLineItem"];
+  onUpdateLineItem: EditableInvoiceCanvasProps["onUpdateLineItem"];
+  quantityError: string;
+  unitPriceError: string;
+}) {
+  return (
+    <div className="group grid min-w-0 gap-3 bg-white px-3 py-3 text-sm sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:items-start sm:gap-3 sm:px-4">
+      <div className="pt-2 tabular-nums text-slate-600">
+        <span className="mr-2 text-xs font-semibold uppercase tracking-wide sm:hidden">
+          No
+        </span>
+        {index + 1}
+      </div>
+      <div className="min-w-0">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
+          Description
+        </span>
+        <EditableInput
+          ariaLabel={`Line item ${index + 1} description`}
+          className="rounded-lg"
+          error={formatLineItemErrorForDisplay(descriptionError, "description")}
+          errorId={`line-item-${index}-description-error`}
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.lineItemDescription}
+          onBlur={() => onLineItemBlur(index, "description")}
+          onChange={(value) => onUpdateLineItem(item.id, "description", value)}
+          placeholder={`Item ${index + 1} description`}
+          value={item.description}
+        />
+      </div>
+      <div className="min-w-0">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
+          Unit Price
+        </span>
+        <EditableInput
+          ariaLabel={`Line item ${index + 1} unit price`}
+          className="rounded-lg tabular-nums sm:text-right"
+          error={formatLineItemErrorForDisplay(unitPriceError, "unitPrice")}
+          errorId={`line-item-${index}-unit-price-error`}
+          inputMode="decimal"
+          onBlur={() => onLineItemBlur(index, "unitPrice")}
+          onChange={(value) => onUpdateLineItem(item.id, "unitPrice", value)}
+          placeholder="0.00"
+          value={item.unitPrice}
+        />
+      </div>
+      <div className="min-w-0">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
+          Qty
+        </span>
+        <EditableInput
+          ariaLabel={`Line item ${index + 1} quantity`}
+          className="rounded-lg tabular-nums sm:text-right"
+          error={formatLineItemErrorForDisplay(quantityError, "quantity")}
+          errorId={`line-item-${index}-quantity-error`}
+          inputMode="decimal"
+          onBlur={() => onLineItemBlur(index, "quantity")}
+          onChange={(value) => onUpdateLineItem(item.id, "quantity", value)}
+          placeholder="1"
+          value={item.quantity}
+        />
+      </div>
+      <div className="min-w-0 pt-2 font-semibold tabular-nums text-slate-950 sm:text-right">
+        <span className="mr-2 text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
+          Amount
+        </span>
+        {formatCurrency(lineTotal)}
+      </div>
+      <button
+        aria-label={`Remove line item ${index + 1}`}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 opacity-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-30 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+        disabled={!canRemove}
+        onClick={() => onRemoveLineItem(item.id)}
+        type="button"
+      >
+        <Trash2 aria-hidden="true" className="h-4 w-4" />
+      </button>
+    </div>
+  );
+});
+
 export function EditableInvoiceLineItems({
   formatCurrency,
   getLineItemError,
@@ -551,97 +646,22 @@ export function EditableInvoiceLineItems({
           <span className="sr-only">Remove</span>
         </div>
         <div className="divide-y divide-slate-200 bg-white sm:min-w-[720px]">
-          {lineItems.map((item, index) => {
-            const descriptionError = formatLineItemErrorForDisplay(
-              getLineItemError(index, "description"),
-              "description"
-            );
-            const quantityError = formatLineItemErrorForDisplay(
-              getLineItemError(index, "quantity"),
-              "quantity"
-            );
-            const unitPriceError = formatLineItemErrorForDisplay(
-              getLineItemError(index, "unitPrice"),
-              "unitPrice"
-            );
-
-            return (
-              <div
-                className="group grid min-w-0 gap-3 bg-white px-3 py-3 text-sm sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:items-start sm:gap-3 sm:px-4"
-                key={item.id}
-              >
-                <div className="pt-2 tabular-nums text-slate-600">
-                  <span className="mr-2 text-xs font-semibold uppercase tracking-wide sm:hidden">
-                    No
-                  </span>
-                  {index + 1}
-                </div>
-                <div className="min-w-0">
-                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
-                    Description
-                  </span>
-                  <EditableInput
-                    ariaLabel={`Line item ${index + 1} description`}
-                    className="rounded-lg"
-                    error={descriptionError}
-                    errorId={`line-item-${index}-description-error`}
-                    maxLength={INVOICE_TEXT_MAX_LENGTHS.lineItemDescription}
-                    onBlur={() => onLineItemBlur(index, "description")}
-                    onChange={(value) => onUpdateLineItem(item.id, "description", value)}
-                    placeholder={`Item ${index + 1} description`}
-                    value={item.description}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
-                    Unit Price
-                  </span>
-                  <EditableInput
-                    ariaLabel={`Line item ${index + 1} unit price`}
-                    className="rounded-lg tabular-nums sm:text-right"
-                    error={unitPriceError}
-                    errorId={`line-item-${index}-unit-price-error`}
-                    inputMode="decimal"
-                    onBlur={() => onLineItemBlur(index, "unitPrice")}
-                    onChange={(value) => onUpdateLineItem(item.id, "unitPrice", value)}
-                    placeholder="0.00"
-                    value={item.unitPrice}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
-                    Qty
-                  </span>
-                  <EditableInput
-                    ariaLabel={`Line item ${index + 1} quantity`}
-                    className="rounded-lg tabular-nums sm:text-right"
-                    error={quantityError}
-                    errorId={`line-item-${index}-quantity-error`}
-                    inputMode="decimal"
-                    onBlur={() => onLineItemBlur(index, "quantity")}
-                    onChange={(value) => onUpdateLineItem(item.id, "quantity", value)}
-                    placeholder="1"
-                    value={item.quantity}
-                  />
-                </div>
-                <div className="min-w-0 pt-2 font-semibold tabular-nums text-slate-950 sm:text-right">
-                  <span className="mr-2 text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
-                    Amount
-                  </span>
-                  {formatCurrency(lineItemPreviewTotals[index] ?? 0)}
-                </div>
-                <button
-                  aria-label={`Remove line item ${index + 1}`}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 opacity-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-30 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
-                  disabled={lineItems.length === 1}
-                  onClick={() => onRemoveLineItem(item.id)}
-                  type="button"
-                >
-                  <Trash2 aria-hidden="true" className="h-4 w-4" />
-                </button>
-              </div>
-            );
-          })}
+          {lineItems.map((item, index) => (
+            <EditableInvoiceLineItemRow
+              canRemove={lineItems.length > 1}
+              descriptionError={getLineItemError(index, "description")}
+              formatCurrency={formatCurrency}
+              index={index}
+              item={item}
+              key={item.id}
+              lineTotal={lineItemPreviewTotals[index] ?? 0}
+              onLineItemBlur={onLineItemBlur}
+              onRemoveLineItem={onRemoveLineItem}
+              onUpdateLineItem={onUpdateLineItem}
+              quantityError={getLineItemError(index, "quantity")}
+              unitPriceError={getLineItemError(index, "unitPrice")}
+            />
+          ))}
         </div>
       </div>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

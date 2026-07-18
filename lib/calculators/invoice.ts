@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals as roundAmount
+} from "./number-utils";
+
 export type InvoiceLineItemInput = {
   description?: string;
   quantity: number | null | undefined;
@@ -22,18 +27,6 @@ export type InvoiceResult = {
 export type InvoiceOptions = {
   taxRate?: number;
 };
-
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 export function calculateInvoice(
   items: InvoiceLineItemInput[],

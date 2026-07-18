@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals as roundAmount
+} from "./number-utils";
+
 export type BreakEvenInput = {
   fixedCosts: number | null | undefined;
   sellingPricePerUnit: number | null | undefined;
@@ -14,18 +19,6 @@ export type BreakEvenResult = {
   breakEvenSales: number;
   explanation: string;
 };
-
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 export function calculateBreakEven(input: BreakEvenInput): BreakEvenResult {
   const fixedCosts = assertValidNumber(input.fixedCosts, "Fixed costs");

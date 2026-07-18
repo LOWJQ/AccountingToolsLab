@@ -120,7 +120,7 @@ export default function SstCalculatorMalaysiaPage() {
   const pageUrl = `${siteConfig.url}/tools/sst-calculator-malaysia`;
 
   return (
-    <ToolPageLayout eyebrow="Malaysia Tax Calculator">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

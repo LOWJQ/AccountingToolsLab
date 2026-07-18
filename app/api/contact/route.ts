@@ -373,21 +373,6 @@ function validatePayload(payload: ContactPayload): ValidationResult {
     };
   }
 
-  if (rawHoneypot.length > 200) {
-    return {
-      ok: true,
-      isSpam: true,
-      data: {
-        name: "",
-        email: "",
-        topic: "",
-        subject: "",
-        message: "",
-        pageUrl: ""
-      }
-    };
-  }
-
   const name = normalizeString(payload.name);
   const email = normalizeString(payload.email).toLowerCase();
   const topic = normalizeString(payload.topic);

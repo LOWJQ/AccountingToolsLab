@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { calculateTrialBalance } from "@/lib/calculators/trial-balance";
 import type { TrialBalanceRow } from "@/lib/calculators/trial-balance";
@@ -27,6 +27,92 @@ function parseAmount(value: string): number | null {
 }
 
 const invalidAmountMessage = "Please enter valid numeric debit and credit amounts.";
+
+type TrialBalanceRowField = keyof Omit<EditableTrialBalanceRow, "id">;
+
+const TrialBalanceRowEditor = memo(function TrialBalanceRowEditor({
+  canRemove,
+  currency,
+  index,
+  onRemove,
+  onUpdate,
+  row
+}: {
+  canRemove: boolean;
+  currency: string;
+  index: number;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, field: TrialBalanceRowField, value: string) => void;
+  row: EditableTrialBalanceRow;
+}) {
+  const parsedDebit = parseAmount(row.debit);
+  const parsedCredit = parseAmount(row.credit);
+  const hasDebit = parsedDebit !== null && parsedDebit > 0;
+  const hasCredit = parsedCredit !== null && parsedCredit > 0;
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-3 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+      <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_3.5rem] lg:gap-4">
+        <div className="grid gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
+            Account Name
+          </span>
+          <input
+            aria-label={`Row ${index + 1} account name`}
+            className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            onChange={(event) => onUpdate(row.id, "accountName", event.target.value)}
+            placeholder="Account name"
+            value={row.accountName}
+          />
+        </div>
+        <div className="grid gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
+            Debit ({currency})
+          </span>
+          <input
+            aria-label={`Row ${index + 1} debit amount`}
+            className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-right text-base font-medium text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            disabled={hasCredit}
+            inputMode="decimal"
+            min="0"
+            onChange={(event) => onUpdate(row.id, "debit", event.target.value)}
+            placeholder="0.00"
+            type="number"
+            value={row.debit}
+          />
+        </div>
+        <div className="grid gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
+            Credit ({currency})
+          </span>
+          <input
+            aria-label={`Row ${index + 1} credit amount`}
+            className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-right text-base font-medium text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            disabled={hasDebit}
+            inputMode="decimal"
+            min="0"
+            onChange={(event) => onUpdate(row.id, "credit", event.target.value)}
+            placeholder="0.00"
+            step="0.01"
+            type="number"
+            value={row.credit}
+          />
+        </div>
+        <div className="flex items-end lg:items-center">
+          <button
+            aria-label={`Remove row ${index + 1}`}
+            className="flex h-11 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-11"
+            disabled={!canRemove}
+            onClick={() => onRemove(row.id)}
+            type="button"
+          >
+            <X aria-hidden="true" className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 function SummaryCard({
   label,
@@ -121,11 +207,11 @@ export function TrialBalanceCalculator() {
   const result = calculation.result;
   const status = getStatus(result);
 
-  function updateRow(
+  const updateRow = useCallback((
     id: string,
-    field: keyof Omit<EditableTrialBalanceRow, "id">,
+    field: TrialBalanceRowField,
     value: string
-  ) {
+  ) => {
     if ((field === "debit" || field === "credit") && value.includes("-")) {
       return;
     }
@@ -158,7 +244,7 @@ export function TrialBalanceCalculator() {
         };
       })
     );
-  }
+  }, []);
 
   function addRow() {
     const id = `row-${Date.now()}`;
@@ -173,9 +259,9 @@ export function TrialBalanceCalculator() {
     ]);
   }
 
-  function removeRow(id: string) {
+  const removeRow = useCallback((id: string) => {
     setRows((currentRows) => currentRows.filter((row) => row.id !== id));
-  }
+  }, []);
 
   return (
     <div className="flex flex-col gap-8">
@@ -189,78 +275,17 @@ export function TrialBalanceCalculator() {
           </div>
 
           <div className="flex flex-col gap-3">
-            {rows.map((row, index) => {
-              const parsedDebit = parseAmount(row.debit);
-              const parsedCredit = parseAmount(row.credit);
-              const hasDebit = parsedDebit !== null && parsedDebit > 0;
-              const hasCredit = parsedCredit !== null && parsedCredit > 0;
-
-              return (
-                <div
-                  className="rounded-lg border border-slate-200 bg-slate-50/50 p-3 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0"
-                  key={row.id}
-                >
-                  <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_3.5rem] lg:gap-4">
-                    <div className="grid gap-2">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
-                        Account Name
-                      </span>
-                      <input
-                        aria-label={`Row ${index + 1} account name`}
-                        className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-                        onChange={(event) => updateRow(row.id, "accountName", event.target.value)}
-                        placeholder="Account name"
-                        value={row.accountName}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
-                        Debit ({currency})
-                      </span>
-                      <input
-                        aria-label={`Row ${index + 1} debit amount`}
-                        className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-right text-base font-medium text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-                        disabled={hasCredit}
-                        inputMode="decimal"
-                        min="0"
-                        onChange={(event) => updateRow(row.id, "debit", event.target.value)}
-                        placeholder="0.00"
-                        type="number"
-                        value={row.debit}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
-                        Credit ({currency})
-                      </span>
-                      <input
-                        aria-label={`Row ${index + 1} credit amount`}
-                        className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-right text-base font-medium text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-                        disabled={hasDebit}
-                        inputMode="decimal"
-                        min="0"
-                        onChange={(event) => updateRow(row.id, "credit", event.target.value)}
-                        placeholder="0.00"
-                        step="0.01"
-                        type="number"
-                        value={row.credit}
-                      />
-                    </div>
-                    <div className="flex items-end lg:items-center">
-                      <button
-                        aria-label={`Remove row ${index + 1}`}
-                        className="flex h-11 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-11"
-                        disabled={rows.length === 1}
-                        onClick={() => removeRow(row.id)}
-                        type="button"
-                      >
-                        <X aria-hidden="true" className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {rows.map((row, index) => (
+              <TrialBalanceRowEditor
+                canRemove={rows.length > 1}
+                currency={currency}
+                index={index}
+                key={row.id}
+                onRemove={removeRow}
+                onUpdate={updateRow}
+                row={row}
+              />
+            ))}
           </div>
 
           <div className="flex justify-stretch lg:justify-end">

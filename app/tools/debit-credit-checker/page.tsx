@@ -103,7 +103,7 @@ export default function DebitCreditCheckerPage() {
   const pageUrl = `${siteConfig.url}/tools/debit-credit-checker`;
 
   return (
-    <ToolPageLayout eyebrow="Accounting Checker">
+    <ToolPageLayout>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },

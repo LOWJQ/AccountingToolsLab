@@ -26,6 +26,11 @@ export type InvoiceLineCalculationResult = {
   lineTotal: number;
 };
 
+export type InvoiceCalculationWithLineItems = {
+  calculation: InvoiceCalculationResult;
+  lineItems: InvoiceLineCalculationResult[];
+};
+
 const MONEY_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/;
 const QUANTITY_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d{0,4})?|\.\d{1,4})$/;
 const PERCENTAGE_AMOUNT_PATTERN = /^[+-]?(?:\d+(?:\.\d{0,4})?|\.\d{1,4})$/;
@@ -112,9 +117,12 @@ export function calculateInvoiceLineItems(
   });
 }
 
-export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculationResult {
+function calculateInvoiceTotalsFromLineItems(
+  invoice: InvoiceData,
+  lineItems: InvoiceLineCalculationResult[]
+): InvoiceCalculationResult {
   const subtotal = roundMoney(
-    calculateInvoiceLineItems(invoice.items).reduce((total, item) => total + item.lineTotal, 0)
+    lineItems.reduce((total, item) => total + item.lineTotal, 0)
   );
 
   const discountValue =
@@ -147,4 +155,19 @@ export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculation
     shippingAmount,
     total: roundMoney(taxableAmount + taxAmount + shippingAmount)
   };
+}
+
+export function calculateInvoiceWithLineItems(
+  invoice: InvoiceData
+): InvoiceCalculationWithLineItems {
+  const lineItems = calculateInvoiceLineItems(invoice.items);
+
+  return {
+    calculation: calculateInvoiceTotalsFromLineItems(invoice, lineItems),
+    lineItems
+  };
+}
+
+export function calculateInvoiceTotals(invoice: InvoiceData): InvoiceCalculationResult {
+  return calculateInvoiceWithLineItems(invoice).calculation;
 }

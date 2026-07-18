@@ -83,7 +83,6 @@ export function useInvoiceDraft({
   return {
     autosaveError,
     clearAutosaveTimer,
-    isDraftHydrated,
     setAutosaveError,
     skipNextAutosave
   };

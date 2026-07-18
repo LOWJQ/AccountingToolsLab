@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals as roundAmount
+} from "./number-utils";
+
 export type DepreciationInput = {
   assetCost: number | null | undefined;
   salvageValue: number | null | undefined;
@@ -13,18 +18,6 @@ export type DepreciationResult = {
   monthlyDepreciation: number;
   explanation: string;
 };
-
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 export function calculateDepreciation(input: DepreciationInput): DepreciationResult {
   const assetCost = assertValidNumber(input.assetCost, "Asset cost");

@@ -1,3 +1,8 @@
+import {
+  assertValidNumber,
+  roundToTwoDecimals as roundAmount
+} from "./number-utils";
+
 export type CashFlowInput = {
   beginningCashBalance: number | null | undefined;
   cashInflows: number | null | undefined;
@@ -15,18 +20,6 @@ export type CashFlowResult = {
   status: CashFlowStatus;
   explanation: string;
 };
-
-function assertValidNumber(value: number | null | undefined, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${label} is required.`);
-  }
-
-  return value;
-}
-
-function roundAmount(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 function getCashFlowStatus(netCashFlow: number): CashFlowStatus {
   if (netCashFlow > 0) {

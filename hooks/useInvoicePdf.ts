@@ -1,17 +1,17 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import {
-  generateInvoicePdf,
-  type InvoicePdfGenerationResult,
-  type InvoicePdfParams
+import type {
+  InvoicePdfGenerationResult,
+  InvoicePdfParams
 } from "@/lib/invoice/invoice-pdf-generator";
+import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 
 type UseInvoicePdfInput = {
   hasValidInvoice: boolean;
   invoiceNumber: string;
   onDownloadComplete: () => void;
-  pdfParams: InvoicePdfParams;
+  pdfParams: Omit<InvoicePdfParams, "previewItems">;
   saveUsedInvoiceNumber: (invoiceNumber: string) => void;
 };
 
@@ -54,7 +54,18 @@ export function useInvoicePdf({
     setPdfStatus(null);
 
     try {
-      const result = await generateInvoicePdf(pdfParams);
+      const previewItems = calculateInvoiceLineItems(pdfParams.invoiceData.items).map(
+        (item, index) => ({
+          ...item,
+          description:
+            pdfParams.invoiceData.items[index]?.description.trim() || `Item ${index + 1}`
+        })
+      );
+      const { generateInvoicePdf } = await import("@/lib/invoice/invoice-pdf-generator");
+      const result = await generateInvoicePdf({
+        ...pdfParams,
+        previewItems
+      });
       saveUsedInvoiceNumber(invoiceNumber);
       onDownloadComplete();
       if (result.warnings.length > 0) {
