@@ -21,7 +21,10 @@ const footerSections: Array<{ links: FooterLink[]; title: string }> = [
     title: "Guides",
     links: [
       { label: "What an Invoice Includes", href: "/guides/what-should-an-invoice-include-before-you-send-it" },
-      { label: "SST Guide for Businesses", href: "/guides/sst-calculator-malaysia-add-remove-sst" },
+      {
+        label: "SST Registration Guide",
+        href: "/guides/do-i-need-to-register-for-sst-malaysia"
+      },
       { label: "Debit vs Credit", href: "/guides/debit-vs-credit" },
       { label: "Accounting Basics", href: "/guides" },
       { label: "All Guides", href: "/guides" }

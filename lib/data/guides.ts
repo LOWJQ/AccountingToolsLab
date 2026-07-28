@@ -20,14 +20,14 @@ export const guides: Guide[] = [
     href: "/guides/what-should-an-invoice-include-before-you-send-it"
   },
   {
-    slug: "sst-calculator-malaysia-add-remove-sst",
-    title: "SST Calculator Malaysia: Add or Remove SST",
+    slug: "do-i-need-to-register-for-sst-malaysia",
+    title: "Do I Need to Register for SST in Malaysia?",
     description:
-      "Learn how to add or remove SST in Malaysia with formulas, examples, SST amount, total including SST, amount before SST, and common mistakes.",
-    menuDescription: "Learn how to add or remove SST in Malaysia with simple formulas.",
-    category: "Malaysia Tax Basics",
+      "Identify whether your business provides taxable goods or services, find the relevant threshold, and test your taxable turnover over 12 months.",
+    menuDescription: "Check whether your business may need SST registration.",
+    category: "Malaysia Business Tax",
     status: "available",
-    href: "/guides/sst-calculator-malaysia-add-remove-sst"
+    href: "/guides/do-i-need-to-register-for-sst-malaysia"
   },
   {
     slug: "trial-balance-explained",

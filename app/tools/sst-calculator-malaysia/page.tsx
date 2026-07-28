@@ -291,16 +291,16 @@ export default function SstCalculatorMalaysiaPage() {
         </h2>
         <Link
           className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/sst-calculator-malaysia-add-remove-sst"
+          href="/guides/do-i-need-to-register-for-sst-malaysia"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">SST Guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              SST Calculator Malaysia: Add or Remove SST
+              Do I Need to Register for SST in Malaysia?
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn how to add or remove SST in Malaysia with formulas, examples, SST amount, total
-              including SST, and amount before SST.
+              Identify the taxable activity, find the correct threshold, and test taxable
+              turnover over 12 months.
             </p>
           </div>
           <ArrowRight

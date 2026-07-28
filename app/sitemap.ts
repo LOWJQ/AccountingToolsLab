@@ -18,7 +18,7 @@ const updatedRouteLastModified: Record<string, string> = {
   "/guides/break-even-point-explained": "2026-05-08",
   "/guides/straight-line-depreciation-explained": "2026-05-08",
   "/guides/what-should-an-invoice-include-before-you-send-it": "2026-05-12",
-  "/guides/sst-calculator-malaysia-add-remove-sst": "2026-05-08",
+  "/guides/do-i-need-to-register-for-sst-malaysia": "2026-07-24",
   "/tools/invoice-generator": "2026-05-11"
 };
 

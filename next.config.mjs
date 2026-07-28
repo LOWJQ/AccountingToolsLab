@@ -56,6 +56,23 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/guides/how-to-create-a-simple-invoice",
+        destination:
+          "/guides/what-should-an-invoice-include-before-you-send-it",
+        permanent: true
+      },
+      {
+        source: "/guides/sst-calculator-malaysia-add-remove-sst",
+        destination: "/guides/do-i-need-to-register-for-sst-malaysia",
+        permanent: true
+      },
+      {
+        source:
+          "/guides/sst-calculator-malaysia-service-charge-restaurant-bills",
+        destination: "/guides/do-i-need-to-register-for-sst-malaysia",
+        permanent: true
+      },
+      {
         source: "/:path*",
         has: [
           {

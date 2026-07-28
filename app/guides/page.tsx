@@ -11,7 +11,7 @@ export const metadata = createMetadata({
 
 const guideOrder = [
   "what-should-an-invoice-include-before-you-send-it",
-  "sst-calculator-malaysia-add-remove-sst",
+  "do-i-need-to-register-for-sst-malaysia",
   "trial-balance-explained",
   "cash-flow-vs-profit",
   "break-even-point-explained",
@@ -62,8 +62,8 @@ const learningPaths = [
         status: "Available"
       },
       {
-        label: "SST Calculator Malaysia: Add or Remove SST",
-        href: "/guides/sst-calculator-malaysia-add-remove-sst",
+        label: "Do I Need to Register for SST?",
+        href: "/guides/do-i-need-to-register-for-sst-malaysia",
         status: "Available"
       },
       {

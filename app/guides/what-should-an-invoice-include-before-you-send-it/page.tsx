@@ -85,8 +85,8 @@ const checklist = [
 
 const sidebarGuides = [
   {
-    href: "/guides/sst-calculator-malaysia-add-remove-sst",
-    label: "SST Calculator Malaysia: Add or Remove SST"
+    href: "/guides/do-i-need-to-register-for-sst-malaysia",
+    label: "Do I Need to Register for SST?"
   },
   {
     href: "/guides/cash-flow-vs-profit",
@@ -382,20 +382,20 @@ export default function HowToCreateSimpleInvoicePage() {
                 <p>
                   If SST applies, show the SST amount clearly on the invoice. You can use the{" "}
                   <Link
-                    className="font-semibold text-slate-950 underline-offset-4 hover:underline"
+                    className="text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
                     href="/tools/sst-calculator-malaysia"
                   >
                     SST Calculator Malaysia
                   </Link>{" "}
                   to check the arithmetic, and read the{" "}
                   <Link
-                    className="font-semibold text-slate-950 underline-offset-4 hover:underline"
-                    href="/guides/sst-calculator-malaysia-add-remove-sst"
+                    className="text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
+                    href="/guides/do-i-need-to-register-for-sst-malaysia"
                   >
-                    add or remove SST guide
+                    SST registration guide
                   </Link>{" "}
-                  for the basic formulas. This guide is general information only, not professional
-                  tax or legal advice.
+                  to check whether the business may need to register. This guide is general
+                  information only, not professional tax or legal advice.
                 </p>
               </div>
             </section>
@@ -414,14 +414,14 @@ export default function HowToCreateSimpleInvoicePage() {
               <p className="mt-5 text-base leading-7 text-slate-950">
                 An invoice also does not mean cash has been collected. For cash planning, compare{" "}
                 <Link
-                  className="font-semibold text-slate-950 underline-offset-4 hover:underline"
+                  className="text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
                   href="/guides/cash-flow-vs-profit"
                 >
                   cash flow vs profit
                 </Link>{" "}
                 or use the{" "}
                 <Link
-                  className="font-semibold text-slate-950 underline-offset-4 hover:underline"
+                  className="text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
                   href="/tools/cash-flow-calculator"
                 >
                   Cash Flow Calculator
@@ -464,7 +464,7 @@ export default function HowToCreateSimpleInvoicePage() {
                 <div className="mt-4 grid gap-3">
                   {sidebarGuides.map((guide) => (
                     <Link
-                      className="text-sm font-semibold leading-6 text-slate-950 underline-offset-4 transition hover:underline"
+                      className="text-sm leading-6 text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
                       href={guide.href}
                       key={guide.href}
                     >
