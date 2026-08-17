@@ -1,93 +1,18 @@
 import type { Tool } from "@/types/tool";
 
+/**
+ * Single source of truth for every tool surface: the tools directory, the
+ * header mega-menu, the footer, the ItemList schema on /tools, and the
+ * sitemap. Order here is the order shown everywhere, flagship tools first.
+ */
 export const tools: Tool[] = [
   {
-    slug: "trial-balance-calculator",
-    name: "Trial Balance Calculator",
-    emoji: "\u2696\uFE0F",
-    description: "Check whether total debits equal total credits and see the difference instantly.",
-    category: "Bookkeeping Checks",
-    bestFor: "Checking ledger balances before preparing financial statements.",
-    href: "/tools/trial-balance-calculator",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
-    slug: "accounting-equation-calculator",
-    name: "Accounting Equation Calculator",
-    emoji: "\u{1F9E9}",
-    description: "Review assets, liabilities, and equity using the basic accounting equation.",
-    category: "Accounting Basics",
-    bestFor: "Understanding how assets, liabilities, and equity relate.",
-    href: "/tools/accounting-equation-calculator",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
-    slug: "debit-credit-checker",
-    name: "Debit/Credit Checker",
-    emoji: "\u{1F501}",
-    description: "Practice whether common account changes should be recorded as debits or credits.",
-    category: "Accounting Basics",
-    bestFor: "Learning normal balances and basic journal entry direction.",
-    href: "/tools/debit-credit-checker",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
-    slug: "financial-ratio-calculator",
-    name: "Financial Ratio Calculator",
-    emoji: "\u{1F4CA}",
-    description: "Calculate beginner-friendly liquidity, profitability, and solvency ratios.",
-    category: "Financial Analysis",
-    bestFor: "Reviewing financial statement performance and position.",
-    href: "/tools/financial-ratio-calculator",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
-    slug: "depreciation-calculator",
-    name: "Depreciation Calculator",
-    emoji: "\u{1F4C9}",
-    description: "Calculate straight-line depreciation from cost, salvage value, and useful life.",
-    category: "Depreciation & Adjustments",
-    bestFor: "Understanding asset cost allocation over time.",
-    href: "/tools/depreciation-calculator",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
-    slug: "break-even-calculator",
-    name: "Break-even Calculator",
-    emoji: "\u{1F3AF}",
-    description:
-      "Calculate contribution margin, break-even units, and break-even sales for a simple business scenario.",
-    category: "Business Planning",
-    bestFor: "Estimating how many units a business needs to sell to cover costs.",
-    href: "/tools/break-even-calculator",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
-    slug: "cash-flow-calculator",
-    name: "Cash Flow Calculator",
-    emoji: "\u{1F4B5}",
-    description:
-      "Calculate net cash flow and ending cash balance from cash inflows and outflows.",
-    category: "Business Planning",
-    bestFor: "Reviewing whether cash increased or decreased during a period.",
-    href: "/tools/cash-flow-calculator",
-    status: "mvp",
-    lastModified: "2026-07-18"
-  },
-  {
     slug: "invoice-generator",
-    name: "Invoice Generator",
-    emoji: "\u{1F4C4}",
+    name: "PDF Invoice Generator Malaysia",
+    menuTitle: "Invoice Generator",
     description:
-      "Create a simple PDF invoice with business details, customer details, line items, optional SST/tax, and totals.",
-    category: "Business Documents",
-    bestFor: "Preparing downloadable PDF invoices for freelancers and small businesses.",
+      "Create simple PDF invoices with business details, customer details, line items, optional SST/tax, discounts, and totals.",
+    menuDescription: "Create professional invoices with MYR, SST, and PDF export.",
     href: "/tools/invoice-generator",
     status: "mvp",
     lastModified: "2026-07-18"
@@ -95,28 +20,97 @@ export const tools: Tool[] = [
   {
     slug: "sst-calculator-malaysia",
     name: "SST Calculator Malaysia",
-    emoji: "\u{1F9FE}",
     description:
       "Estimate Malaysian SST amount, total including SST, or amount before SST using a selected rate.",
-    category: "Malaysia Tax Tools",
-    bestFor: "Learning how to add or remove SST from a simple amount.",
+    menuDescription: "Calculate SST-inclusive and SST-exclusive prices.",
     href: "/tools/sst-calculator-malaysia",
     status: "mvp",
     lastModified: "2026-07-28"
   },
   {
+    slug: "cash-flow-calculator",
+    name: "Cash Flow Calculator",
+    description:
+      "Calculate net cash flow and ending cash balance from cash inflows and outflows.",
+    menuDescription: "Review cash inflows, outflows, and net cash flow.",
+    href: "/tools/cash-flow-calculator",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
+    slug: "break-even-calculator",
+    name: "Break-even Calculator",
+    description:
+      "Calculate contribution margin, break-even units, and break-even sales for a simple business scenario.",
+    menuDescription: "Find the sales needed to cover your costs.",
+    href: "/tools/break-even-calculator",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
+    slug: "financial-ratio-calculator",
+    name: "Financial Ratio Calculator",
+    description: "Calculate beginner-friendly liquidity, profitability, and solvency ratios.",
+    menuDescription: "Calculate useful business and accounting ratios.",
+    href: "/tools/financial-ratio-calculator",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
+    slug: "depreciation-calculator",
+    name: "Depreciation Calculator",
+    description:
+      "Calculate straight-line depreciation from cost, salvage value, and useful life.",
+    menuDescription: "Estimate depreciation using common methods.",
+    href: "/tools/depreciation-calculator",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
+    slug: "trial-balance-calculator",
+    name: "Trial Balance Calculator",
+    description:
+      "Check whether total debits equal total credits and see the difference instantly.",
+    menuDescription: "Check debit and credit totals easily.",
+    href: "/tools/trial-balance-calculator",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
     slug: "journal-entry-checker",
     name: "Journal Entry Checker",
-    emoji: "\u{1F9EE}",
-    description:
-      "Total debits and credits to check whether a basic journal entry balances.",
-    category: "Accounting Basics",
-    bestFor: "Checking the math balance of debit and credit lines.",
+    description: "Total debits and credits to check whether a basic journal entry balances.",
+    menuDescription: "Review simple journal entry logic.",
     href: "/tools/journal-entry-checker",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
+    slug: "debit-credit-checker",
+    name: "Debit/Credit Checker",
+    description:
+      "Practice whether common account changes should be recorded as debits or credits.",
+    menuDescription: "Learn whether an account should be debited or credited.",
+    href: "/tools/debit-credit-checker",
+    status: "mvp",
+    lastModified: "2026-07-18"
+  },
+  {
+    slug: "accounting-equation-calculator",
+    name: "Accounting Equation Calculator",
+    description: "Review assets, liabilities, and equity using the basic accounting equation.",
+    menuDescription: "Check assets, liabilities, and equity.",
+    href: "/tools/accounting-equation-calculator",
     status: "mvp",
     lastModified: "2026-07-18"
   }
 ];
+
+/**
+ * Tools that are actually shipped. Every public surface renders this list, so
+ * the directory, the nav, and the ItemList schema always agree on what exists.
+ */
+export const availableTools: Tool[] = tools.filter((tool) => tool.status === "mvp");
 
 export type ToolLink = {
   href: string;
@@ -134,5 +128,5 @@ export function toolLink(slug: string): ToolLink {
     throw new Error(`toolLink: no tool with slug "${slug}"`);
   }
 
-  return { href: tool.href, label: tool.name };
+  return { href: tool.href, label: tool.menuTitle ?? tool.name };
 }

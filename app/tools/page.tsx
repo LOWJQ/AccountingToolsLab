@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolsDirectory } from "@/components/tools/ToolsDirectory";
-import { tools } from "@/lib/data/tools";
+import { availableTools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 import { createItemListSchema } from "@/lib/seo/schema";
@@ -14,7 +14,8 @@ export const metadata = createMetadata({
   path: "/tools"
 });
 
-const availableTools = tools.filter((tool) => tool.status === "mvp");
+// Built from the same records the directory cards render, so the ItemList
+// schema always describes exactly what a visitor sees on the page.
 const toolItemList = availableTools.map((tool) => ({
   name: tool.name,
   url: `${siteConfig.url}${tool.href}`,

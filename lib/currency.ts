@@ -1,9 +1,23 @@
-export type CurrencyOption = {
+/**
+ * Eager currency core: only the fields needed to format an amount and label
+ * the selector button. The search-only fields (display name, countries) live
+ * in ./currency-search and load on demand, since they are needed just to
+ * populate the dropdown. Keeping them out saves every page a couple of KB it
+ * would otherwise download to render a privacy policy.
+ *
+ * lib/currency-search.ts is keyed by these codes; a test asserts the two stay
+ * in sync so the split cannot silently drift.
+ */
+export type CurrencyCore = {
   code: string;
-  name: string;
   symbol: string;
-  countries: readonly string[];
   locale: string;
+};
+
+/** A currency plus its search metadata, as rendered in the selector list. */
+export type CurrencyOption = CurrencyCore & {
+  name: string;
+  countries: readonly string[];
 };
 
 const popularCurrencyCodes = [
@@ -20,162 +34,162 @@ const popularCurrencyCodes = [
 ] as const;
 
 const allCurrencyOptions = [
-  { code: "AED", name: "UAE dirham", symbol: "د.إ", countries: ["United Arab Emirates"], locale: "en-AE" },
-  { code: "AFN", name: "Afghan afghani", symbol: "؋", countries: ["Afghanistan"], locale: "fa-AF" },
-  { code: "ALL", name: "Albanian lek", symbol: "L", countries: ["Albania"], locale: "sq-AL" },
-  { code: "AMD", name: "Armenian dram", symbol: "֏", countries: ["Armenia"], locale: "hy-AM" },
-  { code: "ANG", name: "Netherlands Antillean guilder", symbol: "ƒ", countries: ["Curaçao", "Sint Maarten"], locale: "nl-CW" },
-  { code: "AOA", name: "Angolan kwanza", symbol: "Kz", countries: ["Angola"], locale: "pt-AO" },
-  { code: "ARS", name: "Argentine peso", symbol: "$", countries: ["Argentina"], locale: "es-AR" },
-  { code: "AUD", name: "Australian dollar", symbol: "A$", countries: ["Australia", "Christmas Island", "Cocos Islands", "Kiribati", "Nauru", "Norfolk Island", "Tuvalu"], locale: "en-AU" },
-  { code: "AWG", name: "Aruban florin", symbol: "ƒ", countries: ["Aruba"], locale: "nl-AW" },
-  { code: "AZN", name: "Azerbaijani manat", symbol: "₼", countries: ["Azerbaijan"], locale: "az-AZ" },
-  { code: "BAM", name: "Bosnia and Herzegovina convertible mark", symbol: "KM", countries: ["Bosnia and Herzegovina"], locale: "bs-BA" },
-  { code: "BBD", name: "Barbadian dollar", symbol: "Bds$", countries: ["Barbados"], locale: "en-BB" },
-  { code: "BDT", name: "Bangladeshi taka", symbol: "৳", countries: ["Bangladesh"], locale: "bn-BD" },
-  { code: "BGN", name: "Bulgarian lev", symbol: "лв", countries: ["Bulgaria"], locale: "bg-BG" },
-  { code: "BHD", name: "Bahraini dinar", symbol: "BD", countries: ["Bahrain"], locale: "ar-BH" },
-  { code: "BIF", name: "Burundian franc", symbol: "FBu", countries: ["Burundi"], locale: "fr-BI" },
-  { code: "BMD", name: "Bermudian dollar", symbol: "BD$", countries: ["Bermuda"], locale: "en-BM" },
-  { code: "BND", name: "Brunei dollar", symbol: "B$", countries: ["Brunei"], locale: "ms-BN" },
-  { code: "BOB", name: "Bolivian boliviano", symbol: "Bs.", countries: ["Bolivia"], locale: "es-BO" },
-  { code: "BRL", name: "Brazilian real", symbol: "R$", countries: ["Brazil"], locale: "pt-BR" },
-  { code: "BSD", name: "Bahamian dollar", symbol: "B$", countries: ["Bahamas"], locale: "en-BS" },
-  { code: "BTN", name: "Bhutanese ngultrum", symbol: "Nu.", countries: ["Bhutan"], locale: "dz-BT" },
-  { code: "BWP", name: "Botswana pula", symbol: "P", countries: ["Botswana"], locale: "en-BW" },
-  { code: "BYN", name: "Belarusian ruble", symbol: "Br", countries: ["Belarus"], locale: "be-BY" },
-  { code: "BZD", name: "Belize dollar", symbol: "BZ$", countries: ["Belize"], locale: "en-BZ" },
-  { code: "CAD", name: "Canadian dollar", symbol: "C$", countries: ["Canada"], locale: "en-CA" },
-  { code: "CDF", name: "Congolese franc", symbol: "FC", countries: ["Democratic Republic of the Congo"], locale: "fr-CD" },
-  { code: "CHF", name: "Swiss franc", symbol: "CHF", countries: ["Switzerland", "Liechtenstein"], locale: "de-CH" },
-  { code: "CLP", name: "Chilean peso", symbol: "$", countries: ["Chile"], locale: "es-CL" },
-  { code: "CNY", name: "Chinese yuan", symbol: "¥", countries: ["China"], locale: "zh-CN" },
-  { code: "COP", name: "Colombian peso", symbol: "$", countries: ["Colombia"], locale: "es-CO" },
-  { code: "CRC", name: "Costa Rican colón", symbol: "₡", countries: ["Costa Rica"], locale: "es-CR" },
-  { code: "CUP", name: "Cuban peso", symbol: "$", countries: ["Cuba"], locale: "es-CU" },
-  { code: "CVE", name: "Cape Verdean escudo", symbol: "$", countries: ["Cape Verde"], locale: "pt-CV" },
-  { code: "CZK", name: "Czech koruna", symbol: "Kč", countries: ["Czechia"], locale: "cs-CZ" },
-  { code: "DJF", name: "Djiboutian franc", symbol: "Fdj", countries: ["Djibouti"], locale: "fr-DJ" },
-  { code: "DKK", name: "Danish krone", symbol: "kr", countries: ["Denmark", "Greenland", "Faroe Islands"], locale: "da-DK" },
-  { code: "DOP", name: "Dominican peso", symbol: "RD$", countries: ["Dominican Republic"], locale: "es-DO" },
-  { code: "DZD", name: "Algerian dinar", symbol: "DA", countries: ["Algeria"], locale: "ar-DZ" },
-  { code: "EGP", name: "Egyptian pound", symbol: "E£", countries: ["Egypt"], locale: "ar-EG" },
-  { code: "ERN", name: "Eritrean nakfa", symbol: "Nfk", countries: ["Eritrea"], locale: "ti-ER" },
-  { code: "ETB", name: "Ethiopian birr", symbol: "Br", countries: ["Ethiopia"], locale: "am-ET" },
-  { code: "EUR", name: "Euro", symbol: "€", countries: ["Eurozone", "European Union"], locale: "de-DE" },
-  { code: "FJD", name: "Fijian dollar", symbol: "FJ$", countries: ["Fiji"], locale: "en-FJ" },
-  { code: "FKP", name: "Falkland Islands pound", symbol: "£", countries: ["Falkland Islands"], locale: "en-FK" },
-  { code: "GBP", name: "British pound sterling", symbol: "£", countries: ["United Kingdom"], locale: "en-GB" },
-  { code: "GEL", name: "Georgian lari", symbol: "₾", countries: ["Georgia"], locale: "ka-GE" },
-  { code: "GHS", name: "Ghanaian cedi", symbol: "GH₵", countries: ["Ghana"], locale: "en-GH" },
-  { code: "GIP", name: "Gibraltar pound", symbol: "£", countries: ["Gibraltar"], locale: "en-GI" },
-  { code: "GMD", name: "Gambian dalasi", symbol: "D", countries: ["Gambia"], locale: "en-GM" },
-  { code: "GNF", name: "Guinean franc", symbol: "FG", countries: ["Guinea"], locale: "fr-GN" },
-  { code: "GTQ", name: "Guatemalan quetzal", symbol: "Q", countries: ["Guatemala"], locale: "es-GT" },
-  { code: "GYD", name: "Guyanese dollar", symbol: "G$", countries: ["Guyana"], locale: "en-GY" },
-  { code: "HKD", name: "Hong Kong dollar", symbol: "HK$", countries: ["Hong Kong"], locale: "zh-HK" },
-  { code: "HNL", name: "Honduran lempira", symbol: "L", countries: ["Honduras"], locale: "es-HN" },
-  { code: "HTG", name: "Haitian gourde", symbol: "G", countries: ["Haiti"], locale: "fr-HT" },
-  { code: "HUF", name: "Hungarian forint", symbol: "Ft", countries: ["Hungary"], locale: "hu-HU" },
-  { code: "IDR", name: "Indonesian rupiah", symbol: "Rp", countries: ["Indonesia"], locale: "id-ID" },
-  { code: "ILS", name: "Israeli new shekel", symbol: "₪", countries: ["Israel", "Palestinian territories"], locale: "he-IL" },
-  { code: "INR", name: "Indian rupee", symbol: "₹", countries: ["India", "Bhutan"], locale: "en-IN" },
-  { code: "IQD", name: "Iraqi dinar", symbol: "ع.د", countries: ["Iraq"], locale: "ar-IQ" },
-  { code: "IRR", name: "Iranian rial", symbol: "﷼", countries: ["Iran"], locale: "fa-IR" },
-  { code: "ISK", name: "Icelandic króna", symbol: "kr", countries: ["Iceland"], locale: "is-IS" },
-  { code: "JMD", name: "Jamaican dollar", symbol: "J$", countries: ["Jamaica"], locale: "en-JM" },
-  { code: "JOD", name: "Jordanian dinar", symbol: "JD", countries: ["Jordan"], locale: "ar-JO" },
-  { code: "JPY", name: "Japanese yen", symbol: "¥", countries: ["Japan"], locale: "ja-JP" },
-  { code: "KES", name: "Kenyan shilling", symbol: "KSh", countries: ["Kenya"], locale: "en-KE" },
-  { code: "KGS", name: "Kyrgyzstani som", symbol: "с", countries: ["Kyrgyzstan"], locale: "ky-KG" },
-  { code: "KHR", name: "Cambodian riel", symbol: "៛", countries: ["Cambodia"], locale: "km-KH" },
-  { code: "KMF", name: "Comorian franc", symbol: "CF", countries: ["Comoros"], locale: "fr-KM" },
-  { code: "KRW", name: "South Korean won", symbol: "₩", countries: ["South Korea"], locale: "ko-KR" },
-  { code: "KWD", name: "Kuwaiti dinar", symbol: "KD", countries: ["Kuwait"], locale: "ar-KW" },
-  { code: "KYD", name: "Cayman Islands dollar", symbol: "CI$", countries: ["Cayman Islands"], locale: "en-KY" },
-  { code: "KZT", name: "Kazakhstani tenge", symbol: "₸", countries: ["Kazakhstan"], locale: "kk-KZ" },
-  { code: "LAK", name: "Lao kip", symbol: "₭", countries: ["Laos"], locale: "lo-LA" },
-  { code: "LBP", name: "Lebanese pound", symbol: "ل.ل", countries: ["Lebanon"], locale: "ar-LB" },
-  { code: "LKR", name: "Sri Lankan rupee", symbol: "Rs", countries: ["Sri Lanka"], locale: "si-LK" },
-  { code: "LRD", name: "Liberian dollar", symbol: "L$", countries: ["Liberia"], locale: "en-LR" },
-  { code: "LSL", name: "Lesotho loti", symbol: "L", countries: ["Lesotho"], locale: "en-LS" },
-  { code: "LYD", name: "Libyan dinar", symbol: "LD", countries: ["Libya"], locale: "ar-LY" },
-  { code: "MAD", name: "Moroccan dirham", symbol: "DH", countries: ["Morocco", "Western Sahara"], locale: "ar-MA" },
-  { code: "MDL", name: "Moldovan leu", symbol: "L", countries: ["Moldova"], locale: "ro-MD" },
-  { code: "MGA", name: "Malagasy ariary", symbol: "Ar", countries: ["Madagascar"], locale: "fr-MG" },
-  { code: "MKD", name: "Macedonian denar", symbol: "ден", countries: ["North Macedonia"], locale: "mk-MK" },
-  { code: "MMK", name: "Myanmar kyat", symbol: "K", countries: ["Myanmar"], locale: "my-MM" },
-  { code: "MNT", name: "Mongolian tögrög", symbol: "₮", countries: ["Mongolia"], locale: "mn-MN" },
-  { code: "MOP", name: "Macanese pataca", symbol: "MOP$", countries: ["Macau"], locale: "zh-MO" },
-  { code: "MRU", name: "Mauritanian ouguiya", symbol: "UM", countries: ["Mauritania"], locale: "ar-MR" },
-  { code: "MUR", name: "Mauritian rupee", symbol: "Rs", countries: ["Mauritius"], locale: "en-MU" },
-  { code: "MVR", name: "Maldivian rufiyaa", symbol: "Rf", countries: ["Maldives"], locale: "dv-MV" },
-  { code: "MWK", name: "Malawian kwacha", symbol: "MK", countries: ["Malawi"], locale: "en-MW" },
-  { code: "MXN", name: "Mexican peso", symbol: "Mex$", countries: ["Mexico"], locale: "es-MX" },
-  { code: "MYR", name: "Malaysian ringgit", symbol: "RM", countries: ["Malaysia"], locale: "en-MY" },
-  { code: "MZN", name: "Mozambican metical", symbol: "MT", countries: ["Mozambique"], locale: "pt-MZ" },
-  { code: "NAD", name: "Namibian dollar", symbol: "N$", countries: ["Namibia"], locale: "en-NA" },
-  { code: "NGN", name: "Nigerian naira", symbol: "₦", countries: ["Nigeria"], locale: "en-NG" },
-  { code: "NIO", name: "Nicaraguan córdoba", symbol: "C$", countries: ["Nicaragua"], locale: "es-NI" },
-  { code: "NOK", name: "Norwegian krone", symbol: "kr", countries: ["Norway", "Svalbard and Jan Mayen"], locale: "nb-NO" },
-  { code: "NPR", name: "Nepalese rupee", symbol: "रू", countries: ["Nepal"], locale: "ne-NP" },
-  { code: "NZD", name: "New Zealand dollar", symbol: "NZ$", countries: ["New Zealand", "Cook Islands", "Niue", "Pitcairn Islands", "Tokelau"], locale: "en-NZ" },
-  { code: "OMR", name: "Omani rial", symbol: "OMR", countries: ["Oman"], locale: "ar-OM" },
-  { code: "PAB", name: "Panamanian balboa", symbol: "B/.", countries: ["Panama"], locale: "es-PA" },
-  { code: "PEN", name: "Peruvian sol", symbol: "S/", countries: ["Peru"], locale: "es-PE" },
-  { code: "PGK", name: "Papua New Guinean kina", symbol: "K", countries: ["Papua New Guinea"], locale: "en-PG" },
-  { code: "PHP", name: "Philippine peso", symbol: "₱", countries: ["Philippines"], locale: "en-PH" },
-  { code: "PKR", name: "Pakistani rupee", symbol: "Rs", countries: ["Pakistan"], locale: "en-PK" },
-  { code: "PLN", name: "Polish złoty", symbol: "zł", countries: ["Poland"], locale: "pl-PL" },
-  { code: "PYG", name: "Paraguayan guaraní", symbol: "₲", countries: ["Paraguay"], locale: "es-PY" },
-  { code: "QAR", name: "Qatari riyal", symbol: "QR", countries: ["Qatar"], locale: "ar-QA" },
-  { code: "RON", name: "Romanian leu", symbol: "lei", countries: ["Romania"], locale: "ro-RO" },
-  { code: "RSD", name: "Serbian dinar", symbol: "дин", countries: ["Serbia"], locale: "sr-RS" },
-  { code: "RUB", name: "Russian ruble", symbol: "₽", countries: ["Russia"], locale: "ru-RU" },
-  { code: "RWF", name: "Rwandan franc", symbol: "FRw", countries: ["Rwanda"], locale: "rw-RW" },
-  { code: "SAR", name: "Saudi riyal", symbol: "SR", countries: ["Saudi Arabia"], locale: "ar-SA" },
-  { code: "SBD", name: "Solomon Islands dollar", symbol: "SI$", countries: ["Solomon Islands"], locale: "en-SB" },
-  { code: "SCR", name: "Seychellois rupee", symbol: "Rs", countries: ["Seychelles"], locale: "en-SC" },
-  { code: "SDG", name: "Sudanese pound", symbol: "SDG", countries: ["Sudan"], locale: "ar-SD" },
-  { code: "SEK", name: "Swedish krona", symbol: "kr", countries: ["Sweden"], locale: "sv-SE" },
-  { code: "SGD", name: "Singapore dollar", symbol: "S$", countries: ["Singapore"], locale: "en-SG" },
-  { code: "SHP", name: "Saint Helena pound", symbol: "£", countries: ["Saint Helena", "Ascension", "Tristan da Cunha"], locale: "en-SH" },
-  { code: "SLE", name: "Sierra Leonean leone", symbol: "Le", countries: ["Sierra Leone"], locale: "en-SL" },
-  { code: "SOS", name: "Somali shilling", symbol: "Sh", countries: ["Somalia"], locale: "so-SO" },
-  { code: "SRD", name: "Surinamese dollar", symbol: "$", countries: ["Suriname"], locale: "nl-SR" },
-  { code: "SSP", name: "South Sudanese pound", symbol: "SS£", countries: ["South Sudan"], locale: "en-SS" },
-  { code: "STN", name: "São Tomé and Príncipe dobra", symbol: "Db", countries: ["São Tomé and Príncipe"], locale: "pt-ST" },
-  { code: "SYP", name: "Syrian pound", symbol: "£", countries: ["Syria"], locale: "ar-SY" },
-  { code: "SZL", name: "Swazi lilangeni", symbol: "L", countries: ["Eswatini"], locale: "en-SZ" },
-  { code: "THB", name: "Thai baht", symbol: "฿", countries: ["Thailand"], locale: "th-TH" },
-  { code: "TJS", name: "Tajikistani somoni", symbol: "SM", countries: ["Tajikistan"], locale: "tg-TJ" },
-  { code: "TMT", name: "Turkmenistani manat", symbol: "m", countries: ["Turkmenistan"], locale: "tk-TM" },
-  { code: "TND", name: "Tunisian dinar", symbol: "DT", countries: ["Tunisia"], locale: "ar-TN" },
-  { code: "TOP", name: "Tongan paʻanga", symbol: "T$", countries: ["Tonga"], locale: "to-TO" },
-  { code: "TRY", name: "Turkish lira", symbol: "₺", countries: ["Türkiye"], locale: "tr-TR" },
-  { code: "TTD", name: "Trinidad and Tobago dollar", symbol: "TT$", countries: ["Trinidad and Tobago"], locale: "en-TT" },
-  { code: "TWD", name: "New Taiwan dollar", symbol: "NT$", countries: ["Taiwan"], locale: "zh-TW" },
-  { code: "TZS", name: "Tanzanian shilling", symbol: "TSh", countries: ["Tanzania"], locale: "sw-TZ" },
-  { code: "UAH", name: "Ukrainian hryvnia", symbol: "₴", countries: ["Ukraine"], locale: "uk-UA" },
-  { code: "UGX", name: "Ugandan shilling", symbol: "USh", countries: ["Uganda"], locale: "en-UG" },
-  { code: "USD", name: "United States dollar", symbol: "$", countries: ["United States", "Ecuador", "El Salvador", "Panama", "Timor-Leste", "Zimbabwe"], locale: "en-US" },
-  { code: "UYU", name: "Uruguayan peso", symbol: "$U", countries: ["Uruguay"], locale: "es-UY" },
-  { code: "UZS", name: "Uzbekistani som", symbol: "soʻm", countries: ["Uzbekistan"], locale: "uz-UZ" },
-  { code: "VES", name: "Venezuelan bolívar", symbol: "Bs.", countries: ["Venezuela"], locale: "es-VE" },
-  { code: "VND", name: "Vietnamese đồng", symbol: "₫", countries: ["Vietnam"], locale: "vi-VN" },
-  { code: "VUV", name: "Vanuatu vatu", symbol: "VT", countries: ["Vanuatu"], locale: "bi-VU" },
-  { code: "WST", name: "Samoan tālā", symbol: "WS$", countries: ["Samoa"], locale: "en-WS" },
-  { code: "XAF", name: "Central African CFA franc", symbol: "FCFA", countries: ["Cameroon", "Central African Republic", "Chad", "Republic of the Congo", "Equatorial Guinea", "Gabon"], locale: "fr-CM" },
-  { code: "XCD", name: "East Caribbean dollar", symbol: "EC$", countries: ["Antigua and Barbuda", "Dominica", "Grenada", "Montserrat", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines"], locale: "en-AG" },
-  { code: "XOF", name: "West African CFA franc", symbol: "CFA", countries: ["Benin", "Burkina Faso", "Côte d'Ivoire", "Guinea-Bissau", "Mali", "Niger", "Senegal", "Togo"], locale: "fr-SN" },
-  { code: "XPF", name: "CFP franc", symbol: "₣", countries: ["French Polynesia", "New Caledonia", "Wallis and Futuna"], locale: "fr-PF" },
-  { code: "YER", name: "Yemeni rial", symbol: "﷼", countries: ["Yemen"], locale: "ar-YE" },
-  { code: "ZAR", name: "South African rand", symbol: "R", countries: ["South Africa", "Lesotho", "Namibia", "Eswatini"], locale: "en-ZA" },
-  { code: "ZMW", name: "Zambian kwacha", symbol: "ZK", countries: ["Zambia"], locale: "en-ZM" },
-  { code: "ZWG", name: "Zimbabwe gold", symbol: "ZiG", countries: ["Zimbabwe"], locale: "en-ZW" }
-] as const satisfies readonly CurrencyOption[];
+  { code: "AED", symbol: "د.إ", locale: "en-AE" },
+  { code: "AFN", symbol: "؋", locale: "fa-AF" },
+  { code: "ALL", symbol: "L", locale: "sq-AL" },
+  { code: "AMD", symbol: "֏", locale: "hy-AM" },
+  { code: "ANG", symbol: "ƒ", locale: "nl-CW" },
+  { code: "AOA", symbol: "Kz", locale: "pt-AO" },
+  { code: "ARS", symbol: "$", locale: "es-AR" },
+  { code: "AUD", symbol: "A$", locale: "en-AU" },
+  { code: "AWG", symbol: "ƒ", locale: "nl-AW" },
+  { code: "AZN", symbol: "₼", locale: "az-AZ" },
+  { code: "BAM", symbol: "KM", locale: "bs-BA" },
+  { code: "BBD", symbol: "Bds$", locale: "en-BB" },
+  { code: "BDT", symbol: "৳", locale: "bn-BD" },
+  { code: "BGN", symbol: "лв", locale: "bg-BG" },
+  { code: "BHD", symbol: "BD", locale: "ar-BH" },
+  { code: "BIF", symbol: "FBu", locale: "fr-BI" },
+  { code: "BMD", symbol: "BD$", locale: "en-BM" },
+  { code: "BND", symbol: "B$", locale: "ms-BN" },
+  { code: "BOB", symbol: "Bs.", locale: "es-BO" },
+  { code: "BRL", symbol: "R$", locale: "pt-BR" },
+  { code: "BSD", symbol: "B$", locale: "en-BS" },
+  { code: "BTN", symbol: "Nu.", locale: "dz-BT" },
+  { code: "BWP", symbol: "P", locale: "en-BW" },
+  { code: "BYN", symbol: "Br", locale: "be-BY" },
+  { code: "BZD", symbol: "BZ$", locale: "en-BZ" },
+  { code: "CAD", symbol: "C$", locale: "en-CA" },
+  { code: "CDF", symbol: "FC", locale: "fr-CD" },
+  { code: "CHF", symbol: "CHF", locale: "de-CH" },
+  { code: "CLP", symbol: "$", locale: "es-CL" },
+  { code: "CNY", symbol: "¥", locale: "zh-CN" },
+  { code: "COP", symbol: "$", locale: "es-CO" },
+  { code: "CRC", symbol: "₡", locale: "es-CR" },
+  { code: "CUP", symbol: "$", locale: "es-CU" },
+  { code: "CVE", symbol: "$", locale: "pt-CV" },
+  { code: "CZK", symbol: "Kč", locale: "cs-CZ" },
+  { code: "DJF", symbol: "Fdj", locale: "fr-DJ" },
+  { code: "DKK", symbol: "kr", locale: "da-DK" },
+  { code: "DOP", symbol: "RD$", locale: "es-DO" },
+  { code: "DZD", symbol: "DA", locale: "ar-DZ" },
+  { code: "EGP", symbol: "E£", locale: "ar-EG" },
+  { code: "ERN", symbol: "Nfk", locale: "ti-ER" },
+  { code: "ETB", symbol: "Br", locale: "am-ET" },
+  { code: "EUR", symbol: "€", locale: "de-DE" },
+  { code: "FJD", symbol: "FJ$", locale: "en-FJ" },
+  { code: "FKP", symbol: "£", locale: "en-FK" },
+  { code: "GBP", symbol: "£", locale: "en-GB" },
+  { code: "GEL", symbol: "₾", locale: "ka-GE" },
+  { code: "GHS", symbol: "GH₵", locale: "en-GH" },
+  { code: "GIP", symbol: "£", locale: "en-GI" },
+  { code: "GMD", symbol: "D", locale: "en-GM" },
+  { code: "GNF", symbol: "FG", locale: "fr-GN" },
+  { code: "GTQ", symbol: "Q", locale: "es-GT" },
+  { code: "GYD", symbol: "G$", locale: "en-GY" },
+  { code: "HKD", symbol: "HK$", locale: "zh-HK" },
+  { code: "HNL", symbol: "L", locale: "es-HN" },
+  { code: "HTG", symbol: "G", locale: "fr-HT" },
+  { code: "HUF", symbol: "Ft", locale: "hu-HU" },
+  { code: "IDR", symbol: "Rp", locale: "id-ID" },
+  { code: "ILS", symbol: "₪", locale: "he-IL" },
+  { code: "INR", symbol: "₹", locale: "en-IN" },
+  { code: "IQD", symbol: "ع.د", locale: "ar-IQ" },
+  { code: "IRR", symbol: "﷼", locale: "fa-IR" },
+  { code: "ISK", symbol: "kr", locale: "is-IS" },
+  { code: "JMD", symbol: "J$", locale: "en-JM" },
+  { code: "JOD", symbol: "JD", locale: "ar-JO" },
+  { code: "JPY", symbol: "¥", locale: "ja-JP" },
+  { code: "KES", symbol: "KSh", locale: "en-KE" },
+  { code: "KGS", symbol: "с", locale: "ky-KG" },
+  { code: "KHR", symbol: "៛", locale: "km-KH" },
+  { code: "KMF", symbol: "CF", locale: "fr-KM" },
+  { code: "KRW", symbol: "₩", locale: "ko-KR" },
+  { code: "KWD", symbol: "KD", locale: "ar-KW" },
+  { code: "KYD", symbol: "CI$", locale: "en-KY" },
+  { code: "KZT", symbol: "₸", locale: "kk-KZ" },
+  { code: "LAK", symbol: "₭", locale: "lo-LA" },
+  { code: "LBP", symbol: "ل.ل", locale: "ar-LB" },
+  { code: "LKR", symbol: "Rs", locale: "si-LK" },
+  { code: "LRD", symbol: "L$", locale: "en-LR" },
+  { code: "LSL", symbol: "L", locale: "en-LS" },
+  { code: "LYD", symbol: "LD", locale: "ar-LY" },
+  { code: "MAD", symbol: "DH", locale: "ar-MA" },
+  { code: "MDL", symbol: "L", locale: "ro-MD" },
+  { code: "MGA", symbol: "Ar", locale: "fr-MG" },
+  { code: "MKD", symbol: "ден", locale: "mk-MK" },
+  { code: "MMK", symbol: "K", locale: "my-MM" },
+  { code: "MNT", symbol: "₮", locale: "mn-MN" },
+  { code: "MOP", symbol: "MOP$", locale: "zh-MO" },
+  { code: "MRU", symbol: "UM", locale: "ar-MR" },
+  { code: "MUR", symbol: "Rs", locale: "en-MU" },
+  { code: "MVR", symbol: "Rf", locale: "dv-MV" },
+  { code: "MWK", symbol: "MK", locale: "en-MW" },
+  { code: "MXN", symbol: "Mex$", locale: "es-MX" },
+  { code: "MYR", symbol: "RM", locale: "en-MY" },
+  { code: "MZN", symbol: "MT", locale: "pt-MZ" },
+  { code: "NAD", symbol: "N$", locale: "en-NA" },
+  { code: "NGN", symbol: "₦", locale: "en-NG" },
+  { code: "NIO", symbol: "C$", locale: "es-NI" },
+  { code: "NOK", symbol: "kr", locale: "nb-NO" },
+  { code: "NPR", symbol: "रू", locale: "ne-NP" },
+  { code: "NZD", symbol: "NZ$", locale: "en-NZ" },
+  { code: "OMR", symbol: "OMR", locale: "ar-OM" },
+  { code: "PAB", symbol: "B/.", locale: "es-PA" },
+  { code: "PEN", symbol: "S/", locale: "es-PE" },
+  { code: "PGK", symbol: "K", locale: "en-PG" },
+  { code: "PHP", symbol: "₱", locale: "en-PH" },
+  { code: "PKR", symbol: "Rs", locale: "en-PK" },
+  { code: "PLN", symbol: "zł", locale: "pl-PL" },
+  { code: "PYG", symbol: "₲", locale: "es-PY" },
+  { code: "QAR", symbol: "QR", locale: "ar-QA" },
+  { code: "RON", symbol: "lei", locale: "ro-RO" },
+  { code: "RSD", symbol: "дин", locale: "sr-RS" },
+  { code: "RUB", symbol: "₽", locale: "ru-RU" },
+  { code: "RWF", symbol: "FRw", locale: "rw-RW" },
+  { code: "SAR", symbol: "SR", locale: "ar-SA" },
+  { code: "SBD", symbol: "SI$", locale: "en-SB" },
+  { code: "SCR", symbol: "Rs", locale: "en-SC" },
+  { code: "SDG", symbol: "SDG", locale: "ar-SD" },
+  { code: "SEK", symbol: "kr", locale: "sv-SE" },
+  { code: "SGD", symbol: "S$", locale: "en-SG" },
+  { code: "SHP", symbol: "£", locale: "en-SH" },
+  { code: "SLE", symbol: "Le", locale: "en-SL" },
+  { code: "SOS", symbol: "Sh", locale: "so-SO" },
+  { code: "SRD", symbol: "$", locale: "nl-SR" },
+  { code: "SSP", symbol: "SS£", locale: "en-SS" },
+  { code: "STN", symbol: "Db", locale: "pt-ST" },
+  { code: "SYP", symbol: "£", locale: "ar-SY" },
+  { code: "SZL", symbol: "L", locale: "en-SZ" },
+  { code: "THB", symbol: "฿", locale: "th-TH" },
+  { code: "TJS", symbol: "SM", locale: "tg-TJ" },
+  { code: "TMT", symbol: "m", locale: "tk-TM" },
+  { code: "TND", symbol: "DT", locale: "ar-TN" },
+  { code: "TOP", symbol: "T$", locale: "to-TO" },
+  { code: "TRY", symbol: "₺", locale: "tr-TR" },
+  { code: "TTD", symbol: "TT$", locale: "en-TT" },
+  { code: "TWD", symbol: "NT$", locale: "zh-TW" },
+  { code: "TZS", symbol: "TSh", locale: "sw-TZ" },
+  { code: "UAH", symbol: "₴", locale: "uk-UA" },
+  { code: "UGX", symbol: "USh", locale: "en-UG" },
+  { code: "USD", symbol: "$", locale: "en-US" },
+  { code: "UYU", symbol: "$U", locale: "es-UY" },
+  { code: "UZS", symbol: "soʻm", locale: "uz-UZ" },
+  { code: "VES", symbol: "Bs.", locale: "es-VE" },
+  { code: "VND", symbol: "₫", locale: "vi-VN" },
+  { code: "VUV", symbol: "VT", locale: "bi-VU" },
+  { code: "WST", symbol: "WS$", locale: "en-WS" },
+  { code: "XAF", symbol: "FCFA", locale: "fr-CM" },
+  { code: "XCD", symbol: "EC$", locale: "en-AG" },
+  { code: "XOF", symbol: "CFA", locale: "fr-SN" },
+  { code: "XPF", symbol: "₣", locale: "fr-PF" },
+  { code: "YER", symbol: "﷼", locale: "ar-YE" },
+  { code: "ZAR", symbol: "R", locale: "en-ZA" },
+  { code: "ZMW", symbol: "ZK", locale: "en-ZM" },
+  { code: "ZWG", symbol: "ZiG", locale: "en-ZW" }
+] as const satisfies readonly CurrencyCore[];
 
-const currencyOptionByCode = new Map<string, CurrencyOption>(
+const currencyOptionByCode = new Map<string, CurrencyCore>(
   allCurrencyOptions.map((option) => [option.code, option])
 );
 
@@ -196,7 +210,7 @@ const remainingCurrencyOptions = allCurrencyOptions
 export const currencyOptions = [
   ...popularCurrencyOptions,
   ...remainingCurrencyOptions
-] as readonly CurrencyOption[];
+] as readonly CurrencyCore[];
 
 export type CurrencyCode = (typeof allCurrencyOptions)[number]["code"];
 
@@ -204,7 +218,7 @@ export const CURRENCY_CODES = currencyOptions.map((option) => option.code) as re
 
 export const defaultCurrency: CurrencyCode = "MYR";
 
-export function getCurrencyOption(currency: string): CurrencyOption | undefined {
+export function getCurrencyOption(currency: string): CurrencyCore | undefined {
   return currencyOptionByCode.get(currency);
 }
 
@@ -216,27 +230,6 @@ export function getCompactCurrencyLabel(currency: string): string {
   const option = getCurrencyOption(currency);
 
   return option ? `${option.code} (${option.symbol})` : currency;
-}
-
-export function searchCurrencies(query: string): CurrencyOption[] {
-  const normalizedQuery = query.trim().toLocaleLowerCase();
-
-  if (!normalizedQuery) {
-    return [...currencyOptions];
-  }
-
-  return currencyOptions.filter((option) => {
-    const searchableText = [
-      option.code,
-      option.name,
-      option.symbol,
-      ...option.countries
-    ]
-      .join(" ")
-      .toLocaleLowerCase();
-
-    return searchableText.includes(normalizedQuery);
-  });
 }
 
 function formatCurrencyFallback(value: number, currency: string): string {

@@ -1,25 +1,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { buildAssetUrl, siteConfig } from "@/lib/seo/site";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "what-should-an-invoice-include-before-you-send-it",
   title: "What Should an Invoice Include? Malaysia Checklist",
   description:
     "A simple Malaysia invoice checklist: business and customer details, invoice number, dates, line items, payment terms, SST notes, and totals.",
   ogImage: {
-    url: "/og-invoice-generator-guide.png",
+    url: "/og-invoice-generator-guide.jpg",
     width: 1200,
     height: 630,
     alt: "What should an invoice include guide preview by AccountingToolsLab"
   },
-  path: "/guides/what-should-an-invoice-include-before-you-send-it"
 });
 
 const pageTitle = "What Should an Invoice Include Before You Send It?";
@@ -214,27 +214,10 @@ export default function HowToCreateSimpleInvoicePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-05-08",
-          dateModified: "2026-05-12",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          image: buildAssetUrl("/guides/simple-invoice-example-labeled.webp"),
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        image={buildAssetUrl("/guides/simple-invoice-example-labeled.webp")}
+        slug="what-should-an-invoice-include-before-you-send-it"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

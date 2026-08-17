@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Straight-Line Depreciation: The Two Numbers You Guess";
@@ -13,11 +13,11 @@ const guidePath = "/guides/straight-line-depreciation-explained";
 const pageDescription =
   "The formula is the easy part. Only one of the three inputs is a fact, the other two are estimates you make, and in Malaysia the answer is not what LHDN will accept.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "straight-line-depreciation-explained",
   title: pageTitle,
   description:
-    "Cost is a fact. Useful life and salvage value are estimates. Learn how to set both, what book value is not, and why LHDN ignores your figure.",
-  path: guidePath
+    "Cost is a fact. Useful life and salvage value are estimates. Learn how to set both, what book value is not, and why LHDN ignores your figure."
 });
 
 const tableOfContents = [
@@ -236,26 +236,9 @@ export default function StraightLineDepreciationGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-08-18",
-          dateModified: "2026-08-18",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="straight-line-depreciation-explained"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

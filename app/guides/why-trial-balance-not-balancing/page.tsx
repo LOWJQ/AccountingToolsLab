@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Why Is My Trial Balance Not Balancing?";
@@ -13,11 +13,11 @@ const guidePath = "/guides/why-trial-balance-not-balancing";
 const pageDescription =
   "The size of the difference is a clue, not just a problem. Five arithmetic checks narrow the search in seconds, and a fixed search order finds whatever is left.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "why-trial-balance-not-balancing",
   title: pageTitle,
   description:
-    "Use the difference to find the error. Re-add the columns, divide by 2, divide by 9, match it to an account balance, then search the ledger in a fixed order.",
-  path: guidePath
+    "Use the difference to find the error. Re-add the columns, divide by 2, divide by 9, match it to an account balance, then search the ledger in a fixed order."
 });
 
 const tableOfContents = [
@@ -260,26 +260,9 @@ export default function WhyTrialBalanceNotBalancingGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-08-17",
-          dateModified: "2026-08-17",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="why-trial-balance-not-balancing"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideCard } from "@/components/tools/RelatedGuideCard";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -219,30 +220,7 @@ export default function FinancialRatioCalculatorPage() {
         </div>
       </section>
 
-      <section className="border-t border-slate-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Related Guide Article
-        </h2>
-        <Link
-          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/what-is-a-good-financial-ratio"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-base font-medium leading-7 text-black">Financial ratio guide</p>
-            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Is My Current Ratio Good? How to Judge Any Ratio
-            </h3>
-            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              A ratio on its own means little. See what counts as good, why a high number can be
-              bad, and how to judge any result using trend and context.
-            </p>
-          </div>
-          <ArrowRight
-            aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
-          />
-        </Link>
-      </section>
+      <RelatedGuideCard eyebrow="Financial ratio guide" slug="what-is-a-good-financial-ratio" />
 
       <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
         <FAQSection

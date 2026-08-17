@@ -10,14 +10,21 @@ export type Guide = {
   /** Draft guides: reachable and linked, but kept out of the sitemap and search index. */
   noindex?: boolean;
   href: string;
-  /** ISO date (YYYY-MM-DD) of the last meaningful content change. Feeds the sitemap. */
+  /** ISO date (YYYY-MM-DD) the guide first went live. Feeds Article schema. */
+  datePublished: string;
+  /**
+   * ISO date (YYYY-MM-DD) of the last meaningful content change. Feeds both the
+   * sitemap lastmod and the Article dateModified, so the two cannot disagree.
+   */
   lastModified: string;
 };
 
 export const guides: Guide[] = [
   {
     slug: "what-should-an-invoice-include-before-you-send-it",
-    title: "What Should an Invoice Include?",
+    // Matches the page's h1 so the Article headline, the directory card, and
+    // the related-guide cards all show the same title as the page itself.
+    title: "What Should an Invoice Include Before You Send It?",
     description:
       "Learn what to include before sending an invoice, including business details, customer details, invoice number, dates, line items, totals, payment details, and tax notes.",
     menuTitle: "What to Put on an Invoice",
@@ -25,6 +32,7 @@ export const guides: Guide[] = [
     category: "Business Documents",
     status: "available",
     href: "/guides/what-should-an-invoice-include-before-you-send-it",
+    datePublished: "2026-05-08",
     lastModified: "2026-07-28"
   },
   {
@@ -37,6 +45,7 @@ export const guides: Guide[] = [
     category: "Malaysia Business Tax",
     status: "available",
     href: "/guides/do-i-need-to-register-for-sst-malaysia",
+    datePublished: "2026-07-24",
     lastModified: "2026-07-28"
   },
   {
@@ -49,6 +58,7 @@ export const guides: Guide[] = [
     category: "Bookkeeping Checks",
     status: "available",
     href: "/guides/errors-not-revealed-by-a-trial-balance",
+    datePublished: "2026-08-17",
     lastModified: "2026-08-17"
   },
   {
@@ -61,6 +71,7 @@ export const guides: Guide[] = [
     category: "Business Planning",
     status: "available",
     href: "/guides/profitable-but-no-cash",
+    datePublished: "2026-08-17",
     lastModified: "2026-08-17"
   },
   {
@@ -73,6 +84,7 @@ export const guides: Guide[] = [
     category: "Business Planning",
     status: "available",
     href: "/guides/fixed-vs-variable-costs",
+    datePublished: "2026-08-17",
     lastModified: "2026-08-17"
   },
   {
@@ -85,6 +97,7 @@ export const guides: Guide[] = [
     category: "Bookkeeping Checks",
     status: "available",
     href: "/guides/why-trial-balance-not-balancing",
+    datePublished: "2026-08-17",
     lastModified: "2026-08-17"
   },
   {
@@ -97,6 +110,7 @@ export const guides: Guide[] = [
     category: "Accounting Basics",
     status: "available",
     href: "/guides/debit-vs-credit",
+    datePublished: "2026-08-17",
     lastModified: "2026-08-17"
   },
   {
@@ -109,6 +123,7 @@ export const guides: Guide[] = [
     category: "Financial Analysis",
     status: "available",
     href: "/guides/what-is-a-good-financial-ratio",
+    datePublished: "2026-08-18",
     lastModified: "2026-08-18"
   },
   {
@@ -121,6 +136,7 @@ export const guides: Guide[] = [
     category: "Depreciation & Adjustments",
     status: "available",
     href: "/guides/straight-line-depreciation-explained",
+    datePublished: "2026-08-18",
     lastModified: "2026-08-18"
   },
   {
@@ -133,9 +149,60 @@ export const guides: Guide[] = [
     category: "Accounting Basics",
     status: "available",
     href: "/guides/journal-entries-for-beginners",
+    datePublished: "2026-08-18",
     lastModified: "2026-08-18"
   }
 ];
+
+/**
+ * Guides that are live and belong in the search index. Feeds both the sitemap
+ * and the /guides ItemList, so the two always list the same set. Draft guides
+ * (noindex) stay linked on the directory page but out of both.
+ */
+export const indexableGuides: Guide[] = guides.filter(
+  (guide) => guide.status === "available" && !guide.noindex
+);
+
+function requireGuide(slug: string, caller: string): Guide {
+  const guide = guides.find((item) => item.slug === slug);
+
+  if (!guide) {
+    throw new Error(`${caller}: no guide with slug "${slug}"`);
+  }
+
+  return guide;
+}
+
+/**
+ * Look up a guide record by slug. Used by metadata and Article schema helpers
+ * so headline, canonical path, and both dates all come from one place.
+ * Throws at build time if the slug does not exist.
+ */
+export function guideBySlug(slug: string): Guide {
+  return requireGuide(slug, "guideBySlug");
+}
+
+export type GuideCard = {
+  description: string;
+  href: string;
+  title: string;
+};
+
+/**
+ * Content for a "Related Guide" card. Tool pages used to hardcode these, which
+ * left three of them advertising titles of guides that had since been renamed
+ * and redirected away. Reading from the guide record keeps card text, page
+ * title, and link target in agreement. Throws if the slug does not exist.
+ */
+export function guideCard(slug: string): GuideCard {
+  const guide = requireGuide(slug, "guideCard");
+
+  return {
+    description: guide.description,
+    href: guide.href,
+    title: guide.title
+  };
+}
 
 export type GuideLink = {
   href: string;
@@ -148,11 +215,7 @@ export type GuideLink = {
  * every surface at once. Throws at build time if the slug does not exist.
  */
 export function guideLink(slug: string): GuideLink {
-  const guide = guides.find((item) => item.slug === slug);
-
-  if (!guide) {
-    throw new Error(`guideLink: no guide with slug "${slug}"`);
-  }
+  const guide = requireGuide(slug, "guideLink");
 
   return { href: guide.href, label: guide.menuTitle ?? guide.title };
 }

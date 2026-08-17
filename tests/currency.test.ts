@@ -4,9 +4,13 @@ import {
   currencyOptions,
   defaultCurrency,
   formatCurrency,
-  isCurrencyCode,
-  searchCurrencies
+  isCurrencyCode
 } from "../lib/currency";
+import {
+  currencyDetailCodes,
+  getSearchableCurrencies,
+  searchCurrencies
+} from "../lib/currency-search";
 
 function test(name: string, run: () => void) {
   run();
@@ -61,6 +65,23 @@ test("currency search matches code, symbol, name, and country", () => {
   assert.equal(searchCurrencies("ringgit")[0]?.code, "MYR");
   assert.equal(searchCurrencies("Malaysia")[0]?.code, "MYR");
   assert.equal(searchCurrencies("United Kingdom").some((option) => option.code === "GBP"), true);
+});
+
+// The currency table is split across two files so the search-only fields load
+// on demand. Nothing at build time forces them to agree, so assert it here: a
+// currency added to one file but not the other would otherwise show up in the
+// dropdown with its code as its name and no country ever matching a search.
+test("every currency has search metadata, and vice versa", () => {
+  const coreCodes = [...CURRENCY_CODES].sort();
+  const detailCodes = [...currencyDetailCodes].sort();
+
+  assert.deepEqual(detailCodes, coreCodes);
+
+  getSearchableCurrencies().forEach((option) => {
+    assert.ok(option.name.length > 0, `${option.code} has no name`);
+    assert.notEqual(option.name, option.code, `${option.code} fell back to its code`);
+    assert.ok(option.countries.length > 0, `${option.code} has no countries`);
+  });
 });
 
 test("currency formatting supports expanded and unexpected currencies safely", () => {

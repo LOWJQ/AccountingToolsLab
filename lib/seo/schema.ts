@@ -19,12 +19,20 @@ export function createOrganizationSchema() {
   };
 }
 
+type ItemListEntry = {
+  name: string;
+  url: string;
+  description?: string;
+};
+
+/**
+ * Build an ItemList for a directory page. `itemType` must match what the
+ * listed pages actually are: the tools directory lists WebApplications, the
+ * guides directory lists Articles.
+ */
 export function createItemListSchema(
-  items: Array<{
-    name: string;
-    url: string;
-    description?: string;
-  }>
+  items: ItemListEntry[],
+  itemType: "Article" | "WebApplication" = "WebApplication"
 ) {
   return {
     "@context": "https://schema.org",
@@ -33,7 +41,7 @@ export function createItemListSchema(
       "@type": "ListItem",
       position: index + 1,
       item: {
-        "@type": "WebApplication",
+        "@type": itemType,
         name: item.name,
         url: item.url,
         ...(item.description ? { description: item.description } : {})

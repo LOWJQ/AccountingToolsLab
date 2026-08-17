@@ -3,6 +3,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { RelatedGuideCard } from "@/components/tools/RelatedGuideCard";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
@@ -285,30 +286,7 @@ export default function SstCalculatorMalaysiaPage() {
         </div>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Related Guide Article
-        </h2>
-        <Link
-          className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/do-i-need-to-register-for-sst-malaysia"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-base font-medium leading-7 text-black">SST Guide</p>
-            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Do I Need to Register for SST in Malaysia?
-            </h3>
-            <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Identify the taxable activity, find the correct threshold, and test taxable
-              turnover over 12 months.
-            </p>
-          </div>
-          <ArrowRight
-            aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
-          />
-        </Link>
-      </section>
+      <RelatedGuideCard showTopBorder={false} eyebrow="SST Guide" slug="do-i-need-to-register-for-sst-malaysia" />
 
       <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
         <FAQSection eyebrow="" faqs={sstFaqs} title="SST Calculator Malaysia FAQs" />

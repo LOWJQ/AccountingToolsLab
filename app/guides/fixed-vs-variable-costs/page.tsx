@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Which Costs Are Fixed and Which Are Variable?";
@@ -13,11 +13,11 @@ const guidePath = "/guides/fixed-vs-variable-costs";
 const pageDescription =
   "One question sorts almost every cost, and getting it wrong is why most break-even numbers are too optimistic. Here is how to classify costs and use them properly.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "fixed-vs-variable-costs",
   title: pageTitle,
   description:
-    "Sort any cost with one question. Learn to classify fixed, variable, and semi-variable costs, split mixed bills, and get a break-even number you can trust.",
-  path: guidePath
+    "Sort any cost with one question. Learn to classify fixed, variable, and semi-variable costs, split mixed bills, and get a break-even number you can trust."
 });
 
 const tableOfContents = [
@@ -247,26 +247,9 @@ export default function FixedVsVariableCostsGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-08-17",
-          dateModified: "2026-08-17",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="fixed-vs-variable-costs"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

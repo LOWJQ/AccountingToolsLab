@@ -17,7 +17,7 @@ export const siteConfig = {
   description: "Free accounting tools and guides for learners and small businesses.",
   url: siteUrl,
   ogImage: {
-    url: buildAssetUrl("/og-image.png"),
+    url: buildAssetUrl("/og-image.jpg"),
     width: 1200,
     height: 630,
     alt: "AccountingToolsLab - Free accounting calculators and guides"

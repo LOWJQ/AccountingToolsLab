@@ -50,21 +50,9 @@ export const metadata: Metadata = {
     description: "Free accounting tools and guides for learners and small businesses.",
     images: [siteConfig.ogImage.url]
   },
-  icons: {
-    icon: [
-      {
-        url: "/google-favicon.png",
-        sizes: "512x512",
-        type: "image/png"
-      },
-      {
-        url: "/favicon.ico",
-        sizes: "any",
-        type: "image/x-icon"
-      }
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }]
-  }
+  // No `icons` block: app/favicon.ico, app/icon.png, and app/apple-icon.png
+  // are file conventions Next already emits. Declaring them here overrode the
+  // convention and shipped a duplicate favicon.ico link plus a 120 KB PNG.
 };
 
 export default function RootLayout({

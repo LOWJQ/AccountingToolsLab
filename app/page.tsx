@@ -13,6 +13,7 @@ import {
   UserRound
 } from "lucide-react";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { guideCard } from "@/lib/data/guides";
 import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
 import { createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
@@ -118,25 +119,21 @@ const steps = [
   }
 ] as const;
 
+// Titles and descriptions come from the guide records so these cards cannot
+// drift out of sync with the pages they link to.
 const guideCards = [
   {
-    title: "How to Create a Simple Invoice",
-    description: "Step-by-step guide to create clear, professional invoices for your business.",
-    href: "/guides/what-should-an-invoice-include-before-you-send-it",
+    ...guideCard("what-should-an-invoice-include-before-you-send-it"),
     cta: "Read guide",
     icon: toolIcons.invoice
   },
   {
-    title: "Debit vs Credit",
-    description: "Understand the difference and how they keep your books in balance.",
-    href: "/guides/debit-vs-credit",
+    ...guideCard("debit-vs-credit"),
     cta: "Read guide",
     icon: toolIcons.debitCredit
   },
   {
-    title: "Errors a Trial Balance Will Not Catch",
-    description: "What it is, why it matters, and how to check it accurately.",
-    href: "/guides/errors-not-revealed-by-a-trial-balance",
+    ...guideCard("errors-not-revealed-by-a-trial-balance"),
     cta: "Read guide",
     icon: toolIcons.trialBalance
   }

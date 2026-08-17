@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Do I Need to Register for SST in Malaysia?";
@@ -13,11 +13,11 @@ const guidePath = "/guides/do-i-need-to-register-for-sst-malaysia";
 const pageDescription =
   "Use this step-by-step screening guide to identify whether your business provides taxable goods or services, find the relevant registration threshold, and test your taxable turnover over 12 months.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "do-i-need-to-register-for-sst-malaysia",
   title: "Do I Need to Register for SST in Malaysia?",
   description:
-    "Check whether your Malaysian business may need SST registration. Identify sales or service tax, find the correct threshold, and test 12-month taxable turnover.",
-  path: guidePath
+    "Check whether your Malaysian business may need SST registration. Identify sales or service tax, find the correct threshold, and test 12-month taxable turnover."
 });
 
 const tableOfContents = [
@@ -245,26 +245,9 @@ export default function SstRegistrationGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-07-24",
-          dateModified: "2026-07-24",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="do-i-need-to-register-for-sst-malaysia"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

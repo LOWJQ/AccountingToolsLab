@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Why Is My Business Profitable but I Have No Cash?";
@@ -13,11 +13,11 @@ const guidePath = "/guides/profitable-but-no-cash";
 const pageDescription =
   "Your profit and loss shows a healthy figure and the bank account does not agree. Six ordinary gaps explain almost every case, and none of them mean the accounts are wrong.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "profitable-but-no-cash",
   title: pageTitle,
   description:
-    "Profit is not cash. Six gaps drain the bank while profit still looks healthy: unpaid invoices, drawings, loan principal, assets, stock, depreciation.",
-  path: guidePath
+    "Profit is not cash. Six gaps drain the bank while profit still looks healthy: unpaid invoices, drawings, loan principal, assets, stock, depreciation."
 });
 
 const tableOfContents = [
@@ -271,26 +271,9 @@ export default function ProfitableButNoCashGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-08-17",
-          dateModified: "2026-08-17",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="profitable-but-no-cash"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

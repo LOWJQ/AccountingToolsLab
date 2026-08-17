@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Balanced Trial Balance: 5 Errors It Will Not Catch";
@@ -13,11 +13,11 @@ const guidePath = "/guides/errors-not-revealed-by-a-trial-balance";
 const pageDescription =
   "A trial balance that balances proves your debits equal your credits. It does not prove your books are right. These five errors keep the totals matching while the accounts stay wrong.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "errors-not-revealed-by-a-trial-balance",
   title: pageTitle,
   description:
-    "A balanced trial balance proves only that debits equal credits. Learn the 5 errors it hides, from omission to compensating, and how to find them.",
-  path: guidePath
+    "A balanced trial balance proves only that debits equal credits. Learn the 5 errors it hides, from omission to compensating, and how to find them."
 });
 
 const tableOfContents = [
@@ -284,26 +284,9 @@ export default function ErrorsNotRevealedByTrialBalanceGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-08-17",
-          dateModified: "2026-08-17",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="errors-not-revealed-by-a-trial-balance"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

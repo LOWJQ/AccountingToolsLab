@@ -1,6 +1,10 @@
-import { guideLink, guides } from "@/lib/data/guides";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { guideLink, guides, indexableGuides } from "@/lib/data/guides";
 import { toolLink } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
+import { createItemListSchema } from "@/lib/seo/schema";
+import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -10,23 +14,13 @@ export const metadata = createMetadata({
   path: "/guides"
 });
 
-const guideOrder = [
-  "what-should-an-invoice-include-before-you-send-it",
-  "do-i-need-to-register-for-sst-malaysia",
-  "errors-not-revealed-by-a-trial-balance",
-  "profitable-but-no-cash",
-  "fixed-vs-variable-costs",
-  "why-trial-balance-not-balancing",
-  "debit-vs-credit",
-  "what-is-a-good-financial-ratio",
-  "straight-line-depreciation-explained",
-  "journal-entries-for-beginners"
-];
-
-const orderedGuides = [...guides].sort(
-  (firstGuide, secondGuide) =>
-    guideOrder.indexOf(firstGuide.slug) - guideOrder.indexOf(secondGuide.slug)
-);
+// Display order comes from lib/data/guides.ts. Draft (noindex) guides stay in
+// the visible list but out of the schema, matching what the sitemap submits.
+const guideItemList = indexableGuides.map((guide) => ({
+  name: guide.title,
+  url: `${siteConfig.url}${guide.href}`,
+  description: guide.description
+}));
 
 const learningPaths = [
   {
@@ -92,14 +86,31 @@ const learningPaths = [
 export default function GuidesPage() {
   return (
     <div>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: siteConfig.url },
+          { name: "Guides", url: `${siteConfig.url}/guides` }
+        ]}
+      />
+      <JsonLd data={createItemListSchema(guideItemList, "Article")} />
+
       <main>
         <section className="bg-white">
           <div className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-            <div className="max-w-5xl">
-              <p className="text-sm font-medium tracking-wide text-slate-500">
-                Invoice and Accounting Guides
-              </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
+            <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link className="transition hover:text-slate-900" href="/">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">&gt;</li>
+                <li className="font-medium text-slate-700">Guides</li>
+              </ol>
+            </nav>
+
+            <div className="mt-8 max-w-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
                 Invoice and Accounting Guides
               </h1>
               <p className="mt-5 text-base leading-7 text-stone-600">
@@ -128,7 +139,7 @@ export default function GuidesPage() {
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {orderedGuides.map((guide) => {
+              {guides.map((guide) => {
                 const isAvailable = guide.status === "available";
 
                 const content = (

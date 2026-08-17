@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
+// Relative, not "@/": the test harness compiles with tsc and runs plain Node,
+// which does not resolve the path alias. app/sitemap.ts does the same.
+import { guideBySlug } from "../data/guides";
 import { buildAssetUrl, siteConfig } from "./site";
+
+type ArticleDates = {
+  /** ISO date (YYYY-MM-DD) the article first went live. */
+  publishedTime: string;
+  /** ISO date (YYYY-MM-DD) of the last meaningful content change. */
+  modifiedTime: string;
+};
 
 type CreateMetadataInput = {
   title: string;
@@ -12,6 +22,11 @@ type CreateMetadataInput = {
   };
   noindex?: boolean;
   path?: string;
+  /**
+   * Present for articles only. Switches og:type from "website" to "article"
+   * and adds the published/modified timestamps that go with it.
+   */
+  article?: ArticleDates;
 };
 
 function normalizePath(path: string): string {
@@ -23,6 +38,7 @@ function normalizePath(path: string): string {
 }
 
 export function createMetadata({
+  article,
   title,
   description = siteConfig.description,
   noindex = false,
@@ -49,7 +65,14 @@ export function createMetadata({
       description,
       url: canonicalUrl,
       siteName: siteConfig.name,
-      type: "website",
+      ...(article
+        ? {
+            type: "article" as const,
+            publishedTime: article.publishedTime,
+            modifiedTime: article.modifiedTime,
+            authors: [siteConfig.name]
+          }
+        : { type: "website" as const }),
       images: [
         {
           url: resolvedOgImage.url,
@@ -66,4 +89,30 @@ export function createMetadata({
       images: [resolvedOgImage.url]
     }
   };
+}
+
+type CreateGuideMetadataInput = Omit<CreateMetadataInput, "article" | "path"> & {
+  slug: string;
+};
+
+/**
+ * Metadata for a guide article. Canonical path and both article dates come
+ * from the guide record, so the sitemap lastmod, og:article:modified_time,
+ * and Article dateModified can never disagree the way they used to when each
+ * page hardcoded its own dates.
+ *
+ * `title` stays explicit: several guides run a keyword-tuned <title> that
+ * differs from the on-page headline, which is intentional.
+ */
+export function createGuideMetadata({ slug, ...rest }: CreateGuideMetadataInput): Metadata {
+  const guide = guideBySlug(slug);
+
+  return createMetadata({
+    ...rest,
+    path: guide.href,
+    article: {
+      publishedTime: guide.datePublished,
+      modifiedTime: guide.lastModified
+    }
+  });
 }

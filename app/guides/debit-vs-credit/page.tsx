@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { guideLink } from "@/lib/data/guides";
-import { createMetadata } from "@/lib/seo/metadata";
+import { createGuideMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 const pageTitle = "Debit or Credit? Why Your Bank Says the Opposite";
@@ -13,11 +13,11 @@ const guidePath = "/guides/debit-vs-credit";
 const pageDescription =
   "Debit means left and credit means right. That is the entire definition. Once you see why your bank statement is written backwards, the rest of the rules stop feeling arbitrary.";
 
-export const metadata = createMetadata({
+export const metadata = createGuideMetadata({
+  slug: "debit-vs-credit",
   title: pageTitle,
   description:
-    "Debit means left, credit means right, nothing more. Learn why your bank shows the opposite, which side each account type uses, and why revenue is a credit.",
-  path: guidePath
+    "Debit means left, credit means right, nothing more. Learn why your bank shows the opposite, which side each account type uses, and why revenue is a credit."
 });
 
 const tableOfContents = [
@@ -283,26 +283,9 @@ export default function DebitVsCreditGuidePage() {
         ]}
       />
       <FAQJsonLd faqs={faqs} />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: pageTitle,
-          description: metadata.description,
-          url: pageUrl,
-          datePublished: "2026-08-17",
-          dateModified: "2026-08-17",
-          author: {
-            "@type": "Organization",
-            name: "AccountingToolsLab"
-          },
-          publisher: {
-            "@type": "Organization",
-            name: siteConfig.name,
-            url: siteConfig.url
-          },
-          mainEntityOfPage: pageUrl
-        }}
+      <ArticleJsonLd
+        description={metadata.description as string}
+        slug="debit-vs-credit"
       />
 
       <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">

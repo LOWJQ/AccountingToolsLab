@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { guides } from "../lib/data/guides";
+import { indexableGuides } from "../lib/data/guides";
 import { tools } from "../lib/data/tools";
 import { siteConfig } from "../lib/seo/site";
 
@@ -17,9 +17,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/tools", lastModified: "2026-07-05" },
     ...tools.map((tool) => ({ path: tool.href, lastModified: tool.lastModified })),
     { path: "/guides", lastModified: "2026-07-28" },
-    ...guides
-      .filter((guide) => guide.status === "available" && !guide.noindex)
-      .map((guide) => ({ path: guide.href, lastModified: guide.lastModified })),
+    ...indexableGuides.map((guide) => ({
+      path: guide.href,
+      lastModified: guide.lastModified
+    })),
     { path: "/about", lastModified: "2026-07-05" },
     { path: "/contact", lastModified: "2026-07-05" },
     { path: "/privacy-policy", lastModified: "2026-07-03" },

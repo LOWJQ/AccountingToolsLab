@@ -13,6 +13,7 @@ import {
 import {
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -20,8 +21,13 @@ import {
   useState
 } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { getCompactCurrencyLabel, isCurrencyCode, searchCurrencies } from "@/lib/currency";
+import {
+  getCompactCurrencyLabel,
+  isCurrencyCode,
+  type CurrencyOption
+} from "@/lib/currency";
 import { guides } from "@/lib/data/guides";
+import { availableTools } from "@/lib/data/tools";
 
 type DesktopMenuKey = "guides" | "tools";
 
@@ -40,58 +46,11 @@ type MegaMenuConfig = {
   viewAllLabel: string;
 };
 
-const toolItems: MenuItem[] = [
-  {
-    label: "Invoice Generator",
-    href: "/tools/invoice-generator",
-    description: "Create professional invoices with MYR, SST, and PDF export."
-  },
-  {
-    label: "SST Calculator Malaysia",
-    href: "/tools/sst-calculator-malaysia",
-    description: "Calculate SST-inclusive and SST-exclusive prices."
-  },
-  {
-    label: "Trial Balance Calculator",
-    href: "/tools/trial-balance-calculator",
-    description: "Check debit and credit totals easily."
-  },
-  {
-    label: "Cash Flow Calculator",
-    href: "/tools/cash-flow-calculator",
-    description: "Review cash inflows, outflows, and net cash flow."
-  },
-  {
-    label: "Break-even Calculator",
-    href: "/tools/break-even-calculator",
-    description: "Find the sales needed to cover your costs."
-  },
-  {
-    label: "Accounting Equation Calculator",
-    href: "/tools/accounting-equation-calculator",
-    description: "Check assets, liabilities, and equity."
-  },
-  {
-    label: "Debit/Credit Checker",
-    href: "/tools/debit-credit-checker",
-    description: "Learn whether an account should be debited or credited."
-  },
-  {
-    label: "Financial Ratio Calculator",
-    href: "/tools/financial-ratio-calculator",
-    description: "Calculate useful business and accounting ratios."
-  },
-  {
-    label: "Depreciation Calculator",
-    href: "/tools/depreciation-calculator",
-    description: "Estimate depreciation using common methods."
-  },
-  {
-    label: "Journal Entry Checker",
-    href: "/tools/journal-entry-checker",
-    description: "Review simple journal entry logic."
-  }
-];
+const toolItems: MenuItem[] = availableTools.map((tool) => ({
+  label: tool.menuTitle ?? tool.name,
+  href: tool.href,
+  description: tool.menuDescription
+}));
 
 const guideItems: MenuItem[] = guides
   .filter((guide) => guide.status === "available")
@@ -120,10 +79,27 @@ const megaMenus: Record<DesktopMenuKey, MegaMenuConfig> = {
   }
 };
 
+/**
+ * Currency display names and country lists exist only to populate this
+ * dropdown, so they load on demand instead of on every page view. Warmed on
+ * hover/focus, which means the list is almost always ready by the time the
+ * panel opens; a direct tap falls back to a brief loading row.
+ */
+type CurrencySearchModule = typeof import("@/lib/currency-search");
+
+let currencySearchPromise: Promise<CurrencySearchModule> | null = null;
+
+function loadCurrencySearch(): Promise<CurrencySearchModule> {
+  currencySearchPromise ??= import("@/lib/currency-search");
+
+  return currencySearchPromise;
+}
+
 function CurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [currencySearch, setCurrencySearch] = useState<CurrencySearchModule | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -132,12 +108,27 @@ function CurrencySelector() {
   const searchInputId = useId();
   const { currency, setCurrency } = useCurrency();
   const selectedLabel = getCompactCurrencyLabel(currency);
-  const filteredCurrencies = useMemo(() => searchCurrencies(searchQuery), [searchQuery]);
+  const filteredCurrencies = useMemo<CurrencyOption[]>(
+    () => currencySearch?.searchCurrencies(searchQuery) ?? [],
+    [currencySearch, searchQuery]
+  );
+  const isLoadingCurrencies = currencySearch === null;
   const selectedIndex = Math.max(filteredCurrencies.findIndex((option) => option.code === currency), 0);
   const activeCurrency = filteredCurrencies[activeIndex];
   const activeOptionId = activeCurrency ? `${listboxId}-${activeCurrency.code}` : undefined;
 
+  const prefetchCurrencySearch = useCallback(() => {
+    if (currencySearch) {
+      return;
+    }
+
+    void loadCurrencySearch().then((currencyModule) => {
+      setCurrencySearch(() => currencyModule);
+    });
+  }, [currencySearch]);
+
   function openSelector(index = selectedIndex) {
+    prefetchCurrencySearch();
     setIsOpen(true);
     setActiveIndex(index);
     window.requestAnimationFrame(() => {
@@ -266,7 +257,9 @@ function CurrencySelector() {
             openSelector(selectedIndex);
           }
         }}
+        onFocus={prefetchCurrencySearch}
         onKeyDown={handleButtonKeyDown}
+        onPointerEnter={prefetchCurrencySearch}
         ref={buttonRef}
         type="button"
       >
@@ -352,7 +345,7 @@ function CurrencySelector() {
               })
             ) : (
               <p className="px-3 py-6 text-center text-sm font-medium text-stone-500">
-                No currencies found.
+                {isLoadingCurrencies ? "Loading currencies..." : "No currencies found."}
               </p>
             )}
           </div>
