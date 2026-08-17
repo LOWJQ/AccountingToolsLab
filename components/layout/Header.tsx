@@ -96,7 +96,7 @@ const toolItems: MenuItem[] = [
 const guideItems: MenuItem[] = guides
   .filter((guide) => guide.status === "available")
   .map((guide) => ({
-    label: guide.title,
+    label: guide.menuTitle ?? guide.title,
     href: guide.href,
     description: guide.menuDescription
   }));

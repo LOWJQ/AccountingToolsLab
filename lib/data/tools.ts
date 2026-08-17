@@ -117,3 +117,22 @@ export const tools: Tool[] = [
     lastModified: "2026-07-18"
   }
 ];
+
+export type ToolLink = {
+  href: string;
+  label: string;
+};
+
+/**
+ * Single source of truth for tool links in navigation and learning paths, so
+ * renaming a tool updates every surface at once. Throws if the slug is unknown.
+ */
+export function toolLink(slug: string): ToolLink {
+  const tool = tools.find((item) => item.slug === slug);
+
+  if (!tool) {
+    throw new Error(`toolLink: no tool with slug "${slug}"`);
+  }
+
+  return { href: tool.href, label: tool.name };
+}

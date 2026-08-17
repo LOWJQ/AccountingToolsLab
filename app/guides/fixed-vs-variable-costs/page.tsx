@@ -4,6 +4,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { guideLink } from "@/lib/data/guides";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -139,19 +140,10 @@ const checklist = [
 ] as const;
 
 const sidebarGuides = [
-  {
-    href: "/guides/profitable-but-no-cash",
-    label: "Why Is My Business Profitable but I Have No Cash?"
-  },
-  {
-    href: "/guides/straight-line-depreciation-explained",
-    label: "Straight-Line Depreciation: The Two Numbers You Guess"
-  },
-  {
-    href: "/guides/what-is-a-good-financial-ratio",
-    label: "Is My Current Ratio Good?"
-  }
-] as const;
+  guideLink("profitable-but-no-cash"),
+  guideLink("straight-line-depreciation-explained"),
+  guideLink("what-is-a-good-financial-ratio")
+];
 
 const faqs = [
   {

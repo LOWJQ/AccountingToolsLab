@@ -5,6 +5,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { guideLink } from "@/lib/data/guides";
 import { createMetadata } from "@/lib/seo/metadata";
 import { buildAssetUrl, siteConfig } from "@/lib/seo/site";
 
@@ -84,19 +85,10 @@ const checklist = [
 ] as const;
 
 const sidebarGuides = [
-  {
-    href: "/guides/do-i-need-to-register-for-sst-malaysia",
-    label: "Do I Need to Register for SST?"
-  },
-  {
-    href: "/guides/profitable-but-no-cash",
-    label: "Profitable but No Cash?"
-  },
-  {
-    href: "/guides/debit-vs-credit",
-    label: "Debit vs Credit"
-  }
-] as const;
+  guideLink("do-i-need-to-register-for-sst-malaysia"),
+  guideLink("profitable-but-no-cash"),
+  guideLink("debit-vs-credit")
+];
 
 const faqs = [
   {

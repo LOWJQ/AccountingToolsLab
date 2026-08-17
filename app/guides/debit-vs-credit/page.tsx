@@ -4,6 +4,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { guideLink } from "@/lib/data/guides";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -175,19 +176,10 @@ const checklist = [
 ] as const;
 
 const sidebarGuides = [
-  {
-    href: "/guides/journal-entries-for-beginners",
-    label: "Journal Entries: How to Know Which Accounts to Use"
-  },
-  {
-    href: "/guides/why-trial-balance-not-balancing",
-    label: "Why Is My Trial Balance Not Balancing?"
-  },
-  {
-    href: "/guides/errors-not-revealed-by-a-trial-balance",
-    label: "Balanced Trial Balance: 5 Errors It Will Not Catch"
-  }
-] as const;
+  guideLink("journal-entries-for-beginners"),
+  guideLink("why-trial-balance-not-balancing"),
+  guideLink("errors-not-revealed-by-a-trial-balance")
+];
 
 const faqs = [
   {

@@ -4,6 +4,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
+import { guideLink } from "@/lib/data/guides";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -117,19 +118,10 @@ const checklist = [
 ] as const;
 
 const sidebarGuides = [
-  {
-    href: "/guides/what-should-an-invoice-include-before-you-send-it",
-    label: "What Should an Invoice Include?"
-  },
-  {
-    href: "/guides/profitable-but-no-cash",
-    label: "Profitable but No Cash?"
-  },
-  {
-    href: "/guides/debit-vs-credit",
-    label: "Debit vs Credit"
-  }
-] as const;
+  guideLink("what-should-an-invoice-include-before-you-send-it"),
+  guideLink("profitable-but-no-cash"),
+  guideLink("debit-vs-credit")
+];
 
 const faqs = [
   {

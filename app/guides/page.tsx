@@ -1,4 +1,5 @@
-import { guides } from "@/lib/data/guides";
+import { guideLink, guides } from "@/lib/data/guides";
+import { toolLink } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 import Link from "next/link";
 
@@ -31,151 +32,59 @@ const learningPaths = [
   {
     title: "Business Documents",
     steps: [
-      {
-        label: "What Should an Invoice Include?",
-        href: "/guides/what-should-an-invoice-include-before-you-send-it",
-        status: "Available"
-      },
-      {
-        label: "Invoice Generator",
-        href: "/tools/invoice-generator",
-        status: "Available"
-      },
-      {
-        label: "SST Calculator Malaysia",
-        href: "/tools/sst-calculator-malaysia",
-        status: "Available"
-      },
-      {
-        label: "Cash Flow Calculator",
-        href: "/tools/cash-flow-calculator",
-        status: "Available"
-      }
+      { ...guideLink("what-should-an-invoice-include-before-you-send-it"), status: "Available" },
+      { ...toolLink("invoice-generator"), status: "Available" },
+      { ...toolLink("sst-calculator-malaysia"), status: "Available" },
+      { ...toolLink("cash-flow-calculator"), status: "Available" }
     ]
   },
   {
     title: "Malaysia Tax Basics",
     steps: [
-      {
-        label: "SST Calculator Malaysia",
-        href: "/tools/sst-calculator-malaysia",
-        status: "Available"
-      },
-      {
-        label: "Do I Need to Register for SST?",
-        href: "/guides/do-i-need-to-register-for-sst-malaysia",
-        status: "Available"
-      },
-      {
-        label: "Invoice Generator",
-        href: "/tools/invoice-generator",
-        status: "Available"
-      }
+      { ...toolLink("sst-calculator-malaysia"), status: "Available" },
+      { ...guideLink("do-i-need-to-register-for-sst-malaysia"), status: "Available" },
+      { ...toolLink("invoice-generator"), status: "Available" }
     ]
   },
   {
     title: "Business Planning",
     steps: [
-      {
-        label: "Which Costs Are Fixed or Variable?",
-        href: "/guides/fixed-vs-variable-costs",
-        status: "Available"
-      },
-      {
-        label: "Break-even Calculator",
-        href: "/tools/break-even-calculator",
-        status: "Available"
-      },
-      {
-        label: "Profitable but No Cash?",
-        href: "/guides/profitable-but-no-cash",
-        status: "Available"
-      },
-      {
-        label: "Cash Flow Calculator",
-        href: "/tools/cash-flow-calculator",
-        status: "Available"
-      }
+      { ...guideLink("fixed-vs-variable-costs"), status: "Available" },
+      { ...toolLink("break-even-calculator"), status: "Available" },
+      { ...guideLink("profitable-but-no-cash"), status: "Available" },
+      { ...toolLink("cash-flow-calculator"), status: "Available" }
     ]
   },
   {
     title: "Financial Analysis",
     steps: [
-      {
-        label: "Is My Current Ratio Good?",
-        href: "/guides/what-is-a-good-financial-ratio",
-        status: "Available"
-      },
-      {
-        label: "Financial Ratio Calculator",
-        href: "/tools/financial-ratio-calculator",
-        status: "Available"
-      }
+      { ...guideLink("what-is-a-good-financial-ratio"), status: "Available" },
+      { ...toolLink("financial-ratio-calculator"), status: "Available" }
     ]
   },
   {
     title: "Accounting Basics",
     steps: [
-      {
-        label: "Debit vs Credit",
-        href: "/guides/debit-vs-credit",
-        status: "Available"
-      },
-      {
-        label: "Journal Entries: How to Know Which Accounts to Use",
-        href: "/guides/journal-entries-for-beginners",
-        status: "Available"
-      },
-      {
-        label: "Debit/Credit Checker",
-        href: "/tools/debit-credit-checker",
-        status: "Available"
-      },
-      {
-        label: "Journal Entry Checker",
-        href: "/tools/journal-entry-checker",
-        status: "Available"
-      },
-      {
-        label: "Accounting Equation Calculator",
-        href: "/tools/accounting-equation-calculator",
-        status: "Available"
-      }
+      { ...guideLink("debit-vs-credit"), status: "Available" },
+      { ...guideLink("journal-entries-for-beginners"), status: "Available" },
+      { ...toolLink("debit-credit-checker"), status: "Available" },
+      { ...toolLink("journal-entry-checker"), status: "Available" },
+      { ...toolLink("accounting-equation-calculator"), status: "Available" }
     ]
   },
   {
     title: "Bookkeeping Checks",
     steps: [
-      {
-        label: "Errors a Trial Balance Will Not Catch",
-        href: "/guides/errors-not-revealed-by-a-trial-balance",
-        status: "Available"
-      },
-      {
-        label: "Why Trial Balance Is Not Balancing",
-        href: "/guides/why-trial-balance-not-balancing",
-        status: "Available"
-      },
-      {
-        label: "Trial Balance Calculator",
-        href: "/tools/trial-balance-calculator",
-        status: "Available"
-      }
+      { ...guideLink("errors-not-revealed-by-a-trial-balance"), status: "Available" },
+      { ...guideLink("why-trial-balance-not-balancing"), status: "Available" },
+      { ...toolLink("trial-balance-calculator"), status: "Available" }
     ]
   },
   {
     title: "Depreciation & Adjustments",
     steps: [
-      {
-        label: "Straight-Line Depreciation: The Two Numbers You Guess",
-        href: "/guides/straight-line-depreciation-explained",
-        status: "Available"
-      },
-      {
-        label: "Depreciation Calculator",
-        href: "/tools/depreciation-calculator",
-        status: "Available"
-      }
+      { ...guideLink("straight-line-depreciation-explained"), status: "Available" },
+      { ...toolLink("depreciation-calculator"), status: "Available" }
     ]
   }
 ];

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { guideLink } from "@/lib/data/guides";
+import { toolLink } from "@/lib/data/tools";
 
 type FooterLink = {
   href: string;
@@ -10,23 +12,19 @@ const footerSections: Array<{ links: FooterLink[]; title: string }> = [
   {
     title: "Tools",
     links: [
-      { label: "Invoice Generator", href: "/tools/invoice-generator" },
-      { label: "SST Calculator Malaysia", href: "/tools/sst-calculator-malaysia" },
-      { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" },
-      { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
+      toolLink("invoice-generator"),
+      toolLink("sst-calculator-malaysia"),
+      toolLink("trial-balance-calculator"),
+      toolLink("cash-flow-calculator"),
       { label: "All Tools", href: "/tools" }
     ]
   },
   {
     title: "Guides",
     links: [
-      { label: "What an Invoice Includes", href: "/guides/what-should-an-invoice-include-before-you-send-it" },
-      {
-        label: "SST Registration Guide",
-        href: "/guides/do-i-need-to-register-for-sst-malaysia"
-      },
-      { label: "Debit vs Credit", href: "/guides/debit-vs-credit" },
-      { label: "Accounting Basics", href: "/guides" },
+      guideLink("what-should-an-invoice-include-before-you-send-it"),
+      guideLink("do-i-need-to-register-for-sst-malaysia"),
+      guideLink("debit-vs-credit"),
       { label: "All Guides", href: "/guides" }
     ]
   },
