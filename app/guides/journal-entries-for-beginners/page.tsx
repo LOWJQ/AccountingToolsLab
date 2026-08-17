@@ -1,234 +1,254 @@
-import { Container } from "@/components/layout/Container";
+import Link from "next/link";
+import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import Link from "next/link";
+
+const pageTitle = "Journal Entries: How to Know Which Accounts to Use";
+const guidePath = "/guides/journal-entries-for-beginners";
+const pageDescription =
+  "Choosing the sides is the easy half. The hard half is turning a sentence into two account names, and knowing when the answer is Prepaid Insurance rather than Insurance Expense.";
 
 export const metadata = createMetadata({
-  title: "Journal Entries for Beginners: Debit and Credit Examples | AccountingToolsLab",
+  title: pageTitle,
   description:
-    "Learn journal entries for beginners with simple debit and credit examples, journal entry format, common mistakes, and step-by-step checks.",
-  path: "/guides/journal-entries-for-beginners"
+    "The hard part of a journal entry is picking the accounts, not the sides. Learn a four-question method and when to use prepaid, accrued, and unearned accounts.",
+  path: guidePath
 });
 
-const debitCreditRules = [
-  ["Asset", "Debit", "Credit"],
-  ["Expense", "Debit", "Credit"],
-  ["Dividends/Drawings", "Debit", "Credit"],
-  ["Liability", "Credit", "Debit"],
-  ["Equity", "Credit", "Debit"],
-  ["Revenue", "Credit", "Debit"]
-];
+const tableOfContents = [
+  { label: "Quick answer", href: "#quick-answer" },
+  { label: "Turning a sentence into an entry", href: "#the-method" },
+  { label: "Key terms", href: "#key-terms" },
+  { label: "When cash and benefit differ", href: "#timing-accounts" },
+  { label: "Entries with more than two lines", href: "#compound" },
+  { label: "Worked examples", href: "#examples" },
+  { label: "Four traps", href: "#traps" },
+  { label: "Checklist", href: "#checklist" },
+  { label: "FAQs", href: "#faq" }
+] as const;
 
-const steps = [
-  "Identify the transaction.",
-  "Decide which accounts are affected.",
-  "Decide whether each account increases or decreases.",
-  "Use debit and credit rules to choose the correct side.",
-  "Enter the debit line or lines.",
-  "Enter the credit line or lines.",
-  "Check that total debits equal total credits.",
-  "Add a short explanation if needed."
-];
-
-const examples = [
+const keyTerms = [
   {
-    title: "Example 1: receiving cash for service revenue",
-    scenario: "A business earns RM 1,000 cash from providing a service.",
-    rows: [
-      ["Cash", "RM 1,000", "-"],
-      ["Service Revenue", "-", "RM 1,000"],
-      ["Total", "RM 1,000", "RM 1,000"]
-    ],
-    explanation: [
-      "Cash increases, and cash is an asset, so debit Cash.",
-      "Revenue increases, and revenue normally increases with credit, so credit Service Revenue."
-    ]
+    term: "Journal entry",
+    meaning:
+      "The record of one transaction, listing the accounts affected and the amount debited and credited. It is where a transaction enters the books."
   },
   {
-    title: "Example 2: paying rent expense",
-    scenario: "A business pays RM 800 cash for rent.",
-    rows: [
-      ["Rent Expense", "RM 800", "-"],
-      ["Cash", "-", "RM 800"],
-      ["Total", "RM 800", "RM 800"]
-    ],
-    explanation: [
-      "Rent Expense increases, and expenses increase with debit.",
-      "Cash decreases, and assets decrease with credit."
-    ]
+    term: "Narration",
+    meaning:
+      "The short explanation written under an entry saying what it was for. It is what makes the entry understandable to someone reading it months later."
   },
   {
-    title: "Example 3: buying equipment with cash",
-    scenario: "A business buys equipment for RM 3,000 cash.",
-    rows: [
-      ["Equipment", "RM 3,000", "-"],
-      ["Cash", "-", "RM 3,000"],
-      ["Total", "RM 3,000", "RM 3,000"]
-    ],
-    explanation: [
-      "Equipment increases, and equipment is an asset, so debit Equipment.",
-      "Cash decreases, and cash is also an asset, so credit Cash."
-    ]
+    term: "Compound entry",
+    meaning:
+      "An entry with more than two lines. Perfectly valid, as long as total debits still equal total credits."
   },
   {
-    title: "Example 4: owner invests cash into the business",
-    scenario: "The owner invests RM 5,000 cash into the business.",
-    rows: [
-      ["Cash", "RM 5,000", "-"],
-      ["Owner's Capital", "-", "RM 5,000"],
-      ["Total", "RM 5,000", "RM 5,000"]
-    ],
-    explanation: [
-      "Cash increases, so debit Cash.",
-      "Owner's Capital increases, and equity normally increases with credit."
-    ]
+    term: "Prepaid expense",
+    meaning:
+      "Something paid for before it is used. It is an asset until consumed, which is why it is Prepaid Insurance and not Insurance Expense on the day you pay."
   },
   {
-    title: "Example 5: buying supplies on credit",
-    scenario: "A business buys RM 600 of supplies but will pay later.",
-    rows: [
-      ["Supplies", "RM 600", "-"],
-      ["Accounts Payable", "-", "RM 600"],
-      ["Total", "RM 600", "RM 600"]
-    ],
-    explanation: [
-      "Supplies increase, and supplies are an asset, so debit Supplies.",
-      "Accounts Payable increases, and liabilities increase with credit."
-    ]
+    term: "Accrued expense",
+    meaning:
+      "Something used before it is paid for. It is a liability, because the benefit has been taken and the obligation to pay exists."
+  },
+  {
+    term: "Unearned revenue",
+    meaning:
+      "Money received before the work is delivered. It is a liability, not revenue, because the business still owes the customer something."
+  },
+  {
+    term: "Adjusting entry",
+    meaning:
+      "An entry made at period end to move amounts into the period they belong to, such as converting part of a prepayment into an expense."
   }
-];
+] as const;
 
-const multiLineRows = [
-  ["Cash", "RM 700", "-"],
-  ["Accounts Receivable", "RM 300", "-"],
-  ["Service Revenue", "-", "RM 1,000"],
-  ["Total", "RM 1,000", "RM 1,000"]
-];
+const methodSteps = [
+  [
+    "1. What did the business receive?",
+    "Cash, stock, equipment, or a service consumed",
+    "This is usually one account"
+  ],
+  [
+    "2. What did it give up or now owe?",
+    "Cash paid out, or a new obligation created",
+    "This is usually the other account"
+  ],
+  [
+    "3. Has the cash moved at a different time?",
+    "Paid early, or used now and paying later",
+    "This is where prepaid, accrued, and unearned accounts appear"
+  ],
+  [
+    "4. What type is each account?",
+    "Asset, liability, equity, revenue, expense, drawings",
+    "Only now does the debit or credit side get decided"
+  ]
+] as const;
 
-const mistakes = [
-  "Thinking debit always means increase",
-  "Thinking credit always means decrease",
-  "Forgetting one side of the entry",
-  "Entering both debit and credit on the same line",
-  "Using the wrong account even though the entry balances",
-  "Forgetting that revenue normally increases with credit",
-  "Forgetting that expenses normally increase with debit",
-  "Mixing up cash received with revenue earned",
-  "Not checking whether total debits equal total credits"
-];
+const timingTable = [
+  [
+    "You pay before you use it",
+    "Prepaid Expense",
+    "Asset",
+    "Insurance paid 12 months ahead"
+  ],
+  [
+    "You use it before you pay",
+    "Accrued Expense",
+    "Liability",
+    "March electricity billed in April"
+  ],
+  [
+    "Customer pays before you deliver",
+    "Unearned Revenue",
+    "Liability",
+    "Deposit for work starting next month"
+  ],
+  [
+    "You deliver before the customer pays",
+    "Trade Receivables",
+    "Asset",
+    "Invoice issued on 30-day terms"
+  ]
+] as const;
 
-const toolLinks = [
+const traps = [
   {
-    title: "Journal Entry Checker",
-    href: "/tools/journal-entry-checker",
-    description: "Use it to check whether debit and credit totals match."
+    id: "jumping-to-sides",
+    name: "1. Reaching for debit and credit too early",
+    summary: "The sides are the last decision, not the first.",
+    example:
+      "Given a sentence about paying rent, people immediately think about which side rent goes on before confirming whether the account is Rent Expense or Prepaid Rent.",
+    why: "Choosing a side for the wrong account produces an entry that balances perfectly and is still wrong. The trial balance will never flag it.",
+    fix: "Name both accounts in full before thinking about sides at all."
   },
   {
-    title: "Debit vs Credit",
-    href: "/guides/debit-vs-credit",
-    description: "Review the account rules before choosing which side to use."
+    id: "expense-not-asset",
+    name: "2. Expensing something paid for in advance",
+    summary: "Paying does not make it an expense yet.",
+    example:
+      "RM 6,000 of insurance covering the next twelve months is debited entirely to Insurance Expense on the day of payment.",
+    why: "The benefit has not been consumed. Recording it all as an expense understates profit this period and overstates it in the eleven periods that follow.",
+    fix: "Debit Prepaid Insurance, then move RM 500 into Insurance Expense each month with an adjusting entry."
   },
   {
-    title: "Debit/Credit Checker",
-    href: "/tools/debit-credit-checker",
-    description: "Use it to check whether an account should be debited or credited."
+    id: "revenue-too-early",
+    name: "3. Treating a deposit as revenue",
+    summary: "Cash received is not the same as revenue earned.",
+    example:
+      "A RM 3,000 deposit for work starting next month is credited to Revenue on receipt.",
+    why: "The business still owes the customer the work, so the amount is an obligation rather than income. Recording it as revenue overstates this period and leaves nothing for the period the work is actually done.",
+    fix: "Credit Unearned Revenue, and move it to Revenue as the work is delivered."
   },
   {
-    title: "Why Trial Balance Does Not Balance",
-    href: "/guides/why-trial-balance-not-balancing",
-    description: "Learn what to check if posted entries lead to unbalanced totals."
-  },
-  {
-    title: "Trial Balance Calculator",
-    href: "/tools/trial-balance-calculator",
-    description: "Use it to check whether total ledger debit and credit balances match."
-  },
-  {
-    title: "Accounting Equation Calculator",
-    href: "/tools/accounting-equation-calculator",
-    description: "Use it to review assets, liabilities, and equity."
+    id: "accrual-double-count",
+    name: "4. Forgetting to reverse an accrual",
+    summary: "The expense gets counted twice when the real invoice arrives.",
+    example:
+      "March electricity is accrued at RM 400. In April the actual bill is posted in full, and nobody removes the accrual.",
+    why: "The same cost now sits in the books twice, overstating expenses and understating profit. It also leaves a liability that never clears.",
+    fix: "Reverse the accrual at the start of the new period so the real invoice can be posted normally."
   }
-];
+] as const;
 
 const checklist = [
-  "Did you identify the accounts affected?",
-  "Did you decide whether each account increased or decreased?",
-  "Did you apply the debit and credit rules correctly?",
-  "Did you put each amount on only one side of each line?",
-  "Do total debits equal total credits?",
-  "Did you add a clear explanation?",
-  "Did you check the entry with the Journal Entry Checker?"
-];
+  "I wrote down what the business received before thinking about sides.",
+  "I wrote down what it gave up or now owes.",
+  "I checked whether the cash moved at a different time from the benefit.",
+  "I used a prepaid, accrued, or unearned account where the timing differed.",
+  "I identified the account type for every line.",
+  "I applied the debit and credit rule for each type.",
+  "I confirmed total debits equal total credits.",
+  "I added a narration explaining what the entry was for."
+] as const;
+
+const sidebarGuides = [
+  {
+    href: "/guides/debit-vs-credit",
+    label: "Debit or Credit? Why Your Bank Says the Opposite"
+  },
+  {
+    href: "/guides/why-trial-balance-not-balancing",
+    label: "Why Is My Trial Balance Not Balancing?"
+  },
+  {
+    href: "/guides/errors-not-revealed-by-a-trial-balance",
+    label: "Balanced Trial Balance: 5 Errors It Will Not Catch"
+  }
+] as const;
 
 const faqs = [
   {
-    question: "What is a journal entry?",
+    question: "How do I know which accounts a transaction affects?",
     answer:
-      "A journal entry records a business transaction by showing the accounts affected, the debit amounts, and the credit amounts."
+      "Ask what the business received and what it gave up or now owes. Those two answers are usually your two accounts. Then check whether the cash moved at a different time from the benefit, because that is when a prepaid, accrued, or unearned account belongs in the entry instead of the obvious one."
   },
   {
-    question: "What is the basic format of a journal entry?",
+    question: "What is the difference between the journal and the ledger?",
     answer:
-      "A basic journal entry usually includes the date, account names, debit column, credit column, and a short explanation."
+      "The journal records transactions in date order as they happen, so it reads like a diary. The ledger groups the same entries by account, so you can see everything that hit Cash or Rent Expense in one place. Every entry starts in the journal and is then posted to the ledger."
   },
   {
-    question: "Why do debits and credits need to balance?",
+    question: "Do debits always have to be listed before credits?",
     answer:
-      "Debits and credits need to balance because double-entry accounting records equal debit and credit effects for each complete transaction."
+      "By convention yes. Debit lines are written first and credit lines below them, usually indented. It is a formatting convention rather than a rule that changes the accounting, but following it makes entries far quicker for someone else to read."
   },
   {
-    question: "How do I know which account to debit?",
+    question: "Is a narration required on a journal entry?",
     answer:
-      "Identify the account type and whether it increased or decreased. Assets and expenses usually increase with debits."
+      "It is not mathematically required, but leaving it out is a mistake you will regret. Months later, an entry without an explanation is very hard to verify or correct, and it is usually the first thing an auditor or accountant asks about."
   },
   {
-    question: "How do I know which account to credit?",
+    question: "What is an adjusting entry?",
     answer:
-      "Identify the account type and whether it increased or decreased. Liabilities, equity, and revenue usually increase with credits."
+      "An entry made at period end to move amounts into the period they belong to. Converting one month of a twelve-month prepayment into an expense is an adjusting entry, as is recording an expense that has been incurred but not yet billed."
   },
   {
-    question: "Can a journal entry have more than two lines?",
+    question: "Does the Journal Entry Checker tell me if I picked the right accounts?",
     answer:
-      "Yes. A journal entry can have multiple debit or credit lines as long as total debits equal total credits."
-  },
-  {
-    question: "Can a journal entry balance but still be wrong?",
-    answer:
-      "Yes. A balanced journal entry checks the math, but the wrong account or wrong classification can still be used."
-  },
-  {
-    question: "What is the difference between a journal entry and a trial balance?",
-    answer:
-      "A journal entry records one transaction. A trial balance lists ledger account balances to check whether total debit and credit balances match."
-  },
-  {
-    question: "Can this guide help with accounting homework?",
-    answer:
-      "Yes. This guide can help you understand the format, examples, and checking steps, but you should still follow your class instructions."
+      "No. It totals your debit and credit lines and confirms whether the entry balances, which catches arithmetic problems and missing lines. Whether Prepaid Insurance was the right account rather than Insurance Expense is a judgement it cannot make, and a wrong account will still balance perfectly."
   }
 ];
 
-function EntryTable({ rows }: { rows: string[][] }) {
+function SimpleTable({
+  headers,
+  rows
+}: {
+  headers: readonly string[];
+  rows: ReadonlyArray<readonly string[]>;
+}) {
   return (
-    <div className="mt-5 overflow-x-auto rounded-xl border border-stone-200">
-      <table className="min-w-[560px] w-full border-collapse bg-white text-left text-sm">
-        <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+    <div className="mt-5 overflow-x-auto rounded-lg border border-slate-200">
+      <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
+        <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-950">
           <tr>
-            <th className="px-4 py-3 font-semibold">Account</th>
-            <th className="px-4 py-3 text-right font-semibold">Debit</th>
-            <th className="px-4 py-3 text-right font-semibold">Credit</th>
+            {headers.map((header) => (
+              <th className="px-4 py-3" key={header} scope="col">
+                {header}
+              </th>
+            ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-stone-100 text-stone-700">
-          {rows.map(([account, debit, credit]) => (
-            <tr className={account === "Total" ? "bg-stone-50 font-semibold" : ""} key={account}>
-              <td className="px-4 py-3 font-semibold text-stone-950">{account}</td>
-              <td className="px-4 py-3 text-right">{debit}</td>
-              <td className="px-4 py-3 text-right">{credit}</td>
+        <tbody className="divide-y divide-slate-100 text-slate-950">
+          {rows.map((row) => (
+            <tr key={row.join("-")}>
+              {row.map((cell, index) => (
+                <td
+                  className={`px-4 py-3 align-top ${
+                    index === 0 ? "font-semibold text-slate-950" : ""
+                  }`}
+                  key={`${row[0]}-${cell}`}
+                >
+                  {cell}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -237,16 +257,56 @@ function EntryTable({ rows }: { rows: string[][] }) {
   );
 }
 
-export default function JournalEntriesForBeginnersPage() {
-  const pageUrl = `${siteConfig.url}/guides/journal-entries-for-beginners`;
-
+function EntryBlock({
+  caption,
+  lines,
+  reasoning
+}: {
+  caption: string;
+  lines: ReadonlyArray<readonly [string, string, string]>;
+  reasoning: string;
+}) {
   return (
     <div>
+      <h3 className="text-xl font-semibold tracking-tight text-slate-950">{caption}</h3>
+      <SimpleTable
+        headers={["Account", "Debit (RM)", "Credit (RM)"]}
+        rows={lines.map((line) => [line[0], line[1], line[2]])}
+      />
+      <p className="mt-4 text-base leading-7 text-slate-950">
+        <span className="font-semibold">Why these accounts. </span>
+        {reasoning}
+      </p>
+    </div>
+  );
+}
+
+function SectionHeading({
+  children,
+  id
+}: {
+  children: string;
+  id: string;
+}) {
+  return (
+    <header id={id} className="scroll-mt-28">
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+        {children}
+      </h2>
+    </header>
+  );
+}
+
+export default function JournalEntriesGuidePage() {
+  const pageUrl = `${siteConfig.url}${guidePath}`;
+
+  return (
+    <div className="bg-white">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },
           { name: "Guides", url: `${siteConfig.url}/guides` },
-          { name: "Journal Entries for Beginners", url: pageUrl }
+          { name: pageTitle, url: pageUrl }
         ]}
       />
       <FAQJsonLd faqs={faqs} />
@@ -254,10 +314,15 @@ export default function JournalEntriesForBeginnersPage() {
         data={{
           "@context": "https://schema.org",
           "@type": "Article",
-          headline: "Journal Entries for Beginners: Debit and Credit Examples",
-          description:
-            "Learn journal entries for beginners with simple debit and credit examples, journal entry format, common mistakes, and step-by-step checks.",
+          headline: pageTitle,
+          description: metadata.description,
           url: pageUrl,
+          datePublished: "2026-08-18",
+          dateModified: "2026-08-18",
+          author: {
+            "@type": "Organization",
+            name: "AccountingToolsLab"
+          },
           publisher: {
             "@type": "Organization",
             name: siteConfig.name,
@@ -267,303 +332,326 @@ export default function JournalEntriesForBeginnersPage() {
         }}
       />
 
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Journal Entries for Beginners: Debit and Credit Examples
-          </h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            A journal entry records a business transaction using debit and credit lines. A
-            complete journal entry should have total debits equal to total credits.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              href="/tools/journal-entry-checker"
-            >
-              Check a Journal Entry
-            </Link>
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-              href="/guides/debit-vs-credit"
-            >
-              Review Debit/Credit Rules
-            </Link>
-          </div>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Quick answer</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              What is a journal entry?
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>A journal entry records the accounts affected by a transaction.</p>
-              <p>
-                Each journal entry usually includes a date, account names, debit amounts, credit
-                amounts, and a short description.
-              </p>
-              <p>
-                Debits go on the left side, credits go on the right side, and total debits should
-                equal total credits.
-              </p>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Core rule</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              The basic rule: debits must equal credits
-            </h2>
-            <div className="mt-5 rounded-xl border border-stone-200 bg-stone-50 p-5 text-center text-xl font-semibold tracking-tight text-stone-950">
-              Total Debits = Total Credits
-            </div>
-            <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
-              This is the foundation of double-entry accounting. A journal entry can have more
-              than two lines, but the total debit amount must equal the total credit amount.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-stone-600 sm:text-base">
-              A balanced journal entry checks the math, but it does not always prove the account
-              choices are correct.
-            </p>
-          </article>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Format</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Journal entry format
-          </h2>
-          <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200">
-            <table className="min-w-[640px] w-full border-collapse bg-white text-left text-sm">
-              <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Date</th>
-                  <th className="px-4 py-3 font-semibold">Account</th>
-                  <th className="px-4 py-3 text-right font-semibold">Debit</th>
-                  <th className="px-4 py-3 text-right font-semibold">Credit</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100 text-stone-700">
-                <tr>
-                  <td className="px-4 py-3">Jan 1</td>
-                  <td className="px-4 py-3 font-semibold text-stone-950">Cash</td>
-                  <td className="px-4 py-3 text-right">RM 1,000</td>
-                  <td className="px-4 py-3 text-right">-</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3">Jan 1</td>
-                  <td className="px-4 py-3 font-semibold text-stone-950">Service Revenue</td>
-                  <td className="px-4 py-3 text-right">-</td>
-                  <td className="px-4 py-3 text-right">RM 1,000</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>Cash is debited because cash increased.</p>
-            <p>Service Revenue is credited because revenue increased.</p>
-            <p>
-              The entry balances because total debits and total credits are both RM 1,000.
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Rules reminder</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Which accounts increase with debit or credit?
-          </h2>
-          <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200">
-            <table className="min-w-[640px] w-full border-collapse bg-white text-left text-sm">
-              <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Account Type</th>
-                  <th className="px-4 py-3 font-semibold">Increases With</th>
-                  <th className="px-4 py-3 font-semibold">Decreases With</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100 text-stone-700">
-                {debitCreditRules.map(([accountType, increasesWith, decreasesWith]) => (
-                  <tr key={accountType}>
-                    <td className="px-4 py-3 font-semibold text-stone-950">{accountType}</td>
-                    <td className="px-4 py-3">{increasesWith}</td>
-                    <td className="px-4 py-3">{decreasesWith}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
-            If this still feels slippery,{" "}
-            <Link
-              className="font-semibold text-slate-700 hover:text-slate-900"
-              href="/guides/debit-vs-credit"
-            >
-              learn the full debit vs credit rules
-            </Link>{" "}
-            or{" "}
-            <Link
-              className="font-semibold text-slate-700 hover:text-slate-900"
-              href="/tools/debit-credit-checker"
-            >
-              use the Debit/Credit Checker
-            </Link>
-            .
-          </p>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Process</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            How to write a journal entry step by step
-          </h2>
-          <ol className="mt-6 grid gap-3">
-            {steps.map((step, index) => (
-              <li className="flex gap-3 text-sm leading-6 text-stone-700" key={step}>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-                  {index + 1}
-                </span>
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section>
-          <p className="text-sm font-medium tracking-wide text-slate-500">Examples</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Debit and credit journal entry examples
-          </h2>
-          <div className="mt-6 grid gap-6">
-            {examples.map((example) => (
-              <article
-                className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
-                key={example.title}
-              >
-                <h3 className="text-xl font-semibold tracking-tight text-stone-950">
-                  {example.title}
-                </h3>
-                <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
-                  <span className="font-semibold text-stone-800">Scenario:</span>{" "}
-                  {example.scenario}
-                </p>
-                <EntryTable rows={example.rows} />
-                <ul className="mt-5 grid gap-3 text-sm leading-6 text-stone-700 sm:text-base">
-                  {example.explanation.map((item) => (
-                    <li className="flex gap-3" key={item}>
-                      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-slate-500" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Multiple lines</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Can a journal entry have more than two lines?
-          </h2>
-          <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-            <p>Yes. A journal entry can have multiple debit or credit lines.</p>
-            <p>The total debit amount still needs to equal the total credit amount.</p>
-            <p>
-              Scenario: a customer pays RM 1,000 total: RM 700 in cash and RM 300 still owed.
-            </p>
-          </div>
-          <EntryTable rows={multiLineRows} />
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Mistakes</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Common journal entry mistakes
-            </h2>
-            <ul className="mt-6 grid gap-3 text-sm leading-6 text-stone-700">
-              {mistakes.map((mistake) => (
-                <li className="flex gap-3" key={mistake}>
-                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-slate-500" />
-                  <span>{mistake}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Related guides</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Learn what happens after journal entries
-            </h2>
-            <div className="mt-5 grid gap-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>
-                Journal entries are posted to ledger accounts. Those ending ledger balances can
-                then be checked in a trial balance.
-              </p>
-              <p>
-                To continue,{" "}
-                <Link
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/guides/trial-balance-explained"
-                >
-                  learn how a trial balance works
-                </Link>{" "}
-                and review{" "}
-                <Link
-                  className="font-semibold text-slate-700 hover:text-slate-900"
-                  href="/guides/why-trial-balance-not-balancing"
-                >
-                  why a trial balance may not balance
-                </Link>
-                .
-              </p>
-            </div>
-          </article>
-        </section>
-
-        <section>
-          <p className="text-sm font-medium tracking-wide text-slate-500">Tools</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-            Practice journal entries with related tools
-          </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {toolLinks.map((tool) => (
-              <Link
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
-                href={tool.href}
-                key={tool.href}
-              >
-                <h3 className="text-base font-semibold text-stone-950">{tool.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{tool.description}</p>
+      <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <nav aria-label="Breadcrumb" className="text-sm text-slate-950">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li>
+              <Link className="transition hover:text-slate-900" href="/">
+                Home
               </Link>
-            ))}
-          </div>
-        </section>
+            </li>
+            <li aria-hidden="true">&gt;</li>
+            <li>
+              <Link className="transition hover:text-slate-900" href="/guides">
+                Guides
+              </Link>
+            </li>
+            <li aria-hidden="true">&gt;</li>
+            <li className="font-medium text-slate-950">{pageTitle}</li>
+          </ol>
+        </nav>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Checklist</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Journal entry checklist for beginners
-          </h2>
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-            {checklist.map((item) => (
-              <li
-                className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700"
-                key={item}
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+          <article className="min-w-0">
+            <header>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                {pageTitle}
+              </h1>
+              <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
+                {pageDescription}
+              </p>
+              <p className="mt-5 text-sm text-slate-950">
+                Updated on 18 August 2026 <span aria-hidden="true">-</span> 10 min read
+              </p>
+            </header>
 
-        <FAQSection faqs={faqs} title="Journal Entries for Beginners FAQs" />
-      </Container>
+            <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
+
+            <section className="mt-12">
+              <SectionHeading id="quick-answer">
+                Quick answer: pick the accounts before the sides
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Most people learn the debit and credit rules and still freeze when handed a
+                sentence like &quot;paid RM 6,000 for twelve months of insurance&quot;. The rules
+                were never the problem. Naming the accounts is.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Work through four questions in order, and only reach for debit and credit at the
+                very end.
+              </p>
+              <SimpleTable
+                headers={["Question", "What you are looking for", "Notes"]}
+                rows={methodSteps}
+              />
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                Once the accounts are named, deciding the side is mechanical. If that part is still
+                shaky, the guide on{" "}
+                <Link
+                  className="font-semibold underline underline-offset-4"
+                  href="/guides/debit-vs-credit"
+                >
+                  which side to use and why banks say the opposite
+                </Link>{" "}
+                covers it.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="the-method">
+                Turning a sentence into an entry
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Every transaction is an exchange. The business gets something and gives up
+                something, and each half of that exchange is one account.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Take &quot;the business paid RM 800 rent for this month by bank transfer&quot;. The
+                business received the use of premises for the month, which is Rent Expense. It gave
+                up money in the bank, which is Cash. Two accounts, identified before any thought
+                about sides.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Question three is where most difficulty lives. If the cash moved at a different
+                time from the benefit, the obvious account is the wrong one. That is the whole
+                reason accounts like Prepaid Insurance and Unearned Revenue exist.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="key-terms">Key terms in plain English</SectionHeading>
+              <dl className="mt-6 space-y-5 text-base leading-7 text-slate-950">
+                {keyTerms.map((item) => (
+                  <div key={item.term}>
+                    <dt className="font-semibold">{item.term}</dt>
+                    <dd className="mt-1">{item.meaning}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="timing-accounts">
+                When the cash and the benefit happen at different times
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                This single table answers the question that trips up more beginners than any other:
+                when to use Prepaid Insurance instead of Insurance Expense, or Unearned Revenue
+                instead of Revenue.
+              </p>
+              <SimpleTable
+                headers={["Situation", "Account to use", "Type", "Example"]}
+                rows={timingTable}
+              />
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                The pattern is consistent. Paying early creates an <strong>asset</strong>, because
+                you are owed something. Receiving early creates a <strong>liability</strong>,
+                because you owe something. Using before paying creates a liability, and delivering
+                before being paid creates an asset.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                These balances do not sit there forever. An adjusting entry moves them across as
+                the benefit is consumed or the work is delivered, which is shown in the second
+                worked example below.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="compound">
+                Entries with more than two lines
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Nothing says an entry must have exactly one debit and one credit. A compound entry
+                can have several lines on either side, and it is correct as long as the two totals
+                agree.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                This is where entries most often go wrong, because a missing line is easy to
+                overlook when there are four or five. Checking the totals with the{" "}
+                <Link
+                  className="font-semibold underline underline-offset-4"
+                  href="/tools/journal-entry-checker"
+                >
+                  journal entry checker
+                </Link>{" "}
+                catches that quickly.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="examples">
+                Five sentences turned into entries
+              </SectionHeading>
+              <div className="mt-8 space-y-10">
+                <EntryBlock
+                  caption="1. Paid RM 500 cash for office supplies used this month"
+                  lines={[
+                    ["Office Supplies Expense", "500", "-"],
+                    ["Cash", "-", "500"]
+                  ]}
+                  reasoning="The business received supplies and consumed them now, so the benefit and the payment happen together. No timing account is needed."
+                />
+                <EntryBlock
+                  caption="2. Paid RM 6,000 for twelve months of insurance in advance"
+                  lines={[
+                    ["Prepaid Insurance", "6,000", "-"],
+                    ["Cash", "-", "6,000"]
+                  ]}
+                  reasoning="Cash left now but no insurance cover has been used yet, so the business is owed something. That makes it an asset rather than an expense. Insurance Expense would be wrong on this date."
+                />
+                <EntryBlock
+                  caption="2a. One month later, the adjusting entry"
+                  lines={[
+                    ["Insurance Expense", "500", "-"],
+                    ["Prepaid Insurance", "-", "500"]
+                  ]}
+                  reasoning="One twelfth of the cover has now been consumed, so RM 500 moves out of the asset and into the expense. Repeating this monthly empties the prepayment over the year."
+                />
+                <EntryBlock
+                  caption="3. Received RM 3,000 from a client for work starting next month"
+                  lines={[
+                    ["Cash", "3,000", "-"],
+                    ["Unearned Revenue", "-", "3,000"]
+                  ]}
+                  reasoning="Cash arrived but nothing has been delivered, so the business owes the client work. That is a liability. Crediting Revenue here would report income the business has not earned."
+                />
+                <EntryBlock
+                  caption="4. Used RM 400 of electricity in March, bill arrives in April"
+                  lines={[
+                    ["Electricity Expense", "400", "-"],
+                    ["Accrued Expenses", "-", "400"]
+                  ]}
+                  reasoning="The benefit was consumed in March, so the cost belongs to March even though no invoice exists yet. The unpaid obligation is a liability."
+                />
+                <EntryBlock
+                  caption="5. Sold RM 1,000 of goods, RM 400 paid in cash and RM 600 on credit"
+                  lines={[
+                    ["Cash", "400", "-"],
+                    ["Trade Receivables", "600", "-"],
+                    ["Revenue", "-", "1,000"]
+                  ]}
+                  reasoning="One sale produced two different assets, so the entry needs three lines. Total debits of RM 1,000 still equal the single RM 1,000 credit."
+                />
+              </div>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="traps">Four traps worth naming</SectionHeading>
+              <div className="mt-8 space-y-10">
+                {traps.map((trap) => (
+                  <div className="scroll-mt-28" id={trap.id} key={trap.id}>
+                    <h3 className="text-xl font-semibold tracking-tight text-slate-950">
+                      {trap.name}
+                    </h3>
+                    <p className="mt-2 text-base leading-7 text-slate-950">{trap.summary}</p>
+                    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-5">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-950">
+                        Example
+                      </p>
+                      <p className="mt-2 text-base leading-7 text-slate-950">{trap.example}</p>
+                    </div>
+                    <p className="mt-4 text-base leading-7 text-slate-950">
+                      <span className="font-semibold">Why it matters. </span>
+                      {trap.why}
+                    </p>
+                    <p className="mt-3 text-base leading-7 text-slate-950">
+                      <span className="font-semibold">What to do. </span>
+                      {trap.fix}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-8 text-base leading-7 text-slate-950">
+                Notice that all four produce entries that balance. A wrong account never disturbs
+                the totals, which is why they survive into the trial balance untouched. The guide
+                on{" "}
+                <Link
+                  className="font-semibold underline underline-offset-4"
+                  href="/guides/errors-not-revealed-by-a-trial-balance"
+                >
+                  errors a balanced trial balance will not catch
+                </Link>{" "}
+                explains how they are eventually found.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="checklist">Checklist for any entry</SectionHeading>
+              <ul className="mt-5 grid gap-3 text-base leading-7 text-slate-950">
+                {checklist.map((item) => (
+                  <li className="flex gap-3" key={item}>
+                    <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-500" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 text-sm leading-6 text-slate-950">
+                This guide explains general bookkeeping concepts for learning and review. It is not
+                accounting advice for a specific set of accounts.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <div className="rounded-lg border border-slate-200 bg-white p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight text-slate-950">
+                    Check the entry balances
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-950">
+                    Enter your debit and credit lines to confirm the totals agree, then use the
+                    checklist above to confirm the accounts were the right ones.
+                  </p>
+                </div>
+                <div className="mt-4 flex shrink-0 flex-wrap gap-3 sm:mt-0">
+                  <Link
+                    className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-50"
+                    href="/tools/debit-credit-checker"
+                  >
+                    Debit/Credit Checker
+                  </Link>
+                  <Link
+                    className="inline-flex h-11 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    href="/tools/journal-entry-checker"
+                  >
+                    Journal Entry Checker
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            <FAQSection
+              eyebrow=""
+              faqs={faqs}
+              id="faq"
+              showTopBorder={false}
+              title="Journal Entry FAQs"
+            />
+          </article>
+
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 space-y-8">
+              <GuideTableOfContents items={tableOfContents} />
+
+              <section>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-950">
+                  Related guides
+                </p>
+                <div className="mt-4 grid gap-3">
+                  {sidebarGuides.map((guide) => (
+                    <Link
+                      className="text-sm leading-6 text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
+                      href={guide.href}
+                      key={guide.href}
+                    >
+                      {guide.label}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }

@@ -221,16 +221,16 @@ export default function BreakEvenCalculatorPage() {
         </h2>
         <Link
           className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/break-even-point-explained"
+          href="/guides/fixed-vs-variable-costs"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Break-even guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Break-even Point Explained
+              Which Costs Are Fixed and Which Are Variable?
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn what break-even point means, how to calculate break-even units and sales,
-              contribution margin, examples, and common beginner mistakes.
+              Sort any cost with one question, split mixed bills like electricity, and avoid the
+              four traps that make a break-even number too optimistic.
             </p>
           </div>
           <ArrowRight

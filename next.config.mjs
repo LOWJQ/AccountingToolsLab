@@ -62,6 +62,26 @@ const nextConfig = {
         permanent: true
       },
       {
+        source: "/guides/trial-balance-explained",
+        destination: "/guides/errors-not-revealed-by-a-trial-balance",
+        permanent: true
+      },
+      {
+        source: "/guides/cash-flow-vs-profit",
+        destination: "/guides/profitable-but-no-cash",
+        permanent: true
+      },
+      {
+        source: "/guides/break-even-point-explained",
+        destination: "/guides/fixed-vs-variable-costs",
+        permanent: true
+      },
+      {
+        source: "/guides/financial-ratios-for-beginners",
+        destination: "/guides/what-is-a-good-financial-ratio",
+        permanent: true
+      },
+      {
         source: "/guides/sst-calculator-malaysia-add-remove-sst",
         destination: "/guides/do-i-need-to-register-for-sst-malaysia",
         permanent: true

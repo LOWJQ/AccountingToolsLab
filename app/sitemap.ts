@@ -3,40 +3,31 @@ import { guides } from "../lib/data/guides";
 import { tools } from "../lib/data/tools";
 import { siteConfig } from "../lib/seo/site";
 
-const defaultLastModified = "2026-05-08";
-
-const updatedRouteLastModified: Record<string, string> = {
-  "": "2026-05-08",
-  "/tools": "2026-05-08",
-  "/about": "2026-05-08",
-  "/guides/debit-vs-credit": "2026-05-08",
-  "/guides/journal-entries-for-beginners": "2026-05-08",
-  "/guides/trial-balance-explained": "2026-05-08",
-  "/guides/why-trial-balance-not-balancing": "2026-05-08",
-  "/guides/financial-ratios-for-beginners": "2026-05-08",
-  "/guides/cash-flow-vs-profit": "2026-05-08",
-  "/guides/break-even-point-explained": "2026-05-08",
-  "/guides/straight-line-depreciation-explained": "2026-05-08",
-  "/guides/what-should-an-invoice-include-before-you-send-it": "2026-05-12",
-  "/guides/do-i-need-to-register-for-sst-malaysia": "2026-07-24",
-  "/tools/invoice-generator": "2026-05-11"
+type SitemapEntry = {
+  path: string;
+  lastModified: string;
 };
 
+// Tool and guide dates live on each entry in lib/data, so editing a page and
+// updating its date happen in the same place. Only the standalone pages below
+// need a date recorded here.
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = [
-    "",
-    "/tools",
-    ...tools.map((tool) => tool.href),
-    "/guides",
-    ...guides.filter((guide) => guide.status === "available").map((guide) => guide.href),
-    "/about",
-    "/contact",
-    "/privacy-policy",
-    "/terms"
+  const entries: SitemapEntry[] = [
+    { path: "", lastModified: "2026-07-05" },
+    { path: "/tools", lastModified: "2026-07-05" },
+    ...tools.map((tool) => ({ path: tool.href, lastModified: tool.lastModified })),
+    { path: "/guides", lastModified: "2026-07-28" },
+    ...guides
+      .filter((guide) => guide.status === "available" && !guide.noindex)
+      .map((guide) => ({ path: guide.href, lastModified: guide.lastModified })),
+    { path: "/about", lastModified: "2026-07-05" },
+    { path: "/contact", lastModified: "2026-07-05" },
+    { path: "/privacy-policy", lastModified: "2026-07-03" },
+    { path: "/terms", lastModified: "2026-07-03" }
   ];
 
-  return routes.map((route) => ({
-    url: `${siteConfig.url}${route || "/"}`,
-    lastModified: updatedRouteLastModified[route] ?? defaultLastModified
+  return entries.map(({ path, lastModified }) => ({
+    url: `${siteConfig.url}${path || "/"}`,
+    lastModified
   }));
 }

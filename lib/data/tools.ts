@@ -9,7 +9,8 @@ export const tools: Tool[] = [
     category: "Bookkeeping Checks",
     bestFor: "Checking ledger balances before preparing financial statements.",
     href: "/tools/trial-balance-calculator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "accounting-equation-calculator",
@@ -19,7 +20,8 @@ export const tools: Tool[] = [
     category: "Accounting Basics",
     bestFor: "Understanding how assets, liabilities, and equity relate.",
     href: "/tools/accounting-equation-calculator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "debit-credit-checker",
@@ -29,7 +31,8 @@ export const tools: Tool[] = [
     category: "Accounting Basics",
     bestFor: "Learning normal balances and basic journal entry direction.",
     href: "/tools/debit-credit-checker",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "financial-ratio-calculator",
@@ -39,7 +42,8 @@ export const tools: Tool[] = [
     category: "Financial Analysis",
     bestFor: "Reviewing financial statement performance and position.",
     href: "/tools/financial-ratio-calculator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "depreciation-calculator",
@@ -49,7 +53,8 @@ export const tools: Tool[] = [
     category: "Depreciation & Adjustments",
     bestFor: "Understanding asset cost allocation over time.",
     href: "/tools/depreciation-calculator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "break-even-calculator",
@@ -60,7 +65,8 @@ export const tools: Tool[] = [
     category: "Business Planning",
     bestFor: "Estimating how many units a business needs to sell to cover costs.",
     href: "/tools/break-even-calculator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "cash-flow-calculator",
@@ -71,7 +77,8 @@ export const tools: Tool[] = [
     category: "Business Planning",
     bestFor: "Reviewing whether cash increased or decreased during a period.",
     href: "/tools/cash-flow-calculator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "invoice-generator",
@@ -82,7 +89,8 @@ export const tools: Tool[] = [
     category: "Business Documents",
     bestFor: "Preparing downloadable PDF invoices for freelancers and small businesses.",
     href: "/tools/invoice-generator",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   },
   {
     slug: "sst-calculator-malaysia",
@@ -93,7 +101,8 @@ export const tools: Tool[] = [
     category: "Malaysia Tax Tools",
     bestFor: "Learning how to add or remove SST from a simple amount.",
     href: "/tools/sst-calculator-malaysia",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-28"
   },
   {
     slug: "journal-entry-checker",
@@ -104,6 +113,7 @@ export const tools: Tool[] = [
     category: "Accounting Basics",
     bestFor: "Checking the math balance of debit and credit lines.",
     href: "/tools/journal-entry-checker",
-    status: "mvp"
+    status: "mvp",
+    lastModified: "2026-07-18"
   }
 ];

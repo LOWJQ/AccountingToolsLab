@@ -227,11 +227,11 @@ export default function DepreciationCalculatorPage() {
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Depreciation guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Straight-Line Depreciation Explained
+              Straight-Line Depreciation: The Two Numbers You Guess
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn straight-line depreciation with the formula, examples, salvage value, useful
-              life, annual depreciation expense, and common beginner mistakes.
+              Cost is a fact, useful life and salvage value are estimates. See how to set both, and
+              why LHDN will not accept your depreciation figure.
             </p>
           </div>
           <ArrowRight

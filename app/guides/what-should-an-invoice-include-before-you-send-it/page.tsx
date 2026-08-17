@@ -9,9 +9,9 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { buildAssetUrl, siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "What Should an Invoice Include Before You Send It? Malaysia Guide",
+  title: "What Should an Invoice Include? Malaysia Checklist",
   description:
-    "Learn what an invoice should include before you send it, with a simple Malaysia-friendly checklist covering business details, customer details, invoice numbers, payment terms, SST/tax notes, and totals.",
+    "A simple Malaysia invoice checklist: business and customer details, invoice number, dates, line items, payment terms, SST notes, and totals.",
   ogImage: {
     url: "/og-invoice-generator-guide.png",
     width: 1200,
@@ -89,8 +89,8 @@ const sidebarGuides = [
     label: "Do I Need to Register for SST?"
   },
   {
-    href: "/guides/cash-flow-vs-profit",
-    label: "Cash Flow vs Profit"
+    href: "/guides/profitable-but-no-cash",
+    label: "Profitable but No Cash?"
   },
   {
     href: "/guides/debit-vs-credit",
@@ -412,12 +412,12 @@ export default function HowToCreateSimpleInvoicePage() {
                 ]}
               />
               <p className="mt-5 text-base leading-7 text-slate-950">
-                An invoice also does not mean cash has been collected. For cash planning, compare{" "}
+                An invoice also does not mean cash has been collected. For cash planning, see{" "}
                 <Link
                   className="text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
-                  href="/guides/cash-flow-vs-profit"
+                  href="/guides/profitable-but-no-cash"
                 >
-                  cash flow vs profit
+                  why profit is not cash
                 </Link>{" "}
                 or use the{" "}
                 <Link

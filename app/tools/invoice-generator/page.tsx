@@ -13,7 +13,7 @@ import Link from "next/link";
 export const metadata = createMetadata({
   title: "Free Invoice Generator Malaysia | Online PDF Invoice Maker",
   description:
-    "Use a free online invoice generator Malaysia tool to create a simple PDF invoice. Add items, SST/tax, discounts, payment details, logo, and download without signing up.",
+    "Free online invoice generator for Malaysia. Create a PDF invoice with items, SST, discounts, and your logo. No sign-up needed.",
   ogImage: {
     url: "/og-invoice-generator-guide.png",
     width: 1200,

@@ -27,10 +27,7 @@ export const metadata: Metadata = {
   title: "AccountingToolsLab",
   description: "Free accounting tools and guides for learners and small businesses.",
   alternates: {
-    canonical: `${siteConfig.url}/`,
-    languages: {
-      "en-MY": `${siteConfig.url}/`
-    }
+    canonical: `${siteConfig.url}/`
   },
   openGraph: {
     title: "AccountingToolsLab",

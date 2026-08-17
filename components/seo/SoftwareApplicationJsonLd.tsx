@@ -1,10 +1,9 @@
 import { JsonLd } from "./JsonLd";
 
+// Deliberately has no aggregateRating support. These tools collect no reviews,
+// so any rating here would be fabricated - the kind of structured data Google
+// issues manual actions for. Add it only alongside real, on-page reviews.
 type SoftwareApplicationJsonLdProps = {
-  aggregateRating?: {
-    ratingValue: string;
-    reviewCount: string;
-  };
   applicationCategory?: string;
   name: string;
   description: string;
@@ -13,7 +12,6 @@ type SoftwareApplicationJsonLdProps = {
 };
 
 export function SoftwareApplicationJsonLd({
-  aggregateRating,
   applicationCategory = "FinanceApplication",
   description,
   name,
@@ -30,15 +28,6 @@ export function SoftwareApplicationJsonLd({
         url,
         applicationCategory,
         operatingSystem: "Web",
-        ...(aggregateRating
-          ? {
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: aggregateRating.ratingValue,
-                reviewCount: aggregateRating.reviewCount
-              }
-            }
-          : {}),
         offers: {
           "@type": "Offer",
           price: "0",

@@ -5,19 +5,19 @@ import Link from "next/link";
 export const metadata = createMetadata({
   title: "Invoice and Accounting Guides | AccountingToolsLab",
   description:
-    "Read simple guides about invoices, SST, cash flow, break-even points, financial ratios, and accounting basics for small businesses, freelancers, beginners, and students.",
+    "Simple guides on invoices, SST, cash flow, break-even, and accounting basics for small businesses, freelancers, and students.",
   path: "/guides"
 });
 
 const guideOrder = [
   "what-should-an-invoice-include-before-you-send-it",
   "do-i-need-to-register-for-sst-malaysia",
-  "trial-balance-explained",
-  "cash-flow-vs-profit",
-  "break-even-point-explained",
+  "errors-not-revealed-by-a-trial-balance",
+  "profitable-but-no-cash",
+  "fixed-vs-variable-costs",
   "why-trial-balance-not-balancing",
   "debit-vs-credit",
-  "financial-ratios-for-beginners",
+  "what-is-a-good-financial-ratio",
   "straight-line-depreciation-explained",
   "journal-entries-for-beginners"
 ];
@@ -77,8 +77,8 @@ const learningPaths = [
     title: "Business Planning",
     steps: [
       {
-        label: "Break-even Point Explained",
-        href: "/guides/break-even-point-explained",
+        label: "Which Costs Are Fixed or Variable?",
+        href: "/guides/fixed-vs-variable-costs",
         status: "Available"
       },
       {
@@ -87,8 +87,8 @@ const learningPaths = [
         status: "Available"
       },
       {
-        label: "Cash Flow vs Profit",
-        href: "/guides/cash-flow-vs-profit",
+        label: "Profitable but No Cash?",
+        href: "/guides/profitable-but-no-cash",
         status: "Available"
       },
       {
@@ -102,8 +102,8 @@ const learningPaths = [
     title: "Financial Analysis",
     steps: [
       {
-        label: "Financial Ratios for Beginners",
-        href: "/guides/financial-ratios-for-beginners",
+        label: "Is My Current Ratio Good?",
+        href: "/guides/what-is-a-good-financial-ratio",
         status: "Available"
       },
       {
@@ -122,7 +122,7 @@ const learningPaths = [
         status: "Available"
       },
       {
-        label: "Journal Entries for Beginners",
+        label: "Journal Entries: How to Know Which Accounts to Use",
         href: "/guides/journal-entries-for-beginners",
         status: "Available"
       },
@@ -147,8 +147,8 @@ const learningPaths = [
     title: "Bookkeeping Checks",
     steps: [
       {
-        label: "Trial Balance Explained",
-        href: "/guides/trial-balance-explained",
+        label: "Errors a Trial Balance Will Not Catch",
+        href: "/guides/errors-not-revealed-by-a-trial-balance",
         status: "Available"
       },
       {
@@ -167,7 +167,7 @@ const learningPaths = [
     title: "Depreciation & Adjustments",
     steps: [
       {
-        label: "Straight-Line Depreciation Explained",
+        label: "Straight-Line Depreciation: The Two Numbers You Guess",
         href: "/guides/straight-line-depreciation-explained",
         status: "Available"
       },

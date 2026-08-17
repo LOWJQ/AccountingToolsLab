@@ -31,14 +31,14 @@ Currently available:
 - Invoice Generator
 - Malaysia SST Calculator
 - Journal Entry Checker
-- Trial Balance Explained guide
+- Errors a Trial Balance Will Not Catch guide
 - Debit vs Credit guide
-- Financial Ratios for Beginners guide
+- Is My Current Ratio Good guide
 - Why Trial Balance Is Not Balancing guide
-- Journal Entries for Beginners guide
-- Cash Flow vs Profit guide
-- Break-even Point Explained guide
-- Straight-Line Depreciation Explained guide
+- Journal Entries guide
+- Profitable but No Cash guide
+- Fixed vs Variable Costs guide
+- Straight-Line Depreciation guide
 - How to Create a Simple Invoice guide
 - SST Calculator Malaysia guide
 
@@ -88,14 +88,14 @@ tests/              Lightweight TypeScript/Node tests for calculators, invoice l
 /tools/sst-calculator-malaysia                Malaysia SST Calculator
 /tools/journal-entry-checker                  Journal Entry Checker
 /guides                                       Guides directory
-/guides/trial-balance-explained               Trial Balance Explained guide
+/guides/errors-not-revealed-by-a-trial-balance               Errors a Trial Balance Will Not Catch guide
 /guides/debit-vs-credit                       Debit vs Credit guide
-/guides/financial-ratios-for-beginners        Financial Ratios for Beginners guide
+/guides/what-is-a-good-financial-ratio        Is My Current Ratio Good guide
 /guides/why-trial-balance-not-balancing       Why Trial Balance Is Not Balancing guide
-/guides/journal-entries-for-beginners         Journal Entries for Beginners guide
-/guides/cash-flow-vs-profit                   Cash Flow vs Profit guide
-/guides/break-even-point-explained            Break-even Point Explained guide
-/guides/straight-line-depreciation-explained  Straight-Line Depreciation Explained guide
+/guides/journal-entries-for-beginners         Journal Entries guide
+/guides/profitable-but-no-cash                   Profitable but No Cash guide
+/guides/fixed-vs-variable-costs            Fixed vs Variable Costs guide
+/guides/straight-line-depreciation-explained  Straight-Line Depreciation guide
 /guides/what-should-an-invoice-include-before-you-send-it        What Should an Invoice Include guide
 /guides/sst-calculator-malaysia-add-remove-sst SST Calculator Malaysia guide
 /about                                        About page

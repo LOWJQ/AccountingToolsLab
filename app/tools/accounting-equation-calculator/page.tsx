@@ -11,7 +11,7 @@ import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "Accounting Equation Calculator | Assets, Liabilities and Equity",
+  title: "Accounting Equation Calculator | Assets and Equity",
   description:
     "Use this free accounting equation calculator to solve for assets, liabilities, or equity using Assets = Liabilities + Equity.",
   path: "/tools/accounting-equation-calculator"

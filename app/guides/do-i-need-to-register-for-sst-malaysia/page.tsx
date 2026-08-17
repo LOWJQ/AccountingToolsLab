@@ -13,7 +13,7 @@ const pageDescription =
   "Use this step-by-step screening guide to identify whether your business provides taxable goods or services, find the relevant registration threshold, and test your taxable turnover over 12 months.";
 
 export const metadata = createMetadata({
-  title: "Do I Need to Register for SST in Malaysia? Small Business Guide",
+  title: "Do I Need to Register for SST in Malaysia?",
   description:
     "Check whether your Malaysian business may need SST registration. Identify sales or service tax, find the correct threshold, and test 12-month taxable turnover.",
   path: guidePath
@@ -122,8 +122,8 @@ const sidebarGuides = [
     label: "What Should an Invoice Include?"
   },
   {
-    href: "/guides/cash-flow-vs-profit",
-    label: "Cash Flow vs Profit"
+    href: "/guides/profitable-but-no-cash",
+    label: "Profitable but No Cash?"
   },
   {
     href: "/guides/debit-vs-credit",

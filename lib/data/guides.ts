@@ -5,7 +5,11 @@ export type Guide = {
   menuDescription: string;
   category: string;
   status: "available" | "coming-soon";
+  /** Draft guides: reachable and linked, but kept out of the sitemap and search index. */
+  noindex?: boolean;
   href: string;
+  /** ISO date (YYYY-MM-DD) of the last meaningful content change. Feeds the sitemap. */
+  lastModified: string;
 };
 
 export const guides: Guide[] = [
@@ -17,7 +21,8 @@ export const guides: Guide[] = [
     menuDescription: "Check what to include before sending an invoice.",
     category: "Business Documents",
     status: "available",
-    href: "/guides/what-should-an-invoice-include-before-you-send-it"
+    href: "/guides/what-should-an-invoice-include-before-you-send-it",
+    lastModified: "2026-07-28"
   },
   {
     slug: "do-i-need-to-register-for-sst-malaysia",
@@ -27,86 +32,95 @@ export const guides: Guide[] = [
     menuDescription: "Check whether your business may need SST registration.",
     category: "Malaysia Business Tax",
     status: "available",
-    href: "/guides/do-i-need-to-register-for-sst-malaysia"
+    href: "/guides/do-i-need-to-register-for-sst-malaysia",
+    lastModified: "2026-07-28"
   },
   {
-    slug: "trial-balance-explained",
-    title: "Trial Balance Explained",
+    slug: "errors-not-revealed-by-a-trial-balance",
+    title: "Balanced Trial Balance: 5 Errors It Will Not Catch",
     description:
-      "Learn what a trial balance is, how to prepare one, the trial balance format, examples, common errors, and why total debits should equal total credits.",
-    menuDescription: "Learn what a trial balance is and how to prepare one.",
+      "A balanced trial balance only proves debits equal credits. Learn the five errors it cannot detect and the checks that find them.",
+    menuDescription: "Learn the five errors a balanced trial balance hides.",
     category: "Bookkeeping Checks",
     status: "available",
-    href: "/guides/trial-balance-explained"
+    href: "/guides/errors-not-revealed-by-a-trial-balance",
+    lastModified: "2026-08-17"
   },
   {
-    slug: "cash-flow-vs-profit",
-    title: "Cash Flow vs Profit",
+    slug: "profitable-but-no-cash",
+    title: "Why Is My Business Profitable but I Have No Cash?",
     description:
-      "Learn the difference between cash flow and profit, why profitable businesses can run out of cash, and how to check simple cash movement.",
-    menuDescription: "Learn the difference between cash flow and profit.",
+      "Profit is not cash. Learn the six gaps that drain the bank while profit still looks healthy, and how to close them.",
+    menuDescription: "Find out where the cash went when profit looks fine.",
     category: "Business Planning",
     status: "available",
-    href: "/guides/cash-flow-vs-profit"
+    href: "/guides/profitable-but-no-cash",
+    lastModified: "2026-08-17"
   },
   {
-    slug: "break-even-point-explained",
-    title: "Break-even Point Explained",
+    slug: "fixed-vs-variable-costs",
+    title: "Which Costs Are Fixed and Which Are Variable?",
     description:
-      "Learn what break-even point means, how to calculate break-even units and sales, contribution margin, examples, and common beginner mistakes.",
-    menuDescription: "Learn what break-even point means and how it is calculated.",
+      "Sort any cost with one question, split mixed bills correctly, and get a break-even number that is not quietly too optimistic.",
+    menuDescription: "Sort fixed, variable, and mixed costs the right way.",
     category: "Business Planning",
     status: "available",
-    href: "/guides/break-even-point-explained"
+    href: "/guides/fixed-vs-variable-costs",
+    lastModified: "2026-08-17"
   },
   {
     slug: "why-trial-balance-not-balancing",
     title: "Why Is My Trial Balance Not Balancing?",
     description:
-      "Learn common reasons a trial balance does not balance, how to use the difference amount, and how to check debit and credit errors step by step.",
-    menuDescription: "Learn common reasons a trial balance does not balance.",
+      "Use the size of the difference to find the error: re-add the columns, divide by 2, divide by 9, then search the ledger in a fixed order.",
+    menuDescription: "Use the difference to track down the error fast.",
     category: "Bookkeeping Checks",
     status: "available",
-    href: "/guides/why-trial-balance-not-balancing"
+    href: "/guides/why-trial-balance-not-balancing",
+    lastModified: "2026-08-17"
   },
   {
     slug: "debit-vs-credit",
-    title: "Debit vs Credit",
+    title: "Debit or Credit? Why Your Bank Says the Opposite",
     description:
-      "Learn debit and credit rules, normal balances, beginner examples, and how to know whether to debit or credit an account.",
-    menuDescription: "Learn debit and credit rules with simple beginner examples.",
+      "Debit means left and credit means right. Learn why your bank statement shows the opposite, and which side each account type uses.",
+    menuDescription: "Learn which side to use and why banks say the opposite.",
     category: "Accounting Basics",
     status: "available",
-    href: "/guides/debit-vs-credit"
+    href: "/guides/debit-vs-credit",
+    lastModified: "2026-08-17"
   },
   {
-    slug: "financial-ratios-for-beginners",
-    title: "Financial Ratios for Beginners",
+    slug: "what-is-a-good-financial-ratio",
+    title: "Is My Current Ratio Good? How to Judge Any Ratio",
     description:
-      "Learn basic financial ratio formulas, examples, and what ratios like current ratio, debt-to-equity, profit margin, and return on assets mean.",
-    menuDescription: "Learn basic financial ratio formulas for simple business checks.",
+      "A ratio on its own means little. Learn what counts as good, why a high number can be bad, and how to judge any ratio using trend and context.",
+    menuDescription: "Turn a ratio into something you can actually act on.",
     category: "Financial Analysis",
     status: "available",
-    href: "/guides/financial-ratios-for-beginners"
+    href: "/guides/what-is-a-good-financial-ratio",
+    lastModified: "2026-08-18"
   },
   {
     slug: "straight-line-depreciation-explained",
-    title: "Straight-Line Depreciation Explained",
+    title: "Straight-Line Depreciation: The Two Numbers You Guess",
     description:
-      "Learn straight-line depreciation with the formula, examples, salvage value, useful life, annual depreciation expense, and common beginner mistakes.",
-    menuDescription: "Learn straight-line depreciation with the formula and examples.",
+      "Cost is a fact, useful life and salvage value are estimates. Learn how to set both, and why LHDN will not accept your depreciation figure.",
+    menuDescription: "Set the two estimates behind every depreciation figure.",
     category: "Depreciation & Adjustments",
     status: "available",
-    href: "/guides/straight-line-depreciation-explained"
+    href: "/guides/straight-line-depreciation-explained",
+    lastModified: "2026-08-18"
   },
   {
     slug: "journal-entries-for-beginners",
-    title: "Journal Entries for Beginners",
+    title: "Journal Entries: How to Know Which Accounts to Use",
     description:
-      "Learn how journal entries work with simple debit and credit examples, common mistakes, and a step-by-step beginner checklist.",
-    menuDescription: "Learn how journal entries work with simple debit and credit examples.",
+      "The hard part is picking the accounts, not the sides. Learn a four-question method and when to use prepaid, accrued, and unearned accounts.",
+    menuDescription: "Turn a sentence into the right two account names.",
     category: "Accounting Basics",
     status: "available",
-    href: "/guides/journal-entries-for-beginners"
+    href: "/guides/journal-entries-for-beginners",
+    lastModified: "2026-08-18"
   }
 ];

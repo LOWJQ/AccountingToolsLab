@@ -10,6 +10,7 @@ type CreateMetadataInput = {
     url: string;
     width: number;
   };
+  noindex?: boolean;
   path?: string;
 };
 
@@ -24,6 +25,7 @@ function normalizePath(path: string): string {
 export function createMetadata({
   title,
   description = siteConfig.description,
+  noindex = false,
   ogImage = siteConfig.ogImage,
   path = "/"
 }: CreateMetadataInput): Metadata {
@@ -38,11 +40,9 @@ export function createMetadata({
     metadataBase: new URL(siteConfig.url),
     title,
     description,
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
     alternates: {
-      canonical: canonicalUrl,
-      languages: {
-        "en-MY": canonicalUrl
-      }
+      canonical: canonicalUrl
     },
     openGraph: {
       title,

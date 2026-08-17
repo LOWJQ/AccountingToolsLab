@@ -226,7 +226,7 @@ export default function TrialBalanceCalculatorPage() {
         </h2>
         <Link
           className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/trial-balance-explained"
+          href="/guides/errors-not-revealed-by-a-trial-balance"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Trial balance guide</p>

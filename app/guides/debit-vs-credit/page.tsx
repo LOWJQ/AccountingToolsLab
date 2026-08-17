@@ -1,305 +1,624 @@
-import { Container } from "@/components/layout/Container";
+import Link from "next/link";
+import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQSection } from "@/components/tools/FAQSection";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import Link from "next/link";
+
+const pageTitle = "Debit or Credit? Why Your Bank Says the Opposite";
+const guidePath = "/guides/debit-vs-credit";
+const pageDescription =
+  "Debit means left and credit means right. That is the entire definition. Once you see why your bank statement is written backwards, the rest of the rules stop feeling arbitrary.";
 
 export const metadata = createMetadata({
-  title: "Debit vs Credit: Simple Rules for Beginners | AccountingToolsLab",
+  title: pageTitle,
   description:
-    "Learn the difference between debit and credit, which accounts increase with debits or credits, normal balances, examples, and beginner mistakes to avoid.",
-  path: "/guides/debit-vs-credit"
+    "Debit means left, credit means right, nothing more. Learn why your bank shows the opposite, which side each account type uses, and why revenue is a credit.",
+  path: guidePath
 });
 
-const accountRules = [
-  ["Asset", "Debit", "Debit", "Credit"],
-  ["Expense", "Debit", "Debit", "Credit"],
-  ["Dividends/Drawings", "Debit", "Debit", "Credit"],
-  ["Liability", "Credit", "Credit", "Debit"],
+const tableOfContents = [
+  { label: "Quick answer", href: "#quick-answer" },
+  { label: "Why your bank says the opposite", href: "#bank-statement" },
+  { label: "Key terms", href: "#key-terms" },
+  { label: "The six account types", href: "#account-types" },
+  { label: "Why revenue is a credit", href: "#why-revenue" },
+  { label: "Worked examples", href: "#examples" },
+  { label: "Four traps", href: "#traps" },
+  { label: "Quick checklist", href: "#checklist" },
+  { label: "FAQs", href: "#faq" }
+] as const;
+
+const keyTerms = [
+  {
+    term: "Debit (Dr)",
+    meaning:
+      "An entry on the left side of an account. It is a position, not a judgement. Whether it increases or decreases the account depends entirely on the account type."
+  },
+  {
+    term: "Credit (Cr)",
+    meaning:
+      "An entry on the right side of an account. Again a position only. Credit does not mean money received and does not mean something good."
+  },
+  {
+    term: "Normal balance",
+    meaning:
+      "The side an account usually sits on, which is the side that increases it. Assets normally hold a debit balance; liabilities normally hold a credit balance."
+  },
+  {
+    term: "Double entry",
+    meaning:
+      "Every transaction is recorded twice, once as a debit and once as a credit of equal value, so the books stay in balance."
+  },
+  {
+    term: "Contra account",
+    meaning:
+      "An account that sits opposite its normal side, such as accumulated depreciation, which reduces an asset and therefore carries a credit balance."
+  },
+  {
+    term: "Drawings",
+    meaning:
+      "Money taken out by the owner. It reduces equity, so despite being a withdrawal it increases with a debit, in the same way an expense does."
+  }
+] as const;
+
+const accountTable = [
+  ["Assets", "Debit", "Debit", "Credit"],
+  ["Expenses", "Debit", "Debit", "Credit"],
+  ["Drawings or dividends", "Debit", "Debit", "Credit"],
+  ["Liabilities", "Credit", "Credit", "Debit"],
   ["Equity", "Credit", "Credit", "Debit"],
   ["Revenue", "Credit", "Credit", "Debit"]
-];
+] as const;
+
+const mirrorTable = [
+  [
+    "You deposit RM 1,000",
+    "Debit Cash (your asset increases)",
+    "Credit your account (the bank owes you more)"
+  ],
+  [
+    "You withdraw RM 400",
+    "Credit Cash (your asset decreases)",
+    "Debit your account (the bank owes you less)"
+  ],
+  [
+    "Bank charges RM 20 in fees",
+    "Debit Bank Charges, Credit Cash",
+    "Credit fee income, Debit your account"
+  ]
+] as const;
 
 const examples = [
-  {
-    title: "Buying equipment with cash",
-    happens: "The business buys equipment and pays cash immediately.",
-    debit: "Debit Equipment",
-    credit: "Credit Cash",
-    explanation:
-      "Equipment is an asset, and assets increase with debits. Cash is also an asset, but it decreases when the business pays it out, so cash is credited."
-  },
-  {
-    title: "Earning service revenue in cash",
-    happens: "The business performs a service and receives cash from the customer.",
-    debit: "Debit Cash",
-    credit: "Credit Service Revenue",
-    explanation:
-      "Cash is an asset, so receiving cash increases it with a debit. Revenue normally increases with a credit."
-  },
-  {
-    title: "Paying rent expense",
-    happens: "The business pays rent for the month.",
-    debit: "Debit Rent Expense",
-    credit: "Credit Cash",
-    explanation:
-      "Rent expense increases with a debit. Cash decreases because the business paid money out, so cash is credited."
-  },
-  {
-    title: "Owner invests cash into the business",
-    happens: "The owner puts personal cash into the business.",
-    debit: "Debit Cash",
-    credit: "Credit Owner's Capital",
-    explanation:
-      "Cash increases with a debit. Owner's capital is an equity account, and equity increases with a credit."
-  }
-];
+  [
+    "Sell a service for RM 500 cash",
+    "Debit Cash 500",
+    "Credit Revenue 500",
+    "An asset rises and equity rises through profit"
+  ],
+  [
+    "Pay RM 800 rent by bank transfer",
+    "Debit Rent Expense 800",
+    "Credit Cash 800",
+    "An expense rises, reducing equity, and an asset falls"
+  ],
+  [
+    "Buy stock on credit for RM 1,200",
+    "Debit Inventory 1,200",
+    "Credit Trade Payables 1,200",
+    "An asset rises and a liability rises"
+  ],
+  [
+    "Owner takes RM 600 for personal use",
+    "Debit Drawings 600",
+    "Credit Cash 600",
+    "Equity falls through drawings and an asset falls"
+  ],
+  [
+    "Customer pays a RM 900 invoice",
+    "Debit Cash 900",
+    "Credit Trade Receivables 900",
+    "One asset rises while another falls, so no change in total"
+  ]
+] as const;
 
-const mistakes = [
-  "Thinking debit always means increase",
-  "Thinking credit always means decrease",
-  "Mixing up assets and expenses",
-  "Forgetting revenue normally increases with credit",
-  "Entering both debit and credit on the same line",
-  "Balancing the entry mathematically but using the wrong account"
-];
+const traps = [
+  {
+    id: "good-bad",
+    name: "1. Treating debit as bad and credit as good",
+    summary: "Neither word carries any judgement about the business.",
+    example:
+      "A RM 800 rent payment is a debit to Rent Expense. A RM 500 sale is a credit to Revenue. One is a cost and one is income, yet the labels say nothing about which is welcome.",
+    why: "Debit and credit only describe which side of the account the entry sits on. Reading them as positive or negative leads to guessing rather than applying the rule for the account type.",
+    fix: "Say the words as left and right in your head until the habit fades."
+  },
+  {
+    id: "bank-wording",
+    name: "2. Copying the wording on your bank statement",
+    summary: "The statement is written from the bank point of view, not yours.",
+    example:
+      "The bank credits your account when you deposit money, but in your own books receiving cash is a debit.",
+    why: "Your balance is an asset to you and a liability to the bank. Both records are correct and they will always use opposite words for the same event.",
+    fix: "Decide entries from your own account types. Use the statement for amounts and dates only, never for the debit or credit wording."
+  },
+  {
+    id: "drawings",
+    name: "3. Assuming drawings behave like equity",
+    summary: "Equity increases with a credit, but drawings increase with a debit.",
+    example:
+      "The owner withdraws RM 600. Drawings is debited even though it belongs to the equity family.",
+    why: "Drawings reduce equity, so it moves in the opposite direction to the capital account. Expenses work the same way for the same reason.",
+    fix: "Remember that anything reducing equity, whether an expense or a withdrawal, increases with a debit."
+  },
+  {
+    id: "revenue-debit",
+    name: "4. Debiting revenue because money came in",
+    summary: "The cash gets the debit. The revenue account does not.",
+    example:
+      "On a RM 500 cash sale, people often want to debit both Cash and Revenue because both feel like increases.",
+    why: "Revenue is not the money itself, it is the reason the money arrived. Cash is the asset that rose, so cash takes the debit and revenue takes the credit.",
+    fix: "Ask which account holds the money. That one is debited. The account explaining why is credited."
+  }
+] as const;
+
+const checklist = [
+  "I can state that debit means left and credit means right.",
+  "I identify the account type before deciding the side.",
+  "I check whether the account is increasing or decreasing.",
+  "I apply the normal balance rule for that account type.",
+  "I ignore the wording used on my bank statement.",
+  "I confirm the debit amount equals the credit amount.",
+  "I treat expenses and drawings as reductions of equity.",
+  "I check that the entry still satisfies the accounting equation."
+] as const;
+
+const sidebarGuides = [
+  {
+    href: "/guides/journal-entries-for-beginners",
+    label: "Journal Entries: How to Know Which Accounts to Use"
+  },
+  {
+    href: "/guides/why-trial-balance-not-balancing",
+    label: "Why Is My Trial Balance Not Balancing?"
+  },
+  {
+    href: "/guides/errors-not-revealed-by-a-trial-balance",
+    label: "Balanced Trial Balance: 5 Errors It Will Not Catch"
+  }
+] as const;
 
 const faqs = [
   {
-    question: "What is a debit?",
+    question: "Is a debit money coming in or money going out?",
     answer:
-      "A debit is the left side of an accounting entry. It increases some account types, such as assets and expenses, and decreases others, such as liabilities, equity, and revenue."
+      "Neither on its own. A debit is simply an entry on the left side of an account. It increases assets, expenses, and drawings, and it decreases liabilities, equity, and revenue. You have to know the account type before the word tells you anything."
   },
   {
-    question: "What is a credit?",
+    question: "What do Dr and Cr actually stand for?",
     answer:
-      "A credit is the right side of an accounting entry. It increases liabilities, equity, and revenue, and decreases assets, expenses, and drawings."
+      "They come from the Latin debere, meaning to owe, and credere, meaning to entrust. The abbreviations kept the r from the Latin spellings, which is why credit is shortened to Cr rather than Cd."
   },
   {
-    question: "Does debit always mean increase?",
+    question: "Is a debit card related to accounting debits?",
     answer:
-      "No. Debit does not always mean increase. Whether a debit increases or decreases an account depends on the account type."
+      "Only through the bank point of view. A debit card takes money from your account, which reduces what the bank owes you, and reductions in a liability are debits in the bank records. In your own books, spending that money is a credit to cash."
   },
   {
-    question: "Which accounts increase with debits?",
+    question: "What is a contra account?",
     answer:
-      "Assets, expenses, and dividends or drawings usually increase with debits."
+      "A contra account sits on the opposite side to the type it belongs to. Accumulated depreciation is a contra asset, so it carries a credit balance and reduces the asset it relates to. Sales returns work the same way against revenue."
   },
   {
-    question: "Which accounts increase with credits?",
-    answer: "Liabilities, equity, and revenue usually increase with credits."
+    question: "Do debits always have to equal credits?",
+    answer:
+      "Yes, for every individual transaction and therefore for the books as a whole. If the totals do not agree, one side was posted without the other, or an amount was written incorrectly, which is what a trial balance is designed to reveal."
   },
   {
-    question: "Why do debits and credits have to balance?",
+    question: "Can the Debit/Credit Checker tell me the account type?",
     answer:
-      "Debits and credits have to balance because double-entry accounting records each transaction on at least two sides. Total debits must equal total credits in a complete journal entry."
-  },
-  {
-    question: "How do I know whether to debit or credit an account?",
-    answer:
-      "First identify the account type, then decide whether the account is increasing or decreasing. The normal balance rules tell you whether to debit or credit it."
-  },
-  {
-    question: "Can a journal entry balance but still be wrong?",
-    answer:
-      "Yes. A journal entry can have equal debits and credits but still use the wrong account, wrong amount, or wrong accounting treatment."
+      "No. You choose the account type and whether it is increasing or decreasing, and the checker returns the correct side along with the normal balance. Deciding whether something is an asset, an expense, or a liability is the judgement it cannot make for you."
   }
 ];
 
+function SimpleTable({
+  headers,
+  rows
+}: {
+  headers: readonly string[];
+  rows: ReadonlyArray<readonly string[]>;
+}) {
+  return (
+    <div className="mt-5 overflow-x-auto rounded-lg border border-slate-200">
+      <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
+        <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-950">
+          <tr>
+            {headers.map((header) => (
+              <th className="px-4 py-3" key={header} scope="col">
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100 text-slate-950">
+          {rows.map((row) => (
+            <tr key={row.join("-")}>
+              {row.map((cell, index) => (
+                <td
+                  className={`px-4 py-3 align-top ${
+                    index === 0 ? "font-semibold text-slate-950" : ""
+                  }`}
+                  key={`${row[0]}-${cell}`}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SectionHeading({
+  children,
+  id
+}: {
+  children: string;
+  id: string;
+}) {
+  return (
+    <header id={id} className="scroll-mt-28">
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+        {children}
+      </h2>
+    </header>
+  );
+}
+
 export default function DebitVsCreditGuidePage() {
-  const pageUrl = `${siteConfig.url}/guides/debit-vs-credit`;
+  const pageUrl = `${siteConfig.url}${guidePath}`;
 
   return (
-    <div>
+    <div className="bg-white">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: siteConfig.url },
           { name: "Guides", url: `${siteConfig.url}/guides` },
-          { name: "Debit vs Credit", url: pageUrl }
+          { name: pageTitle, url: pageUrl }
         ]}
       />
       <FAQJsonLd faqs={faqs} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: pageTitle,
+          description: metadata.description,
+          url: pageUrl,
+          datePublished: "2026-08-17",
+          dateModified: "2026-08-17",
+          author: {
+            "@type": "Organization",
+            name: "AccountingToolsLab"
+          },
+          publisher: {
+            "@type": "Organization",
+            name: siteConfig.name,
+            url: siteConfig.url
+          },
+          mainEntityOfPage: pageUrl
+        }}
+      />
 
-      <Container as="main">
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Accounting Guide</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            Debit vs Credit: Simple Rules for Beginners
-          </h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-stone-600">
-            Debits and credits are the left and right sides of accounting entries. They are not
-            simply another way to say increase and decrease. Whether a debit or credit increases
-            an account depends on the type of account you are recording.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              href="/tools/debit-credit-checker"
-            >
-              Try the Debit/Credit Checker
-            </Link>
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 px-5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-              href="/tools/journal-entry-checker"
-            >
-              Check a Journal Entry
-            </Link>
-          </div>
-        </section>
+      <main className="mx-auto w-full max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <nav aria-label="Breadcrumb" className="text-sm text-slate-950">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li>
+              <Link className="transition hover:text-slate-900" href="/">
+                Home
+              </Link>
+            </li>
+            <li aria-hidden="true">&gt;</li>
+            <li>
+              <Link className="transition hover:text-slate-900" href="/guides">
+                Guides
+              </Link>
+            </li>
+            <li aria-hidden="true">&gt;</li>
+            <li className="font-medium text-slate-950">{pageTitle}</li>
+          </ol>
+        </nav>
 
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Quick answer</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              What is the difference between debit and credit?
-            </h2>
-            <div className="mt-5 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>A debit is the left side of an accounting entry.</p>
-              <p>A credit is the right side of an accounting entry.</p>
-              <p>
-                Whether debit or credit increases an account depends on the account type. For
-                example, cash increases with a debit, but revenue increases with a credit.
+        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+          <article className="min-w-0">
+            <header>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                {pageTitle}
+              </h1>
+              <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
+                {pageDescription}
               </p>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Memory tip</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Easy way to remember debit and credit rules
-            </h2>
-            <div className="mt-5 space-y-3 text-sm leading-6 text-stone-600 sm:text-base">
-              <p>Assets and expenses usually increase with debits.</p>
-              <p>Liabilities, equity, and revenue usually increase with credits.</p>
-              <p>
-                In a complete journal entry, total debits must equal total credits. That balance
-                is what keeps the accounting equation organized.
+              <p className="mt-5 text-sm text-slate-950">
+                Updated on 17 August 2026 <span aria-hidden="true">-</span> 9 min read
               </p>
-            </div>
-          </article>
-        </section>
+            </header>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-medium tracking-wide text-slate-500">Normal balances</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-            Debit and credit rules by account type
-          </h2>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-            The normal balance is the side where an account usually increases. Use this table
-            when you are deciding which accounts increase with debit and which accounts increase
-            with credit.
-          </p>
-          <div className="mt-6 overflow-x-auto rounded-xl border border-stone-200">
-            <table className="min-w-[680px] w-full border-collapse bg-white text-left text-sm">
-              <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Account Type</th>
-                  <th className="px-4 py-3 font-semibold">Normal Balance</th>
-                  <th className="px-4 py-3 font-semibold">Increases With</th>
-                  <th className="px-4 py-3 font-semibold">Decreases With</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100 text-stone-700">
-                {accountRules.map(([accountType, normalBalance, increasesWith, decreasesWith]) => (
-                  <tr key={accountType}>
-                    <td className="px-4 py-3 font-semibold text-stone-950">{accountType}</td>
-                    <td className="px-4 py-3">{normalBalance}</td>
-                    <td className="px-4 py-3">{increasesWith}</td>
-                    <td className="px-4 py-3">{decreasesWith}</td>
-                  </tr>
+            <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
+
+            <section className="mt-12">
+              <SectionHeading id="quick-answer">
+                Quick answer: debit is left, credit is right
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                That is the whole definition. Debit does not mean money out, credit does not mean
+                money in, and neither says anything about whether something is good for the
+                business.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Whether a debit increases or decreases an account depends only on what kind of
+                account it is:
+              </p>
+              <SimpleTable
+                headers={["Account type", "Normal balance", "Increases with", "Decreases with"]}
+                rows={accountTable}
+              />
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                Two questions get you the answer every time. What type of account is this, and is
+                it going up or down? The{" "}
+                <Link
+                  className="font-semibold underline underline-offset-4"
+                  href="/tools/debit-credit-checker"
+                >
+                  debit and credit checker
+                </Link>{" "}
+                takes exactly those two answers and returns the side.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="bank-statement">
+                Why your bank statement says the opposite
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                This is the single most common reason debits and credits feel impossible to learn.
+                You deposit money, the bank calls it a credit, but every textbook says receiving
+                cash is a debit. Both are right.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Your bank statement is not written from your point of view. It is a copy of the
+                bank ledger. To you, money in the bank is an asset. To the bank, your balance is a
+                liability, because they owe it back to you on demand.
+              </p>
+              <SimpleTable
+                headers={["What happens", "In your books", "In the bank books"]}
+                rows={mirrorTable}
+              />
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                The two records are mirror images and always will be. Once you see that, the
+                statement stops being confusing and simply becomes someone else&apos;s ledger.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                The practical rule: take amounts and dates from your bank statement, never the
+                debit and credit wording.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="key-terms">Key terms in plain English</SectionHeading>
+              <dl className="mt-6 space-y-5 text-base leading-7 text-slate-950">
+                {keyTerms.map((item) => (
+                  <div key={item.term}>
+                    <dt className="font-semibold">{item.term}</dt>
+                    <dd className="mt-1">{item.meaning}</dd>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+              </dl>
+            </section>
 
-        <section>
-          <div>
-            <p className="text-sm font-medium tracking-wide text-slate-500">Examples</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
-              Debit and credit examples
-            </h2>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-              The easiest way to learn debit and credit rules is to connect each transaction to
-              the account types involved.
-            </p>
-          </div>
+            <section className="mt-12">
+              <SectionHeading id="account-types">
+                Why each account type behaves the way it does
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                The rules in the table are not arbitrary. They fall directly out of the accounting
+                equation:
+              </p>
+              <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-5">
+                <p className="text-base font-semibold leading-7 text-slate-950">
+                  Assets = Liabilities + Equity
+                </p>
+              </div>
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                Assets sit on the left of that equation, so assets increase with a left-side entry,
+                which is a debit. Liabilities and equity sit on the right, so they increase with a
+                credit. Everything else follows from how it affects equity:
+              </p>
+              <ul className="mt-5 grid gap-3 text-base leading-7 text-slate-950">
+                <li className="flex gap-3">
+                  <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-500" />
+                  <span>
+                    <strong>Revenue increases equity</strong>, so it moves the same way as equity
+                    and increases with a credit.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-500" />
+                  <span>
+                    <strong>Expenses reduce equity</strong>, so they move against it and increase
+                    with a debit.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-500" />
+                  <span>
+                    <strong>Drawings reduce equity</strong> as well, which is why a withdrawal is a
+                    debit despite money leaving the business.
+                  </span>
+                </li>
+              </ul>
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                If the equation itself is unfamiliar, the{" "}
+                <Link
+                  className="font-semibold underline underline-offset-4"
+                  href="/tools/accounting-equation-calculator"
+                >
+                  accounting equation calculator
+                </Link>{" "}
+                shows how assets, liabilities, and equity relate before you apply any of this.
+              </p>
+            </section>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {examples.map((example) => (
-              <article
-                className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
-                key={example.title}
-              >
-                <h3 className="text-base font-semibold text-stone-950">{example.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{example.happens}</p>
-                <div className="mt-4 grid gap-2 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm">
-                  <p>
-                    <span className="font-semibold text-stone-950">Debit line:</span>{" "}
-                    <span className="text-stone-700">{example.debit}</span>
-                  </p>
-                  <p>
-                    <span className="font-semibold text-stone-950">Credit line:</span>{" "}
-                    <span className="text-stone-700">{example.credit}</span>
+            <section className="mt-12">
+              <SectionHeading id="why-revenue">
+                Why revenue increases with a credit
+              </SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                This is the rule that feels most backwards. Money arrives, which feels like an
+                increase, so people want to debit the revenue account.
+              </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                The resolution is that revenue is not the money. Revenue is the reason the money
+                arrived. On a RM 500 cash sale, two different things go up: the cash you now hold,
+                and the profit you have earned.
+              </p>
+              <SimpleTable
+                headers={["Account", "Side", "What it represents"]}
+                rows={[
+                  ["Cash", "Debit 500", "The asset you now hold"],
+                  ["Revenue", "Credit 500", "The earnings that increase equity"]
+                ]}
+              />
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                An asset rose and equity rose, so both sides of the accounting equation moved by
+                RM 500 and it still balances. If you had debited both, the equation would break
+                immediately.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="examples">Five worked examples</SectionHeading>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                Read the reasoning column rather than memorising the entries. The reasoning is what
+                transfers to transactions you have not seen before.
+              </p>
+              <SimpleTable
+                headers={["Transaction", "Debit", "Credit", "Why"]}
+                rows={examples}
+              />
+              <p className="mt-5 text-base leading-7 text-slate-950">
+                The last example is worth pausing on. Both accounts are assets, so one rises and
+                one falls and total assets do not change. Debits and credits still balance.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="traps">Four traps that cause wrong entries</SectionHeading>
+              <div className="mt-8 space-y-10">
+                {traps.map((trap) => (
+                  <div className="scroll-mt-28" id={trap.id} key={trap.id}>
+                    <h3 className="text-xl font-semibold tracking-tight text-slate-950">
+                      {trap.name}
+                    </h3>
+                    <p className="mt-2 text-base leading-7 text-slate-950">{trap.summary}</p>
+                    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-5">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-950">
+                        Example
+                      </p>
+                      <p className="mt-2 text-base leading-7 text-slate-950">{trap.example}</p>
+                    </div>
+                    <p className="mt-4 text-base leading-7 text-slate-950">
+                      <span className="font-semibold">Why it happens. </span>
+                      {trap.why}
+                    </p>
+                    <p className="mt-3 text-base leading-7 text-slate-950">
+                      <span className="font-semibold">What to do. </span>
+                      {trap.fix}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-12">
+              <SectionHeading id="checklist">Quick checklist for any entry</SectionHeading>
+              <ul className="mt-5 grid gap-3 text-base leading-7 text-slate-950">
+                {checklist.map((item) => (
+                  <li className="flex gap-3" key={item}>
+                    <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-500" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 text-sm leading-6 text-slate-950">
+                This guide explains general bookkeeping concepts for learning and review. It is not
+                accounting advice for a specific set of accounts.
+              </p>
+            </section>
+
+            <section className="mt-12">
+              <div className="rounded-lg border border-slate-200 bg-white p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight text-slate-950">
+                    Not sure which side to use?
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-950">
+                    Pick the account type and whether it is going up or down, and get the side plus
+                    the normal balance.
                   </p>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-stone-600">{example.explanation}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+                <div className="mt-4 flex shrink-0 flex-wrap gap-3 sm:mt-0">
+                  <Link
+                    className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-50"
+                    href="/tools/journal-entry-checker"
+                  >
+                    Journal Entry Checker
+                  </Link>
+                  <Link
+                    className="inline-flex h-11 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    href="/tools/debit-credit-checker"
+                  >
+                    Debit/Credit Checker
+                  </Link>
+                </div>
+              </div>
+            </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Watch out</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Common debit and credit mistakes
-            </h2>
-            <ul className="mt-5 grid gap-3 text-sm leading-6 text-stone-700 sm:text-base">
-              {mistakes.map((mistake) => (
-                <li className="flex gap-3" key={mistake}>
-                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-slate-500" />
-                  <span>{mistake}</span>
-                </li>
-              ))}
-            </ul>
+            <FAQSection
+              eyebrow=""
+              faqs={faqs}
+              id="faq"
+              showTopBorder={false}
+              title="Debit and Credit FAQs"
+            />
           </article>
 
-          <article className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-medium tracking-wide text-slate-500">Use the tool</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-950">
-              Check debit and credit direction with the tool
-            </h2>
-            <p className="mt-5 text-sm leading-6 text-stone-600 sm:text-base">
-              If you are unsure whether to debit or credit an account, use the Debit/Credit
-              Checker. Choose the account type, choose whether it increases or decreases, and
-              the tool shows the correct side.
-            </p>
-            <div className="mt-6 grid gap-3">
-              {[
-                ["Debit/Credit Checker", "/tools/debit-credit-checker"],
-                ["Journal Entry Checker", "/tools/journal-entry-checker"],
-                ["Journal Entries for Beginners", "/guides/journal-entries-for-beginners"],
-                ["Accounting Equation Calculator", "/tools/accounting-equation-calculator"],
-                ["Trial Balance Calculator", "/tools/trial-balance-calculator"],
-                ["Trial Balance Explained", "/guides/trial-balance-explained"]
-              ].map(([label, href]) => (
-                <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-50"
-                  href={href}
-                  key={href}
-                >
-                  {label}
-                </Link>
-              ))}
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 space-y-8">
+              <GuideTableOfContents items={tableOfContents} />
+
+              <section>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-950">
+                  Related guides
+                </p>
+                <div className="mt-4 grid gap-3">
+                  {sidebarGuides.map((guide) => (
+                    <Link
+                      className="text-sm leading-6 text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
+                      href={guide.href}
+                      key={guide.href}
+                    >
+                      {guide.label}
+                    </Link>
+                  ))}
+                </div>
+              </section>
             </div>
-          </article>
-        </section>
-
-        <FAQSection faqs={faqs} title="Debit vs Credit FAQs" />
-      </Container>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }

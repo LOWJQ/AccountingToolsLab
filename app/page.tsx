@@ -18,7 +18,7 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
 
 export const metadata = createMetadata({
-  title: "Free Invoice Generator and Accounting Tools | AccountingToolsLab",
+  title: "AccountingToolsLab | Free Invoice Generator and Tools",
   description:
     "Create invoices, calculate SST, check cash flow, and verify accounts with free MYR-friendly accounting tools.",
   path: "/"
@@ -134,9 +134,9 @@ const guideCards = [
     icon: toolIcons.debitCredit
   },
   {
-    title: "Trial Balance Explained",
+    title: "Errors a Trial Balance Will Not Catch",
     description: "What it is, why it matters, and how to check it accurately.",
-    href: "/guides/trial-balance-explained",
+    href: "/guides/errors-not-revealed-by-a-trial-balance",
     cta: "Read guide",
     icon: toolIcons.trialBalance
   }

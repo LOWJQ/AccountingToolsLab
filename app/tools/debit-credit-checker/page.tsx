@@ -227,11 +227,11 @@ export default function DebitCreditCheckerPage() {
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Debit and credit guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Debit vs Credit
+              Debit or Credit? Why Your Bank Says the Opposite
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn debit and credit rules, normal balances, beginner examples, and how to know
-              whether to debit or credit an account.
+              Debit means left and credit means right. See why your bank statement shows the
+              opposite, and which side each account type uses.
             </p>
           </div>
           <ArrowRight

@@ -221,16 +221,16 @@ export default function CashFlowCalculatorPage() {
         </h2>
         <Link
           className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/cash-flow-vs-profit"
+          href="/guides/profitable-but-no-cash"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Cash flow guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Cash Flow vs Profit
+              Why Is My Business Profitable but I Have No Cash?
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn the difference between cash flow and profit, why profitable businesses can run
-              out of cash, and how to check simple cash movement.
+              Six ordinary gaps drain the bank while profit still looks healthy: unpaid invoices,
+              drawings, loan principal, asset purchases, stock, and depreciation.
             </p>
           </div>
           <ArrowRight

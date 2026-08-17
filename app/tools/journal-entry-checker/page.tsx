@@ -228,11 +228,11 @@ export default function JournalEntryCheckerPage() {
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Journal entry guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Journal Entries for Beginners
+              Journal Entries: How to Know Which Accounts to Use
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn how journal entries work with simple debit and credit examples, common
-              mistakes, and a step-by-step beginner checklist.
+              The hard part is picking the accounts, not the sides. Learn a four-question method
+              and when to use prepaid, accrued, and unearned accounts.
             </p>
           </div>
           <ArrowRight

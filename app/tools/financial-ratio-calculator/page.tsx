@@ -11,7 +11,7 @@ import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "Financial Ratio Calculator | Calculate Common Accounting Ratios",
+  title: "Financial Ratio Calculator | Common Accounting Ratios",
   description:
     "Use this free financial ratio calculator to calculate current ratio, debt-to-equity ratio, profit margins, and return on assets.",
   path: "/tools/financial-ratio-calculator"
@@ -225,16 +225,16 @@ export default function FinancialRatioCalculatorPage() {
         </h2>
         <Link
           className="group mt-5 flex items-center gap-5 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-          href="/guides/financial-ratios-for-beginners"
+          href="/guides/what-is-a-good-financial-ratio"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-medium leading-7 text-black">Financial ratio guide</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Financial Ratios for Beginners
+              Is My Current Ratio Good? How to Judge Any Ratio
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-black">
-              Learn basic financial ratio formulas, examples, and what ratios like current ratio,
-              debt-to-equity, profit margin, and return on assets mean.
+              A ratio on its own means little. See what counts as good, why a high number can be
+              bad, and how to judge any result using trend and context.
             </p>
           </div>
           <ArrowRight
