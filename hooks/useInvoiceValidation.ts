@@ -47,6 +47,19 @@ function getFallbackLineItemError(
   return "";
 }
 
+/**
+ * "X is required" errors are not surfaced. The invoice downloads with whatever
+ * has been filled in, so nagging about blanks would flag something that is not
+ * actually a problem. Errors about wrong values, such as an impossible date or
+ * a tax rate over 100, are still shown.
+ *
+ * validateInvoice itself is left intact: it is the shared correctness contract
+ * covered by the test suite, and only the display layer filters.
+ */
+function isRequiredFieldError(message: string): boolean {
+  return message.trim().endsWith("is required.");
+}
+
 export function useInvoiceValidation(
   invoiceData: InvoiceData,
   lineItems: InvoiceLineItem[],
@@ -63,8 +76,10 @@ export function useInvoiceValidation(
   );
   const visibleValidationErrors = useMemo(
     () =>
-      validationErrors.filter((error) =>
-        shouldShowInvoiceValidationError(error.field, displayOptions)
+      validationErrors.filter(
+        (error) =>
+          !isRequiredFieldError(error.message) &&
+          shouldShowInvoiceValidationError(error.field, displayOptions)
       ),
     [displayOptions, validationErrors]
   );
@@ -99,7 +114,10 @@ export function useInvoiceValidation(
       }
 
       if (shouldShowInvoiceValidationError(field, displayOptions)) {
-        return getFallbackLineItemError(lineItems[index], index, key);
+        const fallback = getFallbackLineItemError(lineItems[index], index, key);
+
+        // Same rule as above: an empty line item is allowed to stay empty.
+        return isRequiredFieldError(fallback) ? "" : fallback;
       }
 
       return "";

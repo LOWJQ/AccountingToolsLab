@@ -8,7 +8,6 @@ import {
 import type { InvoicePdfStatus } from "@/hooks/useInvoicePdf";
 
 type InvoiceModalsProps = {
-  hasValidInvoice: boolean;
   isClearEverythingModalOpen: boolean;
   isDownloadModalOpen: boolean;
   isGeneratingPdf: boolean;
@@ -64,7 +63,6 @@ function trapModalFocus(
 }
 
 export function InvoiceModals({
-  hasValidInvoice,
   isClearEverythingModalOpen,
   isDownloadModalOpen,
   isGeneratingPdf,
@@ -252,7 +250,7 @@ export function InvoiceModals({
               </button>
               <button
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-80"
-                disabled={isGeneratingPdf || !hasValidInvoice}
+                disabled={isGeneratingPdf}
                 onClick={onConfirmDownload}
                 ref={confirmDownloadButtonRef}
                 type="button"

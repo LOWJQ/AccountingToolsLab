@@ -5,10 +5,13 @@ export function sanitizePdfFileNamePart(value: string): string {
 export function buildInvoicePdfFileName(
   invoiceNumber: string,
   customerName: string,
-  invoiceDate: string
+  invoiceDate: string,
+  /** Prefix for the file name. Defaults to "Invoice" so existing callers keep
+   *  producing the same name; the receipt generator passes "Receipt". */
+  documentName: string = "Invoice"
 ): string {
   const parts = [
-    "Invoice",
+    documentName,
     sanitizePdfFileNamePart(invoiceNumber || "preview"),
     customerName.trim() ? sanitizePdfFileNamePart(customerName) : "",
     invoiceDate.trim() ? sanitizePdfFileNamePart(invoiceDate) : ""

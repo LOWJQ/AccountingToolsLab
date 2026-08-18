@@ -13,10 +13,47 @@ export type InvoicePdfGenerationResult = {
   warnings: InvoicePdfWarning[];
 };
 
+/**
+ * Wording that differs between document types. The layout, table, totals, and
+ * payment blocks are identical for an invoice and a receipt, so only the labels
+ * are parameterised. Defaults reproduce the invoice exactly, which keeps every
+ * existing caller and its tests unchanged.
+ */
+export type PdfDocumentLabels = {
+  /** Large heading in the top right, e.g. "INVOICE". */
+  title: string;
+  /** Meta row label for the document number, e.g. "Invoice #:". */
+  numberLabel: string;
+  /** Shown in place of a blank document number. */
+  numberPlaceholder: string;
+  /** Heading above the other party, e.g. "BILL TO". */
+  partyLabel: string;
+  /** Meta row label for the main date. */
+  dateLabel: string;
+  /** Shown in place of a blank date. */
+  datePlaceholder: string;
+  /** PDF metadata subject and file name prefix. */
+  documentName: string;
+  /** Extra meta rows under the date, e.g. payment method on a receipt. */
+  extraMetaRows?: { label: string; value: string }[];
+};
+
+export const INVOICE_PDF_LABELS: PdfDocumentLabels = {
+  title: "INVOICE",
+  numberLabel: "Invoice #:",
+  numberPlaceholder: "Invoice number",
+  partyLabel: "BILL TO",
+  dateLabel: "Date:",
+  datePlaceholder: "Invoice date",
+  documentName: "Invoice"
+};
+
 export type InvoicePdfParams = {
   calculation: InvoiceCalculationResult;
   formatCurrency: (value: number) => string;
   invoiceData: InvoiceData;
+  /** Defaults to invoice wording. Pass receipt labels to render a receipt. */
+  labels?: PdfDocumentLabels;
   previewItems: InvoiceLineCalculationResult[];
 };
 
@@ -78,6 +115,7 @@ export async function generateInvoicePdf(
     invoiceData,
     previewItems
   } = params;
+  const labels = params.labels ?? INVOICE_PDF_LABELS;
   const {
     businessAddress,
     businessContact,
@@ -236,8 +274,8 @@ export async function generateInvoicePdf(
   };
 
   doc.setProperties({
-    title: `Invoice ${invoiceNumber || "Preview"}`,
-    subject: "Invoice",
+    title: `${labels.documentName} ${invoiceNumber || "Preview"}`,
+    subject: labels.documentName,
     creator: "AccountingToolsLab"
   });
 
@@ -306,7 +344,7 @@ export async function generateInvoicePdf(
     }
   }
 
-  rightY += writeHeaderTextBlock("INVOICE", contentRight, rightY, {
+  rightY += writeHeaderTextBlock(labels.title, contentRight, rightY, {
     align: "right",
     bold: true,
     color: slate700,
@@ -339,7 +377,7 @@ export async function generateInvoicePdf(
     return rowHeight;
   };
 
-  rightY += writeInvoiceMetaRow("Invoice #:", invoiceNumber || "Invoice number", rightY);
+  rightY += writeInvoiceMetaRow(labels.numberLabel, invoiceNumber || labels.numberPlaceholder, rightY);
 
   const billToHeight =
     12 +
@@ -347,8 +385,13 @@ export async function generateInvoicePdf(
     measureTextBlock(customerName || "Customer name", leftColumnWidth, 13) +
     (customerContact ? 4 + measureTextBlock(customerContact, leftColumnWidth) : 0) +
     (customerAddress ? 2 + measureTextBlock(customerAddress, leftColumnWidth) : 0);
+  const extraMetaRowCount = (labels.extraMetaRows ?? []).filter((row) =>
+    row.value.trim()
+  ).length;
   const dateRowsHeight =
-    lineHeightFor(9) + (dueDate ? 5 + lineHeightFor(9) : 0);
+    lineHeightFor(9) +
+    (dueDate ? 5 + lineHeightFor(9) : 0) +
+    extraMetaRowCount * (5 + lineHeightFor(9));
 
   y = Math.max(leftY, rightY) + 14;
   drawDivider();
@@ -356,7 +399,7 @@ export async function generateInvoicePdf(
   addPageIfNeeded(Math.max(billToHeight, dateRowsHeight) + 24);
   const secondRowTop = y;
   let billToY = secondRowTop;
-  writeTextAt("BILL TO", contentX, billToY, {
+  writeTextAt(labels.partyLabel, contentX, billToY, {
     bold: true,
     color: slate700,
     fontSize: 9,
@@ -384,10 +427,18 @@ export async function generateInvoicePdf(
   }
 
   let dateY = secondRowTop;
-  dateY += writeInvoiceMetaRow("Date:", invoiceDate || "Invoice date", dateY);
+  dateY += writeInvoiceMetaRow(labels.dateLabel, invoiceDate || labels.datePlaceholder, dateY);
   if (dueDate) {
     dateY += 5;
     dateY += writeInvoiceMetaRow("Due:", dueDate, dateY);
+  }
+  for (const row of labels.extraMetaRows ?? []) {
+    if (!row.value.trim()) {
+      continue;
+    }
+
+    dateY += 5;
+    dateY += writeInvoiceMetaRow(row.label, row.value, dateY);
   }
 
   y = Math.max(billToY, dateY) + 18;
@@ -807,7 +858,9 @@ export async function generateInvoicePdf(
   }
 
   drawPageNumber();
-  doc.save(buildInvoicePdfFileName(invoiceNumber, customerName, invoiceDate));
+  doc.save(
+    buildInvoicePdfFileName(invoiceNumber, customerName, invoiceDate, labels.documentName)
+  );
 
   return { warnings: Array.from(warnings) };
 }

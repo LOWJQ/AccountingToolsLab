@@ -157,7 +157,6 @@ export function InvoiceGenerator() {
     calculation,
     getLineItemError,
     getValidationMessage,
-    hasValidInvoice,
     lineItemPreviewTotals,
     lineItemsMessage
   } = useInvoiceValidation(invoiceData, lineItems, validationDisplayOptions);
@@ -374,23 +373,15 @@ export function InvoiceGenerator() {
     });
   }
 
+  // The download is never blocked on completeness. Anything left blank simply
+  // prints as its placeholder, which is more useful than refusing to produce a
+  // draft the user can already see on screen.
   function openDownloadModal() {
-    if (!hasValidInvoice) {
-      revealInvoiceValidationErrors();
-      return;
-    }
-
     clearPdfStatus();
     setIsDownloadModalOpen(true);
   }
 
   function confirmDownloadInvoicePdf() {
-    if (!hasValidInvoice) {
-      revealInvoiceValidationErrors();
-      setIsDownloadModalOpen(false);
-      return;
-    }
-
     void downloadInvoicePdf();
   }
 
@@ -407,7 +398,6 @@ export function InvoiceGenerator() {
     isGeneratingPdf,
     pdfStatus
   } = useInvoicePdf({
-    hasValidInvoice,
     invoiceNumber,
     onDownloadComplete: handleDownloadComplete,
     pdfParams,
@@ -436,10 +426,7 @@ export function InvoiceGenerator() {
     notes: getValidationMessage("payment.notes"),
     paymentLink: getValidationMessage("payment.paymentLink")
   };
-  const validationSummaryMessage =
-    hasAttemptedInvoiceAction && !hasValidInvoice
-      ? "Please complete the highlighted invoice fields before downloading."
-      : "";
+  const validationSummaryMessage = "";
 
   return (
     <div>
@@ -526,7 +513,6 @@ export function InvoiceGenerator() {
       </div>
 
       <InvoiceModals
-        hasValidInvoice={hasValidInvoice}
         isClearEverythingModalOpen={isClearEverythingModalOpen}
         isDownloadModalOpen={isDownloadModalOpen}
         isGeneratingPdf={isGeneratingPdf}

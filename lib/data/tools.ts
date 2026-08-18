@@ -18,6 +18,17 @@ export const tools: Tool[] = [
     lastModified: "2026-07-18"
   },
   {
+    slug: "receipt-generator",
+    name: "Free Receipt Generator",
+    menuTitle: "Receipt Generator",
+    description:
+      "Create a payment receipt PDF recording who paid, what for, the payment method, and the total, with optional tax.",
+    menuDescription: "Make a payment receipt PDF in your browser.",
+    href: "/tools/receipt-generator",
+    status: "mvp",
+    lastModified: "2026-08-18"
+  },
+  {
     slug: "sst-calculator-malaysia",
     name: "SST Calculator Malaysia",
     description:
@@ -133,6 +144,19 @@ export const tools: Tool[] = [
  * the directory, the nav, and the ItemList schema always agree on what exists.
  */
 export const availableTools: Tool[] = tools.filter((tool) => tool.status === "mvp");
+
+/** How many tools the header menu lists before deferring to "View all tools". */
+export const NAV_TOOL_LIMIT = 12;
+
+/**
+ * Tools shown in the header menu. The menu is a shortcut to the most-used
+ * tools, not a full index, so anything past the limit stays one click away
+ * behind "View all tools" rather than growing the panel until it scrolls.
+ *
+ * Reordering the array above is what changes the menu, so there is no second
+ * list to keep in step.
+ */
+export const navTools: Tool[] = availableTools.slice(0, NAV_TOOL_LIMIT);
 
 export type ToolLink = {
   href: string;

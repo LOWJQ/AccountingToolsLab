@@ -51,6 +51,7 @@ export const toolIconsBySlug: Record<string, LucideIcon> = {
   "financial-ratio-calculator": toolIcons.financialRatio,
   "invoice-generator": toolIcons.invoice,
   "journal-entry-checker": toolIcons.journalEntry,
+  "receipt-generator": toolIcons.receipt,
   "sst-calculator-malaysia": toolIcons.sst,
   "trial-balance-calculator": toolIcons.trialBalance
 };

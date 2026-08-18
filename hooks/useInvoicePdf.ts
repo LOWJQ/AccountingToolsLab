@@ -8,7 +8,6 @@ import type {
 import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 
 type UseInvoicePdfInput = {
-  hasValidInvoice: boolean;
   invoiceNumber: string;
   onDownloadComplete: () => void;
   pdfParams: Omit<InvoicePdfParams, "previewItems">;
@@ -36,7 +35,6 @@ function getPdfWarningMessage(result: InvoicePdfGenerationResult): string {
 }
 
 export function useInvoicePdf({
-  hasValidInvoice,
   invoiceNumber,
   onDownloadComplete,
   pdfParams,
@@ -45,11 +43,9 @@ export function useInvoicePdf({
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfStatus, setPdfStatus] = useState<InvoicePdfStatus | null>(null);
 
+  // Deliberately no completeness gate: the invoice downloads with whatever has
+  // been filled in. Blank fields simply render as their placeholder text.
   const downloadInvoicePdf = useCallback(async () => {
-    if (!hasValidInvoice) {
-      return;
-    }
-
     setIsGeneratingPdf(true);
     setPdfStatus(null);
 
@@ -84,7 +80,6 @@ export function useInvoicePdf({
       setIsGeneratingPdf(false);
     }
   }, [
-    hasValidInvoice,
     invoiceNumber,
     onDownloadComplete,
     pdfParams,

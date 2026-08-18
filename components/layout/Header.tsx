@@ -27,7 +27,7 @@ import {
   type CurrencyOption
 } from "@/lib/currency";
 import { guides } from "@/lib/data/guides";
-import { availableTools } from "@/lib/data/tools";
+import { navTools } from "@/lib/data/tools";
 
 type DesktopMenuKey = "guides" | "tools";
 
@@ -46,7 +46,7 @@ type MegaMenuConfig = {
   viewAllLabel: string;
 };
 
-const toolItems: MenuItem[] = availableTools.map((tool) => ({
+const toolItems: MenuItem[] = navTools.map((tool) => ({
   label: tool.menuTitle ?? tool.name,
   href: tool.href,
   description: tool.menuDescription
