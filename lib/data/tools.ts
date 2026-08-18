@@ -28,6 +28,28 @@ export const tools: Tool[] = [
     lastModified: "2026-07-28"
   },
   {
+    slug: "e-invoice-checker-malaysia",
+    name: "e-Invoice Checker Malaysia",
+    menuTitle: "e-Invoice Checker",
+    description:
+      "Check whether your business must issue LHDN e-Invoices, which implementation phase you fall into, and the date it becomes mandatory.",
+    menuDescription: "Check if LHDN e-Invoice applies to your business.",
+    href: "/tools/e-invoice-checker-malaysia",
+    status: "mvp",
+    lastModified: "2026-08-18"
+  },
+  {
+    slug: "e-invoice-code-lookup-malaysia",
+    name: "e-Invoice Code Lookup Malaysia",
+    menuTitle: "e-Invoice Code Lookup",
+    description:
+      "Search LHDN e-Invoice codes by keyword or number, covering MSIC business activity codes and line item classification codes.",
+    menuDescription: "Find MSIC and e-Invoice classification codes.",
+    href: "/tools/e-invoice-code-lookup-malaysia",
+    status: "mvp",
+    lastModified: "2026-08-18"
+  },
+  {
     slug: "cash-flow-calculator",
     name: "Cash Flow Calculator",
     description:

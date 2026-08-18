@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookCheck,
   Calculator,
+  CalendarCheck,
   CircleDollarSign,
   FileCheck2,
   FileText,
@@ -12,6 +13,7 @@ import {
   ListChecks,
   ReceiptText,
   Scale,
+  SearchCode,
   Table2
 } from "lucide-react";
 
@@ -22,6 +24,8 @@ export const toolIcons = {
   cashFlow: CircleDollarSign,
   debitCredit: Scale,
   depreciation: LineChart,
+  eInvoice: CalendarCheck,
+  eInvoiceCodes: SearchCode,
   estimateQuotation: FileCheck2,
   financialRatio: BarChart3,
   invoice: FileText,
@@ -34,7 +38,7 @@ export const toolIcons = {
 /**
  * Icons live here rather than on the Tool records in lib/data/tools.ts: the
  * header is a client component, and putting icon components on the data would
- * pull all ten into every page's bundle.
+ * pull every one of them into every page's bundle.
  */
 export const toolIconsBySlug: Record<string, LucideIcon> = {
   "accounting-equation-calculator": toolIcons.accountingEquation,
@@ -42,6 +46,8 @@ export const toolIconsBySlug: Record<string, LucideIcon> = {
   "cash-flow-calculator": toolIcons.cashFlow,
   "debit-credit-checker": toolIcons.debitCredit,
   "depreciation-calculator": toolIcons.depreciation,
+  "e-invoice-checker-malaysia": toolIcons.eInvoice,
+  "e-invoice-code-lookup-malaysia": toolIcons.eInvoiceCodes,
   "financial-ratio-calculator": toolIcons.financialRatio,
   "invoice-generator": toolIcons.invoice,
   "journal-entry-checker": toolIcons.journalEntry,
