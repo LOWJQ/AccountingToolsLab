@@ -397,9 +397,9 @@ export default function EInvoiceCheckerMalaysiaPage() {
       </section>
 
       <RelatedGuideCard
-        eyebrow="Malaysia Tax Guide"
+        eyebrow="e-Invoice Guide"
         showTopBorder={false}
-        slug="do-i-need-to-register-for-sst-malaysia"
+        slug="what-is-a-tin-number-malaysia"
       />
 
       <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">

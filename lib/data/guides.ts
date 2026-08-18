@@ -36,6 +36,19 @@ export const guides: Guide[] = [
     lastModified: "2026-07-28"
   },
   {
+    slug: "what-is-a-tin-number-malaysia",
+    title: "What Is a TIN Number in Malaysia and How Do I Find Mine?",
+    description:
+      "Find your Tax Identification Number, read what each prefix means, and apply the two formatting rules that cause most e-Invoice TIN rejections.",
+    menuTitle: "What Is a TIN Number?",
+    menuDescription: "Find your TIN and format it so e-Invoice accepts it.",
+    category: "Malaysia Business Tax",
+    status: "available",
+    href: "/guides/what-is-a-tin-number-malaysia",
+    datePublished: "2026-08-18",
+    lastModified: "2026-08-18"
+  },
+  {
     slug: "do-i-need-to-register-for-sst-malaysia",
     title: "Do I Need to Register for SST in Malaysia?",
     description:

@@ -333,9 +333,9 @@ export default function EInvoiceCodeLookupMalaysiaPage() {
       </section>
 
       <RelatedGuideCard
-        eyebrow="Invoice Guide"
+        eyebrow="e-Invoice Guide"
         showTopBorder={false}
-        slug="what-should-an-invoice-include-before-you-send-it"
+        slug="what-is-a-tin-number-malaysia"
       />
 
       <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
