@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +30,7 @@ const tableOfContents = [
   { label: "General TIN codes", href: "#general-tins" },
   { label: "Why TINs get rejected", href: "#rejections" },
   { label: "TIN checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -162,6 +164,29 @@ const checklist = [
   "I asked the buyer to confirm their TIN instead of reusing an old record.",
   "I verified the TIN through MyTax or LHDN where anything looked unclear."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://sdk.myinvois.hasil.gov.my/faq/",
+    label: "MyInvois SDK: frequently asked questions",
+    note: "The IG prefix replacing OG and SG, the 14-character limit, and the leading and trailing zero rules for non-individual TINs."
+  },
+  {
+    href: "https://mytax.hasil.gov.my/",
+    label: "MyTax portal",
+    note: "Where to retrieve your own TIN through e-Daftar or your profile information."
+  },
+  {
+    href: "https://sdk.myinvois.hasil.gov.my/einvoicingapi/01-validate-taxpayer-tin/",
+    label: "Validate Taxpayer's TIN API",
+    note: "Why a TIN cannot be checked from a public website: validation requires credentials tied to a registered taxpayer."
+  },
+  {
+    href: "https://www.hasil.gov.my/en/e-invois/",
+    label: "LHDN e-Invoice",
+    note: "General e-Invoice guidance, including where a TIN is used on a submission."
+  }
+];
 
 const sidebarGuides = [
   guideLink("what-should-an-invoice-include-before-you-send-it"),
@@ -552,6 +577,8 @@ export default function TinNumberMalaysiaGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

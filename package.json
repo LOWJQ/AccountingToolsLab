@@ -11,6 +11,7 @@
     "dev": "next dev",
     "build": "next build",
     "test": "tsc -p tsconfig.test.json && node scripts/run-tests.mjs",
+    "check:dates": "node scripts/check-sitemap-dates.mjs",
     "start": "next start",
     "lint": "next lint"
   },

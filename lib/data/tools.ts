@@ -15,7 +15,7 @@ export const tools: Tool[] = [
     menuDescription: "Create professional invoices with MYR, SST, and PDF export.",
     href: "/tools/invoice-generator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-18"
   },
   {
     slug: "receipt-generator",

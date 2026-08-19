@@ -12,9 +12,9 @@ import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "MSIC and Classification Code Lookup Malaysia | e-Invoice Codes",
+  title: "MSIC and Classification Code Lookup | e-Invoice Malaysia",
   description:
-    "Search LHDN e-Invoice codes by keyword or number. Find the 5-digit MSIC code for your business activity and the 3-digit classification code for each invoice line item.",
+    "Search LHDN e-Invoice codes by keyword or number. Find your 5-digit MSIC business code and the 3-digit classification code for each line item.",
   path: "/tools/e-invoice-code-lookup-malaysia"
 });
 

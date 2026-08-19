@@ -32,6 +32,7 @@ const footerSections: Array<{ links: FooterLink[]; title: string }> = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
+      { label: "Editorial Policy", href: "/editorial-policy" },
       { label: "Contact", href: "/contact" },
       { label: "Privacy Policy", href: "/privacy-policy" },
       { label: "Terms of Use", href: "/terms" }
@@ -96,9 +97,21 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-stone-200 pt-5 text-xs text-stone-500 sm:mt-12 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
-          <p>Copyright 2026 AccountingToolsLab. All rights reserved.</p>
-          <p>Built for simple invoices, business checks, and accounting learning.</p>
+        <div className="mt-10 border-t border-stone-200 pt-5 sm:mt-12 sm:pt-6">
+          <p className="text-xs leading-5 text-stone-500">
+            The tools and guides on this site are for general information and everyday
+            record-keeping. They are based on publicly published Malaysian guidance and are not tax,
+            legal, or accounting advice. Confirm anything that affects your filings with the
+            relevant authority or a qualified professional. See our{" "}
+            <Link className="underline underline-offset-4 hover:text-stone-800" href="/editorial-policy">
+              editorial policy
+            </Link>
+            .
+          </p>
+          <div className="mt-4 flex flex-col gap-3 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>Copyright 2026 AccountingToolsLab. All rights reserved.</p>
+            <p>Built for simple invoices, business checks, and accounting learning.</p>
+          </div>
         </div>
       </div>
     </footer>

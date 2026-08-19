@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -30,6 +31,7 @@ const tableOfContents = [
   { label: "How to register", href: "#how-to-register" },
   { label: "After registration", href: "#after-registration" },
   { label: "Registration checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -116,6 +118,24 @@ const checklist = [
   "I saved the calculation and the records supporting it.",
   "I confirmed the result with RMCD or a qualified tax adviser if classification is unclear."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://mysst.customs.gov.my/",
+    label: "MySST, Royal Malaysian Customs Department",
+    note: "The official SST portal: registration, rates, returns, and announcements."
+  },
+  {
+    href: "https://mysst.customs.gov.my/registering-business/",
+    label: "MySST registration",
+    note: "Who must register, and the thresholds that apply to each category."
+  },
+  {
+    href: "https://mysst.customs.gov.my/industry-guides/",
+    label: "RMCD industry guides",
+    note: "Sector-specific guidance on whether an activity is a taxable service or taxable goods."
+  }
+];
 
 const sidebarGuides = [
   guideLink("what-should-an-invoice-include-before-you-send-it"),
@@ -603,6 +623,8 @@ export default function SstRegistrationGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

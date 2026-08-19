@@ -16,9 +16,9 @@ import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "e-Invoice Checker Malaysia | Am I Required to Issue e-Invoices?",
+  title: "e-Invoice Checker Malaysia | Do I Need to Issue e-Invoices?",
   description:
-    "Check whether your business must issue LHDN e-Invoices through MyInvois. Enter your annual turnover to see your phase, your mandatory start date, and the RM1 million exemption.",
+    "Check whether your business must issue LHDN e-Invoices. Enter your annual turnover to see your phase, your start date, and the RM1 million exemption.",
   path: "/tools/e-invoice-checker-malaysia"
 });
 

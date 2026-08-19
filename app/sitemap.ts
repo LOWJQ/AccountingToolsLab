@@ -14,14 +14,15 @@ type SitemapEntry = {
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: SitemapEntry[] = [
     { path: "", lastModified: "2026-07-05" },
-    { path: "/tools", lastModified: "2026-07-05" },
+    { path: "/tools", lastModified: "2026-08-18" },
     ...tools.map((tool) => ({ path: tool.href, lastModified: tool.lastModified })),
-    { path: "/guides", lastModified: "2026-07-28" },
+    { path: "/guides", lastModified: "2026-08-18" },
     ...indexableGuides.map((guide) => ({
       path: guide.href,
       lastModified: guide.lastModified
     })),
     { path: "/about", lastModified: "2026-07-05" },
+    { path: "/editorial-policy", lastModified: "2026-08-19" },
     { path: "/contact", lastModified: "2026-07-05" },
     { path: "/privacy-policy", lastModified: "2026-07-03" },
     { path: "/terms", lastModified: "2026-07-03" }

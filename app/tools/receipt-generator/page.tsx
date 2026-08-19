@@ -14,7 +14,7 @@ import Link from "next/link";
 export const metadata = createMetadata({
   title: "Free Receipt Generator | Make a Payment Receipt PDF",
   description:
-    "Create a simple payment receipt PDF with your business details, who paid, what they paid for, the payment method, and the total. Free, no sign-up, works in your browser.",
+    "Create a payment receipt PDF with your business details, who paid, what for, the payment method, and the total. Free, no sign-up, runs in your browser.",
   path: "/tools/receipt-generator"
 });
 
