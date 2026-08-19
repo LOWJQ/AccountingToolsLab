@@ -6,6 +6,7 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
+  absoluteTitle: true,
   title: "About AccountingToolsLab | Free Invoice and Accounting Tools",
   description:
     "Learn about AccountingToolsLab, a free invoice generator and accounting tools site for freelancers, small businesses, beginners, and students.",
@@ -140,6 +141,29 @@ export default function AboutPage() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className="border-b border-slate-200 py-10 md:py-12">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            How the content is made
+          </h2>
+          <p className="mt-4 text-base leading-7 text-black">
+            AccountingToolsLab is an independent project rather than an accounting firm, and
+            nobody here is a licensed accountant or tax agent. Rules, rates, and thresholds come
+            from what LHDN, RMCD, and the accounting standards publish, and each guide lists the
+            official pages it draws on together with the date they were last checked.
+          </p>
+          <p className="mt-4 text-base leading-7 text-black">
+            Nothing here is tax, legal, or accounting advice. The{" "}
+            <Link
+              className="font-semibold underline-offset-4 hover:underline"
+              href="/editorial-policy"
+            >
+              editorial policy
+            </Link>{" "}
+            sets out where the information comes from, how corrections are handled, and what the
+            tools deliberately do not do.
+          </p>
         </section>
 
         <section className="py-10 md:py-12">

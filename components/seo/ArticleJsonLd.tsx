@@ -1,5 +1,6 @@
 import { guideBySlug } from "@/lib/data/guides";
-import { buildAssetUrl, siteConfig } from "@/lib/seo/site";
+import { ORGANIZATION_ID } from "@/lib/seo/schema";
+import { siteConfig } from "@/lib/seo/site";
 import { JsonLd } from "./JsonLd";
 
 type ArticleJsonLdProps = {
@@ -25,22 +26,11 @@ export function ArticleJsonLd({ description, image, slug }: ArticleJsonLdProps) 
         url: pageUrl,
         datePublished: guide.datePublished,
         dateModified: guide.lastModified,
-        // Authored and published by the site itself rather than a named person.
-        // The publisher logo is what Google asks for on Article markup.
-        author: {
-          "@type": "Organization",
-          name: siteConfig.name,
-          url: siteConfig.url
-        },
-        publisher: {
-          "@type": "Organization",
-          name: siteConfig.name,
-          url: siteConfig.url,
-          logo: {
-            "@type": "ImageObject",
-            url: buildAssetUrl("/logo-optimized.png")
-          }
-        },
+        // Authored and published by the site itself rather than a named
+        // person. Both point at the Organization node the root layout
+        // emits, so name, URL, and logo are stated once for the site.
+        author: { "@id": ORGANIZATION_ID },
+        publisher: { "@id": ORGANIZATION_ID },
         // Points readers and crawlers at how this content is researched.
         publishingPrinciples: `${siteConfig.url}/editorial-policy`,
         isAccessibleForFree: true,

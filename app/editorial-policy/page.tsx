@@ -6,13 +6,20 @@ import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "Editorial Policy | How AccountingToolsLab Researches Its Content",
+  title: "Editorial Policy | How We Research Our Content",
   description:
     "How the tools and guides on AccountingToolsLab are researched, which official sources they draw on, how often they are reviewed, and what they are not.",
   path: "/editorial-policy"
 });
 
 const editorialSections = [
+  {
+    title: "Who writes this",
+    content: [
+      "AccountingToolsLab is an independent project rather than an accounting firm. The tools and guides are built and maintained by the person who runs the site, working from what the Malaysian authorities and the accounting standards publish.",
+      "Nobody here is a licensed accountant, tax agent, or auditor, and this site does not present itself as one. What the content rests on instead is the sourcing set out below: primary sources, linked so you can check them yourself, with the date each was last read. Where a question turns on professional judgement rather than a published rule, the page says so and points you to the authority."
+    ]
+  },
   {
     title: "Primary sources first",
     content: [

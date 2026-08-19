@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "Privacy Policy | AccountingToolsLab",
+  title: "Privacy Policy",
   description:
     "Read the Privacy Policy for AccountingToolsLab, including invoice drafts, contact form handling, local preferences, analytics, and calculator input handling.",
   path: "/privacy-policy"

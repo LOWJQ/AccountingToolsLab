@@ -7,6 +7,7 @@ import { siteConfig } from "@/lib/seo/site";
 import { Bug, Mail, MessageSquareText } from "lucide-react";
 
 export const metadata = createMetadata({
+  absoluteTitle: true,
   title: "Contact AccountingToolsLab",
   description:
     "Contact AccountingToolsLab with feedback, issue reports, or suggestions for future accounting tools.",

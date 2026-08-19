@@ -7,6 +7,8 @@ import "./globals.css";
 import { CurrencyProvider } from "@/components/currency/CurrencyProvider";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
 import { siteConfig } from "@/lib/seo/site";
 
 const inter = Inter({
@@ -24,7 +26,10 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: "AccountingToolsLab",
+  title: {
+    default: "AccountingToolsLab | Free Invoice Generator and Accounting Tools",
+    template: "%s | AccountingToolsLab"
+  },
   description: "Free accounting tools and guides for learners and small businesses.",
   alternates: {
     canonical: `${siteConfig.url}/`
@@ -63,6 +68,11 @@ export default function RootLayout({
   return (
     <html lang="en-MY" className={`${inter.variable} ${playfair.variable}`}>
       <body className={inter.className}>
+        {/* Emitted here rather than on the homepage so the @id references
+            other nodes make (Article publisher, WebSite publisher) resolve
+            on every page instead of dangling. */}
+        <JsonLd data={createOrganizationSchema()} />
+        <JsonLd data={createWebsiteSchema()} />
         <CurrencyProvider>
           <Header />
           {children}

@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "Invoice and Accounting Guides | AccountingToolsLab",
+  title: "Invoice and Accounting Guides",
   description:
     "Simple guides on invoices, SST, cash flow, break-even, and accounting basics for small businesses, freelancers, and students.",
   path: "/guides"

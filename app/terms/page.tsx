@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/seo/site";
 import Link from "next/link";
 
 export const metadata = createMetadata({
-  title: "Terms of Use | AccountingToolsLab",
+  title: "Terms of Use",
   description:
     "Read the starter Terms of Use for AccountingToolsLab's free accounting tools and educational content.",
   path: "/terms"

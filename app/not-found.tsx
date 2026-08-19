@@ -7,7 +7,7 @@ import { indexableGuides } from "@/lib/data/guides";
 // with a 404 status, which is the signal that matters. This page exists so a
 // bad URL lands on something navigable instead of a bare default screen.
 export const metadata = {
-  title: "Page Not Found | AccountingToolsLab",
+  title: "Page Not Found",
   robots: { index: false, follow: true }
 };
 

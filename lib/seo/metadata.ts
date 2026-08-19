@@ -13,6 +13,12 @@ type ArticleDates = {
 
 type CreateMetadataInput = {
   title: string;
+  /**
+   * Skips the "| AccountingToolsLab" suffix the root layout appends. For the
+   * few pages whose title already names the site, where the template would
+   * repeat it.
+   */
+  absoluteTitle?: boolean;
   description?: string;
   ogImage?: {
     alt: string;
@@ -38,6 +44,7 @@ function normalizePath(path: string): string {
 }
 
 export function createMetadata({
+  absoluteTitle = false,
   article,
   title,
   description = siteConfig.description,
@@ -54,7 +61,7 @@ export function createMetadata({
 
   return {
     metadataBase: new URL(siteConfig.url),
-    title,
+    title: absoluteTitle ? { absolute: title } : title,
     description,
     ...(noindex ? { robots: { index: false, follow: true } } : {}),
     alternates: {

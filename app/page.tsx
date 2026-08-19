@@ -12,13 +12,12 @@ import {
   Scale,
   UserRound
 } from "lucide-react";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { guideCard } from "@/lib/data/guides";
 import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
-import { createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
 
 export const metadata = createMetadata({
+  absoluteTitle: true,
   title: "AccountingToolsLab | Free Invoice Generator and Tools",
   description:
     "Create invoices, calculate SST, check cash flow, and verify accounts with free MYR-friendly accounting tools.",
@@ -440,9 +439,6 @@ function GuideCard({ guide }: { guide: (typeof guideCards)[number] }) {
 export default function HomePage() {
   return (
     <main className="bg-white text-slate-950">
-      <JsonLd data={createWebsiteSchema()} />
-      <JsonLd data={createOrganizationSchema()} />
-
       <section className="border-b border-slate-200">
         <div className="mx-auto grid max-w-[1240px] gap-12 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(32rem,1fr)] lg:items-center lg:px-8 lg:py-20">
           <div>
