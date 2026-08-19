@@ -142,6 +142,28 @@ export default function AccountingEquationCalculatorPage() {
 
       <AccountingEquationCalculator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you use the accounting equation?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          The accounting equation is Assets = Liabilities + Equity, and it holds after every
+          transaction a business records. Rearranged, it gives you whichever figure is missing:
+          Liabilities = Assets - Equity, and Equity = Assets - Liabilities. Enter any two of
+          the three and the third follows.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          The equation shows how a business&apos;s resources are financed, not whether the
+          figures behind them are right. Two sides that agree can still contain an amount
+          posted to the wrong account, so treat a balanced result as arithmetic confirmed
+          rather than accounts verified.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

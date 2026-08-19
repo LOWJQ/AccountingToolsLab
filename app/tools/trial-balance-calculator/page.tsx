@@ -149,6 +149,28 @@ export default function TrialBalanceCalculatorPage() {
       </div>
       <TrialBalanceCalculator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you calculate a trial balance?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          List every ledger account balance, place each amount in either the debit or the
+          credit column, total each column, and compare the two. The trial balance is balanced
+          when total debits equal total credits.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          A balanced trial balance proves the arithmetic, not the bookkeeping. Several errors
+          survive it untouched: a transaction left out altogether, an amount posted to the
+          wrong account of the right type, a debit and a credit reversed, or two mistakes that
+          happen to cancel each other. When the columns do differ, a gap divisible by 9 often
+          points to transposed digits.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

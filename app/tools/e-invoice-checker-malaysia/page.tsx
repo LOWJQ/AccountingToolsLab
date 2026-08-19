@@ -210,6 +210,29 @@ export default function EInvoiceCheckerMalaysiaPage() {
 
       <EInvoiceRequirementChecker />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Do you need to issue e-Invoices in Malaysia?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          It depends on annual turnover. LHDN phases businesses into the e-Invoice mandate
+          largest first, and businesses with annual turnover at or below RM1 million are
+          exempt. That threshold was raised from RM500,000 to RM1 million with effect from 1
+          January 2026, and the phase that would have covered businesses below it was cancelled
+          rather than postponed, so there is no later start date waiting for them.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          LHDN places a business into a phase using its FY2022 annual turnover rather than what
+          it earns today, so check both figures if they fall on different sides of a threshold.
+          This checker compares the turnover you enter against the published phases and dates;
+          it cannot confirm your registration status, and it does not connect to MyInvois.
+        </p>
+      </section>
+
       <p className="text-base leading-7 text-black">
         LHDN phases businesses into the e-Invoice mandate by annual turnover, starting with the
         largest. Businesses at or below {formatMyr(EINVOICE_EXEMPTION_THRESHOLD)} in annual turnover

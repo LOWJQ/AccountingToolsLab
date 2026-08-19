@@ -144,6 +144,28 @@ export default function BreakEvenCalculatorPage() {
       </div>
       <BreakEvenCalculator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you calculate the break-even point?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          Break-even is the sales level where total revenue exactly covers total costs, leaving
+          neither profit nor loss. To find break-even in units, divide fixed costs by the
+          contribution margin per unit, where contribution margin is the selling price per unit
+          minus the variable cost per unit. Multiply those units by the selling price to get
+          break-even sales revenue.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          The result holds only while the price and the cost per unit stay as entered. Fixed
+          costs that step up at higher volumes, or several products with different margins,
+          need to be worked through separately rather than squeezed into one blended figure.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

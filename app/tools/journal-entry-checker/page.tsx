@@ -149,6 +149,27 @@ export default function JournalEntryCheckerPage() {
 
       <JournalEntryChecker />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you check a journal entry?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          A journal entry balances when total debits equal total credits. Each line carries an
+          amount in one column only, never both. Add the debit column, add the credit column,
+          and compare the two: a difference means an amount is missing, mistyped, or sitting on
+          the wrong side.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Balancing is a necessary check rather than a sufficient one. An entry can balance
+          perfectly and still be wrong, because posting the right amount to the wrong account
+          leaves both totals untouched.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

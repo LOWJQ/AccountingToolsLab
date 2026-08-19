@@ -149,6 +149,29 @@ export default function DebitCreditCheckerPage() {
 
       <DebitCreditChecker />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Is it a debit or a credit?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          A debit is the left side of an accounting entry and a credit is the right. Debits
+          increase assets, expenses, and drawings; credits increase liabilities, equity, and
+          revenue. To decrease any of those accounts, use the opposite side. Debit does not
+          mean increase and credit does not mean decrease, because which side increases an
+          account depends entirely on the account type.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          A bank statement uses the two words the other way round, which is where most of the
+          confusion starts. The statement is written from the bank&apos;s books rather than
+          yours, so money paid into your account is a credit on their statement and a debit in
+          your own ledger.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

@@ -144,6 +144,27 @@ export default function CashFlowCalculatorPage() {
       </div>
       <CashFlowCalculator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you calculate net cash flow?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          Net cash flow is cash inflows minus cash outflows over a period. Add net cash flow to
+          the opening cash balance and you get the closing balance. Cash flow counts money
+          actually received and actually paid, so an invoice you have issued but not yet been
+          paid for does not appear until the cash arrives.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          This is why a profitable business can still run short of cash. Profit is measured on
+          income and expenses as they are earned and incurred, while cash flow is measured on
+          movement in and out of the bank, and the two rarely land in the same period.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

@@ -152,6 +152,29 @@ export default function FinancialRatioCalculatorPage() {
 
       <FinancialRatioCalculator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you read a financial ratio?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          A financial ratio compares two figures from the financial statements so a number can
+          be judged in proportion rather than on its own. The current ratio divides current
+          assets by current liabilities to show short-term liquidity. Debt-to-equity divides
+          total liabilities by total equity to show how much of the business is financed by
+          borrowing. Profit margin divides profit by revenue.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          No ratio has a universally correct value. What counts as healthy depends on the
+          industry, the business model, and the point in the year the figures were taken, so a
+          ratio tells you most when compared against the same business over time or against
+          similar businesses.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

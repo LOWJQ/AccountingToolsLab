@@ -143,6 +143,29 @@ export default function InvoiceGeneratorPage() {
       </div>
       <InvoiceGenerator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          What should an invoice include?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          An invoice needs your business name and contact details, the customer&apos;s details,
+          a unique invoice number, the issue date and the payment due date, a line for each
+          item with quantity and price, the total, and how to pay. Tax such as SST is shown as
+          its own line rather than folded into the unit price, so the customer can see what was
+          charged.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          This generator builds the PDF in your browser, and nothing you type is sent to a
+          server. It produces an ordinary business invoice: if your business is required to
+          issue an LHDN e-Invoice, that is a separate submission to MyInvois with its own
+          required fields.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

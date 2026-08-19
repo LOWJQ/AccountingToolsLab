@@ -164,7 +164,41 @@ export default function SstCalculatorMalaysiaPage() {
 
       <SstCalculatorMalaysia />
 
-      <p className="max-w-5xl text-base leading-7 text-black">
+      {/* Sits below the calculator: someone arriving from a search for a tool
+          wants the tool, not an essay. It still states the method in a form
+          that survives being quoted out of context, which is what an answer
+          engine lifts. The rate itself is deliberately not asserted as
+          current, since classification and the rate orders change. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you add or remove SST in Malaysia?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          To add SST, multiply the amount before tax by the SST rate, then add that result to
+          the original amount. To remove SST from a total that already includes it, divide the
+          total by 1 plus the rate written as a decimal: at an 8% rate divide by 1.08, and at 6%
+          divide by 1.06. Subtracting 8% from an SST-inclusive total gives the wrong figure,
+          because the tax was worked out on the smaller pre-tax amount rather than on the total.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Which rate applies depends on how your service or goods are classified. This calculator
+          covers the percentage rates in common use together with the fixed RM25 treatment for
+          credit and charge card services. Malaysia&apos;s SST base was widened from 1 July 2025
+          and the rate orders have been amended since, so confirm the rate for your category
+          against{" "}
+          <a
+            className="font-semibold underline-offset-4 hover:underline"
+            href="https://mysst.customs.gov.my/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            MySST
+          </a>{" "}
+          before relying on a figure for invoicing or filing.
+        </p>
+      </section>
+
+      <p className="text-base leading-7 text-black">
         This SST calculator helps you quickly add or remove SST from an amount. It is useful for
         preparing invoices, quotations, and checking SST amounts for general taxable services and
         other SST categories in Malaysia.

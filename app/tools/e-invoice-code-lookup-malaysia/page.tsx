@@ -173,6 +173,28 @@ export default function EInvoiceCodeLookupMalaysiaPage() {
 
       <EInvoiceCodeLookup />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Which e-Invoice codes do you need?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          A Malaysian e-Invoice uses two different code sets. The MSIC code is five digits and
+          describes what your business does, so you use your own code rather than your
+          customer&apos;s. The classification code is three digits and describes what is being
+          sold; it is required on every line item, and LHDN publishes 45 of them.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Where nothing matches what you are selling, LHDN provides 022 (Others) as the
+          fallback, but reach for it only when no specific code applies, since some categories
+          exist to support tax relief claims by the buyer. The lists here are taken from the
+          files LHDN publishes rather than retyped by hand.
+        </p>
+      </section>
+
       <p className="text-base leading-7 text-black">
         An e-Invoice needs two different kinds of code. The five-digit MSIC code says what your
         business does and is entered once as the supplier. The three-digit classification code says

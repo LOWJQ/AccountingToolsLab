@@ -149,6 +149,28 @@ export default function DepreciationCalculatorPage() {
 
       <DepreciationCalculator />
 
+      {/* Sits below the tool: someone arriving from a search for a calculator
+          wants the calculator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How do you calculate straight-line depreciation?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          Subtract the salvage value from the asset cost, then divide by the useful life in
+          years: annual depreciation = (cost - salvage value) / useful life. Straight-line
+          spreads the same charge across every year of the asset&apos;s life, and book value at
+          any point is the cost less the depreciation charged so far.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Only the cost is a fact. Salvage value and useful life are estimates you choose, and
+          they drive the answer, so it is worth revisiting them if plans for the asset change.
+          In Malaysia, book depreciation is also not what reduces a tax bill: LHDN grants
+          capital allowances on qualifying assets under its own rules instead.
+        </p>
+      </section>
+
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

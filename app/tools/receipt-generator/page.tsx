@@ -160,6 +160,29 @@ export default function ReceiptGeneratorPage() {
 
       <ReceiptGenerator />
 
+      {/* Sits below the tool: someone arriving from a search for a generator
+          wants the generator, not an essay. The wording is kept self-contained
+          so it still reads correctly when an answer engine lifts it away from
+          the surrounding page. */}
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          What goes on a payment receipt?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          A receipt records a payment that has already been made. It should show your business
+          details, who paid, a receipt number, the date the money arrived, what the payment was
+          for, the amount, and the method it was paid by. Where the payment settles an invoice,
+          add the original invoice number so the two documents can be matched later.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          A receipt is not an invoice. An invoice asks for payment and goes out before the
+          customer pays, which is why it carries a due date and bank details to pay into; a
+          receipt confirms the money arrived and needs neither. Many businesses issue both, since
+          a customer often needs the receipt for their own bookkeeping even when they already
+          hold the invoice.
+        </p>
+      </section>
+
       <p className="text-base leading-7 text-black">
         A receipt is proof that money has already changed hands, so it works differently from an
         invoice. There is no due date and no bank details for the customer to pay into. Instead it
