@@ -12,6 +12,7 @@ import {
 } from "@/lib/data/einvoice/phases";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
+import { formatLongDate } from "@/lib/utils/format-date";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -151,17 +152,6 @@ const relatedTools = [
 
 function formatMyr(amount: number): string {
   return `RM${amount.toLocaleString("en-MY")}`;
-}
-
-function formatLongDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-
-  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-    year: "numeric"
-  });
 }
 
 function describeTurnoverRange(minTurnover: number, maxTurnover: number | null): string {

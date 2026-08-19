@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "Using a suspense account", href: "#suspense" },
   { label: "Worked example", href: "#example" },
   { label: "Search checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -151,6 +154,14 @@ const checklist = [
   "I compared each trial balance figure against its ledger balance.",
   "I cleared any suspense account back to zero before preparing final accounts."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/",
+    label: "IAS 8 Accounting Policies, Changes in Accounting Estimates and Errors",
+    note: "How an error is corrected once you have located it, where it affected a prior period. MASB adopts this in Malaysia as MFRS 108. Trial balance mechanics and suspense accounts are bookkeeping practice and are not set by a reporting standard."
+  }
+];
 
 const sidebarGuides = [
   guideLink("errors-not-revealed-by-a-trial-balance"),
@@ -293,9 +304,7 @@ export default function WhyTrialBalanceNotBalancingGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 17 August 2026 <span aria-hidden="true">-</span> 9 min read
-              </p>
+              <GuideMeta slug="why-trial-balance-not-balancing" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -528,6 +537,8 @@ export default function WhyTrialBalanceNotBalancingGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

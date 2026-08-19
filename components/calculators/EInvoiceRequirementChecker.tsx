@@ -7,6 +7,7 @@ import {
   type EInvoiceRequirementResult
 } from "@/lib/calculators/e-invoice-requirement";
 import type { EInvoiceRequirementStatus } from "@/lib/einvoice/einvoice-types";
+import { formatLongDate } from "@/lib/utils/format-date";
 
 const DEFAULT_TURNOVER = "1500000";
 
@@ -36,17 +37,6 @@ function toIsoDate(date: Date): string {
   const day = `${date.getDate()}`.padStart(2, "0");
 
   return `${year}-${month}-${day}`;
-}
-
-function formatLongDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-
-  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-    year: "numeric"
-  });
 }
 
 function describeCountdown(result: EInvoiceRequirementResult): string {

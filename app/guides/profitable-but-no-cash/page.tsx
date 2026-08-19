@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "Which number to watch", href: "#which-to-watch" },
   { label: "How to close the gap", href: "#how-to-close" },
   { label: "Monthly checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -162,6 +165,19 @@ const checklist = [
   "I added depreciation back when reconciling profit to cash.",
   "I forecast cash for the next three months, not just this one."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-7-statement-of-cash-flows/",
+    label: "IAS 7 Statement of Cash Flows",
+    note: "The split of cash flows into operating, investing and financing activities, and the direct and indirect methods. MASB adopts this in Malaysia as MFRS 107."
+  },
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/",
+    label: "IAS 1 Presentation of Financial Statements",
+    note: "Why profit and cash are reported in two separate statements rather than one. MFRS 101 in Malaysia."
+  }
+];
 
 const sidebarGuides = [
   guideLink("what-should-an-invoice-include-before-you-send-it"),
@@ -304,9 +320,7 @@ export default function ProfitableButNoCashGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 17 August 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="profitable-but-no-cash" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -573,6 +587,8 @@ export default function ProfitableButNoCashGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

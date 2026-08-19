@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "Worked examples", href: "#examples" },
   { label: "Four traps", href: "#traps" },
   { label: "Checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -169,6 +172,19 @@ const checklist = [
   "I confirmed total debits equal total credits.",
   "I added a narration explaining what the entry was for."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/conceptual-framework/",
+    label: "Conceptual Framework for Financial Reporting",
+    note: "The element definitions an entry has to satisfy before an item is recognised at all."
+  },
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/",
+    label: "IAS 1 Presentation of Financial Statements",
+    note: "The complete set of financial statements that posted entries roll up into. MFRS 101 in Malaysia."
+  }
+];
 
 const sidebarGuides = [
   guideLink("debit-vs-credit"),
@@ -335,9 +351,7 @@ export default function JournalEntriesGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 18 August 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="journal-entries-for-beginners" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -593,6 +607,8 @@ export default function JournalEntriesGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

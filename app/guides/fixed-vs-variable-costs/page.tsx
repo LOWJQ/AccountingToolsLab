@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "Four classification traps", href: "#traps" },
   { label: "Using them for break-even", href: "#break-even" },
   { label: "Classification checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -138,6 +141,14 @@ const checklist = [
   "I used a consistent period for fixed costs and the sales target.",
   "I recalculated after any change in rent, wages, or supplier pricing."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-2-inventories/",
+    label: "IAS 2 Inventories",
+    note: "Where cost behaviour meets financial reporting: production overhead in the cost of conversion. MASB adopts this in Malaysia as MFRS 102. Classifying costs as fixed or variable is management accounting and is not itself set by a reporting standard."
+  }
+];
 
 const sidebarGuides = [
   guideLink("profitable-but-no-cash"),
@@ -280,9 +291,7 @@ export default function FixedVsVariableCostsGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 17 August 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="fixed-vs-variable-costs" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -560,6 +569,8 @@ export default function FixedVsVariableCostsGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

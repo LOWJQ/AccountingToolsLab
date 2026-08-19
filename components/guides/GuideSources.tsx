@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatLongDate } from "@/lib/utils/format-date";
 
 export type GuideSource = {
   /** What the source is, as the publisher names it. */
@@ -14,17 +15,6 @@ type GuideSourcesProps = {
   checkedOn: string;
   sources: GuideSource[];
 };
-
-function formatCheckedDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-
-  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-    year: "numeric"
-  });
-}
 
 /**
  * Lists the official pages a guide is based on. Malaysian tax guidance changes,
@@ -42,7 +32,7 @@ export function GuideSources({ checkedOn, sources }: GuideSourcesProps) {
       </header>
       <p className="mt-4 text-base leading-7 text-slate-950">
         This guide is based on the official pages below, last checked on{" "}
-        {formatCheckedDate(checkedOn)}. Where they disagree with anything written here, they are
+        {formatLongDate(checkedOn)}. Where they disagree with anything written here, they are
         the authority.
       </p>
       {/* A divided list rather than one box per source: each entry is a link and

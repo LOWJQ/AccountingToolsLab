@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "Worked examples", href: "#examples" },
   { label: "Four traps", href: "#traps" },
   { label: "Quick checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -175,6 +178,19 @@ const checklist = [
   "I check that the entry still satisfies the accounting equation."
 ] as const;
 
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/conceptual-framework/",
+    label: "Conceptual Framework for Financial Reporting",
+    note: "The definitions of asset, liability, equity, income and expense that decide which side of an account an increase is recorded on."
+  },
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/",
+    label: "IAS 1 Presentation of Financial Statements",
+    note: "Where each of the six account types ends up in a published set of accounts. MASB adopts this in Malaysia as MFRS 101."
+  }
+];
+
 const sidebarGuides = [
   guideLink("journal-entries-for-beginners"),
   guideLink("why-trial-balance-not-balancing"),
@@ -316,9 +332,7 @@ export default function DebitVsCreditGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 17 August 2026 <span aria-hidden="true">-</span> 9 min read
-              </p>
+              <GuideMeta slug="debit-vs-credit" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -560,6 +574,8 @@ export default function DebitVsCreditGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "What it does catch", href: "#does-catch" },
   { label: "How to check further", href: "#how-to-check" },
   { label: "Review checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -132,6 +135,19 @@ const checklist = [
   "I compared the balances with the previous period.",
   "I understand that agreement of the totals is a starting point, not proof of accuracy."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-8-accounting-policies-changes-in-accounting-estimates-and-errors/",
+    label: "IAS 8 Accounting Policies, Changes in Accounting Estimates and Errors",
+    note: "How a prior period error is corrected once it is found, including restating the comparative figures. MASB adopts this in Malaysia as MFRS 108."
+  },
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/",
+    label: "IAS 1 Presentation of Financial Statements",
+    note: "The statements a hidden error ultimately misstates, even while the trial balance still agrees. MFRS 101 in Malaysia."
+  }
+];
 
 const sidebarGuides = [
   guideLink("why-trial-balance-not-balancing"),
@@ -317,9 +333,7 @@ export default function ErrorsNotRevealedByTrialBalanceGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 17 August 2026 <span aria-hidden="true">-</span> 9 min read
-              </p>
+              <GuideMeta slug="errors-not-revealed-by-a-trial-balance" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -556,6 +570,8 @@ export default function ErrorsNotRevealedByTrialBalanceGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -29,6 +31,7 @@ const tableOfContents = [
   { label: "Worked example", href: "#example" },
   { label: "How to judge any ratio", href: "#how-to-judge" },
   { label: "Review checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -172,6 +175,14 @@ const checklist = [
   "I treated the ratio as a question to investigate, not a verdict."
 ] as const;
 
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/",
+    label: "IAS 1 Presentation of Financial Statements",
+    note: "The statements every ratio on this page is computed from, and the line items each one draws on. MASB adopts this in Malaysia as MFRS 101."
+  }
+];
+
 const sidebarGuides = [
   guideLink("profitable-but-no-cash"),
   guideLink("fixed-vs-variable-costs"),
@@ -313,9 +324,7 @@ export default function WhatIsAGoodFinancialRatioGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 18 August 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="what-is-a-good-financial-ratio" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -565,6 +574,8 @@ export default function WhatIsAGoodFinancialRatioGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

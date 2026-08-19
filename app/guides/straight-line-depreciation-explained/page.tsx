@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -30,6 +32,7 @@ const tableOfContents = [
   { label: "Why LHDN ignores your figure", href: "#capital-allowances" },
   { label: "Worked example", href: "#example" },
   { label: "Checklist", href: "#checklist" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -127,6 +130,19 @@ const checklist = [
   "I know accounting depreciation is added back for Malaysian tax purposes.",
   "I will revisit the estimates if plans for the asset change."
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://www.ifrs.org/issued-standards/list-of-standards/ias-16-property-plant-and-equipment/",
+    label: "IAS 16 Property, Plant and Equipment",
+    note: "Depreciation methods, useful life and residual value, and the requirement to review those estimates. MASB adopts this in Malaysia as MFRS 116."
+  },
+  {
+    href: "https://www.hasil.gov.my/en/perundangan/ketetapan-umum/",
+    label: "LHDN Public Rulings",
+    note: "Capital allowances, which replace book depreciation in a Malaysian tax computation. See PR 6/2015 on qualifying expenditure and PR 12/2014 on qualifying plant and machinery."
+  }
+];
 
 const sidebarGuides = [
   guideLink("what-is-a-good-financial-ratio"),
@@ -269,9 +285,7 @@ export default function StraightLineDepreciationGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 18 August 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="straight-line-depreciation-explained" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -542,6 +556,8 @@ export default function StraightLineDepreciationGuidePage() {
                 </div>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection
               eyebrow=""

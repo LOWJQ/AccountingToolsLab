@@ -17,6 +17,8 @@ export type Guide = {
    * sitemap lastmod and the Article dateModified, so the two cannot disagree.
    */
   lastModified: string;
+  /** Estimated reading time in minutes, shown in the dateline under the h1. */
+  readTime: number;
 };
 
 export const guides: Guide[] = [
@@ -33,7 +35,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/what-should-an-invoice-include-before-you-send-it",
     datePublished: "2026-05-08",
-    lastModified: "2026-07-28"
+    lastModified: "2026-07-28",
+    readTime: 10
   },
   {
     slug: "what-is-a-tin-number-malaysia",
@@ -46,7 +49,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/what-is-a-tin-number-malaysia",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-18",
+    readTime: 8
   },
   {
     slug: "do-i-need-to-register-for-sst-malaysia",
@@ -59,7 +63,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/do-i-need-to-register-for-sst-malaysia",
     datePublished: "2026-07-24",
-    lastModified: "2026-07-28"
+    lastModified: "2026-07-28",
+    readTime: 10
   },
   {
     slug: "errors-not-revealed-by-a-trial-balance",
@@ -72,7 +77,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/errors-not-revealed-by-a-trial-balance",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17"
+    lastModified: "2026-08-17",
+    readTime: 9
   },
   {
     slug: "profitable-but-no-cash",
@@ -85,7 +91,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/profitable-but-no-cash",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17"
+    lastModified: "2026-08-17",
+    readTime: 10
   },
   {
     slug: "fixed-vs-variable-costs",
@@ -98,7 +105,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/fixed-vs-variable-costs",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17"
+    lastModified: "2026-08-17",
+    readTime: 10
   },
   {
     slug: "why-trial-balance-not-balancing",
@@ -111,7 +119,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/why-trial-balance-not-balancing",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17"
+    lastModified: "2026-08-17",
+    readTime: 9
   },
   {
     slug: "debit-vs-credit",
@@ -124,7 +133,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/debit-vs-credit",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17"
+    lastModified: "2026-08-17",
+    readTime: 9
   },
   {
     slug: "what-is-a-good-financial-ratio",
@@ -137,7 +147,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/what-is-a-good-financial-ratio",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-18",
+    readTime: 10
   },
   {
     slug: "straight-line-depreciation-explained",
@@ -150,7 +161,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/straight-line-depreciation-explained",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-18",
+    readTime: 10
   },
   {
     slug: "journal-entries-for-beginners",
@@ -163,7 +175,8 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/journal-entries-for-beginners",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-18",
+    readTime: 10
   }
 ];
 

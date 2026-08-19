@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
+import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
@@ -35,6 +37,7 @@ const tableOfContents = [
   { label: "Before sending checklist", href: "#checklist" },
   { label: "Malaysia note", href: "#malaysia-note" },
   { label: "Invoice vs receipt", href: "#invoice-vs-receipt" },
+  { label: "Sources", href: "#sources" },
   { label: "FAQs", href: "#faq" }
 ] as const;
 
@@ -83,6 +86,19 @@ const checklist = [
   "Payment reference instruction is included",
   "Invoice is saved or downloaded as a PDF"
 ] as const;
+
+const guideSources = [
+  {
+    href: "https://mysst.customs.gov.my/issuing-invoices/",
+    label: "MySST: issuing invoices",
+    note: "What an SST-registered person must show on an invoice, including the serial number, registration number, the rate, and the tax shown as a separate line."
+  },
+  {
+    href: "https://www.hasil.gov.my/en/e-invois/",
+    label: "LHDN e-Invoice",
+    note: "e-Invoice requirements for Malaysian businesses and the details a submission has to carry."
+  }
+];
 
 const sidebarGuides = [
   guideLink("do-i-need-to-register-for-sst-malaysia"),
@@ -249,9 +265,7 @@ export default function HowToCreateSimpleInvoicePage() {
                 {pageDescription} Include the right details before you send it to reduce payment
                 delays and confusion.
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 12 May 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="what-should-an-invoice-include-before-you-send-it" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
@@ -424,6 +438,8 @@ export default function HowToCreateSimpleInvoicePage() {
                 </Link>
               </div>
             </section>
+
+            <GuideSources checkedOn="2026-08-19" sources={guideSources} />
 
             <FAQSection eyebrow="" faqs={faqs} id="faq" title="Simple Invoice FAQs" />
           </article>

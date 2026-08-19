@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GuideMeta } from "@/components/guides/GuideMeta";
 import { GuideSources } from "@/components/guides/GuideSources";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
 import { ArticleJsonLd } from "@/components/seo/ArticleJsonLd";
@@ -298,9 +299,7 @@ export default function SstRegistrationGuidePage() {
               <p className="mt-5 text-base leading-7 text-slate-950 sm:text-lg">
                 {pageDescription}
               </p>
-              <p className="mt-5 text-sm text-slate-950">
-                Updated on 24 July 2026 <span aria-hidden="true">-</span> 10 min read
-              </p>
+              <GuideMeta slug="do-i-need-to-register-for-sst-malaysia" />
             </header>
 
             <GuideTableOfContents className="mt-8 lg:hidden" items={tableOfContents} />
