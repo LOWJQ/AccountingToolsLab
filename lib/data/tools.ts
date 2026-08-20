@@ -15,7 +15,7 @@ export const tools: Tool[] = [
     menuDescription: "Create professional invoices with MYR, SST, and PDF export.",
     href: "/tools/invoice-generator",
     status: "mvp",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "receipt-generator",
@@ -26,7 +26,7 @@ export const tools: Tool[] = [
     menuDescription: "Make a payment receipt PDF in your browser.",
     href: "/tools/receipt-generator",
     status: "mvp",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "sst-calculator-malaysia",
@@ -36,7 +36,7 @@ export const tools: Tool[] = [
     menuDescription: "Calculate SST-inclusive and SST-exclusive prices.",
     href: "/tools/sst-calculator-malaysia",
     status: "mvp",
-    lastModified: "2026-07-28"
+    lastModified: "2026-08-19"
   },
   {
     slug: "e-invoice-checker-malaysia",
@@ -47,7 +47,7 @@ export const tools: Tool[] = [
     menuDescription: "Check if LHDN e-Invoice applies to your business.",
     href: "/tools/e-invoice-checker-malaysia",
     status: "mvp",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "e-invoice-code-lookup-malaysia",
@@ -58,7 +58,7 @@ export const tools: Tool[] = [
     menuDescription: "Find MSIC and e-Invoice classification codes.",
     href: "/tools/e-invoice-code-lookup-malaysia",
     status: "mvp",
-    lastModified: "2026-08-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "cash-flow-calculator",
@@ -68,7 +68,7 @@ export const tools: Tool[] = [
     menuDescription: "Review cash inflows, outflows, and net cash flow.",
     href: "/tools/cash-flow-calculator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "break-even-calculator",
@@ -78,7 +78,7 @@ export const tools: Tool[] = [
     menuDescription: "Find the sales needed to cover your costs.",
     href: "/tools/break-even-calculator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "financial-ratio-calculator",
@@ -87,7 +87,7 @@ export const tools: Tool[] = [
     menuDescription: "Calculate useful business and accounting ratios.",
     href: "/tools/financial-ratio-calculator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "depreciation-calculator",
@@ -97,7 +97,7 @@ export const tools: Tool[] = [
     menuDescription: "Estimate depreciation using common methods.",
     href: "/tools/depreciation-calculator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "trial-balance-calculator",
@@ -107,7 +107,7 @@ export const tools: Tool[] = [
     menuDescription: "Check debit and credit totals easily.",
     href: "/tools/trial-balance-calculator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "journal-entry-checker",
@@ -116,7 +116,7 @@ export const tools: Tool[] = [
     menuDescription: "Review simple journal entry logic.",
     href: "/tools/journal-entry-checker",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "debit-credit-checker",
@@ -126,7 +126,7 @@ export const tools: Tool[] = [
     menuDescription: "Learn whether an account should be debited or credited.",
     href: "/tools/debit-credit-checker",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   },
   {
     slug: "accounting-equation-calculator",
@@ -135,7 +135,7 @@ export const tools: Tool[] = [
     menuDescription: "Check assets, liabilities, and equity.",
     href: "/tools/accounting-equation-calculator",
     status: "mvp",
-    lastModified: "2026-07-18"
+    lastModified: "2026-08-19"
   }
 ];
 

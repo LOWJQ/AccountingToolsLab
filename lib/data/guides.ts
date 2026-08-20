@@ -35,7 +35,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/what-should-an-invoice-include-before-you-send-it",
     datePublished: "2026-05-08",
-    lastModified: "2026-07-28",
+    lastModified: "2026-08-19",
     readTime: 10
   },
   {
@@ -77,7 +77,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/errors-not-revealed-by-a-trial-balance",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17",
+    lastModified: "2026-08-19",
     readTime: 9
   },
   {
@@ -91,7 +91,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/profitable-but-no-cash",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17",
+    lastModified: "2026-08-19",
     readTime: 10
   },
   {
@@ -105,7 +105,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/fixed-vs-variable-costs",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17",
+    lastModified: "2026-08-19",
     readTime: 10
   },
   {
@@ -119,7 +119,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/why-trial-balance-not-balancing",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17",
+    lastModified: "2026-08-19",
     readTime: 9
   },
   {
@@ -133,7 +133,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/debit-vs-credit",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-17",
+    lastModified: "2026-08-19",
     readTime: 9
   },
   {
@@ -147,7 +147,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/what-is-a-good-financial-ratio",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18",
+    lastModified: "2026-08-19",
     readTime: 10
   },
   {
@@ -161,7 +161,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/straight-line-depreciation-explained",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18",
+    lastModified: "2026-08-19",
     readTime: 10
   },
   {
@@ -175,7 +175,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/journal-entries-for-beginners",
     datePublished: "2026-08-18",
-    lastModified: "2026-08-18",
+    lastModified: "2026-08-19",
     readTime: 10
   }
 ];
