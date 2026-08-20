@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NotFoundReporter } from "@/components/analytics/NotFoundReporter";
 import { ArrowRight } from "lucide-react";
 import { availableTools } from "@/lib/data/tools";
 import { indexableGuides } from "@/lib/data/guides";
@@ -17,6 +18,7 @@ const popularGuides = indexableGuides.slice(0, 4);
 export default function NotFound() {
   return (
     <main className="bg-white">
+      <NotFoundReporter />
       <div className="mx-auto w-full max-w-[1240px] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="max-w-3xl">
           <p className="text-sm font-medium tracking-wide text-slate-500">Error 404</p>

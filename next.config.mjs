@@ -43,6 +43,28 @@ const securityHeaders = [
   }
 ];
 
+// Paths that do not exist but are plausible guesses at ones that do. AI
+// assistants cite invented URLs far more often than search engines send
+// traffic to them, and these are the shapes most likely to be guessed: a
+// dropped "-malaysia" or "-calculator" suffix, or a missing /tools prefix.
+// Every path on the left 404s today, so redirecting it can only improve the
+// outcome. Extend this from the not_found analytics event once real 404 data
+// has accumulated, rather than guessing further.
+const guessedPaths = {
+  "/tools/sst-calculator": "/tools/sst-calculator-malaysia",
+  "/tools/e-invoice-checker": "/tools/e-invoice-checker-malaysia",
+  "/tools/e-invoice-code-lookup": "/tools/e-invoice-code-lookup-malaysia",
+  "/tools/trial-balance": "/tools/trial-balance-calculator",
+  "/tools/accounting-equation": "/tools/accounting-equation-calculator",
+  "/tools/break-even": "/tools/break-even-calculator",
+  "/tools/cash-flow": "/tools/cash-flow-calculator",
+  "/tools/depreciation": "/tools/depreciation-calculator",
+  "/tools/financial-ratio": "/tools/financial-ratio-calculator",
+  "/invoice-generator": "/tools/invoice-generator",
+  "/receipt-generator": "/tools/receipt-generator",
+  "/sst-calculator-malaysia": "/tools/sst-calculator-malaysia"
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -92,6 +114,11 @@ const nextConfig = {
         destination: "/guides/do-i-need-to-register-for-sst-malaysia",
         permanent: true
       },
+      ...Object.entries(guessedPaths).map(([source, destination]) => ({
+        source,
+        destination,
+        permanent: true
+      })),
       {
         source: "/:path*",
         has: [
