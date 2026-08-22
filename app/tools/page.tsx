@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ToolsDirectory } from "@/components/tools/ToolsDirectory";
-import { availableTools } from "@/lib/data/tools";
+import { orderedAvailableTools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 import { createItemListSchema } from "@/lib/seo/schema";
@@ -10,16 +10,17 @@ import { createItemListSchema } from "@/lib/seo/schema";
 export const metadata = createMetadata({
   title: "All Accounting Tools | Free Calculators and Invoice Tools",
   description:
-    "Free accounting calculators and invoice tools for small businesses, freelancers, students, and beginners.",
+    "Free accounting tools for Malaysia — invoice and receipt generators, SST and business calculators, plus checkers for LHDN e-Invoice rules and journal entries.",
   path: "/tools"
 });
 
-// Built from the same records the directory cards render, so the ItemList
-// schema always describes exactly what a visitor sees on the page.
-const toolItemList = availableTools.map((tool) => ({
+// Built from the same records the directory renders, in the same grouped
+// order, so the ItemList schema always describes exactly what a visitor sees.
+// No description: the directory lists names only now, and structured data
+// should not claim text that is not on the page.
+const toolItemList = orderedAvailableTools.map((tool) => ({
   name: tool.name,
-  url: `${siteConfig.url}${tool.href}`,
-  description: tool.description
+  url: `${siteConfig.url}${tool.href}`
 }));
 
 export default function ToolsPage() {
@@ -52,8 +53,9 @@ export default function ToolsPage() {
               All Accounting Tools
             </h1>
             <p className="mt-4 text-base leading-7 text-slate-700">
-              Free accounting calculators and invoice tools for small businesses, freelancers,
-              students, and beginners.
+              Free accounting tools for Malaysian businesses, freelancers, and students. MYR
+              invoicing, SST and LHDN e-Invoice compliance, and the everyday calculators. No
+              sign-up, nothing to install.
             </p>
           </section>
 

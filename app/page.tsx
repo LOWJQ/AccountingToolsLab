@@ -13,7 +13,6 @@ import {
   UserRound
 } from "lucide-react";
 import { guideCard } from "@/lib/data/guides";
-import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createMetadata({
@@ -56,7 +55,6 @@ const mainTools = [
       "Create professional invoices with SST, discounts, payment details, QR payment, and PDF output.",
     href: "/tools/invoice-generator",
     cta: "Create invoice",
-    icon: toolIcons.invoice,
     preview: "invoice"
   },
   {
@@ -64,7 +62,6 @@ const mainTools = [
     description: "Add or remove SST and review totals instantly with MYR calculations.",
     href: "/tools/sst-calculator-malaysia",
     cta: "Calculate SST",
-    icon: toolIcons.sst,
     preview: "sst"
   },
   {
@@ -72,7 +69,6 @@ const mainTools = [
     description: "Check debit and credit totals to make sure your accounts stay balanced.",
     href: "/tools/trial-balance-calculator",
     cta: "Check balance",
-    icon: toolIcons.trialBalance,
     preview: "trial-balance"
   },
   {
@@ -80,7 +76,6 @@ const mainTools = [
     description: "Track cash inflows and outflows to understand your business cash position.",
     href: "/tools/cash-flow-calculator",
     cta: "Open tool",
-    icon: toolIcons.cashFlow,
     preview: "cash-flow"
   }
 ] as const;
@@ -123,18 +118,15 @@ const steps = [
 const guideCards = [
   {
     ...guideCard("what-should-an-invoice-include-before-you-send-it"),
-    cta: "Read guide",
-    icon: toolIcons.invoice
+    cta: "Read guide"
   },
   {
     ...guideCard("debit-vs-credit"),
-    cta: "Read guide",
-    icon: toolIcons.debitCredit
+    cta: "Read guide"
   },
   {
     ...guideCard("errors-not-revealed-by-a-trial-balance"),
-    cta: "Read guide",
-    icon: toolIcons.trialBalance
+    cta: "Read guide"
   }
 ] as const;
 
@@ -388,8 +380,6 @@ function MiniPreview({ type }: { type: (typeof mainTools)[number]["preview"] }) 
 }
 
 function ToolCard({ tool }: { tool: (typeof mainTools)[number] }) {
-  const Icon = tool.icon;
-
   return (
     <Link
       aria-label={`Open ${tool.title}`}
@@ -397,40 +387,32 @@ function ToolCard({ tool }: { tool: (typeof mainTools)[number] }) {
       href={tool.href}
     >
       <MiniPreview type={tool.preview} />
-      <div className="mt-5 flex flex-1 items-stretch gap-3">
-        <Icon aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-slate-950" strokeWidth={1.7} />
-        <div className="flex min-h-0 flex-1 flex-col">
-          <h3 className="text-lg font-semibold text-slate-950">{tool.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{tool.description}</p>
-          <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-slate-950 transition group-hover:text-teal-700">
-            {tool.cta}
-            <ArrowRight aria-hidden="true" className="h-4 w-4" />
-          </span>
-        </div>
+      <div className="mt-5 flex min-h-0 flex-1 flex-col">
+        <h3 className="text-lg font-semibold text-slate-950">{tool.title}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{tool.description}</p>
+        <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-slate-950 transition group-hover:text-teal-700">
+          {tool.cta}
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
+        </span>
       </div>
     </Link>
   );
 }
 
 function GuideCard({ guide }: { guide: (typeof guideCards)[number] }) {
-  const Icon = guide.icon;
-
   return (
     <Link
       aria-label={`Read ${guide.title}`}
       className="group flex h-full rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/60 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-lg hover:shadow-slate-200/80 focus:outline-none focus:ring-4 focus:ring-slate-100"
       href={guide.href}
     >
-      <div className="flex h-full flex-1 items-start gap-4">
-        <Icon aria-hidden="true" className="mt-1 h-8 w-8 shrink-0 text-slate-950" strokeWidth={1.6} />
-        <div className="flex min-h-0 flex-1 flex-col">
-          <h3 className="text-base font-semibold text-slate-950">{guide.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{guide.description}</p>
-          <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-slate-950 transition group-hover:text-teal-700">
-            {guide.cta}
-            <ArrowRight aria-hidden="true" className="h-4 w-4" />
-          </span>
-        </div>
+      <div className="flex h-full min-h-0 flex-1 flex-col">
+        <h3 className="text-base font-semibold text-slate-950">{guide.title}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{guide.description}</p>
+        <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-slate-950 transition group-hover:text-teal-700">
+          {guide.cta}
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
+        </span>
       </div>
     </Link>
   );

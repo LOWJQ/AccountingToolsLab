@@ -5,7 +5,6 @@ import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJ
 import { FAQSection } from "@/components/tools/FAQSection";
 import { RelatedGuideCard } from "@/components/tools/RelatedGuideCard";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
-import { toolIcons } from "@/components/tools/toolIcons";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 import { ArrowRight, Check } from "lucide-react";
@@ -75,27 +74,22 @@ const whenToUseItems = [
 const relatedTools = [
   {
     href: "/tools/debit-credit-checker",
-    icon: toolIcons.debitCredit,
     label: "Debit/Credit Checker"
   },
   {
     href: "/tools/trial-balance-calculator",
-    icon: toolIcons.trialBalance,
     label: "Trial Balance Calculator"
   },
   {
     href: "/tools/accounting-equation-calculator",
-    icon: toolIcons.accountingEquation,
     label: "Accounting Equation Calculator"
   },
   {
     href: "/tools/financial-ratio-calculator",
-    icon: toolIcons.financialRatio,
     label: "Financial Ratio Calculator"
   },
   {
     href: "/tools",
-    icon: toolIcons.allTools,
     label: "All Tools"
   }
 ];
@@ -218,24 +212,19 @@ export default function JournalEntryCheckerPage() {
           Related Tools
         </h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {relatedTools.map((tool) => {
-            const Icon = tool.icon;
-
-            return (
-              <Link
-                className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-                href={tool.href}
-                key={tool.href}
-              >
-                <Icon aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-700" />
-                <span className="min-w-0 flex-1">{tool.label}</span>
-                <ArrowRight
-                  aria-hidden="true"
-                  className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
-                />
-              </Link>
-            );
-          })}
+          {relatedTools.map((tool) => (
+            <Link
+              className="group flex min-h-14 items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-semibold leading-7 text-black transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+              href={tool.href}
+              key={tool.href}
+            >
+              <span className="min-w-0 flex-1">{tool.label}</span>
+              <ArrowRight
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
+              />
+            </Link>
+          ))}
         </div>
       </section>
 

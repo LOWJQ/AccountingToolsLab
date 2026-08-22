@@ -1,38 +1,48 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { toolIconsBySlug } from "@/components/tools/toolIcons";
-import { availableTools } from "@/lib/data/tools";
-import type { Tool } from "@/types/tool";
+import { toolsByCategory } from "@/lib/data/tools";
 
-function ToolCard({ tool }: { tool: Tool }) {
-  const Icon = toolIconsBySlug[tool.slug];
-
-  return (
-    <Link
-      className="group flex min-h-[164px] items-start gap-4 rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-      href={tool.href}
-    >
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center text-slate-800">
-        {Icon ? <Icon aria-hidden="true" className="h-5 w-5" /> : null}
-      </span>
-      <div className="min-w-0 flex-1">
-        <h3 className="text-base font-semibold leading-6 text-slate-950">{tool.name}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{tool.description}</p>
-      </div>
-      <ArrowRight
-        aria-hidden="true"
-        className="mt-1 h-4 w-4 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-900"
-      />
-    </Link>
-  );
-}
-
+/**
+ * A plain grouped index rather than a card grid. This page is somewhere people
+ * pass through on the way to one tool, so anything that is not the tool's name
+ * — icon, description, arrow, card border — is one more thing to read past on
+ * every visit. The card layout stopped scaling somewhere around twenty tools;
+ * a bare list keeps the whole set scannable in one screen.
+ *
+ * Names are links in a list rather than headings: this is navigation, not
+ * content, so a screen reader announcing "list, 7 items" is more use than a
+ * run of h3s.
+ */
 export function ToolsDirectory() {
   return (
-    <section aria-label="Accounting tools" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {availableTools.map((tool) => (
-        <ToolCard key={tool.slug} tool={tool} />
+    <div className="flex flex-col gap-14">
+      {toolsByCategory.map((group) => (
+        <section aria-labelledby={`tools-${group.id}`} key={group.id}>
+          {/* Deliberately louder than the tool names. With a long list the
+              category is what someone locates first, so it has to win the
+              page's second level outright; the rule under it closes the group
+              off without wrapping anything in a box. */}
+          <h2
+            className="border-b border-slate-200 pb-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl"
+            id={`tools-${group.id}`}
+          >
+            {group.title}
+          </h2>
+          <ul className="mt-4 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+            {group.tools.map((tool) => (
+              <li key={tool.slug}>
+                {/* The negative margin cancels the tap-target padding, so the
+                    text still lines up with the heading above it. */}
+                <Link
+                  className="-mx-2 block rounded px-2 py-2.5 text-[15px] leading-6 text-slate-700 underline-offset-4 transition-colors hover:text-slate-950 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                  href={tool.href}
+                >
+                  {tool.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       ))}
-    </section>
+    </div>
   );
 }

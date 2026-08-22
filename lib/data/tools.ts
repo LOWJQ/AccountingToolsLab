@@ -1,4 +1,4 @@
-import type { Tool } from "@/types/tool";
+import type { Tool, ToolCategory } from "@/types/tool";
 
 /**
  * Single source of truth for every tool surface: the tools directory, the
@@ -15,6 +15,7 @@ export const tools: Tool[] = [
     menuDescription: "Create professional invoices with MYR, SST, and PDF export.",
     href: "/tools/invoice-generator",
     status: "mvp",
+    category: "generator",
     lastModified: "2026-08-19"
   },
   {
@@ -26,6 +27,7 @@ export const tools: Tool[] = [
     menuDescription: "Make a payment receipt PDF in your browser.",
     href: "/tools/receipt-generator",
     status: "mvp",
+    category: "generator",
     lastModified: "2026-08-19"
   },
   {
@@ -36,6 +38,7 @@ export const tools: Tool[] = [
     menuDescription: "Calculate SST-inclusive and SST-exclusive prices.",
     href: "/tools/sst-calculator-malaysia",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   },
   {
@@ -47,6 +50,7 @@ export const tools: Tool[] = [
     menuDescription: "Check if LHDN e-Invoice applies to your business.",
     href: "/tools/e-invoice-checker-malaysia",
     status: "mvp",
+    category: "checker",
     lastModified: "2026-08-19"
   },
   {
@@ -58,6 +62,7 @@ export const tools: Tool[] = [
     menuDescription: "Find MSIC and e-Invoice classification codes.",
     href: "/tools/e-invoice-code-lookup-malaysia",
     status: "mvp",
+    category: "checker",
     lastModified: "2026-08-19"
   },
   {
@@ -68,6 +73,7 @@ export const tools: Tool[] = [
     menuDescription: "Review cash inflows, outflows, and net cash flow.",
     href: "/tools/cash-flow-calculator",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   },
   {
@@ -78,6 +84,7 @@ export const tools: Tool[] = [
     menuDescription: "Find the sales needed to cover your costs.",
     href: "/tools/break-even-calculator",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   },
   {
@@ -87,6 +94,7 @@ export const tools: Tool[] = [
     menuDescription: "Calculate useful business and accounting ratios.",
     href: "/tools/financial-ratio-calculator",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   },
   {
@@ -97,6 +105,7 @@ export const tools: Tool[] = [
     menuDescription: "Estimate depreciation using common methods.",
     href: "/tools/depreciation-calculator",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   },
   {
@@ -107,6 +116,7 @@ export const tools: Tool[] = [
     menuDescription: "Check debit and credit totals easily.",
     href: "/tools/trial-balance-calculator",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   },
   {
@@ -116,6 +126,7 @@ export const tools: Tool[] = [
     menuDescription: "Review simple journal entry logic.",
     href: "/tools/journal-entry-checker",
     status: "mvp",
+    category: "checker",
     lastModified: "2026-08-19"
   },
   {
@@ -126,6 +137,7 @@ export const tools: Tool[] = [
     menuDescription: "Learn whether an account should be debited or credited.",
     href: "/tools/debit-credit-checker",
     status: "mvp",
+    category: "checker",
     lastModified: "2026-08-19"
   },
   {
@@ -135,6 +147,7 @@ export const tools: Tool[] = [
     menuDescription: "Check assets, liabilities, and equity.",
     href: "/tools/accounting-equation-calculator",
     status: "mvp",
+    category: "calculator",
     lastModified: "2026-08-19"
   }
 ];
@@ -144,6 +157,41 @@ export const tools: Tool[] = [
  * the directory, the nav, and the ItemList schema always agree on what exists.
  */
 export const availableTools: Tool[] = tools.filter((tool) => tool.status === "mvp");
+
+type ToolCategoryGroup = {
+  id: ToolCategory;
+  /** Section heading on /tools. */
+  title: string;
+};
+
+/**
+ * Section order on the tools directory. Generators lead because they produce
+ * something the visitor takes away, which is what most arrive wanting.
+ */
+export const TOOL_CATEGORIES: ToolCategoryGroup[] = [
+  { id: "generator", title: "Generators" },
+  { id: "calculator", title: "Calculators" },
+  { id: "checker", title: "Checkers" }
+];
+
+/**
+ * The directory sections with the tools belonging to each. Filtering from
+ * availableTools rather than keeping a second hand-written list per section
+ * means a new tool appears in its section as soon as it has a category.
+ * Empty sections drop out, so a category can exist before its first tool does.
+ */
+export const toolsByCategory = TOOL_CATEGORIES.map((category) => ({
+  ...category,
+  tools: availableTools.filter((tool) => tool.category === category.id)
+})).filter((group) => group.tools.length > 0);
+
+/**
+ * Every available tool in the order the directory renders them once grouped.
+ * The ItemList schema on /tools is built from this rather than from
+ * availableTools, so structured data keeps describing the order a visitor
+ * actually sees.
+ */
+export const orderedAvailableTools: Tool[] = toolsByCategory.flatMap((group) => group.tools);
 
 /** How many tools the header menu lists before deferring to "View all tools". */
 export const NAV_TOOL_LIMIT = 12;

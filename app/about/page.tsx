@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, Briefcase, GraduationCap, UserRound } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { orderedAvailableTools } from "@/lib/data/tools";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
@@ -39,26 +40,16 @@ const audiences = [
   }
 ];
 
-const supportItems = [
-  "Free invoice generator with PDF download",
-  "Malaysia SST and tax math helpers",
-  "Business calculators for cash flow, break-even points, ratios, and depreciation",
-  "Accounting learning tools for trial balances, journal entries, debits, credits, and the accounting equation",
-  "Beginner-friendly explanations and practical guide articles"
-];
-
-const currentTools = [
-  { label: "Invoice Generator", href: "/tools/invoice-generator" },
-  { label: "Malaysia SST Calculator", href: "/tools/sst-calculator-malaysia" },
-  { label: "Cash Flow Calculator", href: "/tools/cash-flow-calculator" },
-  { label: "Break-even Calculator", href: "/tools/break-even-calculator" },
-  { label: "Financial Ratio Calculator", href: "/tools/financial-ratio-calculator" },
-  { label: "Depreciation Calculator", href: "/tools/depreciation-calculator" },
-  { label: "Trial Balance Calculator", href: "/tools/trial-balance-calculator" },
-  { label: "Journal Entry Checker", href: "/tools/journal-entry-checker" },
-  { label: "Debit/Credit Checker", href: "/tools/debit-credit-checker" },
-  { label: "Accounting Equation Calculator", href: "/tools/accounting-equation-calculator" }
-];
+/**
+ * Read from the tool records rather than hand-listed here. This section had
+ * fallen three tools behind the site, and a second copy of the list is exactly
+ * what lib/data/tools.ts exists to prevent. Uses the short menu label where a
+ * tool has one, since the full names wrap badly in a three-column grid.
+ */
+const currentTools = orderedAvailableTools.map((tool) => ({
+  href: tool.href,
+  label: tool.menuTitle ?? tool.name
+}));
 
 export default function AboutPage() {
   return (
@@ -123,24 +114,6 @@ export default function AboutPage() {
               );
             })}
           </div>
-        </section>
-
-        <section className="border-b border-slate-200 py-10 md:py-12">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Practical support for accounting basics
-          </h2>
-          <p className="mt-4 text-base leading-7 text-black">
-            The site focuses on useful business tools and learning aids rather than complicated
-            software features.
-          </p>
-          <ul className="mt-5 space-y-3 text-base leading-7 text-black">
-            {supportItems.map((item) => (
-              <li className="flex gap-3" key={item}>
-                <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-600" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
         </section>
 
         <section className="border-b border-slate-200 py-10 md:py-12">

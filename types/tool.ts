@@ -1,5 +1,12 @@
 export type ToolStatus = "planned" | "mvp";
 
+/**
+ * How a tool is grouped on the tools directory. Generators produce a document
+ * to take away, calculators work out a figure from numbers you enter, and
+ * checkers verify something you already have or look up the code for it.
+ */
+export type ToolCategory = "generator" | "calculator" | "checker";
+
 export type Tool = {
   slug: string;
   /**
@@ -18,6 +25,8 @@ export type Tool = {
   menuDescription: string;
   href: string;
   status: ToolStatus;
+  /** Section the tool is listed under on /tools. */
+  category: ToolCategory;
   /** ISO date (YYYY-MM-DD) of the last meaningful content change. Feeds the sitemap. */
   lastModified: string;
 };
