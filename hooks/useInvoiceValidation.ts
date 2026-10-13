@@ -53,8 +53,7 @@ function getFallbackLineItemError(
  * actually a problem. Errors about wrong values, such as an impossible date or
  * a tax rate over 100, are still shown.
  *
- * validateInvoice itself is left intact: it is the shared correctness contract
- * covered by the test suite, and only the display layer filters.
+ * Validation still checks completeness; only the display layer filters.
  */
 function isRequiredFieldError(message: string): boolean {
   return message.trim().endsWith("is required.");
@@ -99,7 +98,6 @@ export function useInvoiceValidation(
     return messages;
   }, [visibleValidationErrors]);
   const lineItemsMessage = validationMessageByField.get("items") ?? "";
-  const hasValidInvoice = validationErrors.length === 0;
   const getValidationMessage = useCallback(
     (field: string) => validationMessageByField.get(field) ?? "",
     [validationMessageByField]
@@ -129,7 +127,6 @@ export function useInvoiceValidation(
     calculation,
     getLineItemError,
     getValidationMessage,
-    hasValidInvoice,
     lineItemPreviewTotals,
     lineItemsMessage
   };

@@ -209,7 +209,7 @@ Manual browser checks after CSP changes:
 The contact rate limiter currently uses the in-memory fallback in
 `MemoryRateLimitStore`. That is useful for local/dev/test, but it is not enough
 across multiple serverless instances. For production abuse protection, wire the
-exported `RateLimitStore` / `SharedRateLimitStore` interface to Redis, Vercel
+exported `RateLimitStore` interface to Redis, Vercel
 KV, Upstash, or another shared store with atomic increment and expiry. Keep
 store credentials server-only; do not expose them with `NEXT_PUBLIC_`.
 

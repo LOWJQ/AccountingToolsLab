@@ -289,8 +289,6 @@ export function ReceiptGenerator() {
     }
   }
 
-  const visibleTax = receipt.tax.filter((row) => row.enabled);
-
   return (
     <section
       aria-labelledby="receipt-generator-heading"

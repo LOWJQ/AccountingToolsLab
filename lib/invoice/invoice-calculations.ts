@@ -58,10 +58,6 @@ export function parseInvoicePercentage(value: string): number | null {
   return parseDecimalAmount(value, PERCENTAGE_AMOUNT_PATTERN);
 }
 
-export function parseInvoiceAmount(value: string): number | null {
-  return parseInvoiceMoneyAmount(value);
-}
-
 export function roundMoney(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;

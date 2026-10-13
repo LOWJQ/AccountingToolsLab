@@ -9,7 +9,7 @@ import { formatLineItemErrorForDisplay } from "../lib/invoice/invoice-line-item-
 import { INVOICE_TEXT_MAX_LENGTHS } from "../lib/invoice/invoice-limits";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
 import { shouldShowInvoiceValidationError } from "../lib/invoice/invoice-validation-display";
-import { validateInvoice } from "../lib/invoice/invoice-validation";
+import { validateInvoiceWithSubtotal } from "../lib/invoice/invoice-validation";
 
 function test(name: string, run: () => void) {
   run();
@@ -102,6 +102,10 @@ function createInvoice(overrides: InvoiceTestOverrides = {}): InvoiceData {
     },
     items: overrides.items ?? baseInvoice.items
   };
+}
+
+function validateInvoice(invoice: InvoiceData) {
+  return validateInvoiceWithSubtotal(invoice, calculateInvoiceTotals(invoice).subtotal);
 }
 
 function messagesFor(invoice: InvoiceData): string[] {
@@ -399,7 +403,7 @@ test("valid minimal invoice passes validation", () => {
   assert.deepEqual(validateInvoice(createInvoice()), []);
 });
 
-test("invoice UI validation display waits for touched fields or an attempted action", () => {
+test("invoice UI validation display waits for touched fields", () => {
   const touchedFields = new Set(["items.0.description"]);
 
   assert.equal(
@@ -409,13 +413,6 @@ test("invoice UI validation display waits for touched fields or an attempted act
   assert.equal(
     shouldShowInvoiceValidationError("items.0.unitPrice", { touchedFields }),
     false
-  );
-  assert.equal(
-    shouldShowInvoiceValidationError("items.0.unitPrice", {
-      showAllErrors: true,
-      touchedFields
-    }),
-    true
   );
   assert.equal(shouldShowInvoiceValidationError("items", { touchedFields }), true);
   assert.equal(

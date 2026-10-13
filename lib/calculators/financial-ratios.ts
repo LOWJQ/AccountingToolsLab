@@ -154,10 +154,6 @@ export function calculateFinancialRatio(input: FinancialRatioInput): FinancialRa
   };
 }
 
-export function calculateFinancialRatios(input: FinancialRatioInput): FinancialRatioResult {
-  return calculateFinancialRatio(input);
-}
-
 function getRatioWarnings(
   definition: RatioDefinition,
   values: Record<string, number>

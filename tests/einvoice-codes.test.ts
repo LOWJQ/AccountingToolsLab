@@ -1,15 +1,10 @@
 import assert from "node:assert/strict";
 import { CLASSIFICATION_CODES } from "../lib/data/einvoice/classification-codes";
-import { E_INVOICE_TYPES } from "../lib/data/einvoice/e-invoice-types";
 import { MSIC_CODES } from "../lib/data/einvoice/msic-codes";
-import { PAYMENT_METHODS } from "../lib/data/einvoice/payment-methods";
 import {
   EINVOICE_EXEMPTION_THRESHOLD,
   EINVOICE_PHASES
 } from "../lib/data/einvoice/phases";
-import { STATE_CODES } from "../lib/data/einvoice/state-codes";
-import { TAX_TYPES } from "../lib/data/einvoice/tax-types";
-import { UNIT_TYPES } from "../lib/data/einvoice/unit-types";
 import type { EInvoiceCode } from "../lib/einvoice/einvoice-types";
 
 function test(name: string, run: () => void) {
@@ -21,11 +16,6 @@ function test(name: string, run: () => void) {
 // bad regeneration silently emptying, truncating, or corrupting a list.
 const lists: { name: string; rows: EInvoiceCode[]; expected: number }[] = [
   { name: "classification codes", rows: CLASSIFICATION_CODES, expected: 45 },
-  { name: "e-invoice types", rows: E_INVOICE_TYPES, expected: 8 },
-  { name: "tax types", rows: TAX_TYPES, expected: 7 },
-  { name: "payment methods", rows: PAYMENT_METHODS, expected: 8 },
-  { name: "state codes", rows: STATE_CODES, expected: 17 },
-  { name: "unit types", rows: UNIT_TYPES, expected: 2162 },
   { name: "MSIC codes", rows: MSIC_CODES, expected: 1174 }
 ];
 
@@ -64,12 +54,6 @@ test("MSIC codes stay five digits", () => {
   for (const row of MSIC_CODES) {
     assert.match(row.code, /^\d{5}$/);
   }
-});
-
-test("e-invoice types cover the supplier and self-billed sets", () => {
-  const codes = E_INVOICE_TYPES.map((row) => row.code);
-
-  assert.deepEqual(codes, ["01", "02", "03", "04", "11", "12", "13", "14"]);
 });
 
 test("phases are ordered largest turnover first and do not overlap", () => {

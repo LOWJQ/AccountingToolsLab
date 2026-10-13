@@ -3,12 +3,14 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const testsDirectory = join(process.cwd(), ".test-dist", "tests");
-const testFiles = readdirSync(testsDirectory)
-  .filter((fileName) => fileName.endsWith(".test.js"))
+// Read the source list so removed tests cannot run from stale compiled output.
+const testFiles = readdirSync(join(process.cwd(), "tests"))
+  .filter((fileName) => fileName.endsWith(".test.ts"))
+  .map((fileName) => fileName.replace(/\.ts$/, ".js"))
   .sort();
 
 if (testFiles.length === 0) {
-  console.error("No compiled test files found. Run tsc -p tsconfig.test.json first.");
+  console.error("No test source files found in tests/.");
   process.exit(1);
 }
 

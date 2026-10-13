@@ -1,0 +1,69 @@
+.printSheet {
+  display: none;
+}
+
+@media print {
+  /* The summary is a body-level portal. Hide the page only while it exists,
+     so printing other tools keeps their normal layout. */
+  :global(body):has(> .printSheet) > :not(.printSheet) {
+    display: none !important;
+  }
+
+  .printSheet {
+    display: block;
+    padding: 24px;
+    color: #111;
+    font: 12pt/1.5 Arial, sans-serif;
+  }
+
+  .printSheet h1 {
+    margin: 4px 0 24px;
+    font-size: 22pt;
+  }
+
+  .brand {
+    margin: 0;
+    font-size: 10pt;
+  }
+
+  .printSheet table {
+    width: 100%;
+    margin-bottom: 24px;
+    border-collapse: collapse;
+    break-inside: avoid;
+  }
+
+  .printSheet caption {
+    margin-bottom: 8px;
+    text-align: left;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+  }
+
+  .printSheet th,
+  .printSheet td {
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .printSheet th {
+    width: 55%;
+    padding-right: 20px;
+    font-weight: normal;
+  }
+
+  .printSheet tr:last-child {
+    font-weight: bold;
+  }
+
+  .printSheet tr:last-child th {
+    font-weight: bold;
+  }
+
+  .note {
+    margin-top: 24px;
+    font-size: 10pt;
+  }
+}

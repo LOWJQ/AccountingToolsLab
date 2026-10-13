@@ -93,8 +93,6 @@ export function EInvoiceCodeLookup() {
   // paginateCodes clamps, so a page left over from a longer result set still
   // renders the last valid page instead of an empty one.
   const result = paginateCodes(matches, page);
-  const totalInList =
-    activeTab === "classification" ? CLASSIFICATION_CODES.length : msicSearch?.msicCodeCount ?? 0;
 
   /**
    * Jumps to the top of the tool. Paging from the bottom of a long list would

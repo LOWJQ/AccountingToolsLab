@@ -6,7 +6,7 @@ import {
   paginateCodes,
   searchEInvoiceCodes
 } from "../lib/einvoice/code-search";
-import { msicCodeCount, searchMsicCodes } from "../lib/einvoice/msic-search";
+import { searchMsicCodes } from "../lib/einvoice/msic-search";
 import type { EInvoiceCode } from "../lib/einvoice/einvoice-types";
 
 function test(name: string, run: () => void) {
@@ -166,8 +166,8 @@ test("every row is reachable by paging through the whole MSIC list", () => {
 test("page size divides the MSIC list into the expected number of pages", () => {
   const { pageCount, totalMatches } = paginateCodes(searchMsicCodes(""), 1);
 
-  assert.equal(totalMatches, msicCodeCount);
-  assert.equal(pageCount, Math.ceil(msicCodeCount / CODE_PAGE_SIZE));
+  assert.equal(totalMatches, MSIC_CODES.length);
+  assert.equal(pageCount, Math.ceil(MSIC_CODES.length / CODE_PAGE_SIZE));
 });
 
 // --- real code lists ---------------------------------------------------------
@@ -196,8 +196,4 @@ test("MSIC search finds an entry by its exact code", () => {
 
 test("MSIC results carry the section letter", () => {
   assert.equal(searchMsicCodes("56101")[0].section, "I");
-});
-
-test("the exported MSIC count matches the code list", () => {
-  assert.equal(msicCodeCount, MSIC_CODES.length);
 });

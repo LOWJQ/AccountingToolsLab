@@ -39,7 +39,7 @@ export const tools: Tool[] = [
     href: "/tools/sst-calculator-malaysia",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-12"
   },
   {
     slug: "e-invoice-checker-malaysia",

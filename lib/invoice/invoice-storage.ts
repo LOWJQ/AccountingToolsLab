@@ -12,17 +12,10 @@ import {
 
 export const ATL_INVOICE_DRAFT_KEY = "atl-invoice-draft";
 export const ATL_INVOICE_LAST_NUMBER_KEY = "atl-invoice-last-number";
-export const ATL_INVOICE_DRAFT_VERSION = 1;
 
-export type StoredInvoiceDraft = {
-  version: number;
-  savedAt: string;
-  invoice: InvoiceData;
-};
+export type StorageResult = { ok: true } | { ok: false; error: string };
 
-type StorageResult = { ok: true } | { ok: false; error: string };
-
-function getLocalStorage(): Storage | null {
+export function getLocalStorage(): Storage | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -119,7 +112,11 @@ function normalizePayment(value: unknown, legacyPaymentDetails: unknown): Invoic
   };
 }
 
-function normalizeInvoice(value: unknown): InvoiceData | null {
+/**
+ * Exported so the multi-invoice library can reuse exactly this defensive
+ * parsing rather than growing a second, slightly different copy of it.
+ */
+export function normalizeInvoice(value: unknown): InvoiceData | null {
   if (!isRecord(value)) {
     return null;
   }
@@ -150,76 +147,6 @@ function normalizeInvoice(value: unknown): InvoiceData | null {
     notes: readString(value.notes),
     terms: readString(value.terms)
   };
-}
-
-export function loadInvoiceDraft(): StoredInvoiceDraft | null {
-  const storage = getLocalStorage();
-
-  if (!storage) {
-    return null;
-  }
-
-  try {
-    const rawDraft = storage.getItem(ATL_INVOICE_DRAFT_KEY);
-
-    if (!rawDraft) {
-      return null;
-    }
-
-    const parsedDraft: unknown = JSON.parse(rawDraft);
-
-    if (!isRecord(parsedDraft) || parsedDraft.version !== ATL_INVOICE_DRAFT_VERSION) {
-      return null;
-    }
-
-    const invoice = normalizeInvoice(parsedDraft.invoice);
-
-    if (!invoice) {
-      return null;
-    }
-
-    return {
-      version: ATL_INVOICE_DRAFT_VERSION,
-      savedAt: readString(parsedDraft.savedAt),
-      invoice
-    };
-  } catch {
-    return null;
-  }
-}
-
-export function saveInvoiceDraft(invoice: InvoiceData): StorageResult {
-  const storage = getLocalStorage();
-
-  if (!storage) {
-    return { ok: false, error: "localStorage is unavailable." };
-  }
-
-  try {
-    const safeInvoice: InvoiceData = {
-      ...invoice,
-      payment: {
-        ...invoice.payment
-      }
-    };
-
-    delete safeInvoice.businessLogoDataUrl;
-    delete safeInvoice.payment.paymentQrDataUrl;
-
-    const draft: StoredInvoiceDraft = {
-      version: ATL_INVOICE_DRAFT_VERSION,
-      savedAt: new Date().toISOString(),
-      invoice: safeInvoice
-    };
-
-    storage.setItem(ATL_INVOICE_DRAFT_KEY, JSON.stringify(draft));
-    return { ok: true };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "Unable to save invoice draft."
-    };
-  }
 }
 
 export function clearInvoiceDraft(): StorageResult {
@@ -274,24 +201,6 @@ export function saveLastInvoiceNumber(invoiceNumber: string): StorageResult {
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Unable to save invoice number."
-    };
-  }
-}
-
-export function clearLastInvoiceNumber(): StorageResult {
-  const storage = getLocalStorage();
-
-  if (!storage) {
-    return { ok: false, error: "localStorage is unavailable." };
-  }
-
-  try {
-    storage.removeItem(ATL_INVOICE_LAST_NUMBER_KEY);
-    return { ok: true };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "Unable to clear invoice number."
     };
   }
 }

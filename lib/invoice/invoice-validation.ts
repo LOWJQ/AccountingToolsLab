@@ -1,5 +1,4 @@
 import {
-  calculateInvoiceTotals,
   parseInvoiceMoneyAmount,
   parseInvoicePercentage,
   parseInvoiceQuantity
@@ -117,9 +116,9 @@ function hasValidHttpUrl(value: string): boolean {
   }
 }
 
-function validateInvoiceWithOptionalSubtotal(
+export function validateInvoiceWithSubtotal(
   invoice: InvoiceData,
-  precomputedSubtotal?: number
+  subtotal: number
 ): InvoiceValidationError[] {
   const errors: InvoiceValidationError[] = [];
   const limits = INVOICE_TEXT_MAX_LENGTHS;
@@ -361,8 +360,6 @@ function validateInvoiceWithOptionalSubtotal(
           });
         }
 
-        const subtotal = precomputedSubtotal ?? calculateInvoiceTotals(invoice).subtotal;
-
         if (discountValue > subtotal) {
           errors.push({
             field: "discount.value",
@@ -442,15 +439,4 @@ function validateInvoiceWithOptionalSubtotal(
   }
 
   return errors;
-}
-
-export function validateInvoice(invoice: InvoiceData): InvoiceValidationError[] {
-  return validateInvoiceWithOptionalSubtotal(invoice);
-}
-
-export function validateInvoiceWithSubtotal(
-  invoice: InvoiceData,
-  subtotal: number
-): InvoiceValidationError[] {
-  return validateInvoiceWithOptionalSubtotal(invoice, subtotal);
 }

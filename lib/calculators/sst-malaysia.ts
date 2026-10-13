@@ -134,21 +134,6 @@ export type FixedSstCategory = SstMalaysiaCategory & {
   fixedAmount: number;
 };
 
-export type SstMalaysiaInput = {
-  mode: SstCalculationMode;
-  amount: number | null | undefined;
-  sstRate: number | null | undefined;
-};
-
-export type SstMalaysiaResult = {
-  mode: SstCalculationMode;
-  amountBeforeSst: number;
-  sstRate: number;
-  sstAmount: number;
-  totalIncludingSst: number;
-  explanation: string;
-};
-
 export type SstInvoiceLineItemInput = {
   id?: string;
   description?: string;
@@ -189,6 +174,8 @@ export type SstInvoiceGroupTotal = {
 
 export type SstInvoiceMalaysiaInput = {
   mode: SstCalculationMode;
+  /** Fixed SST amounts are denominated in MYR. Existing callers default to MYR. */
+  currency?: string;
   items: SstInvoiceLineItemInput[];
 };
 
@@ -235,66 +222,6 @@ export function isFixedSstCategory(
   category: SstMalaysiaCategory | undefined
 ): category is FixedSstCategory {
   return category?.rateType === "fixed" && typeof category.fixedAmount === "number";
-}
-
-export function getSuggestedSstRateForCategory(id: string): number | null {
-  const category = getSstCategoryById(id);
-  return isPercentageSstCategory(category) ? category.suggestedRatePercent : null;
-}
-
-export function calculateSstMalaysia(input: SstMalaysiaInput): SstMalaysiaResult {
-  const amount = assertValidNumber(input.amount, "Amount");
-  const sstRate = assertValidNumber(input.sstRate, "SST rate");
-
-  if (amount < 0) {
-    throw new Error("Amount must be zero or greater.");
-  }
-
-  if (sstRate < 0) {
-    throw new Error("SST rate must be zero or greater.");
-  }
-
-  if (sstRate > 100) {
-    throw new Error("SST rate must be 100% or less.");
-  }
-
-  const rateDecimal = sstRate / 100;
-
-  if (input.mode === "add") {
-    const amountBeforeSst = roundSstMoneyAmount(amount);
-    const sstAmount = roundSstMoneyAmount(amountBeforeSst * rateDecimal);
-    const totalIncludingSst = roundSstMoneyAmount(amountBeforeSst + sstAmount);
-
-    return {
-      mode: input.mode,
-      amountBeforeSst,
-      sstRate,
-      sstAmount,
-      totalIncludingSst,
-      explanation: `Adding ${sstRate}% SST gives an estimated total including SST of ${totalIncludingSst.toFixed(
-        2
-      )}.`
-    };
-  }
-
-  if (input.mode === "remove") {
-    const totalIncludingSst = roundSstMoneyAmount(amount);
-    const amountBeforeSst = roundSstMoneyAmount(totalIncludingSst / (1 + rateDecimal));
-    const sstAmount = roundSstMoneyAmount(totalIncludingSst - amountBeforeSst);
-
-    return {
-      mode: input.mode,
-      amountBeforeSst,
-      sstRate,
-      sstAmount,
-      totalIncludingSst,
-      explanation: `Removing ${sstRate}% SST gives an estimated amount before SST of ${amountBeforeSst.toFixed(
-        2
-      )}.`
-    };
-  }
-
-  throw new Error("Choose whether to add or remove SST.");
 }
 
 function resolveLineTreatment(item: SstInvoiceLineItemInput): {
@@ -476,6 +403,10 @@ export function calculateSstInvoiceMalaysia(
 
   const lineItems = input.items.map((item, index) => {
     const lineNumber = index + 1;
+    const category = getSstCategoryById(item.categoryId);
+    if (isFixedSstCategory(category) && (input.currency ?? "MYR") !== "MYR") {
+      throw new Error(`Fixed RM${category.fixedAmount} SST requires MYR. Enter amounts in Malaysian ringgit.`);
+    }
     const quantity = assertValidNumber(item.quantity, `Line ${lineNumber} quantity`);
     const unitPrice = assertValidNumber(item.unitPrice, `Line ${lineNumber} unit price`);
 

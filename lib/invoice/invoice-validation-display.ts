@@ -1,13 +1,12 @@
 export type InvoiceValidationDisplayOptions = {
-  showAllErrors?: boolean;
   touchedFields?: ReadonlySet<string>;
 };
 
 export function shouldShowInvoiceValidationError(
   field: string,
-  { showAllErrors = false, touchedFields }: InvoiceValidationDisplayOptions
+  { touchedFields }: InvoiceValidationDisplayOptions
 ) {
-  if (showAllErrors || touchedFields?.has(field) === true) {
+  if (touchedFields?.has(field) === true) {
     return true;
   }
 

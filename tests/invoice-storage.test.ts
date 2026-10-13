@@ -1,14 +1,11 @@
 import assert from "node:assert/strict";
 import {
   ATL_INVOICE_DRAFT_KEY,
-  ATL_INVOICE_DRAFT_VERSION,
   ATL_INVOICE_LAST_NUMBER_KEY,
   clearInvoiceDraft,
-  clearLastInvoiceNumber,
   loadLastInvoiceNumber,
-  loadInvoiceDraft,
-  saveLastInvoiceNumber,
-  saveInvoiceDraft
+  normalizeInvoice,
+  saveLastInvoiceNumber
 } from "../lib/invoice/invoice-storage";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
 
@@ -148,77 +145,6 @@ function installStorage(storage: TestStorage) {
   });
 }
 
-test("loadInvoiceDraft returns null when localStorage is unavailable", () => {
-  assert.equal(loadInvoiceDraft(), null);
-});
-
-test("loadInvoiceDraft returns null for missing draft", () => {
-  installStorage(createStorage().storage);
-
-  assert.equal(loadInvoiceDraft(), null);
-});
-
-test("loadInvoiceDraft returns null for invalid JSON", () => {
-  installStorage(createStorage({ [ATL_INVOICE_DRAFT_KEY]: "not json" }).storage);
-
-  assert.equal(loadInvoiceDraft(), null);
-});
-
-test("loadInvoiceDraft returns null for unsupported version", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION + 1,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: createInvoice()
-      })
-    }).storage
-  );
-
-  assert.equal(loadInvoiceDraft(), null);
-});
-
-test("saveInvoiceDraft saves a valid draft payload", () => {
-  const { entries, storage } = createStorage();
-  installStorage(storage);
-
-  const result = saveInvoiceDraft(createInvoice());
-
-  assert.deepEqual(result, { ok: true });
-  assert.equal(typeof entries[ATL_INVOICE_DRAFT_KEY], "string");
-});
-
-test("saved payload includes version, savedAt, and invoice", () => {
-  const { entries, storage } = createStorage();
-  const invoice = createInvoice({ invoiceNumber: "INV-900" });
-  installStorage(storage);
-
-  saveInvoiceDraft(invoice);
-  const payload = JSON.parse(entries[ATL_INVOICE_DRAFT_KEY]);
-
-  assert.equal(payload.version, ATL_INVOICE_DRAFT_VERSION);
-  assert.equal(typeof payload.savedAt, "string");
-  assert.deepEqual(payload.invoice, invoice);
-});
-
-test("saveInvoiceDraft does not store logo or payment QR data URLs", () => {
-  const { entries, storage } = createStorage();
-  const invoice = createInvoice({
-    businessLogoDataUrl: "data:image/png;base64,logo",
-    payment: {
-      paymentQrDataUrl: "data:image/png;base64,qr"
-    }
-  });
-  installStorage(storage);
-
-  saveInvoiceDraft(invoice);
-  const payload = JSON.parse(entries[ATL_INVOICE_DRAFT_KEY]);
-
-  assert.equal(payload.invoice.businessLogoDataUrl, undefined);
-  assert.equal(payload.invoice.payment.paymentQrDataUrl, undefined);
-  assert.equal(payload.invoice.payment.notes, invoice.payment.notes);
-});
-
 test("clearInvoiceDraft removes the draft", () => {
   const { entries, storage } = createStorage({ [ATL_INVOICE_DRAFT_KEY]: "draft" });
   installStorage(storage);
@@ -255,8 +181,6 @@ test("storage helper does not throw when localStorage methods throw", () => {
   };
   installStorage(throwingStorage);
 
-  assert.doesNotThrow(() => loadInvoiceDraft());
-  assert.doesNotThrow(() => saveInvoiceDraft(createInvoice()));
   assert.doesNotThrow(() => clearInvoiceDraft());
 });
 
@@ -272,10 +196,8 @@ test("storage helper handles quota and security errors gracefully", () => {
   };
   installStorage(quotaStorage);
 
-  assert.equal(saveInvoiceDraft(createInvoice()).ok, false);
   assert.equal(clearInvoiceDraft().ok, false);
   assert.equal(saveLastInvoiceNumber("INV-001").ok, false);
-  assert.equal(clearLastInvoiceNumber().ok, false);
 });
 
 test("loadLastInvoiceNumber returns null when missing", () => {
@@ -300,18 +222,9 @@ test("saveLastInvoiceNumber rejects empty invoice number", () => {
   assert.equal(entries[ATL_INVOICE_LAST_NUMBER_KEY], undefined);
 });
 
-test("clearLastInvoiceNumber removes stored invoice number", () => {
-  const { entries, storage } = createStorage({ [ATL_INVOICE_LAST_NUMBER_KEY]: "INV-001" });
-  installStorage(storage);
-
-  assert.deepEqual(clearLastInvoiceNumber(), { ok: true });
-  assert.equal(entries[ATL_INVOICE_LAST_NUMBER_KEY], undefined);
-});
-
 test("last invoice number helpers do not throw when localStorage is unavailable", () => {
   assert.doesNotThrow(() => loadLastInvoiceNumber());
   assert.doesNotThrow(() => saveLastInvoiceNumber("INV-001"));
-  assert.doesNotThrow(() => clearLastInvoiceNumber());
 });
 
 test("last invoice number helpers do not throw when localStorage throws", () => {
@@ -330,62 +243,45 @@ test("last invoice number helpers do not throw when localStorage throws", () => 
 
   assert.doesNotThrow(() => loadLastInvoiceNumber());
   assert.doesNotThrow(() => saveLastInvoiceNumber("INV-001"));
-  assert.doesNotThrow(() => clearLastInvoiceNumber());
 });
 
 test("old draft with paymentDetails string migrates to payment notes", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          payment: undefined,
-          paymentDetails: "Use invoice number as reference."
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    payment: undefined,
+    paymentDetails: "Use invoice number as reference."
+  };
 
-  const draft = loadInvoiceDraft();
+  const normalizedInvoice = normalizeInvoice(storedInvoice);
 
-  assert.equal(draft?.invoice.payment.notes, "Use invoice number as reference.");
-  assert.equal(draft?.invoice.payment.bankName, "");
-  assert.equal(draft?.invoice.payment.accountName, "");
-  assert.equal(draft?.invoice.payment.accountNumber, "");
-  assert.equal(draft?.invoice.payment.duitNowId, "");
-  assert.equal(draft?.invoice.payment.paymentLink, "");
-  assert.equal(draft?.invoice.payment.paymentQrDataUrl, undefined);
+  assert.equal(normalizedInvoice?.payment.notes, "Use invoice number as reference.");
+  assert.equal(normalizedInvoice?.payment.bankName, "");
+  assert.equal(normalizedInvoice?.payment.accountName, "");
+  assert.equal(normalizedInvoice?.payment.accountNumber, "");
+  assert.equal(normalizedInvoice?.payment.duitNowId, "");
+  assert.equal(normalizedInvoice?.payment.paymentLink, "");
+  assert.equal(normalizedInvoice?.payment.paymentQrDataUrl, undefined);
 });
 
 test("old draft missing optional text fields still loads safely", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          businessContact: undefined,
-          businessAddress: undefined,
-          customerContact: undefined,
-          customerAddress: undefined,
-          notes: undefined,
-          payment: {
-            bankName: undefined,
-            accountName: undefined,
-            accountNumber: undefined,
-            duitNowId: undefined,
-            paymentLink: undefined,
-            notes: undefined
-          }
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    businessContact: undefined,
+    businessAddress: undefined,
+    customerContact: undefined,
+    customerAddress: undefined,
+    notes: undefined,
+    payment: {
+      bankName: undefined,
+      accountName: undefined,
+      accountNumber: undefined,
+      duitNowId: undefined,
+      paymentLink: undefined,
+      notes: undefined
+    }
+  };
 
-  const invoice = loadInvoiceDraft()?.invoice;
+  const invoice = normalizeInvoice(storedInvoice);
 
   assert.equal(invoice?.businessContact, "");
   assert.equal(invoice?.businessAddress, "");
@@ -415,72 +311,40 @@ test("new draft with structured payment fields loads correctly without persisted
       paymentQrDataUrl: "data:image/png;base64,qr"
     }
   });
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice
-      })
-    }).storage
-  );
+  const storedInvoice = invoice;
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, {
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.payment, {
     ...invoice.payment,
     paymentQrDataUrl: undefined
   });
 });
 
-test("loadInvoiceDraft strips old business logo data URLs", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          businessLogoDataUrl: "data:image/png;base64,old-logo"
-        }
-      })
-    }).storage
-  );
+test("normalizeInvoice strips old business logo data URLs", () => {
+  const storedInvoice = {
+    ...createInvoice(),
+    businessLogoDataUrl: "data:image/png;base64,old-logo"
+  };
 
-  assert.equal(loadInvoiceDraft()?.invoice.businessLogoDataUrl, undefined);
+  assert.equal(normalizeInvoice(storedInvoice)?.businessLogoDataUrl, undefined);
 });
 
-test("loadInvoiceDraft strips old payment QR data URLs", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: createInvoice({
-          payment: {
-            paymentQrDataUrl: "data:image/png;base64,old-qr"
-          }
-        })
-      })
-    }).storage
-  );
+test("normalizeInvoice strips old payment QR data URLs", () => {
+  const storedInvoice = createInvoice({
+    payment: {
+      paymentQrDataUrl: "data:image/png;base64,old-qr"
+    }
+  });
 
-  assert.equal(loadInvoiceDraft()?.invoice.payment.paymentQrDataUrl, undefined);
+  assert.equal(normalizeInvoice(storedInvoice)?.payment.paymentQrDataUrl, undefined);
 });
 
 test("missing payment object defaults to empty payment fields", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          payment: undefined
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    payment: undefined
+  };
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, {
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.payment, {
     bankName: "",
     accountName: "",
     accountNumber: "",
@@ -492,21 +356,12 @@ test("missing payment object defaults to empty payment fields", () => {
 });
 
 test("malformed payment object does not crash loading", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          payment: "not an object"
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    payment: "not an object"
+  };
 
-  assert.doesNotThrow(() => loadInvoiceDraft());
-  assert.deepEqual(loadInvoiceDraft()?.invoice.payment, {
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.payment, {
     bankName: "",
     accountName: "",
     accountNumber: "",
@@ -520,7 +375,7 @@ test("malformed payment object does not crash loading", () => {
 test("clearInvoiceDraft removes a draft with structured payment fields", () => {
   const { entries, storage } = createStorage({
     [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-      version: ATL_INVOICE_DRAFT_VERSION,
+      version: 1,
       savedAt: "2026-05-08T00:00:00.000Z",
       invoice: createInvoice({ payment: { bankName: "Maybank" } })
     })
@@ -532,76 +387,43 @@ test("clearInvoiceDraft removes a draft with structured payment fields", () => {
 });
 
 test("old draft without terms loads safely", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          terms: undefined
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    terms: undefined
+  };
 
-  assert.equal(loadInvoiceDraft()?.invoice.terms, "");
+  assert.equal(normalizeInvoice(storedInvoice)?.terms, "");
 });
 
 test("new draft with terms loads correctly", () => {
   const invoice = createInvoice({ terms: "Payment is due within 30 days." });
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice
-      })
-    }).storage
-  );
+  const storedInvoice = invoice;
 
-  assert.equal(loadInvoiceDraft()?.invoice.terms, invoice.terms);
+  assert.equal(normalizeInvoice(storedInvoice)?.terms, invoice.terms);
 });
 
 test("missing terms defaults to a safe string", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          terms: undefined
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    terms: undefined
+  };
 
-  assert.equal(typeof loadInvoiceDraft()?.invoice.terms, "string");
+  assert.equal(typeof normalizeInvoice(storedInvoice)?.terms, "string");
 });
 
 test("malformed terms value does not crash loading", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          terms: { text: "not a string" }
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    terms: { text: "not a string" }
+  };
 
-  assert.doesNotThrow(() => loadInvoiceDraft());
-  assert.equal(loadInvoiceDraft()?.invoice.terms, "");
+  assert.equal(normalizeInvoice(storedInvoice)?.terms, "");
 });
 
 test("clearInvoiceDraft removes a draft with terms", () => {
   const { entries, storage } = createStorage({
     [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-      version: ATL_INVOICE_DRAFT_VERSION,
+      version: 1,
       savedAt: "2026-05-08T00:00:00.000Z",
       invoice: createInvoice({ terms: "Payment is due within 30 days." })
     })
@@ -613,20 +435,12 @@ test("clearInvoiceDraft removes a draft with terms", () => {
 });
 
 test("old draft without discount loads with discount disabled", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          discount: undefined
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    discount: undefined
+  };
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, {
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.discount, {
     enabled: false,
     label: "Discount",
     type: "percentage",
@@ -638,52 +452,27 @@ test("new draft with percentage discount loads correctly", () => {
   const invoice = createInvoice({
     discount: { enabled: true, type: "percentage", value: "10" }
   });
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice
-      })
-    }).storage
-  );
+  const storedInvoice = invoice;
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, invoice.discount);
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.discount, invoice.discount);
 });
 
 test("new draft with fixed discount loads correctly", () => {
   const invoice = createInvoice({
     discount: { enabled: true, type: "fixed", value: "50" }
   });
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice
-      })
-    }).storage
-  );
+  const storedInvoice = invoice;
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, invoice.discount);
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.discount, invoice.discount);
 });
 
 test("malformed discount object does not crash loading", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          discount: "not an object"
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    discount: "not an object"
+  };
 
-  assert.doesNotThrow(() => loadInvoiceDraft());
-  assert.deepEqual(loadInvoiceDraft()?.invoice.discount, {
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.discount, {
     enabled: false,
     label: "Discount",
     type: "percentage",
@@ -694,7 +483,7 @@ test("malformed discount object does not crash loading", () => {
 test("clearInvoiceDraft removes a draft with discount fields", () => {
   const { entries, storage } = createStorage({
     [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-      version: ATL_INVOICE_DRAFT_VERSION,
+      version: 1,
       savedAt: "2026-05-08T00:00:00.000Z",
       invoice: createInvoice({ discount: { enabled: true, type: "fixed", value: "50" } })
     })
@@ -706,25 +495,17 @@ test("clearInvoiceDraft removes a draft with discount fields", () => {
 });
 
 test("old draft with single enabled tax migrates to one tax row", () => {
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice: {
-          ...createInvoice(),
-          tax: {
-            enabled: true,
-            label: "SST 6%",
-            rate: "6",
-            type: "percentage"
-          }
-        }
-      })
-    }).storage
-  );
+  const storedInvoice = {
+    ...createInvoice(),
+    tax: {
+      enabled: true,
+      label: "SST 6%",
+      rate: "6",
+      type: "percentage"
+    }
+  };
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.tax, [
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.tax, [
     {
       id: "tax-1",
       enabled: true,
@@ -742,15 +523,7 @@ test("new draft with multiple tax rows loads correctly", () => {
       { id: "tax-service", enabled: true, label: "Service tax", type: "fixed", value: "25" }
     ]
   });
-  installStorage(
-    createStorage({
-      [ATL_INVOICE_DRAFT_KEY]: JSON.stringify({
-        version: ATL_INVOICE_DRAFT_VERSION,
-        savedAt: "2026-05-08T00:00:00.000Z",
-        invoice
-      })
-    }).storage
-  );
+  const storedInvoice = invoice;
 
-  assert.deepEqual(loadInvoiceDraft()?.invoice.tax, invoice.tax);
+  assert.deepEqual(normalizeInvoice(storedInvoice)?.tax, invoice.tax);
 });

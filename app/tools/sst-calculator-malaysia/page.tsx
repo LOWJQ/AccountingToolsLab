@@ -7,7 +7,7 @@ import { RelatedGuideCard } from "@/components/tools/RelatedGuideCard";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = createMetadata({
@@ -26,17 +26,27 @@ const sstFaqs = [
   {
     question: "How do I calculate SST from an amount before tax?",
     answer:
-      "To add SST, multiply the amount before SST by the SST rate. Then add the SST amount to the original amount to get the total including SST."
+      "For percentage SST, multiply the amount before SST by the rate divided by 100. Then add that tax amount to the original amount to get the total including SST. The fixed RM25 option uses a fixed amount instead of this percentage formula."
   },
   {
     question: "How do I remove SST from a total that already includes SST?",
     answer:
-      "To remove SST, divide the SST-inclusive total by 1 plus the SST rate as a decimal. For example, with 8% SST, divide the total by 1.08 to estimate the amount before SST."
+      "For percentage SST, divide the SST-inclusive total by 1 plus the rate divided by 100. For example, with 8% SST, divide the total by 1.08 to estimate the amount before SST. For a fixed-amount tax, remove the fixed tax amount instead."
   },
   {
     question: "What SST rate should I use in Malaysia?",
     answer:
-      "Use the rate that applies to your taxable service or goods category. This calculator includes common percentage rates such as 6%, 8%, 10%, 5%, 0%, and a manual rate option, but you should confirm the applicable treatment with current MySST or RMCD guidance."
+      "Choose the category and rate that apply to your item. The calculator has preset percentages, a manual percentage option, and a fixed RM25 option. These choices do not cover every SST treatment or confirm whether your item is taxable. Check the current MySST industry guides and tax orders before selecting a rate."
+  },
+  {
+    question: "Can I calculate several items with different SST rates?",
+    answer:
+      "Yes. Select Multiple items, enter each item's quantity and unit price, and choose its SST category or manual rate. The calculator works out each item separately, rounds its amounts to two decimal places, and adds them to get the combined totals. Add SST or Remove SST applies to every item in the list."
+  },
+  {
+    question: "How do I copy or print my calculation?",
+    answer:
+      "After entering valid values, choose Copy result to copy the amount breakdown, or Print result to open your browser's print dialog. In Multiple items mode, both include the individual items and combined totals. You can save a PDF if your browser offers that print option."
   },
   {
     question: "What is the difference between sales tax and service tax?",
@@ -55,42 +65,39 @@ const sstFaqs = [
   }
 ];
 
-const benefits = [
+const steps = [
+  "Choose Single amount for one total, or Multiple items to enter separate items with their own quantities and rates.",
+  "Choose Add SST if your prices exclude SST. Choose Remove SST if your prices already include it. This choice applies to all items.",
+  "Enter your amount. In Multiple items mode, enter a quantity and unit price for each row, then use Add item for the next row.",
+  "Choose the product or service category for each amount. If you select a manual category, enter the percentage you want to use.",
+  "Review the breakdown, then use Copy result or Print result to keep a copy. Complete every item before copying or printing the combined total."
+];
+
+const calculationExamples = [
   {
-    description:
-      "Estimate SST from an amount before tax or reverse-calculate the amount before SST.",
-    title: "Add or remove SST quickly"
+    title: "Add SST to a price before tax",
+    instruction: "For an amount of RM1,000 before SST at an example rate of 8%, choose Add SST and enter 1000.",
+    rows: [
+      ["SST amount", "RM1,000 × 0.08 = RM80"],
+      ["Total including SST", "RM1,000 + RM80 = RM1,080"]
+    ],
+    formula: "SST amount = amount before SST × (rate ÷ 100)"
   },
   {
-    description:
-      "See how the SST amount, total including SST, and amount before SST relate to each other.",
-    title: "Understand the calculation"
-  },
-  {
-    description:
-      "Check SST amounts before preparing invoices, quotations, or simple business records.",
-    title: "Useful for invoices and estimates"
+    title: "Remove SST from a price including tax",
+    instruction: "For a total of RM1,080 that already includes 8% SST, choose Remove SST and enter 1080.",
+    rows: [
+      ["Amount before SST", "RM1,080 ÷ 1.08 = RM1,000"],
+      ["SST amount", "RM1,080 − RM1,000 = RM80"]
+    ],
+    formula: "Amount before SST = total including SST ÷ (1 + rate ÷ 100)"
   }
 ];
 
-const steps = [
-  "Enter the amount.",
-  "Choose whether the amount is before SST or includes SST.",
-  "Select the SST category or rate.",
-  "Review the estimated SST amount and total."
-];
-
-const formulas = [
-  ["SST amount", "amount before SST x SST rate"],
-  ["Total including SST", "amount before SST + SST amount"],
-  ["Amount before SST", "amount including SST / (1 + SST rate)"]
-];
-
-const estimateChecks = [
-  "Confirm whether the amount is before SST or already includes SST.",
-  "Check the taxable category before using a suggested rate for invoicing or filing.",
-  "Special fixed-amount categories may not use percentage SST.",
-  "Treat this tool as an estimate, not official tax advice."
+const officialSources = [
+  { href: "https://mysst.customs.gov.my/understanding-sst/", label: "Understanding SST", description: "The difference between sales tax and service tax." },
+  { href: "https://mysst.customs.gov.my/industry-guides/", label: "Industry guides", description: "Guidance for particular goods and services." },
+  { href: "https://mysst.customs.gov.my/sst-orders/", label: "SST orders", description: "Official rate, exemption, and other tax orders." }
 ];
 
 const relatedTools = [
@@ -159,136 +166,163 @@ export default function SstCalculatorMalaysiaPage() {
 
       <SstCalculatorMalaysia />
 
-      {/* Sits below the calculator: someone arriving from a search for a tool
-          wants the tool, not an essay. It still states the method in a form
-          that survives being quoted out of context, which is what an answer
-          engine lifts. The rate itself is deliberately not asserted as
-          current, since classification and the rate orders change. */}
-      <section className="border-t border-slate-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-          How do you add or remove SST in Malaysia?
-        </h2>
-        <p className="mt-3 text-base leading-7 text-black">
-          To add SST, multiply the amount before tax by the SST rate, then add that result to
-          the original amount. To remove SST from a total that already includes it, divide the
-          total by 1 plus the rate written as a decimal: at an 8% rate divide by 1.08, and at 6%
-          divide by 1.06. Subtracting 8% from an SST-inclusive total gives the wrong figure,
-          because the tax was worked out on the smaller pre-tax amount rather than on the total.
-        </p>
-        <p className="mt-3 text-base leading-7 text-black">
-          Which rate applies depends on how your service or goods are classified. This calculator
-          covers the percentage rates in common use together with the fixed RM25 treatment for
-          credit and charge card services. Malaysia&apos;s SST base was widened from 1 July 2025
-          and the rate orders have been amended since, so confirm the rate for your category
-          against{" "}
-          <a
-            className="font-semibold underline-offset-4 hover:underline"
-            href="https://mysst.customs.gov.my/"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            MySST
-          </a>{" "}
-          before relying on a figure for invoicing or filing.
-        </p>
-      </section>
-
-      <p className="text-base leading-7 text-black">
-        This SST calculator helps you quickly add or remove SST from an amount. It is useful for
-        preparing invoices, quotations, and checking SST amounts for general taxable services and
-        other SST categories in Malaysia.
-      </p>
-
-      <section className="border-t border-slate-200 pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Why use this SST calculator
-        </h2>
-        <div className="mt-5 grid gap-6 md:grid-cols-3 md:divide-x md:divide-slate-200">
-          {benefits.map((benefit) => (
-            <div className="md:px-8 md:first:pl-0 md:last:pr-0" key={benefit.title}>
-              <h3 className="text-base font-semibold text-slate-950">{benefit.title}</h3>
-              <p className="mt-2 text-base leading-7 text-black">{benefit.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-t border-slate-200 pt-8">
+      <section className="border-t border-slate-200 pt-8" id="sst-how-to-use">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
           How to use this SST calculator
         </h2>
         <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
           {steps.map((step) => (
-            <li className="pl-2" key={step}>
-              {step}
-            </li>
+            <li className="pl-2" key={step}>{step}</li>
           ))}
         </ol>
       </section>
 
-      <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-[1fr_0.95fr]">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            SST calculation formulas
-          </h2>
-          <div className="mt-5 space-y-4 text-base leading-7 text-black">
-            {formulas.map(([label, formula]) => (
-              <div className="grid gap-2 sm:grid-cols-[170px_24px_1fr]" key={label}>
-                <span className="font-semibold text-black">{label}</span>
-                <span className="hidden text-center font-semibold text-black sm:block">=</span>
-                <span>{formula}</span>
-              </div>
-            ))}
-          </div>
+      <section className="border-t border-slate-200 pt-8" id="sst-calculation-examples">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          How to add or remove SST
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          These examples use 8% to show the calculation. Use the rate that applies to your
+          item. The percentage formulas below do not apply to a fixed-amount tax.
+        </p>
+        <div className="mt-6 grid gap-8 lg:grid-cols-2">
+          {calculationExamples.map((example) => (
+            <div className="lg:last:border-l lg:last:border-slate-200 lg:last:pl-8" key={example.title}>
+              <h3 className="text-lg font-semibold text-slate-950">{example.title}</h3>
+              <p className="mt-3 text-base leading-7 text-black">{example.instruction}</p>
+              <dl className="mt-4 divide-y divide-slate-200">
+                {example.rows.map(([label, value]) => (
+                  <div className="py-3" key={label}>
+                    <dt className="text-sm text-slate-600">{label}</dt>
+                    <dd className="mt-1 text-base font-semibold leading-7 text-slate-950">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-3 text-sm leading-6 text-slate-600">{example.formula}</p>
+            </div>
+          ))}
         </div>
-
-        <div className="lg:border-l lg:border-slate-200 lg:pl-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Worked example
-          </h2>
-          <table className="mt-5 w-full overflow-hidden rounded-lg border border-slate-200 text-base leading-7">
-            <tbody className="divide-y divide-slate-200">
-              <tr>
-                <th className="w-3/5 px-4 py-3 text-left font-medium text-black" scope="row">
-                  Amount before SST
-                </th>
-                <td className="px-4 py-3 font-medium text-black">RM 1,000.00</td>
-              </tr>
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-black" scope="row">
-                  SST rate
-                </th>
-                <td className="px-4 py-3 font-medium text-black">8%</td>
-              </tr>
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-black" scope="row">
-                  SST amount
-                </th>
-                <td className="px-4 py-3 font-medium text-black">RM 80.00</td>
-              </tr>
-              <tr className="bg-slate-50">
-                <th className="px-4 py-3 text-left font-semibold text-black" scope="row">
-                  Total including SST
-                </th>
-                <td className="px-4 py-3 font-semibold text-black">RM 1,080.00</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <p className="mt-6 border-l-2 border-slate-300 pl-5 text-base leading-7 text-black">
+          To remove 8% SST, divide by 1.08. Subtracting 8% from RM1,080 would give RM993.60,
+          which is not the original RM1,000 price. The tax was calculated on the price before SST.
+        </p>
       </section>
 
-      <section className="border-t border-slate-200 pt-8">
+      <section className="border-t border-slate-200 pt-8" id="sst-multiple-item-example">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Before you rely on the estimate
+          Calculate several items with different SST rates
         </h2>
-        <ul className="mt-5 space-y-3 border-l-2 border-slate-300 pl-6 text-base leading-7 text-black">
-          {estimateChecks.map((check) => (
-            <li className="flex items-start gap-3" key={check}>
-              <Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-700" />
-              <span>{check}</span>
+        <p className="mt-3 text-base leading-7 text-black">
+          Select Multiple items when you need separate amounts or rates. Each row&apos;s amount
+          is its quantity multiplied by its unit price. The calculator applies that row&apos;s
+          SST rate, rounds its amounts to two decimal places, then adds the rows together.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          For example, suppose you have two RM100 items at 8% and three RM50 items at 5%.
+          In Add SST mode, the breakdown is:
+        </p>
+        <div
+          aria-label="Multiple-item SST example; scroll horizontally to see all columns"
+          className="mt-5 overflow-x-auto rounded-lg border border-slate-200 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          role="region"
+          tabIndex={0}
+        >
+          <table className="w-full min-w-[600px] text-sm leading-6">
+            <caption className="sr-only">Example amounts at two different SST rates</caption>
+            <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-700">
+              <tr>
+                <th className="px-4 py-3 font-semibold" scope="col">Items</th>
+                <th className="px-4 py-3 font-semibold" scope="col">Before SST</th>
+                <th className="px-4 py-3 font-semibold" scope="col">Rate</th>
+                <th className="px-4 py-3 font-semibold" scope="col">SST</th>
+                <th className="px-4 py-3 font-semibold" scope="col">Including SST</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-black">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium" scope="row">2 × RM100</th>
+                <td className="px-4 py-3">RM200.00</td>
+                <td className="px-4 py-3">8%</td>
+                <td className="px-4 py-3">RM16.00</td>
+                <td className="px-4 py-3">RM216.00</td>
+              </tr>
+              <tr>
+                <th className="px-4 py-3 text-left font-medium" scope="row">3 × RM50</th>
+                <td className="px-4 py-3">RM150.00</td>
+                <td className="px-4 py-3">5%</td>
+                <td className="px-4 py-3">RM7.50</td>
+                <td className="px-4 py-3">RM157.50</td>
+              </tr>
+            </tbody>
+            <tfoot className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-950">
+              <tr>
+                <th className="px-4 py-3 text-left" scope="row">Combined total</th>
+                <td className="px-4 py-3">RM350.00</td>
+                <td className="px-4 py-3">Mixed</td>
+                <td className="px-4 py-3">RM23.50</td>
+                <td className="px-4 py-3">RM373.50</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p className="mt-4 text-base leading-7 text-black">
+          Use a separate row for each rate, rather than applying one rate to the RM350 subtotal.
+          In Remove SST mode, enter each item&apos;s unit price including SST. Because amounts
+          are rounded per row, combining items into one row can produce a small rounding difference.
+        </p>
+      </section>
+
+      <section className="border-t border-slate-200 pt-8" id="sst-category-guidance">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Which SST category should you choose?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          SST includes sales tax and service tax. Sales tax generally applies to taxable
+          imported or locally manufactured goods. Service tax applies to prescribed taxable
+          services. The treatment depends on your item and the applicable rules, rather than
+          one percentage for every purchase.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          The calculator offers preset percentages of 0%, 5%, 6%, 8%, and 10%, plus a manual
+          percentage option. They are calculation choices, not a complete list of Malaysian
+          SST treatments. Choosing the exempt or 0% option does not confirm that your goods
+          qualify for an exemption.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          The credit or charge card option uses a fixed RM25 per unit in this calculator.
+          In Multiple items mode, its fixed tax is RM25 multiplied by quantity, rather than a
+          percentage of the price. This fixed option requires MYR; enter prices in ringgit.
+          Changing the selected currency does not convert your entered amounts.
+          Check the official card guidance for when the tax applies.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Before using an estimate on an invoice or return, confirm the taxable category,
+          rate, and any exemption using the Royal Malaysian Customs Department (RMCD) guidance.
+          For help with registration, read our{" "}
+          <Link className="font-semibold underline underline-offset-4" href="/guides/do-i-need-to-register-for-sst-malaysia">
+            SST registration guide
+          </Link>.
+        </p>
+        <h3 className="mt-6 text-lg font-semibold text-slate-950">Official SST sources</h3>
+        <ul className="mt-3 space-y-3 text-base leading-7 text-black">
+          {officialSources.map((source) => (
+            <li key={source.href}>
+              <a
+                className="font-semibold underline underline-offset-4"
+                href={source.href}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                MySST: {source.label}
+              </a>{" "}
+              — {source.description}
             </li>
           ))}
         </ul>
+        <p className="mt-5 text-sm leading-6 text-slate-600">
+          Explanation updated <time dateTime="2026-10-13">13 October 2026</time>.
+          This tool provides checking estimates and does not determine taxability or submit SST returns.
+        </p>
       </section>
 
       <section className="border-t border-slate-200 pt-8">

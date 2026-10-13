@@ -1,13 +1,24 @@
 import assert from "node:assert/strict";
 import {
   calculateSstInvoiceMalaysia,
-  calculateSstMalaysia,
-  getSuggestedSstRateForCategory,
   getSstCategoryById,
   isFixedSstCategory,
   isPercentageSstCategory,
-  SST_MALAYSIA_CATEGORIES
+  SST_MALAYSIA_CATEGORIES,
+  type SstCalculationMode
 } from "../lib/calculators/sst-malaysia";
+
+// Exercise the same line-item calculation used by the SST form.
+function estimateSstAmount({ mode, amount, sstRate }: {
+  mode: SstCalculationMode;
+  amount: number | null;
+  sstRate: number | null;
+}) {
+  return calculateSstInvoiceMalaysia({
+    mode,
+    items: [{ categoryId: "custom", quantity: 1, unitPrice: amount, manualRatePercent: sstRate }]
+  }).lineItems[0];
+}
 
 function test(name: string, run: () => void) {
   run();
@@ -15,7 +26,7 @@ function test(name: string, run: () => void) {
 }
 
 test("add SST calculates SST amount", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 100,
     sstRate: 8
@@ -25,7 +36,7 @@ test("add SST calculates SST amount", () => {
 });
 
 test("add SST calculates total including SST", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 100,
     sstRate: 8
@@ -35,7 +46,7 @@ test("add SST calculates total including SST", () => {
 });
 
 test("remove SST calculates amount before SST", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "remove",
     amount: 108,
     sstRate: 8
@@ -45,7 +56,7 @@ test("remove SST calculates amount before SST", () => {
 });
 
 test("remove SST calculates SST amount", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "remove",
     amount: 108,
     sstRate: 8
@@ -55,7 +66,7 @@ test("remove SST calculates SST amount", () => {
 });
 
 test("handles 0 percent rate", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 100,
     sstRate: 0
@@ -66,14 +77,14 @@ test("handles 0 percent rate", () => {
 });
 
 test("handles 5, 6, 8, and 10 percent rates", () => {
-  assert.equal(calculateSstMalaysia({ mode: "add", amount: 100, sstRate: 5 }).sstAmount, 5);
-  assert.equal(calculateSstMalaysia({ mode: "add", amount: 100, sstRate: 6 }).sstAmount, 6);
-  assert.equal(calculateSstMalaysia({ mode: "add", amount: 100, sstRate: 8 }).sstAmount, 8);
-  assert.equal(calculateSstMalaysia({ mode: "add", amount: 100, sstRate: 10 }).sstAmount, 10);
+  assert.equal(estimateSstAmount({ mode: "add", amount: 100, sstRate: 5 }).sstAmount, 5);
+  assert.equal(estimateSstAmount({ mode: "add", amount: 100, sstRate: 6 }).sstAmount, 6);
+  assert.equal(estimateSstAmount({ mode: "add", amount: 100, sstRate: 8 }).sstAmount, 8);
+  assert.equal(estimateSstAmount({ mode: "add", amount: 100, sstRate: 10 }).sstAmount, 10);
 });
 
 test("handles custom rates", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 200,
     sstRate: 7.5
@@ -84,7 +95,7 @@ test("handles custom rates", () => {
 });
 
 test("handles custom rates with awkward decimals", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 123.45,
     sstRate: 7.25
@@ -95,7 +106,7 @@ test("handles custom rates with awkward decimals", () => {
 });
 
 test("handles decimals", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 99.99,
     sstRate: 8
@@ -106,7 +117,7 @@ test("handles decimals", () => {
 });
 
 test("add SST mode rounds awkward decimals", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "add",
     amount: 123.456,
     sstRate: 8
@@ -118,7 +129,7 @@ test("add SST mode rounds awkward decimals", () => {
 });
 
 test("remove SST mode rounds awkward decimals", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "remove",
     amount: 133.34,
     sstRate: 8
@@ -130,7 +141,7 @@ test("remove SST mode rounds awkward decimals", () => {
 });
 
 test("handles zero amount", () => {
-  const result = calculateSstMalaysia({
+  const result = estimateSstAmount({
     mode: "remove",
     amount: 0,
     sstRate: 8
@@ -144,54 +155,54 @@ test("handles zero amount", () => {
 test("rejects invalid amount", () => {
   assert.throws(
     () =>
-      calculateSstMalaysia({
+      estimateSstAmount({
         mode: "add",
         amount: Number.NaN,
         sstRate: 8
       }),
-    /Amount is required/
+    /unit price is required/
   );
 
   assert.throws(
     () =>
-      calculateSstMalaysia({
+      estimateSstAmount({
         mode: "add",
         amount: -100,
         sstRate: 8
       }),
-    /Amount must be zero or greater/
+    /unit price must be zero or greater/
   );
 });
 
 test("rejects invalid custom rate", () => {
   assert.throws(
     () =>
-      calculateSstMalaysia({
+      estimateSstAmount({
         mode: "add",
         amount: 100,
         sstRate: null
       }),
-    /SST rate is required/
+    /requires a valid manual SST rate/
   );
 
   assert.throws(
     () =>
-      calculateSstMalaysia({
+      estimateSstAmount({
         mode: "add",
         amount: 100,
         sstRate: -1
       }),
-    /SST rate must be zero or greater/
+    /Manual SST rate must be zero or greater/
   );
 
   assert.throws(
     () =>
-      calculateSstMalaysia({
+      estimateSstAmount({
         mode: "add",
         amount: 100,
         sstRate: 101
       }),
-    /SST rate must be 100% or less/
+    /Manual SST rate must be 100% or less/
   );
 });
 
@@ -218,18 +229,18 @@ test("percentage and fixed category helpers identify category type", () => {
 });
 
 test("service categories expose expected suggested rates", () => {
-  assert.equal(getSuggestedSstRateForCategory("service_general_taxable"), 8);
-  assert.equal(getSuggestedSstRateForCategory("service_food_beverage"), 6);
-  assert.equal(getSuggestedSstRateForCategory("service_logistics"), 6);
-  assert.equal(getSuggestedSstRateForCategory("service_telecommunications"), 6);
-  assert.equal(getSuggestedSstRateForCategory("service_parking"), 6);
+  assert.equal((getSstCategoryById("service_general_taxable")?.suggestedRatePercent ?? null), 8);
+  assert.equal((getSstCategoryById("service_food_beverage")?.suggestedRatePercent ?? null), 6);
+  assert.equal((getSstCategoryById("service_logistics")?.suggestedRatePercent ?? null), 6);
+  assert.equal((getSstCategoryById("service_telecommunications")?.suggestedRatePercent ?? null), 6);
+  assert.equal((getSstCategoryById("service_parking")?.suggestedRatePercent ?? null), 6);
 });
 
 test("goods categories expose expected suggested rates", () => {
-  assert.equal(getSuggestedSstRateForCategory("goods_exempt_or_zero"), 0);
-  assert.equal(getSuggestedSstRateForCategory("goods_sales_tax_5"), 5);
-  assert.equal(getSuggestedSstRateForCategory("goods_sales_tax_10"), 10);
-  assert.equal(getSuggestedSstRateForCategory("goods_specific_or_unsure"), null);
+  assert.equal((getSstCategoryById("goods_exempt_or_zero")?.suggestedRatePercent ?? null), 0);
+  assert.equal((getSstCategoryById("goods_sales_tax_5")?.suggestedRatePercent ?? null), 5);
+  assert.equal((getSstCategoryById("goods_sales_tax_10")?.suggestedRatePercent ?? null), 10);
+  assert.equal((getSstCategoryById("goods_specific_or_unsure")?.suggestedRatePercent ?? null), null);
 });
 
 test("custom and uncertain goods categories require manual rates", () => {
@@ -321,6 +332,37 @@ test("invoice-style remove SST calculation supports multiple line items", () => 
   assert.equal(result.subtotalBeforeSst, 200);
   assert.equal(result.totalSst, 13);
   assert.equal(result.grandTotalIncludingSst, 213);
+});
+
+test("multiple-item totals sum rounded item amounts instead of taxing the combined subtotal", () => {
+  for (const mode of ["add", "remove"] as const) {
+    const result = calculateSstInvoiceMalaysia({
+      mode,
+      items: [
+        { categoryId: "service_general_taxable", quantity: 1, unitPrice: 0.06 },
+        { categoryId: "service_general_taxable", quantity: 1, unitPrice: 0.06 }
+      ]
+    });
+    assert.equal(result.totalSst, 0);
+    assert.equal(result.subtotalBeforeSst, 0.12);
+    assert.equal(result.grandTotalIncludingSst, 0.12);
+    assert.equal(result.groupedSst[0].sstAmount, 0);
+  }
+});
+
+test("multiple-item totals combine fixed, manual, and zero-rated items", () => {
+  const result = calculateSstInvoiceMalaysia({
+    mode: "add",
+    items: [
+      { categoryId: "service_credit_charge_card", quantity: 2, unitPrice: 100 },
+      { categoryId: "custom", manualRatePercent: 7.5, quantity: 1, unitPrice: 80 },
+      { categoryId: "goods_exempt_or_zero", quantity: 1, unitPrice: 40 }
+    ]
+  });
+  assert.deepEqual(result.lineItems.map((item) => item.sstAmount), [50, 6, 0]);
+  assert.equal(result.subtotalBeforeSst, 320);
+  assert.equal(result.totalSst, 56);
+  assert.equal(result.grandTotalIncludingSst, 376);
 });
 
 test("invoice-style calculation groups SST totals by rate and category", () => {
@@ -537,4 +579,41 @@ test("fixed credit or charge card remove mode rejects impossible inclusive amoun
       }),
     /Fixed SST amount cannot be greater/
   );
+});
+
+test("fixed RM25 SST rejects foreign currencies in add and remove modes", () => {
+  for (const mode of ["add", "remove"] as const) {
+    for (const currency of ["USD", "SGD", "EUR"]) {
+      assert.throws(() => calculateSstInvoiceMalaysia({
+        mode,
+        currency,
+        items: [{ categoryId: "service_credit_charge_card", quantity: 2, unitPrice: 100 }]
+      }), /Fixed RM25 SST requires MYR/);
+    }
+  }
+});
+
+test("fixed RM25 SST retains the correct quantity and inclusive amounts in MYR", () => {
+  const added = calculateSstInvoiceMalaysia({
+    mode: "add", currency: "MYR",
+    items: [{ categoryId: "service_credit_charge_card", quantity: 2, unitPrice: 100 }]
+  });
+  const removed = calculateSstInvoiceMalaysia({
+    mode: "remove", currency: "MYR",
+    items: [{ categoryId: "service_credit_charge_card", quantity: 2, unitPrice: 125 }]
+  });
+  for (const result of [added, removed]) {
+    assert.equal(result.subtotalBeforeSst, 200);
+    assert.equal(result.totalSst, 50);
+    assert.equal(result.grandTotalIncludingSst, 250);
+  }
+});
+
+test("percentage SST continues to work in other currencies", () => {
+  const result = calculateSstInvoiceMalaysia({
+    mode: "add", currency: "USD",
+    items: [{ categoryId: "service_general_taxable", quantity: 1, unitPrice: 100 }]
+  });
+  assert.equal(result.totalSst, 8);
+  assert.equal(result.grandTotalIncludingSst, 108);
 });

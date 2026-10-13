@@ -11,6 +11,3 @@ import type { MsicCode } from "./einvoice-types";
 export function searchMsicCodes(query: string): MsicCode[] {
   return searchEInvoiceCodes(MSIC_CODES, query);
 }
-
-/** Total published entries, shown as a count before anyone searches. */
-export const msicCodeCount = MSIC_CODES.length;

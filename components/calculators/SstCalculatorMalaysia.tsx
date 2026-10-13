@@ -1,21 +1,23 @@
 "use client";
 
-import { Check, ChevronDown, RefreshCcw } from "lucide-react";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import {
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
-  type ReactNode
+  type KeyboardEvent
 } from "react";
+import { SstResultActions } from "./SstResultActions";
+import { calculateSstPreview } from "@/lib/calculators/sst-preview";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { formatCurrency as formatCurrencyValue } from "@/lib/currency";
 import {
   calculateSstInvoiceMalaysia,
   getSstCategoryById,
   SST_MALAYSIA_CATEGORIES,
+  type CalculatedSstInvoiceLineItem,
   type SstCalculationMode,
   type SstCategoryId,
   type SstMalaysiaCategory
@@ -25,6 +27,26 @@ type DropdownOption<T extends string> = {
   label: string;
   value: T;
 };
+
+type SstItemDraft = {
+  id: string;
+  description: string;
+  quantity: string;
+  amount: string;
+  categoryId: SstCategoryId;
+  manualRate: string;
+};
+
+function createItem(id: string): SstItemDraft {
+  return {
+    id,
+    description: "",
+    quantity: "1",
+    amount: "",
+    categoryId: "service_general_taxable",
+    manualRate: ""
+  };
+}
 
 type DropdownGroup<T extends string> = {
   label?: string;
@@ -111,7 +133,7 @@ function formatRateSummary(
 }
 
 export function SstCalculatorMalaysia() {
-  const { currency } = useCurrency();
+  const { currency, setCurrency } = useCurrency();
   const formatCurrency = useMemo(
     () =>
       (value: number) =>
@@ -126,11 +148,42 @@ export function SstCalculatorMalaysia() {
   const [amount, setAmount] = useState("1000");
   const [categoryId, setCategoryId] = useState<SstCategoryId>("service_general_taxable");
   const [manualRate, setManualRate] = useState("");
+  const [multipleItems, setMultipleItems] = useState(false);
+  const [items, setItems] = useState<SstItemDraft[]>([]);
+  const [hasAttemptedExport, setHasAttemptedExport] = useState(false);
+  const nextItemId = useRef(1);
 
   const category = getCategoryOrFallback(categoryId);
   const manualRateEnabled = shouldUseManualRate(category);
+  const requiresMyr = currency !== "MYR" && (multipleItems
+    ? items.some((item) => getCategoryOrFallback(item.categoryId).rateType === "fixed")
+    : category.rateType === "fixed");
+
+  const preview = useMemo(
+    () => calculateSstPreview({
+      mode,
+      currency,
+      items: items.map((item, index) => ({
+          id: item.id,
+          description: item.description.trim() || `Item ${index + 1}`,
+          quantity: parseAmount(item.quantity),
+          unitPrice: parseAmount(item.amount),
+          categoryId: item.categoryId,
+          manualRatePercent: shouldUseManualRate(getCategoryOrFallback(item.categoryId))
+            ? parseAmount(item.manualRate)
+            : undefined
+        }))
+    }),
+    [currency, items, mode]
+  );
+  const itemCalculations = preview.items;
+  const isComplete = !multipleItems || preview.canExport;
+  const incompleteCount = multipleItems ? preview.incompleteCount : 0;
 
   const calculation = useMemo(() => {
+    if (multipleItems) {
+      return { result: preview.result, message: "Enter values for an item to see its subtotal." };
+    }
     if (!amount.trim()) {
       return { result: null, message: "Enter an amount to estimate SST." };
     }
@@ -139,6 +192,7 @@ export function SstCalculatorMalaysia() {
       return {
         result: calculateSstInvoiceMalaysia({
           mode,
+          currency,
           items: [
             {
               id: "sst-summary",
@@ -158,15 +212,82 @@ export function SstCalculatorMalaysia() {
         message: error instanceof Error ? error.message : "Check the values and try again."
       };
     }
-  }, [amount, category.label, categoryId, manualRate, manualRateEnabled, mode]);
+  }, [amount, category.label, categoryId, currency, preview.result, manualRate, manualRateEnabled, mode, multipleItems]);
 
   const line = calculation.result?.lineItems[0];
+  const result = calculation.result;
+
+  function switchInputMode(useMultiple: boolean) {
+    setHasAttemptedExport(false);
+    if (useMultiple && items.length === 0) {
+      setItems([{
+        ...createItem(String(nextItemId.current++)),
+        amount,
+        categoryId,
+        manualRate
+      }]);
+    }
+    setMultipleItems(useMultiple);
+  }
+
+  function addItem() {
+    setHasAttemptedExport(false);
+    const item = createItem(String(nextItemId.current++));
+    setItems((current) => [...current, item]);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`sst-item-${item.id}-amount`)?.focus();
+    });
+  }
+
+  function updateItem(id: string, changes: Partial<SstItemDraft>) {
+    setHasAttemptedExport(false);
+    setItems((current) => current.map((item) => item.id === id ? { ...item, ...changes } : item));
+  }
+
+  function removeItem(id: string) {
+    setHasAttemptedExport(false);
+    if (items.length <= 1) return;
+    const index = items.findIndex((item) => item.id === id);
+    const remaining = items.filter((item) => item.id !== id);
+    setItems(remaining);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`sst-item-${remaining[Math.min(index, remaining.length - 1)].id}-description`)?.focus();
+    });
+  }
 
   function resetCalculator() {
+    setHasAttemptedExport(false);
     setMode("add");
+    if (multipleItems) {
+      setItems([{ ...createItem(String(nextItemId.current++)), amount: "1000" }]);
+      return;
+    }
     setAmount("1000");
     setCategoryId("service_general_taxable");
     setManualRate("");
+  }
+
+  function handleInvalidExport() {
+    setHasAttemptedExport(true);
+    if (requiresMyr) {
+      window.requestAnimationFrame(() => document.getElementById("sst-use-myr")?.focus());
+      return;
+    }
+    const index = itemCalculations.findIndex((item) => !item.line);
+    const item = items[index];
+    if (!item) return;
+    const quantity = parseAmount(item.quantity);
+    const price = parseAmount(item.amount);
+    const field = quantity === null || quantity <= 0
+      ? "quantity"
+      : price === null || price < 0
+        ? "amount"
+        : shouldUseManualRate(getCategoryOrFallback(item.categoryId))
+          ? "manual-rate"
+          : "amount";
+    window.requestAnimationFrame(() => {
+      document.getElementById(`sst-item-${item.id}-${field}`)?.focus();
+    });
   }
 
   return (
@@ -178,8 +299,71 @@ export function SstCalculatorMalaysia() {
         SST calculator inputs and results
       </h2>
 
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 px-5 py-4 md:px-6" role="group" aria-label="Calculator input mode">
+        {([false, true] as const).map((useMultiple) => (
+          <button
+            aria-pressed={multipleItems === useMultiple}
+            className={`min-h-11 rounded-lg border px-4 text-sm font-semibold transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${multipleItems === useMultiple ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+            key={String(useMultiple)}
+            onClick={() => switchInputMode(useMultiple)}
+            type="button"
+          >
+            {useMultiple ? "Multiple items" : "Single amount"}
+          </button>
+        ))}
+      </div>
+
+      {requiresMyr ? (
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 md:px-6">
+          <p className="max-w-3xl text-sm leading-6 text-slate-700" role="status">
+            The fixed RM25 option requires MYR. Enter prices in Malaysian ringgit.
+            Switching currency keeps your entered numbers and does not convert them.
+          </p>
+          <button
+            className="min-h-11 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            id="sst-use-myr"
+            onClick={() => { setCurrency("MYR"); setHasAttemptedExport(false); }}
+            type="button"
+          >
+            Use MYR
+          </button>
+        </div>
+      ) : null}
+
+      {multipleItems ? (
+        <div className="p-5 md:p-6">
+          <div className="grid gap-4 md:grid-cols-2 md:items-end">
+            <ModeSelect mode={mode} onModeChange={(value) => { setMode(value); setHasAttemptedExport(false); }} />
+            <p className="text-sm leading-6 text-slate-600">
+              Choose an SST category for each item. {mode === "add" ? "Enter unit prices before SST." : "Enter unit prices that already include SST."}
+            </p>
+          </div>
+          <div className="mt-6 space-y-6 divide-y divide-slate-200">
+            {items.map((item, index) => (
+              <SstItemRow
+                canRemove={items.length > 1}
+                currency={currency}
+                formatCurrency={formatCurrency}
+                index={index}
+                item={item}
+                key={item.id}
+                line={itemCalculations[index].line}
+                message={itemCalculations[index].message}
+                mode={mode}
+                onRemove={() => removeItem(item.id)}
+                onUpdate={(changes) => updateItem(item.id, changes)}
+                showError={hasAttemptedExport}
+              />
+            ))}
+          </div>
+          <button className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100" onClick={addItem} type="button">
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Add item
+          </button>
+        </div>
+      ) : (
       <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] md:p-6">
-        <ModeSelect mode={mode} onModeChange={setMode} />
+        <ModeSelect mode={mode} onModeChange={(value) => { setMode(value); setHasAttemptedExport(false); }} />
 
         <CategorySelect
           categoryId={categoryId}
@@ -220,38 +404,159 @@ export function SstCalculatorMalaysia() {
           onManualRateChange={setManualRate}
         />
       </div>
+      )}
 
       <div
         aria-live="polite"
         className="border-t border-slate-200 p-5 md:p-6"
       >
-        {line ? (
-          <div className="grid gap-5 md:grid-cols-3">
-            <ResultStat label="SST amount" value={formatCurrency(line.sstAmount)}>
-              <button
-                className="mt-5 inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
-                onClick={resetCalculator}
-                type="button"
-              >
-                <RefreshCcw aria-hidden="true" className="h-4 w-4" />
-                Reset
-              </button>
-            </ResultStat>
-            <ResultStat
-              label={mode === "add" ? "Total including SST" : "Amount before SST"}
-              value={
-                mode === "add"
-                  ? formatCurrency(line.totalIncludingSst)
-                  : formatCurrency(line.amountBeforeSst)
-              }
-            />
-            <ResultStat label="SST rate" value={formatRateSummary(line)} />
+        {incompleteCount > 0 ? (
+          <div className="mb-5">
+            {result ? <p className="font-semibold text-slate-900">Subtotal of completed items</p> : null}
+            <p className={`mt-1 text-sm leading-6 ${hasAttemptedExport ? "text-red-700" : "text-slate-600"}`} role={hasAttemptedExport ? "alert" : undefined}>
+              {incompleteCount} {incompleteCount === 1 ? "item unfinished" : "items unfinished"}.
+              {result ? " Shown amounts include completed items only." : ""} Complete or remove unfinished items before copying or printing.
+            </p>
           </div>
+        ) : null}
+        {line && result ? (
+          <>
+            <div className="grid gap-5 md:grid-cols-3">
+              <ResultStat label={multipleItems ? (isComplete ? "Total SST" : "Subtotal SST") : "SST amount"} value={formatCurrency(result.totalSst)} />
+              <ResultStat
+                label={mode === "add" ? (isComplete ? "Total including SST" : "Subtotal including SST") : (isComplete ? "Amount before SST" : "Subtotal before SST")}
+                value={
+                  mode === "add"
+                    ? formatCurrency(result.grandTotalIncludingSst)
+                    : formatCurrency(result.subtotalBeforeSst)
+                }
+              />
+              {multipleItems ? (
+                <ResultStat
+                  label={mode === "add" ? "Subtotal before SST" : (isComplete ? "Total including SST" : "Subtotal including SST")}
+                  value={formatCurrency(mode === "add" ? result.subtotalBeforeSst : result.grandTotalIncludingSst)}
+                />
+              ) : <ResultStat label="SST rate" value={formatRateSummary(line)} />}
+            </div>
+            <SstResultActions
+              isComplete={isComplete}
+              onInvalidExport={handleInvalidExport}
+              onReset={resetCalculator}
+              rows={multipleItems ? [
+                ["Calculation mode", mode === "add" ? "Add SST" : "Remove SST"],
+                ["Number of items", String(items.length)],
+                ["Currency", currency],
+                ["Subtotal before SST", formatCurrency(result.subtotalBeforeSst)],
+                ["Total SST", formatCurrency(result.totalSst)],
+                ["Total including SST", formatCurrency(result.grandTotalIncludingSst)]
+              ] : [
+                ["Calculation mode", mode === "add" ? "Add SST" : "Remove SST"],
+                ["Product or service category", category.label],
+                ["Currency", currency],
+                ["SST rate", formatRateSummary(line)],
+                ["Amount before SST", formatCurrency(line.amountBeforeSst)],
+                ["SST amount", formatCurrency(line.sstAmount)],
+                ["Total including SST", formatCurrency(line.totalIncludingSst)]
+              ]}
+              sections={multipleItems ? result.lineItems.map((item, index) => ({
+                title: `Item ${index + 1}: ${item.description}`,
+                rows: [
+                  ["Product or service category", item.categoryLabel],
+                  ["Quantity", String(item.quantity)],
+                  [mode === "add" ? "Unit price before SST" : "Unit price including SST", formatCurrency(item.unitPrice)],
+                  ["SST rate", formatRateSummary(item)],
+                  ["Amount before SST", formatCurrency(item.amountBeforeSst)],
+                  ["SST amount", formatCurrency(item.sstAmount)],
+                  ["Total including SST", formatCurrency(item.totalIncludingSst)]
+                ]
+              })) : undefined}
+            />
+          </>
         ) : (
-          <p className="text-sm leading-6 text-slate-600">{calculation.message}</p>
+          <div>
+            <p className="text-sm leading-6 text-slate-600">{calculation.message}</p>
+            {multipleItems ? (
+              <SstResultActions isComplete={false} onInvalidExport={handleInvalidExport} onReset={resetCalculator} rows={[]} />
+            ) : null}
+          </div>
         )}
       </div>
     </section>
+  );
+}
+
+function SstItemRow({
+  canRemove, currency, formatCurrency, index, item, line, message, mode, onRemove, onUpdate, showError
+}: {
+  canRemove: boolean;
+  currency: string;
+  formatCurrency: (value: number) => string;
+  index: number;
+  item: SstItemDraft;
+  line: CalculatedSstInvoiceLineItem | null;
+  message: string;
+  mode: SstCalculationMode;
+  onRemove: () => void;
+  onUpdate: (changes: Partial<SstItemDraft>) => void;
+  showError: boolean;
+}) {
+  const prefix = `sst-item-${item.id}`;
+  const category = getCategoryOrFallback(item.categoryId);
+  const feedbackId = `${prefix}-feedback`;
+  const prompt = category.rateType === "fixed" && currency !== "MYR"
+    ? message
+    : !item.amount.trim()
+    ? "Enter a unit price to include this item."
+    : !item.quantity.trim()
+      ? "Enter a quantity to include this item."
+      : shouldUseManualRate(category) && !item.manualRate.trim()
+        ? "Enter an SST rate to include this item."
+        : message;
+  return (
+    <fieldset className="min-w-0 border-0 p-0 pt-6 first:pt-0">
+      <legend className="sr-only">Item {index + 1}</legend>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p aria-hidden="true" className="text-sm font-semibold text-slate-900">Item {index + 1}</p>
+        <button
+          aria-label={`Remove item ${index + 1}`}
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={!canRemove}
+          onClick={onRemove}
+          type="button"
+        >
+          <Trash2 aria-hidden="true" className="h-4 w-4" /> Remove
+        </button>
+      </div>
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.5fr)_minmax(0,0.9fr)_minmax(0,1.4fr)]">
+        <label className="grid min-w-0 gap-2" htmlFor={`${prefix}-description`}>
+          <span className="text-xs font-medium text-slate-600">Description (optional)</span>
+          <input className={inputClassName} id={`${prefix}-description`} maxLength={200} onChange={(event) => onUpdate({ description: event.target.value })} placeholder={`Item ${index + 1}`} type="text" value={item.description} />
+        </label>
+        <label className="grid min-w-0 gap-2" htmlFor={`${prefix}-quantity`}>
+          <span className="text-xs font-medium text-slate-600">Quantity</span>
+          <input aria-describedby={!line ? feedbackId : undefined} aria-invalid={showError && !line && (!item.quantity || Number(item.quantity) <= 0) ? true : undefined} className={inputClassName} id={`${prefix}-quantity`} inputMode="decimal" min="0" onChange={(event) => onUpdate({ quantity: event.target.value })} step="any" type="number" value={item.quantity} />
+        </label>
+        <label className="grid min-w-0 gap-2" htmlFor={`${prefix}-amount`}>
+          <span className="text-xs font-medium text-slate-600">{mode === "add" ? "Unit price before SST" : "Unit price including SST"} ({currency})</span>
+          <input aria-describedby={!line ? feedbackId : undefined} aria-invalid={showError && !line && (!item.amount || Number(item.amount) < 0 || message.includes("Fixed SST amount")) ? true : undefined} className={inputClassName} id={`${prefix}-amount`} inputMode="decimal" min="0" onChange={(event) => onUpdate({ amount: event.target.value })} placeholder="0.00" step="0.01" type="number" value={item.amount} />
+        </label>
+        <div className="grid min-w-0 content-start gap-3">
+          <CategorySelect categoryId={item.categoryId} describedBy={!line ? feedbackId : undefined} id={`${prefix}-category`} label="Product or service category" onChange={(categoryId) => onUpdate({ categoryId, manualRate: "" })} />
+          <ManualRateControls className="min-w-0" describedBy={!line ? feedbackId : undefined} invalid={showError && !line && (parseAmount(item.manualRate) === null || Number(item.manualRate) < 0 || Number(item.manualRate) > 100) ? true : undefined} idPrefix={prefix} manualRate={item.manualRate} manualRateEnabled={shouldUseManualRate(category)} onManualRateChange={(manualRate) => onUpdate({ manualRate })} />
+        </div>
+      </div>
+      {line ? (
+        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+          {([
+            ["Amount before SST", line.amountBeforeSst],
+            ["SST amount", line.sstAmount],
+            ["Total including SST", line.totalIncludingSst]
+          ] as const).map(([label, value]) => (
+            <div key={label}><dt className="text-slate-500">{label}</dt><dd className="mt-1 font-semibold tabular-nums text-slate-950">{formatCurrency(value)}</dd></div>
+          ))}
+        </dl>
+      ) : <p className={`mt-3 text-sm ${showError ? "text-red-700" : "text-slate-600"}`} id={feedbackId}>{showError ? message : prompt}</p>}
+    </fieldset>
   );
 }
 
@@ -524,11 +829,17 @@ function DropdownSelect<T extends string>({
 }
 
 function ManualRateControls({
+  className = "md:col-start-3",
+  describedBy,
+  invalid,
   idPrefix,
   manualRate,
   manualRateEnabled,
   onManualRateChange
 }: {
+  className?: string;
+  describedBy?: string;
+  invalid?: boolean;
   idPrefix: string;
   manualRate: string;
   manualRateEnabled: boolean;
@@ -539,9 +850,11 @@ function ManualRateControls({
   }
 
   return (
-    <label className="grid gap-2 md:col-start-3" htmlFor={`${idPrefix}-manual-rate`}>
+    <label className={`grid gap-2 ${className}`} htmlFor={`${idPrefix}-manual-rate`}>
       <span className="text-xs font-medium text-slate-600">Manual SST rate (%)</span>
       <input
+        aria-describedby={describedBy}
+        aria-invalid={invalid}
         className={inputClassName}
         id={`${idPrefix}-manual-rate`}
         inputMode="decimal"
@@ -559,11 +872,9 @@ function ManualRateControls({
 }
 
 function ResultStat({
-  children,
   label,
   value
 }: {
-  children?: ReactNode;
   label: string;
   value: string;
 }) {
@@ -573,7 +884,6 @@ function ResultStat({
       <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
         {value}
       </p>
-      {children}
     </div>
   );
 }

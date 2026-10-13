@@ -21,7 +21,3 @@ export function getNextInvoiceNumber(current: string): string | null {
   const nextSuffix = String(parsedSuffix + 1).padStart(numericSuffix.length, "0");
   return `${prefix}${nextSuffix}`;
 }
-
-export function canAutoIncrementInvoiceNumber(value: string): boolean {
-  return getNextInvoiceNumber(value) !== null;
-}

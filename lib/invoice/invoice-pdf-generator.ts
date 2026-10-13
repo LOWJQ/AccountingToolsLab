@@ -10,6 +10,9 @@ import type { InvoiceData } from "./invoice-types";
 type PdfColor = [number, number, number];
 export type InvoicePdfWarning = "business-logo-skipped" | "payment-qr-skipped";
 export type InvoicePdfGenerationResult = {
+  /** Present only when the caller asked for "blob" instead of a download. */
+  blob?: Blob;
+  fileName?: string;
   warnings: InvoicePdfWarning[];
 };
 
@@ -54,6 +57,12 @@ export type InvoicePdfParams = {
   invoiceData: InvoiceData;
   /** Defaults to invoice wording. Pass receipt labels to render a receipt. */
   labels?: PdfDocumentLabels;
+  /**
+   * "save" downloads the file immediately, which is what every caller did
+   * before the preview existed and stays the default. "blob" hands the PDF
+   * back instead, so it can be shown before the visitor commits to saving it.
+   */
+  output?: "blob" | "save";
   previewItems: InvoiceLineCalculationResult[];
 };
 
@@ -858,9 +867,19 @@ export async function generateInvoicePdf(
   }
 
   drawPageNumber();
-  doc.save(
-    buildInvoicePdfFileName(invoiceNumber, customerName, invoiceDate, labels.documentName)
+
+  const fileName = buildInvoicePdfFileName(
+    invoiceNumber,
+    customerName,
+    invoiceDate,
+    labels.documentName
   );
+
+  if (params.output === "blob") {
+    return { blob: doc.output("blob"), fileName, warnings: Array.from(warnings) };
+  }
+
+  doc.save(fileName);
 
   return { warnings: Array.from(warnings) };
 }

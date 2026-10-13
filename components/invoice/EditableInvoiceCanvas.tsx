@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { memo, useRef, useState } from "react";
-import { Download, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
+import { Download, FolderOpen, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type { InvoiceCalculationResult } from "@/lib/invoice/invoice-calculations";
 import { formatLineItemErrorForDisplay } from "@/lib/invoice/invoice-line-item-error-display";
 import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
@@ -75,6 +75,8 @@ type EditableInvoiceCanvasProps = {
   onInvoiceNumberChange: (value: string) => void;
   onLineItemBlur: (index: number, key: "description" | "quantity" | "unitPrice") => void;
   onNotesChange: (value: string) => void;
+  onOpenSavedInvoices: () => void;
+  savedInvoiceCount: number;
   onPaymentChange: (field: keyof InvoicePaymentDetails, value: string | undefined) => void;
   onPaymentFieldBlur: (field: keyof InvoicePaymentDetails) => void;
   onRemoveLineItem: (id: string) => void;
@@ -96,7 +98,6 @@ type EditableInvoiceCanvasProps = {
   tax: InvoiceTax[];
   terms: string;
   termsError: string;
-  validationSummaryMessage: string;
 };
 
 const editableBaseClass =
@@ -219,16 +220,18 @@ export function EditableInvoiceActions({
   isGeneratingPdf,
   onClearEverything,
   onDownloadInvoice,
+  onOpenSavedInvoices,
   /** "bottom" flips the divider so the bar reads as closing the form rather
    *  than heading it. The same controls appear at both ends of a long form. */
   placement = "top",
-  validationSummaryMessage
+  savedInvoiceCount
 }: Pick<
   EditableInvoiceCanvasProps,
   | "isGeneratingPdf"
   | "onClearEverything"
   | "onDownloadInvoice"
-  | "validationSummaryMessage"
+  | "onOpenSavedInvoices"
+  | "savedInvoiceCount"
 > & { placement?: "bottom" | "top" }) {
   return (
     <div
@@ -237,6 +240,19 @@ export function EditableInvoiceActions({
       }`}
     >
       <div className="flex flex-wrap gap-2">
+        <button
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+          onClick={onOpenSavedInvoices}
+          type="button"
+        >
+          <FolderOpen aria-hidden="true" className="h-4 w-4" />
+          My invoices
+          {savedInvoiceCount > 0 ? (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+              {savedInvoiceCount}
+            </span>
+          ) : null}
+        </button>
         <button
         className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
           onClick={onClearEverything}
@@ -247,14 +263,13 @@ export function EditableInvoiceActions({
         </button>
       </div>
       <button
-        aria-describedby={validationSummaryMessage ? "invoice-validation-summary" : undefined}
         className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 text-sm font-semibold text-white transition hover:bg-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-wait disabled:opacity-70"
         disabled={isGeneratingPdf}
         onClick={onDownloadInvoice}
         type="button"
       >
         <Download aria-hidden="true" className="h-4 w-4" />
-        {isGeneratingPdf ? "Preparing PDF..." : "Download invoice PDF"}
+        {isGeneratingPdf ? "Preparing PDF..." : "Preview & download"}
       </button>
     </div>
   );
@@ -1244,18 +1259,10 @@ export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
         isGeneratingPdf={props.isGeneratingPdf}
         onClearEverything={props.onClearEverything}
         onDownloadInvoice={props.onDownloadInvoice}
-        validationSummaryMessage={props.validationSummaryMessage}
+        onOpenSavedInvoices={props.onOpenSavedInvoices}
+        savedInvoiceCount={props.savedInvoiceCount}
       />
 
-      {props.validationSummaryMessage ? (
-        <p
-          className="mx-4 mt-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
-          id="invoice-validation-summary"
-          role="alert"
-        >
-          {props.validationSummaryMessage}
-        </p>
-      ) : null}
       {props.pdfStatus ? (
         <p
           className={`mx-4 mt-4 rounded-lg border px-3 py-2 text-sm font-medium leading-6 ${
@@ -1305,8 +1312,9 @@ export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
         isGeneratingPdf={props.isGeneratingPdf}
         onClearEverything={props.onClearEverything}
         onDownloadInvoice={props.onDownloadInvoice}
+        onOpenSavedInvoices={props.onOpenSavedInvoices}
         placement="bottom"
-        validationSummaryMessage={props.validationSummaryMessage}
+        savedInvoiceCount={props.savedInvoiceCount}
       />
     </div>
   );

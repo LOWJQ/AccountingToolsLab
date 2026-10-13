@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { canAutoIncrementInvoiceNumber, getNextInvoiceNumber } from "../lib/invoice/invoice-numbering";
+import { getNextInvoiceNumber } from "../lib/invoice/invoice-numbering";
 
 function test(name: string, run: () => void) {
   run();
@@ -64,9 +64,4 @@ test("whitespace-only string returns null", () => {
 
 test("preserves prefix exactly after trimming surrounding whitespace", () => {
   assert.equal(getNextInvoiceNumber("  Custom Prefix-009  "), "Custom Prefix-010");
-});
-
-test("canAutoIncrementInvoiceNumber reports supported values", () => {
-  assert.equal(canAutoIncrementInvoiceNumber("INV-001"), true);
-  assert.equal(canAutoIncrementInvoiceNumber("INV"), false);
 });
