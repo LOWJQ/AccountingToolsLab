@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata = createMetadata({
   title: "Privacy Policy",
   description:
-    "Read the Privacy Policy for AccountingToolsLab, including invoice drafts, contact form handling, local preferences, analytics, and calculator input handling.",
+    "Read how AccountingToolsLab handles saved invoices, business details, logos, payment QR images, local preferences, contact messages, and analytics.",
   path: "/privacy-policy"
 });
 
@@ -26,7 +26,7 @@ const privacySections = [
       "If you email AccountingToolsLab directly, the site owner may receive your email address, subject line, and message content.",
       "If you use the contact form, AccountingToolsLab receives the name, email address, topic, subject, message, optional page or tool URL, and spam-check information needed to send and protect the message.",
       "When you use calculators, the numbers you enter are used to calculate results for that page. The general calculator pages are designed to work without creating an account or saving your entries on the server.",
-      "When you use the invoice generator, the invoice details you type may be saved in your own browser as a draft so you can continue editing on the same device. Uploaded logo and payment QR images are used for the current preview and PDF workflow, but they are intentionally excluded from saved browser drafts."
+      "The invoice generator processes your invoice details, business logo, and payment QR image in your browser to create previews and PDFs. The generator does not upload these details or images to an AccountingToolsLab server. They may be saved in your browser as explained below."
     ]
   },
   {
@@ -41,16 +41,26 @@ const privacySections = [
     title: "Local storage and similar technologies",
     content: [
       "AccountingToolsLab uses browser localStorage to remember your selected currency preference, so the same currency can remain selected after refresh.",
-      "The invoice generator may use browser localStorage to save an invoice draft and the last invoice number on the same device. This is local browser storage, not an AccountingToolsLab account.",
-      "Invoice logo and payment QR image files are not saved into the localStorage invoice draft. Clearing the draft or clearing your browser storage can remove locally saved invoice data.",
+      "When browser storage is available, the invoice generator automatically saves your invoice edits in this browser. It can keep up to 50 invoices, including customer details, dates, item descriptions, prices, taxes, discounts, and notes. It also remembers the last used invoice number.",
+      "Your business details are saved separately and reused across invoices. These include your business name, contact details, address, logo, payment details, payment QR image, and terms. Logos and QR images can remain saved after closing the page or starting a new invoice.",
+      "Saved invoices and business details are kept in this browser on this device, without an online account or automatic syncing to other devices. Anyone with access to the same browser profile may be able to open them. If browser storage is blocked or full, changes may remain available only while the page is open.",
       "Analytics, hosting, security, and performance services may use technical signals or similar technologies to measure usage, protect the contact form, and keep the website working."
+    ]
+  },
+  {
+    title: "Managing saved invoices and backups",
+    content: [
+      "Starting a New invoice keeps your saved invoices and business details. Deleting an invoice from My invoices removes that invoice, but keeps your shared business details, logo, and payment QR image.",
+      "Reset removes the invoice you are working on and the shared business details, including the logo, payment details, and QR image. Your other saved invoices and last used invoice number remain.",
+      "To remove all locally saved website data, clear this website's site data in your browser settings. This also removes your saved invoices, business details, images, last invoice number, and currency preference. Export a backup first if you want to keep your invoices.",
+      "Export backup downloads a file containing your saved invoices and shared business details, including any saved logo, payment details, and QR image. Restore backup reads that file in your browser. Keep backup files private. Clearing website data does not delete PDFs or backup files you have already downloaded."
     ]
   },
   {
     title: "How information is used",
     content: [
       "Information is used to run the website, calculate tool results, remember local preferences, generate invoice previews and PDFs, respond to contact messages, prevent abuse, debug errors, and improve content and performance.",
-      "AccountingToolsLab does not sell personal information. The site does not use your calculator or invoice entries to create a user profile."
+      "AccountingToolsLab does not sell personal information. Calculator and invoice entries are used for your tool results, saved invoices, previews, and downloads."
     ]
   },
   {
@@ -121,7 +131,7 @@ export default function PrivacyPolicyPage() {
             <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
               <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
               <span>Last updated</span>
-              <span className="text-slate-950">June 28, 2026</span>
+              <time className="text-slate-950" dateTime="2026-10-13">October 13, 2026</time>
             </p>
             <div className="mt-8 border-t border-slate-200" />
           </Container>

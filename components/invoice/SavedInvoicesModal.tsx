@@ -122,7 +122,7 @@ export function SavedInvoicesModal({
               My invoices
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              Saved on this device only, not synced to your other devices.
+              Saved in this browser.
             </p>
           </div>
           <button
@@ -139,7 +139,7 @@ export function SavedInvoicesModal({
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
           {invoices.length === 0 ? (
             <p className="text-sm leading-6 text-slate-600">
-              No saved invoices yet. Whatever you type is saved here automatically.
+              No invoices yet. Edits save automatically.
             </p>
           ) : (
             <>
@@ -240,11 +240,7 @@ export function SavedInvoicesModal({
         </div>
 
         <div className="border-t border-slate-200 p-5">
-          <p className="text-sm leading-6 text-slate-600">
-            Clearing your browser data deletes these invoices. Keep a backup file if they
-            matter.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
               onClick={() => setBackupStatus(onExportBackup())}
@@ -255,14 +251,17 @@ export function SavedInvoicesModal({
             </button>
             <button
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+              aria-describedby="invoice-backup-hint"
               onClick={() => importInputRef.current?.click()}
               type="button"
             >
               <Upload aria-hidden="true" className="h-4 w-4" />
-              Import backup
+              Restore backup
             </button>
             <input
               accept="application/json,.json"
+              aria-label="Choose invoice backup"
+              aria-describedby="invoice-backup-hint"
               className="sr-only"
               onChange={async (event) => {
                 const file = event.target.files?.[0];
@@ -277,6 +276,9 @@ export function SavedInvoicesModal({
               type="file"
             />
           </div>
+          <p className="mt-3 text-xs leading-5 text-slate-500" id="invoice-backup-hint">
+            Use the .json file from Export backup. Keep backups private.
+          </p>
           {backupStatus ? (
             <p
               className={`mt-3 rounded-md border p-3 text-sm leading-6 ${

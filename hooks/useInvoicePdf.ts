@@ -7,6 +7,7 @@ import type {
 } from "@/lib/invoice/invoice-pdf-generator";
 import { calculateInvoiceLineItems } from "@/lib/invoice/invoice-calculations";
 import { downloadBlob } from "@/lib/utils/download-blob";
+import { openInvoicePdfPreview } from "@/lib/invoice/invoice-pdf-preview";
 
 type UseInvoicePdfInput = {
   invoiceNumber: string;
@@ -19,8 +20,7 @@ export type InvoicePdfStatus = {
   type: "error" | "warning";
 };
 
-/** What the preview dialog is currently showing. */
-export type InvoicePdfStage = "closed" | "downloaded" | "preparing" | "preview";
+export type InvoicePdfStage = "closed" | "downloaded";
 
 function getPdfWarningMessage(result: InvoicePdfGenerationResult): string {
   const hasLogoWarning = result.warnings.includes("business-logo-skipped");
@@ -37,15 +37,6 @@ function getPdfWarningMessage(result: InvoicePdfGenerationResult): string {
   return "The invoice was created, but the payment QR image could not be added. Try re-uploading the QR image if needed.";
 }
 
-/**
- * Phones do not reliably render a PDF inside an iframe — iOS Safari in
- * particular shows a blank panel — so small screens skip the preview and
- * download straight away instead of being shown an empty box.
- */
-function canPreviewPdfInline(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
-}
-
 export function useInvoicePdf({
   invoiceNumber,
   pdfParams,
@@ -54,25 +45,26 @@ export function useInvoicePdf({
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfStatus, setPdfStatus] = useState<InvoicePdfStatus | null>(null);
   const [pdfStage, setPdfStage] = useState<InvoicePdfStage>("closed");
-  const [previewUrl, setPreviewUrl] = useState("");
-  const previewBlobRef = useRef<Blob | null>(null);
-  const previewFileNameRef = useRef("");
-  const previewUrlRef = useRef("");
+  const [completedPdf, setCompletedPdf] = useState<{
+    blob: Blob; fileName: string; invoiceNumber: string; customerName: string; total: string;
+  } | null>(null);
+  const previewTabsRef = useRef<Array<{ tab: Window; url: string }>>([]);
+  const generatingRef = useRef(false);
 
-  const releasePreview = useCallback(() => {
-    if (previewUrlRef.current) {
-      URL.revokeObjectURL(previewUrlRef.current);
-      previewUrlRef.current = "";
-    }
-
-    previewBlobRef.current = null;
-    previewFileNameRef.current = "";
-    setPreviewUrl("");
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      previewTabsRef.current = previewTabsRef.current.filter((preview) => {
+        if (!preview.tab.closed) return true;
+        URL.revokeObjectURL(preview.url);
+        return false;
+      });
+    }, 1000);
+    return () => {
+      window.clearInterval(timer);
+      previewTabsRef.current.forEach((preview) => URL.revokeObjectURL(preview.url));
+      previewTabsRef.current = [];
+    };
   }, []);
-
-  // Object URLs are held by the browser until revoked, so a preview that is
-  // never opened again would leak the whole PDF.
-  useEffect(() => releasePreview, [releasePreview]);
 
   const buildPreviewItems = useCallback(
     () =>
@@ -84,24 +76,31 @@ export function useInvoicePdf({
     [pdfParams.invoiceData.items]
   );
 
-  /**
-   * Builds the PDF once. On a large screen it is held for preview; on a phone
-   * it downloads immediately, since there is nothing useful to show first.
-   * Deliberately no completeness gate: blank fields print as placeholders.
-   */
-  const prepareInvoicePdf = useCallback(async () => {
+  const generatePdf = useCallback(async () => {
+    const { generateInvoicePdf } = await import("@/lib/invoice/invoice-pdf-generator");
+    return generateInvoicePdf({ ...pdfParams, output: "blob", previewItems: buildPreviewItems() });
+  }, [buildPreviewItems, pdfParams]);
+
+  const createInvoicePdf = useCallback(async (action: "preview" | "download") => {
+    if (generatingRef.current) return;
+    generatingRef.current = true;
     setIsGeneratingPdf(true);
     setPdfStatus(null);
-    setPdfStage("preparing");
-    releasePreview();
-
     try {
-      const { generateInvoicePdf } = await import("@/lib/invoice/invoice-pdf-generator");
-      const result = await generateInvoicePdf({
-        ...pdfParams,
-        output: "blob",
-        previewItems: buildPreviewItems()
-      });
+      let result: InvoicePdfGenerationResult;
+      if (action === "preview") {
+        const preview = await openInvoicePdfPreview(generatePdf);
+        if (preview.status !== "opened") {
+          setPdfStatus({ type: "warning", message: preview.status === "blocked"
+            ? "Allow popups to preview, or use Download PDF."
+            : "Preview closed. You can open it again." });
+          return;
+        }
+        previewTabsRef.current.push({ tab: preview.tab, url: preview.url });
+        result = preview.pdf;
+      } else {
+        result = await generatePdf();
+      }
 
       if (!result.blob || !result.fileName) {
         throw new Error("The invoice PDF could not be created.");
@@ -111,19 +110,17 @@ export function useInvoicePdf({
         setPdfStatus({ message: getPdfWarningMessage(result), type: "warning" });
       }
 
-      previewBlobRef.current = result.blob;
-      previewFileNameRef.current = result.fileName;
-
-      if (canPreviewPdfInline()) {
-        const url = URL.createObjectURL(result.blob);
-        previewUrlRef.current = url;
-        setPreviewUrl(url);
-        setPdfStage("preview");
-      } else {
+      if (action === "download") {
         downloadBlob(result.blob, result.fileName);
-        saveUsedInvoiceNumber(invoiceNumber);
+        setCompletedPdf({
+          blob: result.blob, fileName: result.fileName, invoiceNumber,
+          customerName: pdfParams.invoiceData.customerName,
+          total: pdfParams.formatCurrency(pdfParams.calculation.total)
+        });
         setPdfStage("downloaded");
       }
+      // The native viewer can download or print without notifying the editor.
+      saveUsedInvoiceNumber(invoiceNumber);
     } catch {
       setPdfStatus({
         message:
@@ -132,33 +129,28 @@ export function useInvoicePdf({
       });
       setPdfStage("closed");
     } finally {
+      generatingRef.current = false;
       setIsGeneratingPdf(false);
     }
   }, [
-    buildPreviewItems,
+    generatePdf,
     invoiceNumber,
     pdfParams,
-    releasePreview,
     saveUsedInvoiceNumber
   ]);
 
-  /** Saves the PDF already generated for the preview — no second render. */
-  const downloadPreparedPdf = useCallback(() => {
-    const blob = previewBlobRef.current;
+  const prepareInvoicePdf = useCallback(() => createInvoicePdf("preview"), [createInvoicePdf]);
+  const downloadInvoicePdf = useCallback(() => createInvoicePdf("download"), [createInvoicePdf]);
 
-    if (!blob) {
-      return;
-    }
-
-    downloadBlob(blob, previewFileNameRef.current);
-    saveUsedInvoiceNumber(invoiceNumber);
-    setPdfStage("downloaded");
-  }, [invoiceNumber, saveUsedInvoiceNumber]);
-
-  const closePdfDialog = useCallback(() => {
-    releasePreview();
+  const returnToEditor = useCallback(() => {
     setPdfStage("closed");
-  }, [releasePreview]);
+    setCompletedPdf(null);
+    setPdfStatus(null);
+  }, []);
+
+  const downloadCompletedPdf = useCallback(() => {
+    if (completedPdf) downloadBlob(completedPdf.blob, completedPdf.fileName);
+  }, [completedPdf]);
 
   const clearPdfStatus = useCallback(() => {
     setPdfStatus(null);
@@ -166,12 +158,13 @@ export function useInvoicePdf({
 
   return {
     clearPdfStatus,
-    closePdfDialog,
-    downloadPreparedPdf,
+    returnToEditor,
+    completedPdf,
+    downloadCompletedPdf,
+    downloadInvoicePdf,
     isGeneratingPdf,
     pdfStage,
     pdfStatus,
-    prepareInvoicePdf,
-    previewUrl
+    prepareInvoicePdf
   };
 }

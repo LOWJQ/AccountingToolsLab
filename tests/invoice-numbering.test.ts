@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { getNextInvoiceNumber } from "../lib/invoice/invoice-numbering";
+import { getNextInvoiceNumber, getUnusedInvoiceNumber } from "../lib/invoice/invoice-numbering";
 
 function test(name: string, run: () => void) {
   run();
@@ -64,4 +64,15 @@ test("whitespace-only string returns null", () => {
 
 test("preserves prefix exactly after trimming surrounding whitespace", () => {
   assert.equal(getNextInvoiceNumber("  Custom Prefix-009  "), "Custom Prefix-010");
+});
+
+test("new invoice suggestions skip numbers already in history", () => {
+  assert.equal(getUnusedInvoiceNumber("INV-002", ["INV-001", "INV-002", "INV-003"]), "INV-004");
+  assert.equal(getUnusedInvoiceNumber("INV-005", ["INV-001"]), "INV-005");
+  assert.equal(getUnusedInvoiceNumber("INV-001", ["RESTORE-TEST", "INV-001"]), "INV-002");
+  assert.equal(getUnusedInvoiceNumber("CUSTOM-099", [" CUSTOM-099 ", "CUSTOM-100"]), "CUSTOM-101");
+});
+
+test("unsupported duplicate numbers do not loop indefinitely", () => {
+  assert.equal(getUnusedInvoiceNumber("ABC", ["ABC"]), null);
 });

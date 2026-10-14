@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState
@@ -9,6 +10,7 @@ import {
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { EditableInvoiceCanvas } from "@/components/invoice/EditableInvoiceCanvas";
 import { InvoiceModals } from "@/components/invoice/InvoiceModals";
+import { InvoiceDownloadComplete } from "@/components/invoice/InvoiceDownloadComplete";
 import { SavedInvoicesModal } from "@/components/invoice/SavedInvoicesModal";
 import { mergeInvoice, splitInvoice } from "@/lib/invoice/invoice-library";
 import { getCurrencyOption, isCurrencyCode } from "@/lib/currency";
@@ -76,7 +78,7 @@ function normalizeRestoredTaxRows(taxRows: InvoiceTax[]): InvoiceTax[] {
   }));
 }
 
-export function InvoiceGenerator() {
+export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: (isComplete: boolean) => void } = {}) {
   const { currency, formatCurrency, setCurrency } = useCurrency();
   const currencySymbol = getCurrencyOption(currency)?.symbol ?? currency;
   const invoiceGeneratorTopRef = useRef<HTMLDivElement>(null);
@@ -205,6 +207,7 @@ export function InvoiceGenerator() {
     removeSavedInvoice,
     resetEverything,
     savedInvoices,
+    saveCurrentInvoice,
     setAutosaveError,
     skipNextAutosave
   } = useInvoiceDraft({
@@ -345,6 +348,7 @@ export function InvoiceGenerator() {
 
   function handleOpenSavedInvoice(id: string) {
     if (openSavedInvoice(id)) {
+      returnToEditor();
       resetValidationDisplay();
       setIsSavedInvoicesModalOpen(false);
       scrollInvoiceGeneratorToTop();
@@ -360,6 +364,7 @@ export function InvoiceGenerator() {
     });
 
     if (duplicated) {
+      returnToEditor();
       resetValidationDisplay();
       setIsSavedInvoicesModalOpen(false);
       scrollInvoiceGeneratorToTop();
@@ -372,6 +377,7 @@ export function InvoiceGenerator() {
     if (!wasCurrent) {
       return;
     }
+    returnToEditor();
 
     // The invoice on screen was the one deleted, so put a blank one in its
     // place rather than leaving the form pointing at something that is gone.
@@ -414,7 +420,7 @@ export function InvoiceGenerator() {
         : "Draft could not be cleared from this device. The form was reset for this session."
     );
     resetValidationDisplay();
-    closePdfDialog();
+    returnToEditor();
     setIsClearEverythingModalOpen(false);
     scrollInvoiceGeneratorToTop();
   }
@@ -431,9 +437,20 @@ export function InvoiceGenerator() {
   // The download is never blocked on completeness. Anything left blank simply
   // prints as its placeholder, which is more useful than refusing to produce a
   // draft the user can already see on screen.
-  function openDownloadModal() {
+  function previewInvoice() {
     clearPdfStatus();
     void prepareInvoicePdf();
+  }
+
+  function downloadInvoice() {
+    saveCurrentInvoice();
+    clearPdfStatus();
+    void downloadInvoicePdf();
+  }
+
+  function openHistory() {
+    if (pdfStage === "closed") saveCurrentInvoice();
+    setIsSavedInvoicesModalOpen(true);
   }
 
   /**
@@ -441,7 +458,8 @@ export function InvoiceGenerator() {
    * has already been autosaved under its own id, so it stays in My invoices.
    */
   function startNewInvoice() {
-    closePdfDialog();
+    saveCurrentInvoice();
+    returnToEditor();
     clearAutosaveTimer();
     beginNewInvoice();
     skipNextAutosave();
@@ -468,18 +486,22 @@ export function InvoiceGenerator() {
   );
   const {
     clearPdfStatus,
-    closePdfDialog,
-    downloadPreparedPdf,
+    returnToEditor,
+    completedPdf,
+    downloadCompletedPdf,
+    downloadInvoicePdf,
     isGeneratingPdf,
     pdfStage,
     pdfStatus,
-    prepareInvoicePdf,
-    previewUrl
+    prepareInvoicePdf
   } = useInvoicePdf({
     invoiceNumber,
     pdfParams,
     saveUsedInvoiceNumber
   });
+  useEffect(() => {
+    onCompletionChange?.(pdfStage === "downloaded");
+  }, [onCompletionChange, pdfStage]);
   const businessNameError = getValidationMessage("businessName");
   const businessContactError = getValidationMessage("businessContact");
   const businessAddressError = getValidationMessage("businessAddress");
@@ -507,6 +529,19 @@ export function InvoiceGenerator() {
   return (
     <div>
       <div className="scroll-mt-24" ref={invoiceGeneratorTopRef}>
+        {pdfStage === "downloaded" && completedPdf ? (
+          <InvoiceDownloadComplete
+            invoiceNumber={completedPdf.invoiceNumber}
+            customerName={completedPdf.customerName}
+            total={completedPdf.total}
+            autosaveError={autosaveError}
+            pdfStatus={pdfStatus}
+            onDownload={downloadCompletedPdf}
+            onEdit={() => { returnToEditor(); scrollInvoiceGeneratorToTop(); }}
+            onNewInvoice={startNewInvoice}
+            onHistory={openHistory}
+          />
+        ) : (
         <EditableInvoiceCanvas
           autosaveError={autosaveError}
           businessAddress={businessAddress}
@@ -547,7 +582,7 @@ export function InvoiceGenerator() {
           onBusinessLogoChange={setBusinessLogoDataUrl}
           onBusinessNameChange={setBusinessName}
           onClearEverything={clearEverything}
-          onOpenSavedInvoices={() => setIsSavedInvoicesModalOpen(true)}
+          onOpenSavedInvoices={openHistory}
           savedInvoiceCount={savedInvoices.length}
           onCustomerAddressChange={setCustomerAddress}
           onCustomerContactChange={setCustomerContact}
@@ -556,7 +591,8 @@ export function InvoiceGenerator() {
           onDiscountLabelChange={updateDiscountLabel}
           onDiscountTypeToggle={toggleDiscountType}
           onDiscountValueChange={updateDiscountValue}
-          onDownloadInvoice={openDownloadModal}
+          onDownloadInvoice={downloadInvoice}
+          onPreviewInvoice={previewInvoice}
           onDueDateChange={setDueDate}
           onFieldBlur={markInvoiceFieldTouched}
           onInvoiceDateChange={setInvoiceDate}
@@ -587,23 +623,17 @@ export function InvoiceGenerator() {
           terms={terms}
           termsError={termsError}
         />
+        )}
       </div>
 
       <InvoiceModals
         isClearEverythingModalOpen={isClearEverythingModalOpen}
-        isGeneratingPdf={isGeneratingPdf}
         onCancelClearEverything={() => setIsClearEverythingModalOpen(false)}
-        onClosePdfDialog={closePdfDialog}
         onConfirmClearEverything={confirmClearEverything}
-        onDownloadPdf={downloadPreparedPdf}
-        onStartNewInvoice={startNewInvoice}
-        pdfStage={pdfStage}
-        pdfStatus={pdfStatus}
-        previewUrl={previewUrl}
       />
 
       <SavedInvoicesModal
-        currentInvoiceId={currentInvoiceId}
+        currentInvoiceId={pdfStage === "downloaded" ? "" : currentInvoiceId}
         invoices={savedInvoices}
         isOpen={isSavedInvoicesModalOpen}
         onClose={() => setIsSavedInvoicesModalOpen(false)}

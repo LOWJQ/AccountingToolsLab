@@ -243,15 +243,40 @@ provider timeouts, and an application-level in-memory fallback limiter.
 ## Invoice Generator Privacy
 
 The invoice generator is client-side and designed for simple PDF invoices and
-record-keeping. Draft invoice data is saved in the user's browser localStorage
-when available, so repeat editing works on the same device. Uploaded logo and
-payment QR image data URLs are intentionally stripped before drafts are saved,
-so those images remain in the current browser session and PDF output but are
-not persisted to localStorage.
+record-keeping. When localStorage is available, edits are saved automatically in
+the same browser on the same device. The library keeps up to 50 invoices with
+customer details, dates, items, amounts, taxes, discounts, and notes. The last
+used invoice number and currency preference are also stored locally.
+
+Shared business details are saved separately in `atl-business-profile`, including
+the business logo, payment details, payment QR image, and terms. Those images can
+persist across page reloads and new invoices. Individual invoice records and the
+legacy single-draft parser omit images; this does not mean images are excluded
+from all localStorage.
 
 Uploaded invoice logos and payment QR images are validated before use. They are
-only used for the current preview/PDF workflow and are not uploaded to a server
-by the invoice generator.
+used for previews, PDF output, and the locally saved business profile. The invoice
+generator does not upload invoice details or images to a server. This does not
+disable the website's separate hosting, analytics, or contact-form services.
+
+Starting a new invoice keeps existing invoices and shared business details.
+Preview opens a page-fitted PDF in a separate tab. Download PDF starts the
+download and replaces the editor with a completion view: edit the same invoice,
+start a new invoice, download the generated file again, or open My invoices.
+Pending edits are saved immediately before downloading or starting a new invoice.
+New invoices reuse business details, logo, payment information, terms, and currency;
+customer details, invoice items, and invoice-specific adjustments start fresh.
+Deleting an invoice removes only that invoice. Reset removes
+the current invoice and shared business profile, including its images, but keeps
+other saved invoices and the last used invoice number. Clearing the website's
+browser site data removes all local website storage.
+
+Exported JSON backups include saved invoices and the shared business profile,
+including any saved logo and payment QR image. Imports are read in the browser.
+Downloaded PDFs and backups are separate files and are not deleted by clearing
+browser storage. People using the same browser profile may be able to access
+saved invoices, so the public Privacy Policy explains shared-device access and
+keeping backup files private.
 
 The invoice generator does not submit, validate, or connect invoices to
 LHDN/MyInvois and should not be treated as professional accounting, tax, or

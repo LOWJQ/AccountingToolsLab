@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import {
   calculateAccountingEquation,
@@ -47,6 +47,7 @@ function parseAmount(value: string): number {
 }
 
 export function AccountingEquationCalculator() {
+  const solveForGroupName = useId();
   const [solveFor, setSolveFor] = useState<AccountingEquationSolveFor>("assets");
   const { currency, formatCurrency } = useCurrency();
   const [values, setValues] = useState<Record<FieldName, string>>({
@@ -93,26 +94,27 @@ export function AccountingEquationCalculator() {
     <div className="flex flex-col gap-8">
       <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
         <div className="grid gap-6">
-          <div className="grid gap-3">
-            <p className="text-sm font-semibold text-slate-950">Choose what to calculate</p>
-            <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3">
+          <fieldset className="min-w-0">
+            <legend className="text-sm font-semibold text-slate-950">Choose what to calculate</legend>
+            <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
               {solveOptions.map((option) => (
-                <button
-                  aria-pressed={solveFor === option.value}
-                  className={`h-11 px-4 text-sm font-semibold transition ${
-                    solveFor === option.value
-                      ? "bg-slate-900 text-white"
-                      : "border-t border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-950 sm:border-l sm:border-t-0"
-                  }`}
+                <label
+                  className={`inline-flex min-h-11 cursor-pointer items-center gap-2.5 text-sm font-medium transition hover:text-slate-950 ${solveFor === option.value ? "text-slate-950" : "text-slate-600"}`}
                   key={option.value}
-                  onClick={() => setSolveFor(option.value)}
-                  type="button"
                 >
+                  <input
+                    checked={solveFor === option.value}
+                    className="h-[18px] w-[18px] shrink-0 cursor-pointer rounded-full accent-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                    name={solveForGroupName}
+                    onChange={() => setSolveFor(option.value)}
+                    type="radio"
+                    value={option.value}
+                  />
                   {option.label}
-                </button>
+                </label>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           <div className="grid gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-start">
             <div className="grid gap-5 lg:pr-8">

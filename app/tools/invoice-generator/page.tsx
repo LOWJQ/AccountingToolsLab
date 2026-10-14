@@ -1,4 +1,4 @@
-import { InvoiceGenerator } from "@/components/calculators/InvoiceGenerator";
+import { InvoiceGeneratorWorkspace } from "@/components/invoice/InvoiceGeneratorWorkspace";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
@@ -47,7 +47,7 @@ const invoiceFaqs = [
   {
     question: "Can I save or edit my invoice later?",
     answer:
-      "Drafts can be saved in your browser on this device when local draft saving is available. They are not stored in an online account."
+      "Yes. When browser storage is available, your edits are saved automatically. Open My invoices to find saved invoices. Business details, logos, and payment QR images are saved separately and reused. These stay in this browser on this device, without automatic syncing to other devices."
   }
 ];
 
@@ -125,7 +125,7 @@ export default function InvoiceGeneratorPage() {
         </ol>
       </nav>
 
-      <div className="max-w-5xl">
+      <InvoiceGeneratorWorkspace intro={<div className="max-w-5xl">
         <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Free Online Invoice Generator Malaysia
         </h1>
@@ -135,8 +135,7 @@ export default function InvoiceGeneratorPage() {
           items, tax/SST, discounts, payment information, notes, logo, and payment QR image, then
           download a clean invoice without signing up.
         </p>
-      </div>
-      <InvoiceGenerator />
+      </div>}>
 
       {/* Sits below the tool: someone arriving from a search for a calculator
           wants the calculator, not an essay. The wording is kept self-contained
@@ -154,10 +153,37 @@ export default function InvoiceGeneratorPage() {
           charged.
         </p>
         <p className="mt-3 text-base leading-7 text-black">
-          This generator builds the PDF in your browser, and nothing you type is sent to a
-          server. It produces an ordinary business invoice: if your business is required to
+          This generator builds the PDF in your browser and does not upload your invoice details
+          or images to our server. It produces an ordinary business invoice: if your business is required to
           issue an LHDN e-Invoice, that is a separate submission to MyInvois with its own
           required fields.
+        </p>
+      </section>
+
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Where are my invoice details saved?
+        </h2>
+        <p className="mt-3 text-base leading-7 text-black">
+          When browser storage is available, your invoice edits are saved automatically in this
+          browser on this device. Your business details, logo, payment details, and payment QR
+          image are saved separately and reused when you start a New invoice. They can remain
+          saved after you close the page. There is no automatic syncing to other devices.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Delete individual invoices in My invoices. Reset removes the current
+          invoice and your shared business details and images, while keeping other saved invoices
+          and the last used invoice number. Clear this website&apos;s site data in your browser
+          settings to remove all locally saved data.
+        </p>
+        <p className="mt-3 text-base leading-7 text-black">
+          Export backup in My invoices lets you keep a copy before clearing browser data. That
+          file includes your saved invoices, business details, and any saved logo or payment QR
+          image. Keep it private, especially on a shared device. Read the{" "}
+          <Link className="underline underline-offset-4" href="/privacy-policy">
+            Privacy Policy
+          </Link>{" "}
+          for details about storage and other website services.
         </p>
       </section>
 
@@ -214,6 +240,7 @@ export default function InvoiceGeneratorPage() {
       <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
         <FAQSection eyebrow="" faqs={invoiceFaqs} title="Invoice Generator FAQs" />
       </section>
+      </InvoiceGeneratorWorkspace>
     </ToolPageLayout>
   );
 }

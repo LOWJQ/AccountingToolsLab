@@ -66,9 +66,9 @@ const sstFaqs = [
 ];
 
 const steps = [
-  "Choose Single amount for one total, or Multiple items to enter separate items with their own quantities and rates.",
+  "Start by entering an amount in Single amount mode. For separate items with their own quantities and rates, select Multiple items and enter a quantity and unit price for each row.",
   "Choose Add SST if your prices exclude SST. Choose Remove SST if your prices already include it. This choice applies to all items.",
-  "Enter your amount. In Multiple items mode, enter a quantity and unit price for each row, then use Add item for the next row.",
+  "In Multiple items mode, use Add item for the next row. Leave an unfinished row blank until you are ready to enter its price.",
   "Choose the product or service category for each amount. If you select a manual category, enter the percentage you want to use.",
   "Review the breakdown, then use Copy result or Print result to keep a copy. Complete every item before copying or printing the combined total."
 ];

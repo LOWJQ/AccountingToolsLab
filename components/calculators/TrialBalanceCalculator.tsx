@@ -4,7 +4,7 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { calculateTrialBalance } from "@/lib/calculators/trial-balance";
 import type { TrialBalanceRow } from "@/lib/calculators/trial-balance";
-import { Plus, X } from "lucide-react";
+import { Check, Minus, Plus, TriangleAlert, X } from "lucide-react";
 
 type EditableTrialBalanceRow = {
   id: string;
@@ -51,43 +51,44 @@ const TrialBalanceRowEditor = memo(function TrialBalanceRowEditor({
   const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-3 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
-      <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_3.5rem] lg:gap-4">
-        <div className="grid gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
-            Account Name
+    <div className="min-w-0 border-t border-slate-200 py-4 first:border-t-0 first:pt-0 lg:border-0 lg:p-0">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.75rem] gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_2.75rem]">
+        <div className="col-span-3 grid min-w-0 gap-2 lg:col-span-1">
+          <span className="text-xs font-medium text-slate-600 lg:hidden">
+            Account name
           </span>
           <input
             aria-label={`Row ${index + 1} account name`}
-            className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            className="h-11 w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-4 focus:ring-slate-100"
             onChange={(event) => onUpdate(row.id, "accountName", event.target.value)}
             placeholder="Account name"
             value={row.accountName}
           />
         </div>
-        <div className="grid gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
+        <div className="grid min-w-0 gap-2">
+          <span className="text-xs font-medium text-slate-600 lg:hidden">
             Debit ({currency})
           </span>
           <input
             aria-label={`Row ${index + 1} debit amount`}
-            className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-right text-base font-medium text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            className="h-11 w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 text-right text-sm font-medium text-slate-950 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-500 focus:ring-4 focus:ring-slate-100"
             disabled={hasCredit}
             inputMode="decimal"
             min="0"
             onChange={(event) => onUpdate(row.id, "debit", event.target.value)}
             placeholder="0.00"
+            step="0.01"
             type="number"
             value={row.debit}
           />
         </div>
-        <div className="grid gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 lg:hidden">
+        <div className="grid min-w-0 gap-2">
+          <span className="text-xs font-medium text-slate-600 lg:hidden">
             Credit ({currency})
           </span>
           <input
             aria-label={`Row ${index + 1} credit amount`}
-            className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-right text-base font-medium text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            className="h-11 w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 text-right text-sm font-medium text-slate-950 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-500 focus:ring-4 focus:ring-slate-100"
             disabled={hasDebit}
             inputMode="decimal"
             min="0"
@@ -101,7 +102,7 @@ const TrialBalanceRowEditor = memo(function TrialBalanceRowEditor({
         <div className="flex items-end lg:items-center">
           <button
             aria-label={`Remove row ${index + 1}`}
-            className="flex h-11 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-11"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!canRemove}
             onClick={() => onRemove(row.id)}
             type="button"
@@ -113,65 +114,6 @@ const TrialBalanceRowEditor = memo(function TrialBalanceRowEditor({
     </div>
   );
 });
-
-function SummaryCard({
-  label,
-  value,
-  tone = "neutral"
-}: {
-  label: string;
-  value: string;
-  tone?: "neutral" | "success" | "error";
-}) {
-  const toneClass =
-    tone === "success"
-      ? "text-emerald-700"
-      : tone === "error"
-        ? "text-rose-700"
-        : "text-slate-950";
-
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white px-4 py-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className={`mt-2 text-2xl font-semibold tracking-tight ${toneClass}`}>{value}</p>
-    </div>
-  );
-}
-
-function getStatus({
-  totalDebit,
-  totalCredit,
-  isBalanced
-}: {
-  totalDebit: number;
-  totalCredit: number;
-  isBalanced: boolean;
-}) {
-  if (totalDebit === 0 && totalCredit === 0) {
-    return {
-      label: "Waiting for entries",
-      cardClass: "border-slate-200 bg-white",
-      labelClass: "text-slate-500",
-      badgeClass: "bg-slate-100 text-slate-700"
-    };
-  }
-
-  if (isBalanced) {
-    return {
-      label: "Balanced",
-      cardClass: "border-slate-200 bg-white",
-      labelClass: "text-slate-500",
-      badgeClass: "bg-emerald-100 text-emerald-800"
-    };
-  }
-
-  return {
-    label: "Not balanced",
-    cardClass: "border-slate-200 bg-white",
-    labelClass: "text-slate-500",
-    badgeClass: "bg-rose-100 text-rose-800"
-  };
-}
 
 export function TrialBalanceCalculator() {
   const [rows, setRows] = useState<EditableTrialBalanceRow[]>(initialRows);
@@ -205,7 +147,25 @@ export function TrialBalanceCalculator() {
   }, [rows]);
 
   const result = calculation.result;
-  const status = getStatus(result);
+  const hasAmounts = rows.some((row) => row.debit.trim() !== "" || row.credit.trim() !== "");
+  const hasResult = hasAmounts && !calculation.message;
+  const statusLabel = calculation.message
+    ? "Check your entries"
+    : !hasAmounts
+      ? "Waiting for entries"
+      : result.isBalanced ? "Balanced" : "Not balanced";
+  const StatusIcon = calculation.message || (hasAmounts && !result.isBalanced)
+    ? TriangleAlert
+    : hasAmounts ? Check : Minus;
+  const statusMessage = calculation.message
+    ? "Correct the invalid amount to see your result."
+    : !hasAmounts
+      ? "Enter a debit or credit amount to see the totals."
+      : result.isBalanced
+        ? "Total debits equal total credits."
+        : result.difference === 0
+          ? "The totals differ by less than 0.01. Check amounts with more than two decimal places."
+          : `${result.totalDebit > result.totalCredit ? "Debit" : "Credit"} total is ${formatCurrency(result.difference)} higher than ${result.totalDebit > result.totalCredit ? "credit" : "debit"} total.`;
 
   const updateRow = useCallback((
     id: string,
@@ -264,14 +224,17 @@ export function TrialBalanceCalculator() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
-        <div className="space-y-4">
-          <div className="hidden grid-cols-[1.4fr_1fr_1fr_3.5rem] gap-4 px-1 text-xs font-semibold uppercase tracking-wide text-slate-600 lg:grid">
-            <span>Account Name</span>
-            <span>Debit ({currency})</span>
-            <span>Credit ({currency})</span>
-            <span>Remove</span>
+    <section aria-labelledby="trial-balance-calculator-heading" className="grid min-w-0 rounded-lg border border-slate-200 bg-white lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+      <h2 className="sr-only" id="trial-balance-calculator-heading">Trial balance entries and result</h2>
+      <div className="min-w-0 p-5 sm:p-6">
+        <h3 className="text-base font-semibold text-slate-950">Account balances</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Enter each account balance in either Debit or Credit.</p>
+        <div className="mt-6 space-y-4">
+          <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_2.75rem] gap-3 border-b border-slate-200 pb-3 text-sm font-medium text-slate-600 lg:grid">
+            <span>Account name</span>
+            <span className="text-right">Debit ({currency})</span>
+            <span className="text-right">Credit ({currency})</span>
+            <span className="sr-only">Remove</span>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -288,48 +251,46 @@ export function TrialBalanceCalculator() {
             ))}
           </div>
 
-          <div className="flex justify-stretch lg:justify-end">
+          <div>
             <button
               type="button"
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 lg:w-auto"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
               onClick={addRow}
             >
               <Plus aria-hidden="true" className="h-4 w-4" />
-              Add Row
+              Add row
             </button>
           </div>
         </div>
 
         {calculation.message ? (
-          <p className="mt-5 text-sm font-medium text-rose-700">{calculation.message}</p>
+          <p className="mt-5 text-sm font-medium text-slate-900" role="alert">{calculation.message}</p>
         ) : null}
 
-        <div className="mt-8 border-t border-slate-200 pt-6">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <SummaryCard label="Total Debit" value={formatCurrency(result.totalDebit)} />
-            <SummaryCard label="Total Credit" value={formatCurrency(result.totalCredit)} />
-            <SummaryCard
-              label="Difference"
-              tone={result.difference > 0 ? "error" : "neutral"}
-              value={formatCurrency(result.difference)}
-            />
-            <div className={`rounded-lg border px-4 py-4 ${status.cardClass}`}>
-              <p className={`text-xs font-semibold uppercase ${status.labelClass}`}>
-                Status
-              </p>
-              <div
-                className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${status.badgeClass}`}
-              >
-                {status.label}
+      </div>
+      <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0">
+        <div className="lg:sticky lg:top-24" aria-live="polite" aria-atomic="true">
+          <h3 className="text-base font-semibold text-slate-950">Your result</h3>
+          <p className="mt-6 flex items-center gap-2 text-base font-semibold text-slate-950">
+            <StatusIcon aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-600" />
+            {statusLabel}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{statusMessage}</p>
+          <dl className="mt-6 divide-y divide-slate-200 border-t border-slate-200">
+            {([
+              ["Total debit", result.totalDebit],
+              ["Total credit", result.totalCredit],
+              ["Difference", result.difference]
+            ] as const).map(([label, value]) => (
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-4" key={label}>
+                <dt className="text-sm text-slate-600">{label}</dt>
+                <dd className="min-w-0 max-w-full break-words text-base font-semibold tabular-nums text-slate-950">{hasResult ? formatCurrency(value) : "—"}</dd>
               </div>
-            </div>
-          </div>
+            ))}
+          </dl>
+          <p className="mt-4 text-xs leading-5 text-slate-500">Matching totals do not rule out every accounting error.</p>
         </div>
-
-        <p className="mt-5 text-base leading-7 text-slate-600">
-          Use this generated trial balance summary to check whether total debits equal total credits.
-        </p>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }

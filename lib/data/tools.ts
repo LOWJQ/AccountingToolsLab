@@ -16,7 +16,7 @@ export const tools: Tool[] = [
     href: "/tools/invoice-generator",
     status: "mvp",
     category: "generator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-13"
   },
   {
     slug: "receipt-generator",
@@ -39,7 +39,7 @@ export const tools: Tool[] = [
     href: "/tools/sst-calculator-malaysia",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-10-12"
+    lastModified: "2026-10-13"
   },
   {
     slug: "e-invoice-checker-malaysia",
@@ -117,7 +117,7 @@ export const tools: Tool[] = [
     href: "/tools/trial-balance-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-13"
   },
   {
     slug: "journal-entry-checker",
@@ -148,7 +148,7 @@ export const tools: Tool[] = [
     href: "/tools/accounting-equation-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-13"
   }
 ];
 

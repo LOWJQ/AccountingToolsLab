@@ -557,6 +557,10 @@ export function Header() {
       const visibilityProgress = headerHeight > 0 ? 1 - headerOffset / headerHeight : 1;
       header.style.setProperty("--header-offset", `${headerOffset}px`);
       header.style.setProperty("--header-visibility", `${Math.max(visibilityProgress, 0)}`);
+      document.documentElement.style.setProperty(
+        "--site-header-visible-height",
+        `${headerHeight - headerOffset}px`
+      );
     }
 
     function updateHeaderOffset() {
@@ -586,16 +590,20 @@ export function Header() {
       frameId = window.requestAnimationFrame(updateHeaderOffset);
     }
 
+    if (header) applyHeaderOffset(header, header.offsetHeight, 0);
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
       if (frameId) {
         window.cancelAnimationFrame(frameId);
       }
 
       header?.style.removeProperty("--header-offset");
       header?.style.removeProperty("--header-visibility");
+      document.documentElement.style.removeProperty("--site-header-visible-height");
     };
   }, []);
 

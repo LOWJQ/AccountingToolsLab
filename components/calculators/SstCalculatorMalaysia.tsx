@@ -145,7 +145,7 @@ export function SstCalculatorMalaysia() {
   );
 
   const [mode, setMode] = useState<SstCalculationMode>("add");
-  const [amount, setAmount] = useState("1000");
+  const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState<SstCategoryId>("service_general_taxable");
   const [manualRate, setManualRate] = useState("");
   const [multipleItems, setMultipleItems] = useState(false);
@@ -185,7 +185,7 @@ export function SstCalculatorMalaysia() {
       return { result: preview.result, message: "Enter values for an item to see its subtotal." };
     }
     if (!amount.trim()) {
-      return { result: null, message: "Enter an amount to estimate SST." };
+      return { result: null, message: "Enter an amount to see your result." };
     }
 
     try {
@@ -259,12 +259,17 @@ export function SstCalculatorMalaysia() {
     setHasAttemptedExport(false);
     setMode("add");
     if (multipleItems) {
-      setItems([{ ...createItem(String(nextItemId.current++)), amount: "1000" }]);
+      const item = createItem(String(nextItemId.current++));
+      setItems([item]);
+      window.requestAnimationFrame(() => {
+        document.getElementById(`sst-item-${item.id}-amount`)?.focus();
+      });
       return;
     }
-    setAmount("1000");
+    setAmount("");
     setCategoryId("service_general_taxable");
     setManualRate("");
+    window.requestAnimationFrame(() => document.getElementById("sst-amount")?.focus());
   }
 
   function handleInvalidExport() {
@@ -299,11 +304,11 @@ export function SstCalculatorMalaysia() {
         SST calculator inputs and results
       </h2>
 
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 px-5 py-4 md:px-6" role="group" aria-label="Calculator input mode">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 px-5 py-3 md:px-8" role="group" aria-label="Calculator input mode">
         {([false, true] as const).map((useMultiple) => (
           <button
             aria-pressed={multipleItems === useMultiple}
-            className={`min-h-11 rounded-lg border px-4 text-sm font-semibold transition focus:outline-none focus:ring-4 focus:ring-slate-100 ${multipleItems === useMultiple ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+            className={`min-h-11 border-b-2 px-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 ${multipleItems === useMultiple ? "border-slate-900 text-slate-950" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-900"}`}
             key={String(useMultiple)}
             onClick={() => switchInputMode(useMultiple)}
             type="button"
@@ -330,6 +335,7 @@ export function SstCalculatorMalaysia() {
         </div>
       ) : null}
 
+      <div className={multipleItems ? "" : "grid md:grid-cols-2"}>
       {multipleItems ? (
         <div className="p-5 md:p-6">
           <div className="grid gap-4 md:grid-cols-2 md:items-end">
@@ -362,54 +368,61 @@ export function SstCalculatorMalaysia() {
           </button>
         </div>
       ) : (
-      <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] md:p-6">
-        <ModeSelect mode={mode} onModeChange={(value) => { setMode(value); setHasAttemptedExport(false); }} />
-
-        <CategorySelect
-          categoryId={categoryId}
-          id="sst-category"
-          label="Product or service category"
-          onChange={(nextCategoryId) => {
-            setCategoryId(nextCategoryId);
-            setManualRate("");
-          }}
-        />
-
+      <div className="grid content-start gap-7 p-5 md:p-8">
         <label className="grid min-w-0 gap-2" htmlFor="sst-amount">
-          <span className="text-xs font-medium text-slate-600">
-            {mode === "add" ? "Amount before SST" : "Amount including SST"}
+          <span className="text-sm font-semibold text-slate-950" id="sst-amount-label">
+            1. Enter amount
           </span>
           <span className="flex h-11 min-w-0 overflow-hidden rounded-lg border border-stone-300 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
-            <span className="flex h-full items-center border-r border-stone-200 bg-slate-50 px-3 text-sm font-medium text-slate-500">
+            <span className="flex h-full items-center border-r border-stone-200 bg-slate-50 px-3 text-sm font-medium text-slate-500" id="sst-amount-currency">
               {currency}
             </span>
             <input
+              aria-describedby="sst-amount-hint"
+              aria-labelledby="sst-amount-label sst-amount-currency"
               className="h-full min-w-0 flex-1 border-0 bg-white px-3 text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400"
               id="sst-amount"
               inputMode="decimal"
               min="0"
               onChange={(event) => setAmount(event.target.value)}
-              placeholder={mode === "add" ? "1000" : "1080"}
+              placeholder={mode === "add" ? "e.g. 1000" : "e.g. 1080"}
               step="0.01"
               type="number"
               value={amount}
             />
           </span>
+          <span className="text-sm leading-6 text-slate-600" id="sst-amount-hint">
+            {mode === "add" ? "Enter a price before SST." : "Enter a price that already includes SST."}
+          </span>
         </label>
 
-        <ManualRateControls
-          idPrefix="sst"
-          manualRate={manualRate}
-          manualRateEnabled={manualRateEnabled}
-          onManualRateChange={setManualRate}
-        />
+        <ModeSelect label="2. Add or remove SST" mode={mode} onModeChange={(value) => { setMode(value); setHasAttemptedExport(false); }} />
+
+        <div className="grid min-w-0 gap-4">
+          <CategorySelect
+            categoryId={categoryId}
+            id="sst-category"
+            label="3. Choose category / rate"
+            onChange={(nextCategoryId) => {
+              setCategoryId(nextCategoryId);
+              setManualRate("");
+            }}
+          />
+          <ManualRateControls
+            idPrefix="sst"
+            manualRate={manualRate}
+            manualRateEnabled={manualRateEnabled}
+            onManualRateChange={setManualRate}
+          />
+        </div>
       </div>
       )}
 
       <div
         aria-live="polite"
-        className="border-t border-slate-200 p-5 md:p-6"
+        className={multipleItems ? "border-t border-slate-200 p-5 md:p-6" : "min-w-0 border-t border-slate-200 p-5 md:border-l md:border-t-0 md:p-8"}
       >
+        {!multipleItems ? <h3 className="mb-6 text-base font-semibold text-slate-950">Your result</h3> : null}
         {incompleteCount > 0 ? (
           <div className="mb-5">
             {result ? <p className="font-semibold text-slate-900">Subtotal of completed items</p> : null}
@@ -421,8 +434,8 @@ export function SstCalculatorMalaysia() {
         ) : null}
         {line && result ? (
           <>
-            <div className="grid gap-5 md:grid-cols-3">
-              <ResultStat label={multipleItems ? (isComplete ? "Total SST" : "Subtotal SST") : "SST amount"} value={formatCurrency(result.totalSst)} />
+            {multipleItems ? <div className="grid gap-5 md:grid-cols-3">
+              <ResultStat label={isComplete ? "Total SST" : "Subtotal SST"} value={formatCurrency(result.totalSst)} />
               <ResultStat
                 label={mode === "add" ? (isComplete ? "Total including SST" : "Subtotal including SST") : (isComplete ? "Amount before SST" : "Subtotal before SST")}
                 value={
@@ -431,13 +444,32 @@ export function SstCalculatorMalaysia() {
                     : formatCurrency(result.subtotalBeforeSst)
                 }
               />
-              {multipleItems ? (
                 <ResultStat
                   label={mode === "add" ? "Subtotal before SST" : (isComplete ? "Total including SST" : "Subtotal including SST")}
                   value={formatCurrency(mode === "add" ? result.subtotalBeforeSst : result.grandTotalIncludingSst)}
                 />
-              ) : <ResultStat label="SST rate" value={formatRateSummary(line)} />}
-            </div>
+            </div> : (
+              <>
+                <p className="text-sm font-medium text-slate-600">
+                  {mode === "add" ? "Total including SST" : "Amount before SST"}
+                </p>
+                <p className="mt-2 break-words text-3xl font-semibold tabular-nums tracking-tight text-slate-950 sm:text-4xl">
+                  {formatCurrency(mode === "add" ? result.grandTotalIncludingSst : result.subtotalBeforeSst)}
+                </p>
+                <dl className="mt-6 divide-y divide-slate-200 border-t border-slate-200 text-sm">
+                  {([
+                    [mode === "add" ? "Amount before SST" : "Total including SST", formatCurrency(mode === "add" ? result.subtotalBeforeSst : result.grandTotalIncludingSst)],
+                    ["SST amount", formatCurrency(result.totalSst)],
+                    ["SST rate", formatRateSummary(line)]
+                  ] as const).map(([label, value]) => (
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-4" key={label}>
+                      <dt className="text-slate-600">{label}</dt>
+                      <dd className="min-w-0 max-w-full break-words font-semibold tabular-nums text-slate-950">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            )}
             <SstResultActions
               isComplete={isComplete}
               onInvalidExport={handleInvalidExport}
@@ -474,12 +506,21 @@ export function SstCalculatorMalaysia() {
           </>
         ) : (
           <div>
-            <p className="text-sm leading-6 text-slate-600">{calculation.message}</p>
+            {!multipleItems ? (
+              <>
+                <p className="text-sm font-medium text-slate-600">{mode === "add" ? "Total including SST" : "Amount before SST"}</p>
+                <p className="mt-2 text-4xl font-semibold text-slate-400" aria-hidden="true">—</p>
+              </>
+            ) : null}
+            <p className={`${multipleItems ? "" : "mt-6 "}text-sm leading-6 text-slate-600`}>{calculation.message}</p>
             {multipleItems ? (
               <SstResultActions isComplete={false} onInvalidExport={handleInvalidExport} onReset={resetCalculator} rows={[]} />
+            ) : amount || mode !== "add" || categoryId !== "service_general_taxable" ? (
+              <button className="mt-6 min-h-11 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100" onClick={resetCalculator} type="button">Reset</button>
             ) : null}
           </div>
         )}
+      </div>
       </div>
     </section>
   );
@@ -561,23 +602,36 @@ function SstItemRow({
 }
 
 function ModeSelect({
+  label = "Calculation mode",
   mode,
   onModeChange
 }: {
+  label?: string;
   mode: SstCalculationMode;
   onModeChange: (value: SstCalculationMode) => void;
 }) {
   return (
-    <DropdownSelect
-      id="sst-calculation-mode"
-      label="Calculation mode"
-      onChange={onModeChange}
-      options={[
-        { label: "Add SST (Amount before SST to Total including SST)", value: "add" },
-        { label: "Remove SST (Total including SST to Amount before SST)", value: "remove" }
-      ]}
-      value={mode}
-    />
+    <fieldset className="min-w-0 border-0 p-0">
+      <legend className="mb-2 text-sm font-semibold text-slate-950">{label}</legend>
+      <div className="flex flex-wrap gap-x-6 gap-y-1">
+        {(["add", "remove"] as const).map((value) => (
+          <label
+            className={`inline-flex min-h-11 cursor-pointer items-center gap-2.5 text-sm font-medium transition hover:text-slate-950 ${mode === value ? "text-slate-950" : "text-slate-600"}`}
+            key={value}
+          >
+            <input
+              checked={mode === value}
+              className="h-[18px] w-[18px] shrink-0 cursor-pointer rounded-full accent-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+              name="sst-calculation-mode"
+              onChange={() => onModeChange(value)}
+              type="radio"
+              value={value}
+            />
+            {value === "add" ? "Add SST" : "Remove SST"}
+          </label>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
@@ -748,7 +802,7 @@ function DropdownSelect<T extends string>({
 
   return (
     <div className="relative grid min-w-0 gap-2" ref={rootRef}>
-      <span className="text-xs font-medium text-slate-600" id={labelId}>
+      <span className="text-sm font-semibold text-slate-950" id={labelId}>
         {label}
       </span>
       <button

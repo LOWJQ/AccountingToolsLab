@@ -87,6 +87,20 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
     skipNextAutosaveRef.current = true;
   }
 
+  // Flush before downloading or switching invoices, so a fast click on
+  // "New invoice" cannot cancel the last edits waiting in the debounce.
+  const saveCurrentInvoice = useCallback(() => {
+    if (!isDraftHydrated) return false;
+    clearAutosaveTimer();
+    const { fields, profile } = splitInvoice(invoiceData);
+    const profileResult = saveBusinessProfile(profile);
+    const invoiceResult = saveInvoice(currentInvoiceIdRef.current, fields);
+    const failure = !profileResult.ok ? profileResult : !invoiceResult.ok ? invoiceResult : null;
+    setAutosaveError(failure ? getSaveErrorMessage(failure) : "");
+    refreshSavedInvoices();
+    return !failure;
+  }, [invoiceData, isDraftHydrated, refreshSavedInvoices]);
+
   useEffect(() => {
     if (hasLoadedDraftRef.current) {
       return;
@@ -132,29 +146,14 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      const { fields, profile } = splitInvoice(invoiceData);
-      // Business details are written separately so they survive "New invoice"
-      // and are stored once rather than copied onto every invoice.
-      const profileResult = saveBusinessProfile(profile);
-      const invoiceResult = saveInvoice(currentInvoiceIdRef.current, fields);
-      const failure = !profileResult.ok
-        ? profileResult
-        : !invoiceResult.ok
-          ? invoiceResult
-          : null;
-
-      setAutosaveError(failure ? getSaveErrorMessage(failure) : "");
-      setSavedInvoices(listInvoices());
-      autosaveTimerRef.current = null;
-    }, 1000);
+    const timer = window.setTimeout(saveCurrentInvoice, 1000);
 
     autosaveTimerRef.current = timer;
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [invoiceData, isDraftHydrated]);
+  }, [invoiceData, isDraftHydrated, saveCurrentInvoice]);
 
   /**
    * Points the autosave at a fresh record. The invoice on screen has already
@@ -330,6 +329,7 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
     removeSavedInvoice,
     resetEverything,
     savedInvoices,
+    saveCurrentInvoice,
     setAutosaveError,
     skipNextAutosave
   };

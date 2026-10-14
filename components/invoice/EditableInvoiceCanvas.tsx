@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { memo, useRef, useState } from "react";
-import { Download, FolderOpen, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
+import { memo, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { ChevronDown, Download, ExternalLink, FolderOpen, Plus, Repeat2, RotateCcw, Trash2, Upload, X } from "lucide-react";
 import type { InvoiceCalculationResult } from "@/lib/invoice/invoice-calculations";
 import { formatLineItemErrorForDisplay } from "@/lib/invoice/invoice-line-item-error-display";
 import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
@@ -68,6 +68,7 @@ type EditableInvoiceCanvasProps = {
   onDiscountTypeToggle: () => void;
   onDiscountValueChange: (value: string) => void;
   onDownloadInvoice: () => void;
+  onPreviewInvoice: () => void;
   onDueDateChange: (value: string) => void;
   onFieldBlur: (field: string) => void;
   onAddTax: () => void;
@@ -101,7 +102,7 @@ type EditableInvoiceCanvasProps = {
 };
 
 const editableBaseClass =
-  "w-full min-w-0 rounded-lg border border-slate-200 bg-white text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-500 focus:ring-4 focus:ring-slate-100";
+  "w-full min-w-0 scroll-mt-44 rounded-lg border border-slate-200 bg-white text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-500 focus:ring-4 focus:ring-slate-100";
 const multilineInputClass = `${editableBaseClass} px-3 py-2 text-sm leading-6`;
 
 function errorClass(error: string) {
@@ -114,7 +115,7 @@ function FieldError({ error, id }: { error: string; id: string }) {
   }
 
   return (
-    <p className="mt-1 whitespace-nowrap text-xs font-medium text-red-700" id={id}>
+    <p className="mt-1 text-xs font-medium text-red-700" id={id}>
       {error}
     </p>
   );
@@ -127,6 +128,7 @@ function EditableInput({
   error = "",
   errorId,
   inputMode,
+  label,
   max,
   maxLength,
   min,
@@ -142,6 +144,7 @@ function EditableInput({
   error?: string;
   errorId: string;
   inputMode?: "decimal" | "text";
+  label?: string;
   max?: string;
   maxLength?: number;
   min?: string;
@@ -151,13 +154,15 @@ function EditableInput({
   type?: "date" | "number" | "text" | "url";
   value: string;
 }) {
-  return (
+  const inputId = useId();
+  const input = (
     <>
       <input
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
         aria-label={ariaLabel}
         autoFocus={autoFocus}
+        id={inputId}
         className={`${editableBaseClass} h-10 px-3 text-sm ${errorClass(error)} ${className}`}
         inputMode={inputMode}
         max={max}
@@ -172,6 +177,13 @@ function EditableInput({
       <FieldError error={error} id={errorId} />
     </>
   );
+
+  return label ? (
+    <div className="min-w-0">
+      <label className="mb-1.5 block text-xs font-medium text-slate-600" htmlFor={inputId}>{label}</label>
+      {input}
+    </div>
+  ) : input;
 }
 
 function EditableTextarea({
@@ -179,6 +191,7 @@ function EditableTextarea({
   className = "",
   error = "",
   errorId,
+  label,
   maxLength,
   onBlur,
   onChange,
@@ -190,6 +203,7 @@ function EditableTextarea({
   className?: string;
   error?: string;
   errorId: string;
+  label?: string;
   maxLength?: number;
   onBlur?: () => void;
   onChange: (value: string) => void;
@@ -197,12 +211,40 @@ function EditableTextarea({
   rows?: number;
   value: string;
 }) {
-  return (
+  const inputId = useId();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    function resizeTextarea() {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight + 2, 240)}px`;
+    }
+    resizeTextarea();
+    let previousWidth = 0;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width !== previousWidth) {
+        previousWidth = entry.contentRect.width;
+        resizeTextarea();
+      }
+    });
+    if (textareaRef.current?.parentElement) observer.observe(textareaRef.current.parentElement);
+    window.addEventListener("resize", resizeTextarea);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", resizeTextarea);
+    };
+  }, [value]);
+
+  const input = (
     <>
       <textarea
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
         aria-label={ariaLabel}
+        id={inputId}
+        ref={textareaRef}
         className={`${multilineInputClass} ${errorClass(error)} ${className}`}
         maxLength={maxLength}
         onBlur={onBlur}
@@ -214,63 +256,75 @@ function EditableTextarea({
       <FieldError error={error} id={errorId} />
     </>
   );
+
+  return label ? (
+    <div className="min-w-0">
+      <label className="mb-1.5 block text-xs font-medium text-slate-600" htmlFor={inputId}>{label}</label>
+      {input}
+    </div>
+  ) : input;
 }
 
 export function EditableInvoiceActions({
   isGeneratingPdf,
   onClearEverything,
   onDownloadInvoice,
+  onPreviewInvoice,
   onOpenSavedInvoices,
-  /** "bottom" flips the divider so the bar reads as closing the form rather
-   *  than heading it. The same controls appear at both ends of a long form. */
-  placement = "top",
+  calculation,
+  formatCurrency,
   savedInvoiceCount
 }: Pick<
   EditableInvoiceCanvasProps,
   | "isGeneratingPdf"
   | "onClearEverything"
   | "onDownloadInvoice"
+  | "onPreviewInvoice"
   | "onOpenSavedInvoices"
+  | "calculation"
+  | "formatCurrency"
   | "savedInvoiceCount"
-> & { placement?: "bottom" | "top" }) {
+>) {
   return (
-    <div
-      className={`flex flex-col gap-3 bg-white p-4 sm:flex-row sm:items-center sm:justify-between ${
-        placement === "bottom" ? "border-t border-slate-200" : "border-b border-slate-200"
-      }`}
-    >
-      <div className="flex flex-wrap gap-2">
+    <div className="sticky z-30 flex min-w-0 items-center justify-between gap-2 rounded-t-lg border-b border-slate-200 bg-white p-3 transition-[top] duration-300 ease-out sm:gap-4 sm:px-4" style={{ top: "var(--site-header-visible-height, 4rem)" }}>
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <button
           className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
           onClick={onOpenSavedInvoices}
+          disabled={isGeneratingPdf}
+          aria-label="My invoices"
+          title="My invoices"
           type="button"
         >
           <FolderOpen aria-hidden="true" className="h-4 w-4" />
-          My invoices
+          <span className="hidden sm:inline">My invoices</span>
           {savedInvoiceCount > 0 ? (
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+            <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 sm:inline">
               {savedInvoiceCount}
             </span>
           ) : null}
         </button>
-        <button
-        className="inline-flex h-10 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
-          onClick={onClearEverything}
-          type="button"
-        >
+        <button aria-label="Reset invoice" title="Reset invoice" className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:opacity-60" disabled={isGeneratingPdf} onClick={onClearEverything} type="button">
           <RotateCcw aria-hidden="true" className="h-4 w-4" />
-          Reset / Clear everything
+          <span className="hidden sm:inline">Reset</span>
         </button>
       </div>
+      <div className="flex min-w-0 items-center gap-1 sm:gap-3">
+        <p className="hidden min-w-0 text-sm text-slate-600 md:block">Total <span className="ml-2 font-semibold tabular-nums text-slate-950">{formatCurrency(calculation.total)}</span></p>
+        <button aria-label="Preview PDF (opens in a new tab)" title="Preview PDF (opens in a new tab)" className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:cursor-wait disabled:opacity-60" disabled={isGeneratingPdf} onClick={onPreviewInvoice} type="button">
+          <ExternalLink aria-hidden="true" className="h-4 w-4" /><span className="hidden sm:inline">Preview</span>
+        </button>
       <button
         className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 text-sm font-semibold text-white transition hover:bg-slate-950 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-wait disabled:opacity-70"
         disabled={isGeneratingPdf}
+        aria-label={isGeneratingPdf ? "Preparing PDF" : "Download PDF"}
         onClick={onDownloadInvoice}
         type="button"
       >
         <Download aria-hidden="true" className="h-4 w-4" />
-        {isGeneratingPdf ? "Preparing PDF..." : "Preview & download"}
+        <span className="sm:hidden">{isGeneratingPdf ? "Wait..." : "PDF"}</span><span className="hidden sm:inline">{isGeneratingPdf ? "Preparing PDF..." : "Download PDF"}</span>
       </button>
+      </div>
     </div>
   );
 }
@@ -324,7 +378,7 @@ function EditableInvoiceLogo({
     <div className="grid justify-items-start gap-2 sm:justify-items-end">
       <button
         aria-label={businessLogoDataUrl ? "Replace business logo" : "Upload logo"}
-        className="group flex min-h-20 w-40 items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus:border-slate-500 focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className={`group flex w-40 items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus:border-slate-500 focus:outline-none focus:ring-4 focus:ring-slate-100 ${businessLogoDataUrl ? "min-h-20" : "min-h-11"}`}
         disabled={isProcessing}
         onClick={openLogoPicker}
         type="button"
@@ -341,7 +395,7 @@ function EditableInvoiceLogo({
         ) : (
           <span className="inline-flex items-center gap-2">
             <Upload aria-hidden="true" className="h-4 w-4" />
-            Upload logo
+            Add logo
           </span>
         )}
       </button>
@@ -373,7 +427,7 @@ function EditableInvoiceLogo({
       ) : null}
       <p
         aria-live="polite"
-        className={`min-h-4 text-xs ${
+        className={`text-xs ${
           message === "Processing logo..." ? "text-stone-500" : "font-medium text-red-700"
         }`}
       >
@@ -388,9 +442,10 @@ export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
     <header className="grid gap-6 border-b border-slate-200 pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
       <div className="min-w-0">
         <p className="mb-3 text-sm font-semibold text-slate-950">Business information</p>
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           <EditableInput
             ariaLabel="Business name"
+            label="Business name"
             autoFocus
             className="h-11 text-base font-semibold"
             error={props.businessNameError}
@@ -403,6 +458,7 @@ export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
           />
           <EditableInput
             ariaLabel="Business email or phone"
+            label="Email or phone"
             error={props.businessContactError}
             errorId="business-contact-error"
             maxLength={INVOICE_TEXT_MAX_LENGTHS.businessContact}
@@ -413,6 +469,7 @@ export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
           />
           <EditableTextarea
             ariaLabel="Business address"
+            label="Business address"
             error={props.businessAddressError}
             errorId="business-address-error"
             maxLength={INVOICE_TEXT_MAX_LENGTHS.businessAddress}
@@ -425,7 +482,7 @@ export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
         </div>
       </div>
 
-      <div className="grid min-w-0 gap-4 text-left sm:justify-items-end sm:text-right">
+      <div className="grid min-w-0 content-start gap-4 text-left sm:justify-items-end sm:text-right">
         <EditableInvoiceLogo
           businessLogoDataUrl={props.businessLogoDataUrl}
           businessName={props.businessName}
@@ -459,9 +516,10 @@ function EditableInvoiceCustomerAndDates(props: EditableInvoiceCanvasProps) {
     <section className="mt-6 grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
       <div className="min-w-0">
         <p className="mb-3 text-sm font-semibold text-slate-950">Bill to</p>
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           <EditableInput
             ariaLabel="Customer name"
+            label="Customer name"
             className="h-10 text-sm"
             error={props.customerNameError}
             errorId="customer-name-error"
@@ -473,6 +531,7 @@ function EditableInvoiceCustomerAndDates(props: EditableInvoiceCanvasProps) {
           />
           <EditableInput
             ariaLabel="Customer email or phone"
+            label="Email or phone"
             error={props.customerContactError}
             errorId="customer-contact-error"
             maxLength={INVOICE_TEXT_MAX_LENGTHS.customerContact}
@@ -483,6 +542,7 @@ function EditableInvoiceCustomerAndDates(props: EditableInvoiceCanvasProps) {
           />
           <EditableTextarea
             ariaLabel="Customer address"
+            label="Customer address"
             error={props.customerAddressError}
             errorId="customer-address-error"
             maxLength={INVOICE_TEXT_MAX_LENGTHS.customerAddress}
@@ -1033,6 +1093,31 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
   );
 }
 
+function OptionalPaymentSection({ children, hasContent, hasError, label, emptyLabel }: {
+  children: ReactNode;
+  hasContent: boolean;
+  hasError: boolean;
+  label: string;
+  emptyLabel: string;
+}) {
+  const [isOpen, setIsOpen] = useState(hasContent || hasError);
+  const contentId = useId();
+
+  useEffect(() => {
+    if (hasContent || hasError) setIsOpen(true);
+  }, [hasContent, hasError]);
+
+  return (
+    <div className="border-b border-slate-200 last:border-b-0">
+      <button aria-controls={contentId} aria-expanded={isOpen} className="flex min-h-12 w-full items-center justify-between gap-3 py-3 text-left text-sm font-medium text-slate-700 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300" onClick={() => setIsOpen((open) => !open)} type="button">
+        <span>{isOpen || hasContent ? label : emptyLabel}</span>
+        <ChevronDown aria-hidden="true" className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      <div className="pb-4" hidden={!isOpen} id={contentId}>{children}</div>
+    </div>
+  );
+}
+
 export function EditableInvoicePaymentDetails({
   onPaymentChange,
   onPaymentFieldBlur,
@@ -1081,12 +1166,13 @@ export function EditableInvoicePaymentDetails({
 
   return (
     <section className="mt-8 border-t border-slate-200 pt-6">
-      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.86fr)]">
-        <div className="min-w-0">
-          <h3 className="mb-3 text-sm font-semibold text-slate-950">Payment details</h3>
-          <div className="grid gap-2">
+      <h3 className="text-sm font-semibold text-slate-950">Payment details <span className="ml-1 font-normal text-slate-500">(optional)</span></h3>
+      <p className="mt-2 mb-3 text-sm leading-6 text-slate-600">Add the ways your customer can pay. You can include more than one.</p>
+      <OptionalPaymentSection emptyLabel="Add bank details" label="Bank details" hasContent={Boolean(payment.bankName || payment.accountName || payment.accountNumber)} hasError={Boolean(paymentErrors.bankName || paymentErrors.accountName || paymentErrors.accountNumber)}>
+          <div className="grid gap-3 sm:grid-cols-3">
             <EditableInput
               ariaLabel="Bank name"
+              label="Bank name"
               error={paymentErrors.bankName ?? ""}
               errorId="payment-bank-name-error"
               maxLength={INVOICE_TEXT_MAX_LENGTHS.bankName}
@@ -1097,6 +1183,7 @@ export function EditableInvoicePaymentDetails({
             />
             <EditableInput
               ariaLabel="Account holder name"
+              label="Account holder name"
               error={paymentErrors.accountName ?? ""}
               errorId="payment-account-name-error"
               maxLength={INVOICE_TEXT_MAX_LENGTHS.accountName}
@@ -1107,6 +1194,7 @@ export function EditableInvoicePaymentDetails({
             />
             <EditableInput
               ariaLabel="Account number"
+              label="Account number"
               error={paymentErrors.accountNumber ?? ""}
               errorId="payment-account-number-error"
               maxLength={INVOICE_TEXT_MAX_LENGTHS.accountNumber}
@@ -1115,8 +1203,14 @@ export function EditableInvoicePaymentDetails({
               placeholder="Account number"
               value={payment.accountNumber}
             />
+          </div>
+      </OptionalPaymentSection>
+      <OptionalPaymentSection emptyLabel="Add DuitNow / QR" label="DuitNow / QR" hasContent={Boolean(payment.duitNowId || payment.paymentQrDataUrl)} hasError={Boolean(paymentErrors.duitNowId || qrMessage)}>
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="min-w-0">
             <EditableInput
               ariaLabel="DuitNow ID"
+              label="DuitNow ID"
               error={paymentErrors.duitNowId ?? ""}
               errorId="payment-duitnow-id-error"
               maxLength={INVOICE_TEXT_MAX_LENGTHS.duitNowId}
@@ -1125,36 +1219,13 @@ export function EditableInvoicePaymentDetails({
               placeholder="DuitNow ID"
               value={payment.duitNowId}
             />
-            <EditableInput
-              ariaLabel="Payment link"
-              error={paymentErrors.paymentLink ?? ""}
-              errorId="payment-link-error"
-              maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentLink}
-              onBlur={() => onPaymentFieldBlur("paymentLink")}
-              onChange={(value) => onPaymentChange("paymentLink", value)}
-              placeholder="Payment link"
-              type="url"
-              value={payment.paymentLink}
-            />
-            <EditableTextarea
-              ariaLabel="Payment notes"
-              error={paymentErrors.notes ?? ""}
-              errorId="payment-notes-error"
-              maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentNotes}
-              onBlur={() => onPaymentFieldBlur("notes")}
-              onChange={(value) => onPaymentChange("notes", value)}
-              placeholder="Payment notes"
-              rows={2}
-              value={payment.notes}
-            />
           </div>
-        </div>
 
         <div className="min-w-0">
-          <h3 className="mb-3 text-sm font-semibold text-slate-950">Payment QR image</h3>
+          <p className="mb-1.5 text-xs font-medium text-slate-600">Payment QR image</p>
           <button
             aria-label={payment.paymentQrDataUrl ? "Replace payment QR image" : "Upload payment QR image"}
-            className="flex min-h-32 w-40 items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-center text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus:border-slate-500 focus:outline-none focus:ring-4 focus:ring-slate-100"
+            className={`flex w-40 items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-center text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus:border-slate-500 focus:outline-none focus:ring-4 focus:ring-slate-100 ${payment.paymentQrDataUrl ? "min-h-32" : "min-h-11"}`}
             disabled={isProcessingQr}
             onClick={openQrPicker}
             type="button"
@@ -1169,7 +1240,7 @@ export function EditableInvoicePaymentDetails({
                 width={112}
               />
             ) : (
-              <span className="inline-flex flex-col items-center gap-2">
+              <span className="inline-flex items-center gap-2">
                 <Upload aria-hidden="true" className="h-4 w-4" />
                 Upload QR
               </span>
@@ -1210,7 +1281,36 @@ export function EditableInvoicePaymentDetails({
             {qrMessage}
           </p>
         </div>
-      </div>
+        </div>
+      </OptionalPaymentSection>
+      <OptionalPaymentSection emptyLabel="Add payment link" label="Payment link" hasContent={Boolean(payment.paymentLink)} hasError={Boolean(paymentErrors.paymentLink)}>
+        <EditableInput
+          ariaLabel="Payment link"
+          label="Payment link"
+          error={paymentErrors.paymentLink ?? ""}
+          errorId="payment-link-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentLink}
+          onBlur={() => onPaymentFieldBlur("paymentLink")}
+          onChange={(value) => onPaymentChange("paymentLink", value)}
+          placeholder="https://example.com/pay"
+          type="url"
+          value={payment.paymentLink}
+        />
+      </OptionalPaymentSection>
+      <OptionalPaymentSection emptyLabel="Add payment notes" label="Payment notes" hasContent={Boolean(payment.notes)} hasError={Boolean(paymentErrors.notes)}>
+        <EditableTextarea
+          ariaLabel="Payment notes"
+          label="Payment notes"
+          error={paymentErrors.notes ?? ""}
+          errorId="payment-notes-error"
+          maxLength={INVOICE_TEXT_MAX_LENGTHS.paymentNotes}
+          onBlur={() => onPaymentFieldBlur("notes")}
+          onChange={(value) => onPaymentChange("notes", value)}
+          placeholder="Add payment instructions"
+          rows={2}
+          value={payment.notes}
+        />
+      </OptionalPaymentSection>
     </section>
   );
 }
@@ -1229,7 +1329,7 @@ function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
             onBlur={() => props.onFieldBlur("notes")}
             onChange={props.onNotesChange}
             placeholder="Add any notes for this invoice"
-            rows={4}
+            rows={2}
             value={props.notes}
           />
         </div>
@@ -1243,7 +1343,7 @@ function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
           onBlur={() => props.onFieldBlur("terms")}
           onChange={props.onTermsChange}
           placeholder="Add terms & conditions"
-          rows={4}
+          rows={2}
           value={props.terms}
         />
         </div>
@@ -1254,11 +1354,14 @@ function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
 
 export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <div className="relative rounded-lg border border-slate-200 bg-white">
       <EditableInvoiceActions
+        calculation={props.calculation}
+        formatCurrency={props.formatCurrency}
         isGeneratingPdf={props.isGeneratingPdf}
         onClearEverything={props.onClearEverything}
         onDownloadInvoice={props.onDownloadInvoice}
+        onPreviewInvoice={props.onPreviewInvoice}
         onOpenSavedInvoices={props.onOpenSavedInvoices}
         savedInvoiceCount={props.savedInvoiceCount}
       />
@@ -1308,14 +1411,6 @@ export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
         <EditableInvoiceNotesAndTerms {...props} />
       </div>
 
-      <EditableInvoiceActions
-        isGeneratingPdf={props.isGeneratingPdf}
-        onClearEverything={props.onClearEverything}
-        onDownloadInvoice={props.onDownloadInvoice}
-        onOpenSavedInvoices={props.onOpenSavedInvoices}
-        placement="bottom"
-        savedInvoiceCount={props.savedInvoiceCount}
-      />
     </div>
   );
 }
