@@ -24,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/about", lastModified: "2026-07-05" },
     { path: "/editorial-policy", lastModified: "2026-08-19" },
     { path: "/contact", lastModified: "2026-07-05" },
-    { path: "/privacy-policy", lastModified: "2026-10-13" },
+    { path: "/privacy-policy", lastModified: "2026-10-25" },
     { path: "/terms", lastModified: "2026-07-03" }
   ];
 

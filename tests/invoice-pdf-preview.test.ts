@@ -42,6 +42,13 @@ async function runTests() {
     console.log("PASS preview opens synchronously, fits the page, and keeps the PDF URL alive");
 
     events.length = 0;
+    const receiptPreview = await openInvoicePdfPreview(async () => pdf, "Receipt");
+    assert.equal(receiptPreview.status, "opened");
+    assert.equal(tab.document.title, "Receipt preview");
+    assert.equal(tab.document.body.textContent, "Preparing receipt...");
+    console.log("PASS receipt preview uses receipt wording with the same safe PDF-tab flow");
+
+    events.length = 0;
     blocked = true;
     assert.deepEqual(await openInvoicePdfPreview(async () => { throw new Error("must not run"); }), { status: "blocked" });
     assert.deepEqual(events, ["open:about:blank:_blank"]);

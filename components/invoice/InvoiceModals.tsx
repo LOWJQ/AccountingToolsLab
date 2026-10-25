@@ -4,12 +4,14 @@ import { useEffect, useRef } from "react";
 import { trapModalFocus } from "@/components/invoice/modal-focus";
 
 type InvoiceModalsProps = {
+  documentKind?: "invoice" | "receipt";
   isClearEverythingModalOpen: boolean;
   onCancelClearEverything: () => void;
   onConfirmClearEverything: () => void;
 };
 
 export function InvoiceModals({
+  documentKind = "invoice",
   isClearEverythingModalOpen,
   onCancelClearEverything,
   onConfirmClearEverything
@@ -92,12 +94,12 @@ export function InvoiceModals({
               className="mt-2 text-xl font-semibold tracking-tight text-stone-950"
               id="clear-invoice-draft-title"
             >
-              Clear this invoice and your business details?
+              Clear this {documentKind} and your business details?
             </h2>
             <p className="mt-3 text-sm leading-6 text-stone-600">
-              This clears the invoice you are working on and the saved business details, logo,
-              and payment information. Your other saved invoices are not affected, and your last
-              used invoice number stays the same.
+              {documentKind === "receipt"
+                ? "This clears the current receipt and your saved receipt business details and logo. Other saved receipts and your last used receipt number are kept."
+                : "This clears the invoice you are working on and the saved business details, logo, and payment information. Your other saved invoices are not affected, and your last used invoice number stays the same."}
             </p>
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button

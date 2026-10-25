@@ -1,4 +1,4 @@
-import { ReceiptGenerator } from "@/components/calculators/ReceiptGenerator";
+import { ReceiptGeneratorWorkspace } from "@/components/receipt/ReceiptGeneratorWorkspace";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { FAQJsonLd } from "@/components/seo/FAQJsonLd";
 import { SoftwareApplicationJsonLd } from "@/components/seo/SoftwareApplicationJsonLd";
@@ -46,12 +46,12 @@ const receiptFaqs = [
   {
     question: "Does my data get uploaded anywhere?",
     answer:
-      "No. The receipt is built and turned into a PDF entirely in your browser. Nothing you type is sent to a server, and there is no sign-up."
+      "The receipt and PDF are created in your browser without uploading your receipt details or logo. Edits are saved automatically in this browser on this device when storage is available. My receipts lets you export or restore a receipt backup."
   },
   {
     question: "Can I number receipts automatically?",
     answer:
-      "Yes. If your receipt number ends in digits, such as REC-001, the number moves on to the next one after each download. You can always type a different number yourself."
+      "Yes. If your receipt number ends in digits, such as REC-001, New receipt suggests the next available number and keeps your business details and logo. You can always type a different number yourself."
   }
 ];
 
@@ -77,7 +77,7 @@ const steps = [
   "Fill in your business details and who the payment came from.",
   "Enter the receipt number, the date paid, and the payment method.",
   "List what the payment covered, with quantity and unit price.",
-  "Add tax or notes if you need them, then download the PDF."
+  "Add tax or notes, preview the receipt, then download the PDF."
 ];
 
 const receiptChecks = [
@@ -143,7 +143,7 @@ export default function ReceiptGeneratorPage() {
         </ol>
       </nav>
 
-      <div className="max-w-6xl">
+      <ReceiptGeneratorWorkspace intro={<div className="max-w-6xl">
         <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Free Receipt Generator
         </h1>
@@ -151,9 +151,7 @@ export default function ReceiptGeneratorPage() {
           Create a payment receipt PDF that records who paid, what for, how much, and how they
           paid. No sign-up, and nothing leaves your browser.
         </p>
-      </div>
-
-      <ReceiptGenerator />
+      </div>}>
 
       {/* Sits below the tool: someone arriving from a search for a generator
           wants the generator, not an essay. The wording is kept self-contained
@@ -178,6 +176,11 @@ export default function ReceiptGeneratorPage() {
         </p>
       </section>
 
+      <section className="border-t border-slate-200 pt-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Where are my receipts saved?</h2>
+        <p className="mt-3 text-base leading-7 text-black">Edits save automatically in this browser on this device, for up to 50 receipts. New receipt keeps your business details and logo. Use My receipts to reopen, duplicate, or delete receipts, and export a receipt backup before clearing browser data. Restore backup accepts the .json file from My receipts; invoice backups are separate. Keep backups private. There is no automatic syncing between devices.</p>
+        <p className="mt-3 text-base leading-7 text-black">Reset clears the current receipt and saved receipt business details and logo. Other receipts and the last used number are kept. Clear this website’s browser data to remove all local records. Read the <Link className="underline underline-offset-4" href="/privacy-policy">Privacy Policy</Link> for details.</p>
+      </section>
       <p className="text-base leading-7 text-black">
         A receipt is proof that money has already changed hands, so it works differently from an
         invoice. There is no due date and no bank details for the customer to pay into. Instead it
@@ -315,6 +318,7 @@ export default function ReceiptGeneratorPage() {
       <section className="[&_details>p]:text-base [&_details>p]:leading-7 [&_details>p]:text-black [&_h2]:text-3xl [&_summary]:text-base [&_summary]:leading-7 [&_summary]:text-black sm:[&_h2]:text-4xl">
         <FAQSection eyebrow="" faqs={receiptFaqs} title="Receipt Generator FAQs" />
       </section>
+      </ReceiptGeneratorWorkspace>
     </ToolPageLayout>
   );
 }

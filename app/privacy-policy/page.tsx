@@ -44,6 +44,7 @@ const privacySections = [
       "When browser storage is available, the invoice generator automatically saves your invoice edits in this browser. It can keep up to 50 invoices, including customer details, dates, item descriptions, prices, taxes, discounts, and notes. It also remembers the last used invoice number.",
       "Your business details are saved separately and reused across invoices. These include your business name, contact details, address, logo, payment details, payment QR image, and terms. Logos and QR images can remain saved after closing the page or starting a new invoice.",
       "Saved invoices and business details are kept in this browser on this device, without an online account or automatic syncing to other devices. Anyone with access to the same browser profile may be able to open them. If browser storage is blocked or full, changes may remain available only while the page is open.",
+      "The receipt generator saves up to 50 receipts and a separate receipt business profile and logo in this browser. New receipts reuse those business details. On first use, existing invoice business details may be copied into the receipt profile; invoice records and receipt records remain separate. My receipts provides open, duplicate, delete, export backup, and restore backup actions. Reset clears the current receipt and the receipt profile, keeping other receipt records and the last used number. Receipt backups are separate from invoice backups and include private receipt details and the logo. Clearing this website’s browser data removes saved receipts too.",
       "Analytics, hosting, security, and performance services may use technical signals or similar technologies to measure usage, protect the contact form, and keep the website working."
     ]
   },
@@ -131,7 +132,7 @@ export default function PrivacyPolicyPage() {
             <p className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
               <span className="h-2 w-2 rounded-full bg-teal-600" aria-hidden="true" />
               <span>Last updated</span>
-              <time className="text-slate-950" dateTime="2026-10-13">October 13, 2026</time>
+              <time className="text-slate-950" dateTime="2026-10-25">October 25, 2026</time>
             </p>
             <div className="mt-8 border-t border-slate-200" />
           </Container>

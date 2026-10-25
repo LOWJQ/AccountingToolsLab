@@ -121,7 +121,7 @@ function FieldError({ error, id }: { error: string; id: string }) {
   );
 }
 
-function EditableInput({
+export function EditableInput({
   ariaLabel,
   autoFocus = false,
   className = "",
@@ -186,7 +186,7 @@ function EditableInput({
   ) : input;
 }
 
-function EditableTextarea({
+export function EditableTextarea({
   ariaLabel,
   className = "",
   error = "",
@@ -273,7 +273,8 @@ export function EditableInvoiceActions({
   onOpenSavedInvoices,
   calculation,
   formatCurrency,
-  savedInvoiceCount
+  savedInvoiceCount,
+  documentKind = "invoice"
 }: Pick<
   EditableInvoiceCanvasProps,
   | "isGeneratingPdf"
@@ -284,7 +285,7 @@ export function EditableInvoiceActions({
   | "calculation"
   | "formatCurrency"
   | "savedInvoiceCount"
->) {
+> & { documentKind?: "invoice" | "receipt" }) {
   return (
     <div className="sticky z-30 flex min-w-0 items-center justify-between gap-2 rounded-t-lg border-b border-slate-200 bg-white p-3 transition-[top] duration-300 ease-out sm:gap-4 sm:px-4" style={{ top: "var(--site-header-visible-height, 4rem)" }}>
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -292,25 +293,25 @@ export function EditableInvoiceActions({
           className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
           onClick={onOpenSavedInvoices}
           disabled={isGeneratingPdf}
-          aria-label="My invoices"
-          title="My invoices"
+          aria-label={`My ${documentKind}s`}
+          title={`My ${documentKind}s`}
           type="button"
         >
           <FolderOpen aria-hidden="true" className="h-4 w-4" />
-          <span className="hidden sm:inline">My invoices</span>
+          <span className="hidden sm:inline">My {documentKind}s</span>
           {savedInvoiceCount > 0 ? (
             <span className="hidden rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 sm:inline">
               {savedInvoiceCount}
             </span>
           ) : null}
         </button>
-        <button aria-label="Reset invoice" title="Reset invoice" className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:opacity-60" disabled={isGeneratingPdf} onClick={onClearEverything} type="button">
+        <button aria-label={`Reset ${documentKind}`} title={`Reset ${documentKind}`} className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:opacity-60" disabled={isGeneratingPdf} onClick={onClearEverything} type="button">
           <RotateCcw aria-hidden="true" className="h-4 w-4" />
           <span className="hidden sm:inline">Reset</span>
         </button>
       </div>
       <div className="flex min-w-0 items-center gap-1 sm:gap-3">
-        <p className="hidden min-w-0 text-sm text-slate-600 md:block">Total <span className="ml-2 font-semibold tabular-nums text-slate-950">{formatCurrency(calculation.total)}</span></p>
+        <p className="hidden min-w-0 text-sm text-slate-600 lg:block">Total <span className="ml-2 font-semibold tabular-nums text-slate-950">{formatCurrency(calculation.total)}</span></p>
         <button aria-label="Preview PDF (opens in a new tab)" title="Preview PDF (opens in a new tab)" className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:cursor-wait disabled:opacity-60" disabled={isGeneratingPdf} onClick={onPreviewInvoice} type="button">
           <ExternalLink aria-hidden="true" className="h-4 w-4" /><span className="hidden sm:inline">Preview</span>
         </button>
@@ -329,7 +330,7 @@ export function EditableInvoiceActions({
   );
 }
 
-function EditableInvoiceLogo({
+export function EditableInvoiceLogo({
   businessLogoDataUrl,
   businessName,
   onBusinessLogoChange
@@ -702,7 +703,8 @@ export function EditableInvoiceLineItems({
   onAddLineItem,
   onLineItemBlur,
   onRemoveLineItem,
-  onUpdateLineItem
+  onUpdateLineItem,
+  title = "Invoice items"
 }: Pick<
   EditableInvoiceCanvasProps,
   | "formatCurrency"
@@ -714,10 +716,10 @@ export function EditableInvoiceLineItems({
   | "onLineItemBlur"
   | "onRemoveLineItem"
   | "onUpdateLineItem"
->) {
+> & { title?: string }) {
   return (
     <section className="mt-7">
-      <h3 className="mb-3 text-sm font-semibold text-slate-950">Invoice items</h3>
+      <h3 className="mb-3 text-sm font-semibold text-slate-950">{title}</h3>
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <div className="hidden min-w-[720px] border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:gap-3 sm:px-4">
           <span>No</span>
@@ -888,7 +890,7 @@ function EditableTaxRow({
   );
 }
 
-export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
+export function EditableInvoiceTotals(props: Pick<EditableInvoiceCanvasProps, "calculation" | "currencySymbol" | "discount" | "discountError" | "discountLabelError" | "formatCurrency" | "getTaxError" | "onAddTax" | "onDiscountEnabledChange" | "onDiscountLabelChange" | "onDiscountTypeToggle" | "onDiscountValueChange" | "onFieldBlur" | "onRemoveTax" | "onShippingAmountChange" | "onShippingEnabledChange" | "onShippingLabelChange" | "onTaxLabelChange" | "onTaxTypeChange" | "onTaxValueChange" | "shipping" | "shippingError" | "shippingLabelError" | "tax"> & { totalLabel?: string }) {
   const discountValueIsPercentage = props.discount.type === "percentage";
 
   return (
@@ -1085,7 +1087,7 @@ export function EditableInvoiceTotals(props: EditableInvoiceCanvasProps) {
         )}
 
         <div className="mt-3 flex justify-between gap-4 border-t border-slate-300 pt-3 text-lg font-semibold text-slate-950">
-          <span>Total</span>
+          <span>{props.totalLabel ?? "Total"}</span>
           <span className="tabular-nums">{props.formatCurrency(props.calculation.total)}</span>
         </div>
       </div>

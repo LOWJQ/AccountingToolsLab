@@ -6,7 +6,8 @@ export type InvoicePdfPreviewResult =
 
 /** Open during the click, before async PDF generation consumes user activation. */
 export async function openInvoicePdfPreview(
-  generatePdf: () => Promise<InvoicePdfGenerationResult>
+  generatePdf: () => Promise<InvoicePdfGenerationResult>,
+  documentName = "Invoice"
 ): Promise<InvoicePdfPreviewResult> {
   const tab = window.open("about:blank", "_blank");
   if (!tab) return { status: "blocked" };
@@ -14,8 +15,8 @@ export async function openInvoicePdfPreview(
   let url = "";
   try {
     tab.opener = null;
-    tab.document.title = "Invoice preview";
-    tab.document.body.textContent = "Preparing invoice...";
+    tab.document.title = `${documentName} preview`;
+    tab.document.body.textContent = `Preparing ${documentName.toLowerCase()}...`;
 
     const pdf = await generatePdf();
     if (!pdf.blob || !pdf.fileName) throw new Error("Invoice PDF could not be created.");

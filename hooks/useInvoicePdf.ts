@@ -42,6 +42,7 @@ export function useInvoicePdf({
   pdfParams,
   saveUsedInvoiceNumber
 }: UseInvoicePdfInput) {
+  const documentName = pdfParams.labels?.documentName ?? "Invoice";
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfStatus, setPdfStatus] = useState<InvoicePdfStatus | null>(null);
   const [pdfStage, setPdfStage] = useState<InvoicePdfStage>("closed");
@@ -89,7 +90,7 @@ export function useInvoicePdf({
     try {
       let result: InvoicePdfGenerationResult;
       if (action === "preview") {
-        const preview = await openInvoicePdfPreview(generatePdf);
+        const preview = await openInvoicePdfPreview(generatePdf, documentName);
         if (preview.status !== "opened") {
           setPdfStatus({ type: "warning", message: preview.status === "blocked"
             ? "Allow popups to preview, or use Download PDF."
@@ -107,7 +108,7 @@ export function useInvoicePdf({
       }
 
       if (result.warnings.length > 0) {
-        setPdfStatus({ message: getPdfWarningMessage(result), type: "warning" });
+        setPdfStatus({ message: getPdfWarningMessage(result).replace(/invoice/g, documentName.toLowerCase()), type: "warning" });
       }
 
       if (action === "download") {
@@ -124,7 +125,7 @@ export function useInvoicePdf({
     } catch {
       setPdfStatus({
         message:
-          "Invoice PDF could not be generated. Please try again, or remove uploaded images and download again.",
+          `${documentName} PDF could not be generated. Please try again, or remove uploaded images and download again.`,
         type: "error"
       });
       setPdfStage("closed");
@@ -134,6 +135,7 @@ export function useInvoicePdf({
     }
   }, [
     generatePdf,
+    documentName,
     invoiceNumber,
     pdfParams,
     saveUsedInvoiceNumber

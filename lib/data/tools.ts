@@ -28,7 +28,7 @@ export const tools: Tool[] = [
     href: "/tools/receipt-generator",
     status: "mvp",
     category: "generator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "sst-calculator-malaysia",
