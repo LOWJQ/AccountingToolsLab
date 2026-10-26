@@ -75,6 +75,10 @@ const whenToUseItems = [
 
 const relatedTools = [
   {
+    href: "/tools/bank-reconciliation",
+    label: "Bank Reconciliation Matcher"
+  },
+  {
     href: "/tools/invoice-generator",
     label: "Create a PDF Invoice"
   },

@@ -74,6 +74,18 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders
+      },
+      {
+        source: "/tools/bank-reconciliation",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: contentSecurityPolicy
+              .replace(/connect-src [^;]+/, "connect-src 'self'")
+              .replace(/script-src [^;]+/, `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`)
+              .replace(/img-src [^;]+/, "img-src 'self' data: blob:")
+          }
+        ]
       }
     ];
   },

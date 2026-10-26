@@ -10,7 +10,7 @@ import { createItemListSchema } from "@/lib/seo/schema";
 export const metadata = createMetadata({
   title: "All Accounting Tools | Free Calculators and Invoice Tools",
   description:
-    "Free accounting tools for Malaysia — invoice and receipt generators, SST and business calculators, plus checkers for LHDN e-Invoice rules and journal entries.",
+    "Free accounting tools for Malaysia — invoice and receipt generators, bank reconciliation, SST and business calculators, plus e-Invoice and journal entry checkers.",
   path: "/tools"
 });
 

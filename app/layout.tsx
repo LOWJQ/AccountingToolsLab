@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import type { ReactNode } from "react";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SiteTelemetry } from "@/components/analytics/SiteTelemetry";
 import "./globals.css";
 import { CurrencyProvider } from "@/components/currency/CurrencyProvider";
 import { Footer } from "@/components/layout/Footer";
@@ -78,8 +77,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </CurrencyProvider>
-        <Analytics />
-        <SpeedInsights />
+        <SiteTelemetry />
       </body>
     </html>
   );

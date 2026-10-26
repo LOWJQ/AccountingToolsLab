@@ -42,6 +42,17 @@ export const tools: Tool[] = [
     lastModified: "2026-10-13"
   },
   {
+    slug: "bank-reconciliation",
+    name: "Free Bank Reconciliation Matcher",
+    menuTitle: "Bank Reconciliation",
+    description: "Match bank statement and cashbook CSV transactions, review differences, and download a working paper. Files stay in your browser.",
+    menuDescription: "Match bank and cashbook CSVs privately.",
+    href: "/tools/bank-reconciliation",
+    status: "mvp",
+    category: "checker",
+    lastModified: "2026-10-25"
+  },
+  {
     slug: "e-invoice-checker-malaysia",
     name: "e-Invoice Checker Malaysia",
     menuTitle: "e-Invoice Checker",
@@ -51,7 +62,7 @@ export const tools: Tool[] = [
     href: "/tools/e-invoice-checker-malaysia",
     status: "mvp",
     category: "checker",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "e-invoice-code-lookup-malaysia",
@@ -63,7 +74,7 @@ export const tools: Tool[] = [
     href: "/tools/e-invoice-code-lookup-malaysia",
     status: "mvp",
     category: "checker",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "cash-flow-calculator",
@@ -74,7 +85,7 @@ export const tools: Tool[] = [
     href: "/tools/cash-flow-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "break-even-calculator",
@@ -85,7 +96,7 @@ export const tools: Tool[] = [
     href: "/tools/break-even-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "financial-ratio-calculator",
@@ -95,7 +106,7 @@ export const tools: Tool[] = [
     href: "/tools/financial-ratio-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "depreciation-calculator",
@@ -106,7 +117,7 @@ export const tools: Tool[] = [
     href: "/tools/depreciation-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "trial-balance-calculator",
@@ -127,7 +138,7 @@ export const tools: Tool[] = [
     href: "/tools/journal-entry-checker",
     status: "mvp",
     category: "checker",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "debit-credit-checker",
@@ -138,7 +149,7 @@ export const tools: Tool[] = [
     href: "/tools/debit-credit-checker",
     status: "mvp",
     category: "checker",
-    lastModified: "2026-08-19"
+    lastModified: "2026-10-25"
   },
   {
     slug: "accounting-equation-calculator",

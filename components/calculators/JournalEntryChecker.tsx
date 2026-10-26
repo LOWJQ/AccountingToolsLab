@@ -1,6 +1,7 @@
 "use client";
 
-import { Info, Plus, RotateCcw } from "lucide-react";
+import { Check, Minus, Plus, TriangleAlert, X } from "lucide-react";
+import { ToolNote, ToolReset, ToolResultRows, ToolWorkspace, toolButtonClass, toolInputClass } from "@/components/tools/ToolWorkspace";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { checkJournalEntry, type JournalEntryLine } from "@/lib/calculators/journal-entry";
@@ -12,9 +13,9 @@ type EditableJournalEntryLine = {
   credit: string;
 };
 
-function createLine(index: number): EditableJournalEntryLine {
+function createLine(index: number, id = `line-${index}`): EditableJournalEntryLine {
   return {
-    id: `line-${Date.now()}-${index}`,
+    id,
     accountName: "",
     debit: "",
     credit: ""
@@ -37,12 +38,14 @@ type JournalEntryLineField = keyof Omit<EditableJournalEntryLine, "id">;
 const JournalEntryLineEditor = memo(function JournalEntryLineEditor({
   canRemove,
   index,
+  currency,
   line,
   onRemove,
   onUpdate
 }: {
   canRemove: boolean;
   index: number;
+  currency: string;
   line: EditableJournalEntryLine;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: JournalEntryLineField, value: string) => void;
@@ -53,67 +56,22 @@ const JournalEntryLineEditor = memo(function JournalEntryLineEditor({
   const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
   return (
-    <div className="grid min-w-0 gap-3 rounded-lg border border-slate-200 bg-white p-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_6rem] lg:border-0 lg:p-0">
-      <label className="grid min-w-0 gap-2">
-        <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
-          Account Name
-        </span>
-        <input
-          aria-label={`Line ${index + 1} account name`}
-          className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-base text-black outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-          onChange={(event) => onUpdate(line.id, "accountName", event.target.value)}
-          placeholder="Account name"
-          value={line.accountName}
-        />
-      </label>
-
-      <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:contents">
-        <label className="grid min-w-0 gap-2">
-          <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
-            Debit
-          </span>
-          <input
-            aria-label={`Line ${index + 1} debit amount`}
-            className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-right text-base text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-            disabled={hasCredit}
-            inputMode="decimal"
-            min="0"
-            onChange={(event) => onUpdate(line.id, "debit", event.target.value)}
-            placeholder="0.00"
-            step="0.01"
-            type="number"
-            value={line.debit}
-          />
+    <div className="min-w-0 border-t border-slate-200 py-4 first:border-t-0 first:pt-0 lg:border-0 lg:p-0">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.75rem] gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_2.75rem]">
+        <label className="col-span-3 grid min-w-0 gap-2 lg:col-span-1">
+          <span className="text-xs font-medium text-slate-600 lg:hidden">Account name</span>
+          <input aria-label={`Line ${index + 1} account name`} className={toolInputClass} name={`account-${line.id}`} onChange={e => onUpdate(line.id, "accountName", e.target.value)} placeholder="Account name" value={line.accountName} />
         </label>
-
         <label className="grid min-w-0 gap-2">
-          <span className="text-xs font-semibold uppercase text-slate-500 lg:hidden">
-            Credit
-          </span>
-          <input
-            aria-label={`Line ${index + 1} credit amount`}
-            className="h-10 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-4 text-right text-base text-black outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 hover:border-slate-300 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
-            disabled={hasDebit}
-            inputMode="decimal"
-            min="0"
-            onChange={(event) => onUpdate(line.id, "credit", event.target.value)}
-            placeholder="0.00"
-            step="0.01"
-            type="number"
-            value={line.credit}
-          />
+          <span className="text-xs font-medium text-slate-600 lg:hidden">Debit ({currency})</span>
+          <input aria-label={`Line ${index + 1} debit amount`} aria-invalid={parsedDebit === null || undefined} className={`${toolInputClass} text-right tabular-nums`} disabled={hasCredit} inputMode="decimal" min="0" name={`debit-${line.id}`} onChange={e => onUpdate(line.id, "debit", e.target.value)} placeholder="0.00" step="0.01" type="number" value={line.debit} />
         </label>
+        <label className="grid min-w-0 gap-2">
+          <span className="text-xs font-medium text-slate-600 lg:hidden">Credit ({currency})</span>
+          <input aria-label={`Line ${index + 1} credit amount`} aria-invalid={parsedCredit === null || undefined} className={`${toolInputClass} text-right tabular-nums`} disabled={hasDebit} inputMode="decimal" min="0" name={`credit-${line.id}`} onChange={e => onUpdate(line.id, "credit", e.target.value)} placeholder="0.00" step="0.01" type="number" value={line.credit} />
+        </label>
+        <div className="flex items-end lg:items-center"><button aria-label={`Remove line ${index + 1}`} className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40" disabled={!canRemove} onClick={() => onRemove(line.id)} type="button"><X aria-hidden="true" className="h-4 w-4" /></button></div>
       </div>
-
-      <button
-        aria-label={`Remove line ${index + 1}`}
-        className="flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-base font-semibold text-transparent transition after:text-slate-500 after:content-['x'] hover:border-rose-200 hover:bg-rose-50 hover:after:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 lg:w-24"
-        disabled={!canRemove}
-        onClick={() => onRemove(line.id)}
-        type="button"
-      >
-        ×
-      </button>
     </div>
   );
 });
@@ -122,66 +80,9 @@ function isBlankLine(line: EditableJournalEntryLine): boolean {
   return !line.accountName.trim() && !line.debit.trim() && !line.credit.trim();
 }
 
-function SummaryCard({
-  label,
-  value,
-  tone = "neutral"
-}: {
-  label: string;
-  value: string;
-  tone?: "neutral" | "success" | "error";
-}) {
-  const toneClass =
-    tone === "success"
-      ? "text-emerald-700"
-      : tone === "error"
-        ? "text-rose-700"
-        : "text-slate-950";
-
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white px-4 py-4">
-      <p className="text-xs font-semibold uppercase text-slate-500">{label}</p>
-      <p className={`mt-2 text-2xl font-semibold tracking-tight ${toneClass}`}>{value}</p>
-    </div>
-  );
-}
-
-function getStatus({
-  hasResult,
-  isBalanced
-}: {
-  hasResult: boolean;
-  isBalanced: boolean;
-}) {
-  if (!hasResult) {
-    return {
-      label: "Waiting for entries",
-      cardClass: "border-slate-200 bg-white",
-      labelClass: "text-slate-500",
-      badgeClass: "bg-slate-100 text-slate-700"
-    };
-  }
-
-  if (isBalanced) {
-    return {
-      label: "Balanced",
-      cardClass: "border-slate-200 bg-white",
-      labelClass: "text-slate-500",
-      badgeClass: "bg-emerald-100 text-emerald-800"
-    };
-  }
-
-  return {
-    label: "Not balanced",
-    cardClass: "border-slate-200 bg-white",
-    labelClass: "text-slate-500",
-    badgeClass: "bg-rose-100 text-rose-800"
-  };
-}
-
 export function JournalEntryChecker() {
   const [lines, setLines] = useState<EditableJournalEntryLine[]>([createLine(1), createLine(2)]);
-  const { formatCurrency } = useCurrency();
+  const { currency, formatCurrency } = useCurrency();
 
   const calculation = useMemo(() => {
     const activeLines = lines.filter((line) => !isBlankLine(line));
@@ -266,7 +167,7 @@ export function JournalEntryChecker() {
   }, []);
 
   function addLine() {
-    setLines((currentLines) => [...currentLines, createLine(currentLines.length + 1)]);
+    setLines((currentLines) => [...currentLines, createLine(currentLines.length + 1, crypto.randomUUID())]);
   }
 
   const removeLine = useCallback((id: string) => {
@@ -282,10 +183,8 @@ export function JournalEntryChecker() {
   const totalDebit = calculation.result?.totalDebit ?? 0;
   const totalCredit = calculation.result?.totalCredit ?? 0;
   const difference = calculation.result?.difference ?? Math.abs(totalDebit - totalCredit);
-  const status = getStatus({
-    hasResult: Boolean(calculation.result),
-    isBalanced: calculation.result?.isBalanced ?? false
-  });
+  const statusLabel = calculation.result ? calculation.result.isBalanced ? "Balanced" : "Not balanced" : lines.some(line => !isBlankLine(line)) ? "Check your entries" : "Waiting for entries";
+  const StatusIcon = calculation.result ? calculation.result.isBalanced ? Check : TriangleAlert : Minus;
   const helperMessage = calculation.result
     ? calculation.result.isBalanced
       ? "Your journal entry balances. Total debits equal total credits."
@@ -295,81 +194,18 @@ export function JournalEntryChecker() {
     : "";
 
   return (
-    <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-      <div className="flex items-center border-b border-slate-200 px-5 py-4 sm:px-6">
-        <button
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
-          onClick={resetChecker}
-          type="button"
-        >
-          <RotateCcw aria-hidden="true" className="h-4 w-4" />
-          Reset / Clear
-        </button>
+    <ToolWorkspace title="Journal entry lines" wide inputs={<>
+      <p className="text-sm leading-6 text-slate-600">Enter each account on its own line, with an amount in Debit or Credit.</p>
+      <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_2.75rem] gap-3 border-b border-slate-200 pb-3 text-sm font-medium text-slate-600 lg:grid">
+        <span>Account name</span><span className="text-right">Debit ({currency})</span><span className="text-right">Credit ({currency})</span><span className="sr-only">Remove</span>
       </div>
-
-      <div className="p-5 sm:p-6">
-        <div className="space-y-3">
-          <div className="hidden grid-cols-[minmax(0,1.7fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_6rem] gap-4 px-1 text-sm font-semibold text-slate-900 lg:grid">
-            <span>Account Name</span>
-            <span>Debit</span>
-            <span>Credit</span>
-            <span className="sr-only">Remove</span>
-          </div>
-
-          {lines.map((line, index) => (
-            <JournalEntryLineEditor
-              canRemove={lines.length > 1}
-              index={index}
-              key={line.id}
-              line={line}
-              onRemove={removeLine}
-              onUpdate={updateLine}
-            />
-          ))}
-
-          <button
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200"
-            onClick={addLine}
-            type="button"
-          >
-            <Plus aria-hidden="true" className="h-4 w-4" />
-            Add line
-          </button>
-        </div>
-
-        {calculation.message ? (
-          <p className="mt-5 text-base font-medium leading-7 text-black">{calculation.message}</p>
-        ) : null}
-
-        <div className="mt-6 border-t border-slate-200 pt-6">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard label="Total Debits" value={formatCurrency(totalDebit)} />
-          <SummaryCard label="Total Credits" value={formatCurrency(totalCredit)} />
-          <SummaryCard
-            label="Difference"
-            tone={difference > 0 ? "error" : "neutral"}
-            value={formatCurrency(difference)}
-          />
-          <div className={`rounded-lg border px-4 py-4 ${status.cardClass}`}>
-            <p className={`text-xs font-semibold uppercase ${status.labelClass}`}>
-              Status
-            </p>
-            <div
-              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${status.badgeClass}`}
-            >
-              {status.label}
-            </div>
-          </div>
-        </div>
-
-        {helperMessage ? (
-          <p className="mt-5 flex items-start gap-3 text-base leading-7 text-black">
-            <Info aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-600" />
-            <span>{helperMessage}</span>
-          </p>
-        ) : null}
-        </div>
-      </div>
-    </section>
+      <div className="flex min-w-0 flex-col gap-3">{lines.map((line, index) => <JournalEntryLineEditor canRemove={lines.length > 1} currency={currency} index={index} key={line.id} line={line} onRemove={removeLine} onUpdate={updateLine} />)}</div>
+      <div className="flex flex-wrap gap-3"><button className={toolButtonClass} onClick={addLine} type="button"><Plus aria-hidden="true" className="h-4 w-4" />Add line</button><ToolReset onClick={resetChecker} /></div>
+    </>}>
+      <p className="flex items-center gap-2 text-base font-semibold text-slate-950"><StatusIcon aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-600" />{statusLabel}</p>
+      <ToolNote warning={Boolean(calculation.message && lines.some(line => !isBlankLine(line)))}>{helperMessage || calculation.message}</ToolNote>
+      <ToolResultRows rows={[["Total debit", calculation.result ? formatCurrency(totalDebit) : "—"], ["Total credit", calculation.result ? formatCurrency(totalCredit) : "—"], ["Difference", calculation.result ? formatCurrency(difference) : "—"]]} />
+      <p className="mt-4 text-xs leading-5 text-slate-500">Matching totals do not confirm that every account or amount is correct.</p>
+    </ToolWorkspace>
   );
 }
