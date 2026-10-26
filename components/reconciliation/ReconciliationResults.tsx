@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowLeft, Check, Download, Undo2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { acceptMatch, getReview, manualMatch, releaseMatch } from "@/lib/reconciliation/review";
 import { ReconciliationSummary, reconciliationTextButton } from "./ReconciliationSummary";
 import type { FlagKind, Match, Reconciliation, Transaction } from "@/lib/reconciliation/types";
 import { toolButtonClass, toolInputClass } from "@/components/tools/ToolWorkspace";
+import { MappingSelect } from "./ImportFilePanel";
 
 type Tab = "suggested" | "unmatched" | "matched" | "invalid";
 const PAGE_SIZE = 20;
@@ -26,8 +27,7 @@ export function ReconciliationResults({ result, matches, notes, onChange, onNote
 }) {
   const review = useMemo(() => getReview(result, matches), [result, matches]);
   const allRows = useMemo(() => new Map([...result.bank.transactions, ...result.ledger.transactions].map(row => [row.id, row])), [result]);
-  const [tab, setTab] = useState<Tab>("suggested");
-  const [overview, setOverview] = useState(true);
+  const [tab, setTab] = useState<Tab | null>(null);
   const [manual, setManual] = useState(false);
   const [page, setPage] = useState(1);
   const [cause, setCause] = useState("all");
@@ -58,18 +58,25 @@ export function ReconciliationResults({ result, matches, notes, onChange, onNote
   const start = (currentPage - 1) * pageSize;
 
   function edit(action: () => Match[]) {
-    try { onChange(action()); setError(""); setExported(false); if (tab === "suggested") window.requestAnimationFrame(() => document.getElementById("reconciliation-review-title")?.focus({ preventScroll: true })); }
+    try { onChange(action()); setError(""); setExported(false); if (tab === "suggested") window.requestAnimationFrame(() => document.getElementById("reconciliation-review-status")?.focus({ preventScroll: true })); }
     catch (cause) { setError(cause instanceof Error ? cause.message : "The match could not be updated."); }
   }
-  function focusHeading(summary: boolean) {
-    window.requestAnimationFrame(() => {
-      const heading = document.getElementById(summary ? "reconciliation-results-title" : "reconciliation-review-title");
-      heading?.focus({ preventScroll: true });
-      document.getElementById("reconciliation-workflow")?.scrollIntoView({ block: "start" });
-    });
+  function changeTab(next: Tab) {
+    setTab(current => current === next ? null : next);
+    setPage(1);
+    setManual(false);
+    setSelected(new Set());
+    setCause("all");
+    setQuery("");
+    setError("");
+    setExported(false);
   }
-  function changeTab(next: Tab) { setTab(next); setOverview(false); setPage(1); setError(""); focusHeading(false); }
-  function backToSummary() { setOverview(true); focusHeading(true); }
+  function collapseReview() {
+    const previous = tab;
+    setTab(null);
+    setSelected(new Set());
+    window.requestAnimationFrame(() => (document.getElementById(`review-toggle-${previous}`) ?? document.getElementById("reconciliation-results-title"))?.focus({ preventScroll: true }));
+  }
   function selectRow(id: string) {
     setSelected(current => {
       const next = new Set([...current].filter(value => !review.reservedIds.has(value)));
@@ -107,8 +114,8 @@ export function ReconciliationResults({ result, matches, notes, onChange, onNote
     const ledgerRows = match.ledgerIds.map(id => allRows.get(id)!);
     return <li className="py-6 first:pt-0" key={match.id}>
       <div className="grid min-w-0 gap-5 md:grid-cols-2 md:gap-8">
-        <div className="min-w-0"><h2 className="mb-3 text-xs font-medium text-slate-500">Bank statement</h2><div className="space-y-3">{bankRows.map(row => transaction(row))}</div></div>
-        <div className="min-w-0"><h2 className="mb-3 text-xs font-medium text-slate-500">Cashbook{ledgerRows.length > 1 ? ` (${ledgerRows.length} transactions)` : ""}</h2><div className="space-y-3">{ledgerRows.map(row => transaction(row))}</div></div>
+        <div className="min-w-0"><h3 className="mb-3 text-xs font-medium text-slate-500">Bank statement</h3><div className="space-y-3">{bankRows.map(row => transaction(row))}</div></div>
+        <div className="min-w-0"><h3 className="mb-3 text-xs font-medium text-slate-500">Cashbook{ledgerRows.length > 1 ? ` (${ledgerRows.length} transactions)` : ""}</h3><div className="space-y-3">{ledgerRows.map(row => transaction(row))}</div></div>
       </div>
       <div className="mt-4 flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
         <div className="max-w-2xl"><p className="text-sm leading-6 text-slate-600">{match.method === "combined" ? "These entries add up to the same amount. Check the payment details." : match.state === "suggested" ? "The amounts agree. Check these are the same payment." : "These transactions are matched."}</p><details><summary className="min-h-11 cursor-pointer py-3 text-xs font-medium text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">Why this match?</summary><p className="text-sm leading-6 text-slate-600">{match.reason}</p><p className="mt-2 text-xs text-slate-500">Bank CSV lines {bankRows.map(row => row.line).join(", ")}; cashbook CSV lines {ledgerRows.map(row => row.line).join(", ")}.</p></details></div>
@@ -122,35 +129,26 @@ export function ReconciliationResults({ result, matches, notes, onChange, onNote
     </li>;
   }
 
-  if (overview) return <ReconciliationSummary result={result} bankMatched={review.bankMatched} ledgerMatched={review.ledgerMatched} suggested={review.suggested.length} unmatched={review.unmatched.length} canUndo={canUndo} stale={stale} onReview={changeTab} onDownload={() => exportReport(false)} onNew={onNew} onEditFiles={onEditFiles} onUndo={onUndo} />;
-
-  const title = tab === "suggested" ? "Check suggested matches" : tab === "unmatched" ? "Investigate unmatched transactions" : tab === "matched" ? "Matched transactions" : "Check excluded rows";
-  return <section aria-labelledby="reconciliation-review-title" className="min-w-0" id="reconciliation-results">
-    <button className={`${reconciliationTextButton} mb-5 px-0`} onClick={backToSummary} type="button"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Back to results</button>
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <h1 className="scroll-mt-28 text-2xl font-semibold tracking-tight text-slate-950 outline-none sm:text-3xl" id="reconciliation-review-title" tabIndex={-1}>{title}</h1>
-      {tab !== "invalid" ? <button className={reconciliationTextButton} disabled={!canUndo || stale} onClick={() => { onUndo(); setSelected(new Set()); setExported(false); }} type="button"><Undo2 aria-hidden="true" className="h-4 w-4" />Undo last match</button> : null}
-    </div>
-    {tab === "suggested" ? <p aria-live="polite" className="mt-3 text-sm leading-6 text-slate-600">{review.suggested.length ? `Check one payment at a time. ${review.suggested.length} ${review.suggested.length === 1 ? "suggestion remains" : "suggestions remain"}.` : "No suggestions left. Return to results for your next step."}</p> : null}
-    {tab === "invalid" ? <div className="mt-3"><p className="max-w-2xl text-sm leading-6 text-slate-600">Check why each row was excluded. If it needs correcting, fix your CSV and replace the file. All excluded rows remain in the report.</p><button className={reconciliationTextButton} onClick={onEditFiles} type="button">Edit files or columns</button></div> : null}
+  return <ReconciliationSummary result={result} bankMatched={review.bankMatched} ledgerMatched={review.ledgerMatched} suggested={review.suggested.length} unmatched={review.unmatched.length} canUndo={canUndo} stale={stale} activeSection={tab} onReview={changeTab} onDownload={() => exportReport(false)} onNew={onNew} onEditFiles={onEditFiles} onUndo={onUndo}>
+    {tab === "suggested" ? <p aria-live="polite" className="mb-4 rounded text-sm leading-6 text-slate-600 focus-visible:outline focus-visible:outline-2" id="reconciliation-review-status" tabIndex={-1}>{review.suggested.length ? `Check the payment details before accepting. ${review.suggested.length} ${review.suggested.length === 1 ? "suggestion left" : "suggestions left"}.` : "All suggestions reviewed. You can check unmatched entries or download the report."}</p> : null}
+    {tab === "invalid" ? <div className="mb-4"><p className="max-w-2xl text-sm leading-6 text-slate-600">Correct these rows in your CSV, then replace the file. They remain in the downloaded report.</p><button className={reconciliationTextButton} onClick={onEditFiles} type="button">Edit files or columns</button></div> : null}
     {error ? <p className="mt-4 text-sm font-medium text-slate-900" role="alert">{error}</p> : null}
     {exported ? <p className="mt-4 text-sm text-slate-600" role="status">Open-items CSV download started.</p> : null}
-    <div className="min-w-0 pt-6">
+    <div className="min-w-0">
       {tab === "unmatched" ? <>
-        <div className="mb-5 grid gap-4 sm:grid-cols-2"><label className="grid min-w-0 gap-2 text-sm font-medium text-slate-900" htmlFor="unmatched-search">Search unmatched<input autoComplete="off" className={toolInputClass} id="unmatched-search" name="unmatched-search" onChange={event => { setQuery(event.target.value); setPage(1); }} placeholder="Description, reference, date…" type="search" value={query} /></label><label className="grid min-w-0 gap-2 text-sm font-medium text-slate-900" htmlFor="unmatched-cause">Show<select className={toolInputClass} id="unmatched-cause" name="unmatched-cause" onChange={event => { setCause(event.target.value); setPage(1); }} value={cause}><option value="all">All unmatched</option><option value="bank">Bank only</option><option value="ledger">Cashbook only</option>{Object.entries(causeLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label></div>
+        {(review.unmatched.length > 6 || query || cause !== "all") ? <div className="mb-4 grid gap-4 sm:grid-cols-2"><label className="grid min-w-0 gap-2 text-sm font-medium text-slate-900" htmlFor="unmatched-search">Search unmatched<input autoComplete="off" className={toolInputClass} id="unmatched-search" name="unmatched-search" onChange={event => { setQuery(event.target.value); setPage(1); }} placeholder="Description, reference, date…" type="search" value={query} /></label><MappingSelect id="unmatched-cause" label="Show" onChange={value => { setCause(value); setPage(1); }} options={[{ value: "all", label: "All unmatched" }, { value: "bank", label: "Bank only" }, { value: "ledger", label: "Cashbook only" }, ...Object.entries(causeLabels).map(([value, label]) => ({ value, label }))]} value={cause} /></div> : null}
         <button aria-pressed={manual} className={`${reconciliationTextButton} mb-3 px-0`} disabled={stale} onClick={() => { setManual(value => !value); setSelected(new Set()); }} type="button">{manual ? "Stop selecting rows" : "Match rows manually"}</button>
-        <p className="mb-5 text-sm leading-6 text-slate-600">{manual ? "Select bank and cashbook rows for the same payment. Their totals must agree." : "Check these entries in your records. Open Details and note for a possible cause or follow-up note."}</p>
+        {manual ? <p className="mb-5 text-sm leading-6 text-slate-600">Select bank and cashbook rows for the same payment. Their totals must agree.</p> : null}
         {selectedRows.length ? <div className="mb-5 border-y border-slate-200 py-4"><p className="text-sm leading-6 text-slate-700">Bank: {bankSelected.length} selected, {format(bankSum)}. Cashbook: {ledgerSelected.length} selected, {format(ledgerSum)}.</p><p className="mt-1 text-sm font-medium tabular-nums text-slate-900">Difference: {format(bankSum - ledgerSum)}{!sameDirection ? " — select the same money direction." : ""}</p><div className="mt-3 flex flex-wrap gap-2"><button className={toolButtonClass} disabled={!canMatch} onClick={matchSelection} type="button">Match selected</button><button className={toolButtonClass} onClick={() => setSelected(new Set())} type="button">Clear selection</button></div></div> : null}
       </> : null}
-      {(tab === "suggested" || tab === "matched") ? <ul className="divide-y divide-slate-200">{(items as Match[]).slice(start, start + pageSize).map(matchRow)}</ul> : tab === "unmatched" ? <div className="grid min-w-0 gap-8 md:grid-cols-2 md:gap-10">{([{ label: "Bank only", rows: bankOnly }, { label: "Cashbook only", rows: ledgerOnly }]).map(({ label, rows }) => <div className="min-w-0" key={label}><h2 className="border-b border-slate-200 pb-3 text-sm font-semibold text-slate-800">{label} <span className="ml-1 font-normal tabular-nums text-slate-500">{rows.length}</span></h2><ul className="divide-y divide-slate-200">{rows.slice(start, start + PAGE_SIZE).map(row => <li className="py-5" key={row.id}>{transaction(row, true)}</li>)}</ul>{rows.length === 0 ? <p className="py-5 text-sm text-slate-500">No transactions in this view.</p> : null}</div>)}</div> : <ul className="divide-y divide-slate-200">{invalid.slice(start, start + PAGE_SIZE).map(row => <li className="py-5 first:pt-0" key={row.id}><p className="text-sm font-semibold text-slate-900">{row.source === "bank" ? "Bank" : "Cashbook"} CSV line {row.line}</p><p className="mt-2 text-sm leading-6 text-slate-600">{row.reason}</p><details className="mt-2"><summary className="min-h-11 cursor-pointer py-3 text-sm text-slate-600">Original row</summary><p className="max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-slate-600">{row.cells.join(" | ")}</p></details></li>)}</ul>}
-      {items.length === 0 ? <p className="py-4 text-sm leading-6 text-slate-600">{tab === "suggested" ? "Suggestions reviewed. Return to results for your next step." : tab === "matched" ? "No confirmed matches yet." : tab === "invalid" ? "No invalid rows were found." : "No unmatched rows fit this view."}</p> : null}
+      {(tab === "suggested" || tab === "matched") ? <ul className="divide-y divide-slate-200">{(items as Match[]).slice(start, start + pageSize).map(matchRow)}</ul> : tab === "unmatched" ? <div className="grid min-w-0 gap-8 md:grid-cols-2 md:gap-10">{([{ label: "Bank only", rows: bankOnly }, { label: "Cashbook only", rows: ledgerOnly }]).map(({ label, rows }) => <div className="min-w-0" key={label}><h3 className="border-b border-slate-200 pb-3 text-sm font-semibold text-slate-800">{label} <span className="ml-1 font-normal tabular-nums text-slate-500">{rows.length}</span></h3><ul className="divide-y divide-slate-200">{rows.slice(start, start + PAGE_SIZE).map(row => <li className="py-5" key={row.id}>{transaction(row, true)}</li>)}</ul>{rows.length === 0 ? <p className="py-5 text-sm text-slate-500">No transactions in this view.</p> : null}</div>)}</div> : <ul className="divide-y divide-slate-200">{invalid.slice(start, start + PAGE_SIZE).map(row => <li className="py-5 first:pt-0" key={row.id}><p className="text-sm font-semibold text-slate-900">{row.source === "bank" ? "Bank" : "Cashbook"} CSV line {row.line}</p><p className="mt-2 text-sm leading-6 text-slate-600">{row.reason}</p><details className="mt-2"><summary className="min-h-11 cursor-pointer py-3 text-sm text-slate-600">Original row</summary><p className="max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-slate-600">{row.cells.join(" | ")}</p></details></li>)}</ul>}
+      {items.length === 0 && tab !== "suggested" ? <p className="py-4 text-sm leading-6 text-slate-600">{tab === "matched" ? "No confirmed matches yet." : tab === "invalid" ? "No invalid rows were found." : "No unmatched rows fit this view."}</p> : null}
       {pages > 1 ? <nav aria-label="Result pages" className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4"><button className={toolButtonClass} disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)} type="button">Previous</button><p className="text-sm tabular-nums text-slate-600">{currentPage} of {pages}</p><button className={toolButtonClass} disabled={currentPage === pages} onClick={() => setPage(currentPage + 1)} type="button">Next</button></nav> : null}
       {tab === "unmatched" && selectedRows.length ? <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4"><button className={toolButtonClass} disabled={!canMatch} onClick={matchSelection} type="button">Match selected ({selectedRows.length})</button><button className={toolButtonClass} onClick={() => setSelected(new Set())} type="button">Clear selection</button></div> : null}
     </div>
-    <div className="mt-6 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:flex-wrap">
-      <button className={toolButtonClass} onClick={backToSummary} type="button">Back to results</button>
-      <button className={toolButtonClass} onClick={() => exportReport(false)} type="button"><Download aria-hidden="true" className="h-4 w-4" />{stale ? "Download previous report" : "Download report"}</button>
+    <div className="mt-4 flex flex-wrap gap-3">
+      <button className={reconciliationTextButton} onClick={collapseReview} type="button">Collapse details</button>
       {tab === "unmatched" ? <button className={reconciliationTextButton} onClick={() => exportReport(true)} type="button">Download open items only</button> : null}
     </div>
-  </section>;
+  </ReconciliationSummary>;
 }

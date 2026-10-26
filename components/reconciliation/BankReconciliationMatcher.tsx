@@ -3,7 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
-import { ImportFilePanel, MappingSelect, emptyImport, type ImportState } from "./ImportFilePanel";
+import { ImportFilePanel, emptyImport, type ImportState } from "./ImportFilePanel";
 import { ReconciliationResults } from "./ReconciliationResults";
 import { ReconciliationDownloadComplete, reconciliationPrimaryButton } from "./ReconciliationDownloadComplete";
 import { downloadCsv } from "@/lib/reconciliation/download";
@@ -11,7 +11,6 @@ import { createReport } from "@/lib/reconciliation/report";
 import { getReview } from "@/lib/reconciliation/review";
 import { toolButtonClass, toolInputClass } from "@/components/tools/ToolWorkspace";
 import { useReconciliationWorker } from "@/hooks/useReconciliationWorker";
-import { currencyOptions, isCurrencyCode } from "@/lib/currency";
 import { inferHeaderRow, inferMapping, mappingError, tableFromDocument } from "@/lib/reconciliation/csv";
 import { MAX_CSV_BYTES, type CsvDocument, type ImportInput, type Match, type MatchOptions, type Reconciliation, type Source } from "@/lib/reconciliation/types";
 
@@ -40,7 +39,7 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
   const [days, setDays] = useState("3");
   const [combined, setCombined] = useState(true);
   const [statementEnd, setStatementEnd] = useState("");
-  const { currency, setCurrency } = useCurrency();
+  const { currency } = useCurrency();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Reconciliation | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -54,6 +53,7 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
   const [comparisonId, setComparisonId] = useState(0);
   const dialog = useRef<HTMLDialogElement>(null);
   const cancelButton = useRef<HTMLButtonElement>(null);
+  const settings = useRef<HTMLDetailsElement>(null);
   const version = useRef(0);
   const readVersions = useRef({ bank: 0, ledger: 0 });
   const { request, cancel } = useReconciliationWorker();
@@ -135,7 +135,11 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
           throw new Error(`${source === "bank" ? "Bank statement" : "Cashbook"}: ${problem}`);
         }
       }
-      if (days.trim() === "" || !Number.isInteger(Number(days)) || Number(days) < 0 || Number(days) > 31) throw new Error("Choose a date window from 0 to 31 days.");
+      if (days.trim() === "" || !Number.isInteger(Number(days)) || Number(days) < 0 || Number(days) > 31) {
+        if (settings.current) settings.current.open = true;
+        document.getElementById("match-days")?.focus();
+        throw new Error("Choose a date difference from 0 to 31 days.");
+      }
       void compareInputs(inputs.bank, inputs.ledger, { days: Number(days), combined, currency, statementEnd });
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Check the files and settings."); }
   }
@@ -185,23 +189,25 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
             <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setLedger(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("ledger", file)} source="ledger" state={ledger} /></div>
           </div>
           <div className="border-t border-slate-200 px-5 py-5 sm:px-6 lg:px-8">
-            <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
-              <MappingSelect id="reconciliation-currency" label="Both files use" value={currency} options={currencyOptions.map(option => ({ value: option.code, label: `${option.code} (${option.symbol})` }))} onChange={value => { if (isCurrencyCode(value)) setCurrency(value); }} />
-              <label className="grid min-w-0 gap-2 text-sm font-medium text-slate-900" htmlFor="match-days">Dates up to this many days apart<input autoComplete="off" className={toolInputClass} id="match-days" name="match-days" inputMode="numeric" max="31" min="0" onChange={event => { setDays(event.target.value); setDirty(Boolean(result)); }} step="1" type="number" value={days} /></label>
-              <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-slate-700 sm:col-span-2 lg:col-span-1 lg:self-end"><input checked={combined} className="h-4 w-4 shrink-0 accent-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4" onChange={event => { setCombined(event.target.checked); setDirty(Boolean(result)); }} type="checkbox" />Suggest combined payments (up to 3 transactions)</label>
-            </div>
-            <details className="mt-3">
+            <details ref={settings}>
               <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                Add statement end date (optional)
+                Matching settings (optional)
               </summary>
-              <div className="mt-2 max-w-sm">
+              <div className="mt-3 grid min-w-0 gap-5 sm:grid-cols-2">
+                <div className="max-w-sm">
+                  <label className="grid min-w-0 gap-2 text-sm font-medium text-slate-900" htmlFor="match-days">Allow date difference (days)<input aria-describedby="match-days-hint" autoComplete="off" className={toolInputClass} id="match-days" name="match-days" inputMode="numeric" max="31" min="0" onChange={event => { setDays(event.target.value); setDirty(Boolean(result)); }} step="1" type="number" value={days} /></label>
+                  <p className="mt-2 text-xs leading-5 text-slate-500" id="match-days-hint">All rows are checked. Matches must fall within this date gap.</p>
+                </div>
+                <div className="max-w-sm">
                 <label className="grid gap-2 text-sm font-medium text-slate-900" htmlFor="statement-end">
-                  Statement end date
+                  Statement end date (optional)
                   <input aria-describedby="statement-end-hint" className={toolInputClass} id="statement-end" name="statement-end" onChange={event => { setStatementEnd(event.target.value); setDirty(Boolean(result)); }} type="date" value={statementEnd} />
                 </label>
                 <p className="mt-2 text-sm leading-6 text-slate-600" id="statement-end-hint">
                   Helps spot entries that may not have cleared by this date.
                 </p>
+                </div>
+                <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-slate-700 sm:col-span-2"><input checked={combined} className="h-4 w-4 shrink-0 accent-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4" onChange={event => { setCombined(event.target.checked); setDirty(Boolean(result)); }} type="checkbox" />Suggest combined payments (up to 3 transactions)</label>
               </div>
             </details>
           </div>
