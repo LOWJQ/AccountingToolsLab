@@ -1,4 +1,4 @@
-export const CONTACT_MAX_BODY_BYTES = 15_000;
+const CONTACT_MAX_BODY_BYTES = 15_000;
 
 export type LimitedJsonBodyResult<T> =
   | { ok: true; data: T }

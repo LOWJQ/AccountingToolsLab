@@ -161,13 +161,13 @@ export function normalizeImport(input: ImportInput, source: Source, currency: st
     const rawCurrency = get(mapping.currency).toUpperCase();
     const rowCurrency = rawCurrency === "RM" ? "MYR" : rawCurrency;
     const reason = record.cells.length !== input.table.headers.length ? `Expected ${input.table.headers.length} columns; found ${record.cells.length}. Check the CSV export.` : !date ? "The date does not fit the selected format or is not a real date." : rowCurrency && rowCurrency !== currency ? `Currency ${rowCurrency} does not match ${currency}. Use one currency per run.` : cents === null ? "The amount is invalid. Check separators, two-decimal precision, and money-in/out columns." : cents === 0 ? "Zero amount: this row has no cash movement." : "";
-    if (reason || !date || cents === null) result.invalid.push({ id, source, line: record.line, cells: record.originalCells ?? record.cells, reason });
+    if (reason || !date || cents === null) result.invalid.push({ id, source, line: record.line, cells: record.cells, reason });
     else {
       if (mapping.invert) cents = -cents;
       result.totalCents += cents;
       grossCents += Math.abs(cents);
       if (!Number.isSafeInteger(result.totalCents) || !Number.isSafeInteger(grossCents)) throw new Error("The total is too large to compare safely. Use a shorter period.");
-      result.transactions.push({ id, source, line: record.line, date: date.iso, day: date.day, description: get(mapping.description), reference: get(mapping.reference), cents, originalCells: record.originalCells ?? record.cells });
+      result.transactions.push({ id, source, line: record.line, date: date.iso, day: date.day, description: get(mapping.description), reference: get(mapping.reference), cents, originalCells: record.cells });
     }
   }
   return result;

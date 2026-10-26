@@ -1,5 +1,7 @@
 "use client";
 
+import { parseDebitCreditAmount } from "@/lib/calculators/number-utils";
+
 import { memo, useCallback, useMemo, useState } from "react";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { calculateTrialBalance } from "@/lib/calculators/trial-balance";
@@ -16,15 +18,6 @@ type EditableTrialBalanceRow = {
 const initialRows: EditableTrialBalanceRow[] = [
   { id: "row-1", accountName: "", debit: "", credit: "" }
 ];
-
-function parseAmount(value: string): number | null {
-  if (value.trim() === "") {
-    return 0;
-  }
-
-  const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? amount : null;
-}
 
 const invalidAmountMessage = "Please enter valid numeric debit and credit amounts.";
 
@@ -45,8 +38,8 @@ const TrialBalanceRowEditor = memo(function TrialBalanceRowEditor({
   onUpdate: (id: string, field: TrialBalanceRowField, value: string) => void;
   row: EditableTrialBalanceRow;
 }) {
-  const parsedDebit = parseAmount(row.debit);
-  const parsedCredit = parseAmount(row.credit);
+  const parsedDebit = parseDebitCreditAmount(row.debit);
+  const parsedCredit = parseDebitCreditAmount(row.credit);
   const hasDebit = parsedDebit !== null && parsedDebit > 0;
   const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
@@ -122,8 +115,8 @@ export function TrialBalanceCalculator() {
   const calculation = useMemo(() => {
     const parsedRows = rows.map((row) => ({
       row,
-      debit: parseAmount(row.debit),
-      credit: parseAmount(row.credit)
+      debit: parseDebitCreditAmount(row.debit),
+      credit: parseDebitCreditAmount(row.credit)
     }));
 
     if (parsedRows.some((row) => row.debit === null || row.credit === null)) {

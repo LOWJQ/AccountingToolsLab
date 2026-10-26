@@ -1,5 +1,7 @@
 "use client";
 
+import { parseDebitCreditAmount } from "@/lib/calculators/number-utils";
+
 import { Check, Minus, Plus, TriangleAlert, X } from "lucide-react";
 import { ToolNote, ToolReset, ToolResultRows, ToolWorkspace, toolButtonClass, toolInputClass } from "@/components/tools/ToolWorkspace";
 import { memo, useCallback, useMemo, useState } from "react";
@@ -22,15 +24,6 @@ function createLine(index: number, id = `line-${index}`): EditableJournalEntryLi
   };
 }
 
-function parseAmount(value: string): number | null {
-  if (value.trim() === "") {
-    return 0;
-  }
-
-  const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? amount : null;
-}
-
 const invalidAmountMessage = "Please enter valid numeric debit and credit amounts.";
 
 type JournalEntryLineField = keyof Omit<EditableJournalEntryLine, "id">;
@@ -50,8 +43,8 @@ const JournalEntryLineEditor = memo(function JournalEntryLineEditor({
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: JournalEntryLineField, value: string) => void;
 }) {
-  const parsedDebit = parseAmount(line.debit);
-  const parsedCredit = parseAmount(line.credit);
+  const parsedDebit = parseDebitCreditAmount(line.debit);
+  const parsedCredit = parseDebitCreditAmount(line.credit);
   const hasDebit = parsedDebit !== null && parsedDebit > 0;
   const hasCredit = parsedCredit !== null && parsedCredit > 0;
 
@@ -96,8 +89,8 @@ export function JournalEntryChecker() {
 
     const parsedLines = activeLines.map((line) => ({
       line,
-      debit: parseAmount(line.debit),
-      credit: parseAmount(line.credit)
+      debit: parseDebitCreditAmount(line.debit),
+      credit: parseDebitCreditAmount(line.credit)
     }));
 
     if (parsedLines.some((line) => line.debit === null || line.credit === null)) {

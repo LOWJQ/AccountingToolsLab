@@ -4,7 +4,7 @@ import { isTransposition, matchTransactions, reconcile, referenceKey } from "../
 import { acceptMatch, getReview, manualMatch, releaseMatch } from "../lib/reconciliation/review";
 import { createReport, csvCell } from "../lib/reconciliation/report";
 import { isPrivateToolUrl } from "../lib/reconciliation/privacy";
-import { sampleBankCsv, sampleLedgerCsv } from "../lib/reconciliation/sample";
+import { sampleBankCsv, sampleLedgerCsv } from "./fixtures/bank-reconciliation";
 import { MAX_CSV_BYTES, type ImportInput, type MatchOptions, type NormalizedImport, type Source, type Transaction } from "../lib/reconciliation/types";
 
 function test(name: string, run: () => void) { run(); console.log(`PASS ${name}`); }

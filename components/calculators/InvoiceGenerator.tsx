@@ -7,6 +7,7 @@ import {
   useRef,
   useState
 } from "react";
+import { todayIsoDate } from "@/lib/utils/format-date";
 import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { EditableInvoiceCanvas } from "@/components/invoice/EditableInvoiceCanvas";
 import { InvoiceModals } from "@/components/invoice/InvoiceModals";
@@ -15,6 +16,7 @@ import { SavedInvoicesModal } from "@/components/invoice/SavedInvoicesModal";
 import { mergeInvoice, splitInvoice } from "@/lib/invoice/invoice-library";
 import { getCurrencyOption, isCurrencyCode } from "@/lib/currency";
 import {
+  createDefaultInvoiceLineItem,
   createEmptyInvoiceDefaults,
   DEFAULT_INVOICE_NUMBER,
   prepareInvoiceForFormRestore
@@ -38,17 +40,7 @@ import {
 } from "@/lib/invoice/invoice-types";
 
 function createLineItem(index: number): InvoiceLineItem {
-  return {
-    id: `item-${Date.now()}-${index}`,
-    description: "",
-    quantity: "1",
-    unitPrice: ""
-  };
-}
-
-function getLocalDateInputValue(date = new Date()) {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return localDate.toISOString().slice(0, 10);
+  return createDefaultInvoiceLineItem(`item-${Date.now()}-${index}`);
 }
 
 function normalizeLegacyTaxLabel(label: string) {
@@ -90,7 +82,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
   const [customerContact, setCustomerContact] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState(DEFAULT_INVOICE_NUMBER);
-  const [invoiceDate, setInvoiceDate] = useState(() => getLocalDateInputValue());
+  const [invoiceDate, setInvoiceDate] = useState(() => todayIsoDate());
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState(DEFAULT_INVOICE_TERMS);
@@ -165,7 +157,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
   const restoreInvoiceState = useCallback(
     (invoice: InvoiceData) => {
       const restoredInvoice = prepareInvoiceForFormRestore(invoice, {
-        invoiceDate: getLocalDateInputValue(),
+        invoiceDate: todayIsoDate(),
         invoiceNumber: DEFAULT_INVOICE_NUMBER,
         lineItemId: createLineItem(1).id
       });
@@ -360,7 +352,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
   function handleDuplicateSavedInvoice(id: string) {
     const duplicated = duplicateSavedInvoice(id, {
       fallbackInvoiceNumber: getNextInvoiceNumberSuggestion() ?? DEFAULT_INVOICE_NUMBER,
-      invoiceDate: getLocalDateInputValue()
+      invoiceDate: todayIsoDate()
     });
 
     if (duplicated) {
@@ -389,7 +381,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
         splitInvoice(invoiceData).profile,
         splitInvoice(
           createEmptyInvoiceDefaults({
-            invoiceDate: getLocalDateInputValue(),
+            invoiceDate: todayIsoDate(),
             invoiceNumber: getNextInvoiceNumberSuggestion() ?? DEFAULT_INVOICE_NUMBER,
             lineItemId: createLineItem(1).id
           })
@@ -409,7 +401,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
     skipNextAutosave();
     restoreInvoiceState(
       createEmptyInvoiceDefaults({
-        invoiceDate: getLocalDateInputValue(),
+        invoiceDate: todayIsoDate(),
         invoiceNumber: nextInvoiceNumber ?? DEFAULT_INVOICE_NUMBER,
         lineItemId: createLineItem(1).id
       })
@@ -469,7 +461,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
         splitInvoice(
           createEmptyInvoiceDefaults({
             currency: invoiceData.currency,
-            invoiceDate: getLocalDateInputValue(),
+            invoiceDate: todayIsoDate(),
             invoiceNumber: getNextInvoiceNumberSuggestion() ?? DEFAULT_INVOICE_NUMBER,
             lineItemId: createLineItem(1).id
           })

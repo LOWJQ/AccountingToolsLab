@@ -6,7 +6,7 @@ import type { ReceiptData } from "./receipt-types";
 import { RECEIPT_PAYMENT_METHODS } from "./receipt-types";
 
 export const RECEIPT_LIBRARY_KEY = "atl-receipt-library-v1";
-export const MAX_SAVED_RECEIPTS = 50;
+const MAX_SAVED_RECEIPTS = 50;
 export const MAX_RECEIPT_BACKUP_BYTES = 4 * 1024 * 1024;
 type ProfileKeys = "businessName" | "businessContact" | "businessAddress" | "businessLogoDataUrl";
 export type ReceiptProfile = Pick<ReceiptData, ProfileKeys>;

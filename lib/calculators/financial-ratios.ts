@@ -112,7 +112,7 @@ export const ratioDefinitions: Record<FinancialRatioType, RatioDefinition> = {
   }
 };
 
-export function formatRatioResult(value: number, format: "ratio" | "percentage"): string {
+function formatRatioResult(value: number, format: "ratio" | "percentage"): string {
   const rounded = roundAmount(value);
 
   if (format === "percentage") {

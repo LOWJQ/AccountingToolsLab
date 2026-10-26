@@ -1,4 +1,4 @@
-export const RECONCILIATION_PATH = "/tools/bank-reconciliation";
+const RECONCILIATION_PATH = "/tools/bank-reconciliation";
 
 export function isPrivateToolUrl(url: string): boolean {
   try {

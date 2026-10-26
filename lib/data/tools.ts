@@ -179,7 +179,7 @@ type ToolCategoryGroup = {
  * Section order on the tools directory. Generators lead because they produce
  * something the visitor takes away, which is what most arrive wanting.
  */
-export const TOOL_CATEGORIES: ToolCategoryGroup[] = [
+const TOOL_CATEGORIES: ToolCategoryGroup[] = [
   { id: "generator", title: "Generators" },
   { id: "calculator", title: "Calculators" },
   { id: "checker", title: "Checkers" }
@@ -205,7 +205,7 @@ export const toolsByCategory = TOOL_CATEGORIES.map((category) => ({
 export const orderedAvailableTools: Tool[] = toolsByCategory.flatMap((group) => group.tools);
 
 /** How many tools the header menu lists before deferring to "View all tools". */
-export const NAV_TOOL_LIMIT = 12;
+const NAV_TOOL_LIMIT = 12;
 
 /**
  * Tools shown in the header menu. The menu is a shortcut to the most-used

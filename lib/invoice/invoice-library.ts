@@ -21,7 +21,7 @@ import {
 
 export const ATL_BUSINESS_PROFILE_KEY = "atl-business-profile";
 export const ATL_INVOICE_INDEX_KEY = "atl-invoice-index";
-export const ATL_INVOICE_ITEM_KEY_PREFIX = "atl-invoice-item-";
+const ATL_INVOICE_ITEM_KEY_PREFIX = "atl-invoice-item-";
 export const ATL_INVOICE_LIBRARY_VERSION = 1;
 
 /** Hard ceiling on saved invoices, so a browser quota error stays unlikely. */

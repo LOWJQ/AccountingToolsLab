@@ -10,46 +10,12 @@ https://www.accountingtoolslab.com
 
 ## Current Status
 
-The project is a Next.js App Router site with multiple working calculators, guide pages, SEO routes, a contact API route, and shared site layout.
+A Next.js App Router site with accounting calculators, invoice and receipt PDF
+editors, a browser-only bank reconciliation matcher, guides, SEO routes and a
+contact API. There is no database, login, payments, advertising or AI service.
 
-Currently available:
-
-- Homepage
-- Tools directory
-- Guides directory
-- About page
-- Contact page
-- Privacy Policy
-- Terms of Use
-- Trial Balance Calculator
-- Accounting Equation Calculator
-- Debit/Credit Helper
-- Financial Ratio Calculator
-- Depreciation Calculator
-- Break-even Calculator
-- Cash Flow Calculator
-- Invoice Generator
-- Malaysia SST Calculator
-- Journal Entry Checker
-- Errors a Trial Balance Will Not Catch guide
-- Debit vs Credit guide
-- Is My Current Ratio Good guide
-- Why Trial Balance Is Not Balancing guide
-- Journal Entries guide
-- Profitable but No Cash guide
-- Fixed vs Variable Costs guide
-- Straight-Line Depreciation guide
-- How to Create a Simple Invoice guide
-- SST Calculator Malaysia guide
-
-## Not Implemented Yet
-
-- Database
-- Login or authentication
-- Payments
-- Ads
-- AI features
-- Dashboard features
+The tool catalogue in `lib/data/tools.ts` and guide catalogue in
+`lib/data/guides.ts` are the source of truth for available pages and navigation.
 
 ## Tech Stack
 
@@ -65,44 +31,30 @@ Currently available:
 ```text
 app/                Next.js App Router routes, root layout, sitemap, and robots files.
 components/         Layout, calculator, invoice, contact, tool, SEO, and UI component folders.
-hooks/              Client hooks for focused invoice-generator behavior.
+hooks/              Client hooks for invoice/receipt state, PDF generation, and reconciliation workers.
 lib/                Calculator logic, invoice helpers, contact helpers, shared data, SEO helpers, and utilities.
 types/              Small shared TypeScript types that are still used across the app.
 public/             Static assets such as logos, favicons, OG images, and guide images.
 tests/              Lightweight TypeScript/Node tests for calculators, invoice logic, contact API helpers, and SEO helpers.
 ```
 
-## Key Routes
+## Routes and shared code
 
-```text
-/                                             Homepage
-/tools                                        Tools directory
-/tools/trial-balance-calculator               Trial Balance Calculator
-/tools/accounting-equation-calculator         Accounting Equation Calculator
-/tools/debit-credit-checker                   Debit/Credit Helper
-/tools/financial-ratio-calculator             Financial Ratio Calculator
-/tools/depreciation-calculator                Depreciation Calculator
-/tools/break-even-calculator                  Break-even Calculator
-/tools/cash-flow-calculator                   Cash Flow Calculator
-/tools/invoice-generator                      Invoice Generator
-/tools/sst-calculator-malaysia                Malaysia SST Calculator
-/tools/journal-entry-checker                  Journal Entry Checker
-/guides                                       Guides directory
-/guides/errors-not-revealed-by-a-trial-balance               Errors a Trial Balance Will Not Catch guide
-/guides/debit-vs-credit                       Debit vs Credit guide
-/guides/what-is-a-good-financial-ratio        Is My Current Ratio Good guide
-/guides/why-trial-balance-not-balancing       Why Trial Balance Is Not Balancing guide
-/guides/journal-entries-for-beginners         Journal Entries guide
-/guides/profitable-but-no-cash                   Profitable but No Cash guide
-/guides/fixed-vs-variable-costs            Fixed vs Variable Costs guide
-/guides/straight-line-depreciation-explained  Straight-Line Depreciation guide
-/guides/what-should-an-invoice-include-before-you-send-it        What Should an Invoice Include guide
-/guides/sst-calculator-malaysia-add-remove-sst SST Calculator Malaysia guide
-/about                                        About page
-/contact                                      Contact page
-/privacy-policy                               Privacy Policy
-/terms                                        Terms of Use
-```
+- `app/` defines the public URLs. Preserve route files, redirects and metadata
+  assets when reorganizing components.
+- `lib/data/tools.ts` and `lib/data/guides.ts` supply the directories and related
+  links; `app/sitemap.ts` advertises canonical pages.
+- `lib/utils/` contains shared download, image-processing and date helpers.
+- Invoice and receipt tools share PDF generation and editor controls while
+  keeping separate document data and browser storage.
+- Reconciliation parsing, matching and Excel report creation run in a local
+  worker. Excel libraries load only when needed.
+- `tests/fixtures/` holds fictional reconciliation data used by tests, rather
+  than shipping demo data with application logic.
+
+Generated `.next/`, `.test-dist/`, `*.tsbuildinfo`, and `node_modules/` are
+ignored build/runtime output. Keep the source tests and lockfile; they are
+needed to verify behavior and reproduce dependency installations.
 
 ## Environment
 
@@ -175,10 +127,6 @@ To test the contact form locally:
 8. Submit the form from `/contact`.
 9. If it fails, check the dev terminal for the safe Resend status summary.
 10. Check the Resend dashboard logs.
-
-The YouTube tutorial stores contacts in Neon with Drizzle and server actions.
-This project currently sends contact submissions by email through a Next.js API
-route and Resend.
 
 ## Production Security
 
@@ -327,7 +275,7 @@ npm run build
 ```
 
 Static metadata assets are served from `public/`. The default OG image and the
-invoice/guide OG image are expected to be 1200x630 PNG files so metadata and
+invoice/guide OG image are 1200x630 JPEG files so metadata and
 actual asset dimensions stay aligned.
 
 Run a dependency audit:

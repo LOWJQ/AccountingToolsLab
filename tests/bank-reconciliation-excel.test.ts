@@ -6,7 +6,7 @@ import { createWorkbookReport, readWorkbook, validateWorkbookArchive } from "../
 import { hasShortYear, inferDateFormat, parseDate } from "../lib/reconciliation/dates";
 import { inferHeaderRow, inferMapping, normalizeImport, parseCsv, tableFromDocument } from "../lib/reconciliation/csv";
 import { reconcile } from "../lib/reconciliation/matcher";
-import { sampleBankCsv, sampleLedgerCsv } from "../lib/reconciliation/sample";
+import { sampleBankCsv, sampleLedgerCsv } from "./fixtures/bank-reconciliation";
 import type { ImportInput, Source } from "../lib/reconciliation/types";
 
 function input(text: string, source: Source): ImportInput {

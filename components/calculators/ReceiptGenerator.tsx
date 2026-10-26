@@ -15,7 +15,7 @@ import { calculateInvoiceWithLineItems } from "@/lib/invoice/invoice-calculation
 import { validateInvoiceWithSubtotal } from "@/lib/invoice/invoice-validation";
 import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 import { DEFAULT_INVOICE_TAX } from "@/lib/invoice/invoice-types";
-import { createEmptyReceiptLineItem } from "@/lib/receipt/receipt-defaults";
+import { createDefaultInvoiceLineItem } from "@/lib/invoice/invoice-defaults";
 import { createReceiptPdfLabels, toInvoiceDocument } from "@/lib/receipt/receipt-document";
 import { receiptFromLibrary } from "@/lib/receipt/receipt-library";
 import { RECEIPT_PAYMENT_METHODS } from "@/lib/receipt/receipt-types";
@@ -107,7 +107,7 @@ export function ReceiptGenerator({ onCompletionChange }: { onCompletionChange?: 
         </section>
         <EditableInvoiceLineItems title="Receipt items" formatCurrency={formatCurrency} lineItemPreviewTotals={validation.lineItemPreviewTotals} lineItems={receipt.items}
           lineItemsMessage={validation.lineItemsMessage} getLineItemError={validation.getLineItemError}
-          onAddLineItem={() => updateReceipt({ items: [...receipt.items, createEmptyReceiptLineItem(`receipt-item-${Date.now()}`)] })}
+          onAddLineItem={() => updateReceipt({ items: [...receipt.items, createDefaultInvoiceLineItem(`receipt-item-${Date.now()}`)] })}
           onLineItemBlur={(index, key) => touch(`items.${index}.${key}`)}
           onRemoveLineItem={id => { if (receipt.items.length > 1) updateReceipt({ items: receipt.items.filter(item => item.id !== id) }); }}
           onUpdateLineItem={(id, key, value) => updateReceipt({ items: receipt.items.map(item => item.id === id ? { ...item, [key]: value } : item) })} />

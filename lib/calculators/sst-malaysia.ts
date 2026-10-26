@@ -190,7 +190,7 @@ export type SstInvoiceMalaysiaResult = {
   explanation: string;
 };
 
-export function roundSstMoneyAmount(value: number): number {
+function roundSstMoneyAmount(value: number): number {
   return roundToTwoDecimals(value);
 }
 

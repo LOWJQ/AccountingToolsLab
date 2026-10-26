@@ -10,7 +10,7 @@ import { buildAssetUrl, siteConfig } from "./site";
  * every page, not just the homepage.
  */
 export const ORGANIZATION_ID = `${siteConfig.url}/#organization`;
-export const WEBSITE_ID = `${siteConfig.url}/#website`;
+const WEBSITE_ID = `${siteConfig.url}/#website`;
 
 export function createWebsiteSchema() {
   return {

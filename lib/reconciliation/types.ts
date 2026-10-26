@@ -3,7 +3,7 @@ export const MAX_TRANSACTIONS = 10_000;
 export const MAX_HEADER_ROWS = 50;
 
 export type Source = "bank" | "ledger";
-export type CsvRecord = { line: number; cells: string[]; originalCells?: string[] };
+export type CsvRecord = { line: number; cells: string[] };
 export type CsvDocument = { records: CsvRecord[]; delimiter: string; sheet?: string; hasFormulas?: boolean };
 export type CsvTable = { headers: string[]; records: CsvRecord[] };
 export type DateFormat = "iso" | "dmy" | "mdy" | "named" | "";

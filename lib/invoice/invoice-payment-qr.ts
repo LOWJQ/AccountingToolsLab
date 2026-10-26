@@ -1,7 +1,9 @@
-export const INVOICE_PAYMENT_QR_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+import { getDataUrlByteSize, resizeImageFile } from "../utils/image-file";
+
+const INVOICE_PAYMENT_QR_MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
 export const INVOICE_PAYMENT_QR_MAX_DATA_URL_BYTES = 800 * 1024;
-export const INVOICE_PAYMENT_QR_MAX_STORED_WIDTH = 512;
-export const INVOICE_PAYMENT_QR_MAX_STORED_HEIGHT = 512;
+const INVOICE_PAYMENT_QR_MAX_STORED_WIDTH = 512;
+const INVOICE_PAYMENT_QR_MAX_STORED_HEIGHT = 512;
 
 const acceptedPaymentQrTypes = new Set(["image/png", "image/jpeg"]);
 
@@ -20,38 +22,6 @@ export function validatePaymentQrFile(file: File): PaymentQrResult {
   return { ok: true };
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error("Invalid image data."));
-    };
-    reader.onerror = () => reject(new Error("Payment QR image could not be processed."));
-    reader.readAsDataURL(file);
-  });
-}
-
-function loadImage(dataUrl: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Payment QR image could not be loaded."));
-    image.src = dataUrl;
-  });
-}
-
-function getDataUrlByteSize(dataUrl: string): number {
-  const base64 = dataUrl.split(",")[1] ?? "";
-  return Math.ceil((base64.length * 3) / 4);
-}
-
 export async function processPaymentQrFile(file: File): Promise<ProcessPaymentQrResult> {
   const validation = validatePaymentQrFile(file);
 
@@ -59,46 +29,15 @@ export async function processPaymentQrFile(file: File): Promise<ProcessPaymentQr
     return validation;
   }
 
-  if (
-    typeof window === "undefined" ||
-    typeof document === "undefined" ||
-    typeof FileReader === "undefined" ||
-    typeof Image === "undefined"
-  ) {
-    return {
-      ok: false,
-      error: "Payment QR image could not be processed. Please try another image."
-    };
-  }
-
   try {
-    const sourceDataUrl = await readFileAsDataUrl(file);
-    const image = await loadImage(sourceDataUrl);
-    const scale = Math.min(
-      1,
-      INVOICE_PAYMENT_QR_MAX_STORED_WIDTH / image.naturalWidth,
-      INVOICE_PAYMENT_QR_MAX_STORED_HEIGHT / image.naturalHeight
-    );
-    const width = Math.max(1, Math.round(image.naturalWidth * scale));
-    const height = Math.max(1, Math.round(image.naturalHeight * scale));
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
+    const dataUrl = await resizeImageFile(file, {
+      maxWidth: INVOICE_PAYMENT_QR_MAX_STORED_WIDTH,
+      maxHeight: INVOICE_PAYMENT_QR_MAX_STORED_HEIGHT,
+      type: "image/png",
+      imageSmoothingEnabled: false
+    });
 
-    if (!context) {
-      return {
-        ok: false,
-        error: "Payment QR image could not be processed. Please try another image."
-      };
-    }
-
-    canvas.width = width;
-    canvas.height = height;
-    context.imageSmoothingEnabled = false;
-    context.drawImage(image, 0, 0, width, height);
-
-    const dataUrl = canvas.toDataURL("image/png");
-
-    if (!dataUrl.startsWith("data:image/")) {
+    if (!dataUrl || !dataUrl.startsWith("data:image/")) {
       return {
         ok: false,
         error: "Payment QR image could not be processed. Please try another image."

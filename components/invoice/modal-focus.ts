@@ -6,7 +6,7 @@ import type { KeyboardEvent as ReactKeyboardEvent } from "react";
  * Shared by every invoice dialog so keyboard behaviour cannot drift between
  * them. Extracted from InvoiceModals when the saved-invoices dialog was added.
  */
-export function getFocusableElements(container: HTMLElement) {
+function getFocusableElements(container: HTMLElement) {
   const focusableSelector = [
     "a[href]",
     "button:not([disabled])",

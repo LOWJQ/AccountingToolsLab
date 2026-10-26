@@ -41,7 +41,7 @@ export type PdfDocumentLabels = {
   extraMetaRows?: { label: string; value: string }[];
 };
 
-export const INVOICE_PDF_LABELS: PdfDocumentLabels = {
+const INVOICE_PDF_LABELS: PdfDocumentLabels = {
   title: "INVOICE",
   numberLabel: "Invoice #:",
   numberPlaceholder: "Invoice number",

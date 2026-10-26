@@ -438,7 +438,7 @@ export function EditableInvoiceLogo({
   );
 }
 
-export function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
+function EditableInvoiceHeader(props: EditableInvoiceCanvasProps) {
   return (
     <header className="grid gap-6 border-b border-slate-200 pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
       <div className="min-w-0">
@@ -1120,7 +1120,7 @@ function OptionalPaymentSection({ children, hasContent, hasError, label, emptyLa
   );
 }
 
-export function EditableInvoicePaymentDetails({
+function EditableInvoicePaymentDetails({
   onPaymentChange,
   onPaymentFieldBlur,
   payment,

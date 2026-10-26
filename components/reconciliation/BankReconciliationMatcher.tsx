@@ -6,7 +6,7 @@ import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ImportFilePanel, emptyImport, type ImportState } from "./ImportFilePanel";
 import { ReconciliationResults } from "./ReconciliationResults";
 import { ReconciliationDownloadComplete, reconciliationPrimaryButton } from "./ReconciliationDownloadComplete";
-import { downloadBlob, downloadCsv } from "@/lib/reconciliation/download";
+import { downloadBlob, downloadCsv } from "@/lib/utils/download-blob";
 import { createReport } from "@/lib/reconciliation/report";
 import { getReview } from "@/lib/reconciliation/review";
 import { toolButtonClass, toolInputClass } from "@/components/tools/ToolWorkspace";
@@ -196,7 +196,7 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
     try {
       const response = await request({ type: "report", result, matches, notes });
       if (response.type !== "report" || runVersion !== version.current) return;
-      downloadBlob(new Blob([response.bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "bank-reconciliation-working-paper.xlsx");
+      downloadBlob(new Blob([response.bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "bank-reconciliation-working-paper.xlsx", 60_000);
       setReportFormat("Excel");
       setUnsaved(false);
       setStage("download");

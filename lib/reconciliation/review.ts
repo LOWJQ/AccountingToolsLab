@@ -1,6 +1,6 @@
 import type { Match, Reconciliation, Transaction } from "./types";
 
-export const isConfirmed = (match: Match) => match.state === "automatic" || match.state === "accepted" || match.state === "manual";
+const isConfirmed = (match: Match) => match.state === "automatic" || match.state === "accepted" || match.state === "manual";
 
 export function getReview(result: Reconciliation, matches: Match[]) {
   const confirmed = matches.filter(isConfirmed);

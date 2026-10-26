@@ -13,8 +13,7 @@ const contentSecurityPolicy = [
     isDevelopment ? " 'unsafe-eval'" : ""
   } https://challenges.cloudflare.com https://va.vercel-scripts.com https://*.vercel-scripts.com`,
   "connect-src 'self' https://challenges.cloudflare.com https://vitals.vercel-insights.com https://*.vercel-insights.com https://*.vercel-analytics.com https://va.vercel-scripts.com",
-  // blob: is required by the invoice PDF preview, which renders the generated
-  // file in an iframe before the visitor commits to downloading it.
+  // blob: supports locally generated PDF previews without uploading document data.
   "frame-src 'self' blob: https://challenges.cloudflare.com",
   "child-src 'self' blob: https://challenges.cloudflare.com",
   "worker-src 'self' blob:",

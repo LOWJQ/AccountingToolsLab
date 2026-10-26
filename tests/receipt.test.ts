@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { calculateInvoiceTotals } from "../lib/invoice/invoice-calculations";
 import { buildInvoicePdfFileName } from "../lib/invoice/invoice-pdf";
-import { createEmptyReceipt, todayIsoDate } from "../lib/receipt/receipt-defaults";
+import { createEmptyReceipt } from "../lib/receipt/receipt-defaults";
+import { todayIsoDate } from "../lib/utils/format-date";
 import { createReceiptPdfLabels, toInvoiceDocument } from "../lib/receipt/receipt-document";
 import { describeReceiptPaymentMethod } from "../lib/receipt/receipt-types";
 import type { ReceiptData } from "../lib/receipt/receipt-types";
