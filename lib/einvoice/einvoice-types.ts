@@ -20,8 +20,8 @@ export type MsicCode = EInvoiceCode & {
 
 /**
  * How a taxpayer is brought into the e-Invoice mandate. LHDN phases businesses
- * in by annual turnover, so a business is either inside a phase or below the
- * exemption threshold entirely.
+ * in by annual turnover; new businesses and exemption exceptions can have
+ * different implementation dates.
  */
 export type EInvoicePhaseId = "phase-1" | "phase-2" | "phase-3" | "phase-4";
 
@@ -30,10 +30,10 @@ export type EInvoicePhase = {
   /** Display label, e.g. "Phase 4". */
   label: string;
   /**
-   * Lower bound of annual turnover in MYR, inclusive. A business qualifies for
-   * a phase when turnover is greater than minTurnover.
+   * Lower turnover bound, exclusive unless minInclusive is true.
    */
   minTurnover: number;
+  minInclusive?: boolean;
   /**
    * Upper bound of annual turnover in MYR, inclusive. `null` means no ceiling,
    * which is how the first phase is defined.
@@ -42,9 +42,8 @@ export type EInvoicePhase = {
   /** ISO date (YYYY-MM-DD) the phase became mandatory. */
   mandatoryFrom: string;
   /**
-   * ISO date (YYYY-MM-DD) the phase's six-month relaxation period ends. During
-   * relaxation LHDN does not impose penalties. `null` where LHDN has not
-   * published one.
+   * Published relaxation end. Relief is conditional on complying with the
+   * consolidated e-Invoice requirements; it is not a blanket penalty waiver.
    */
   relaxationEndsOn: string | null;
   /** Plain-language description of who falls in this phase. */
@@ -53,8 +52,10 @@ export type EInvoicePhase = {
 
 /** What the requirement checker concludes for a given business. */
 export type EInvoiceRequirementStatus =
-  /** Turnover is at or below the exemption threshold. */
+  /** Below the threshold with no reported ownership/group exception. */
   | "exempt"
+  /** The supplied context cannot establish eligibility or an exact start date. */
+  | "needs-review"
   /** In scope, and the mandatory date has already passed. */
   | "required-now"
   /** In scope, but the mandatory date is still in the future. */

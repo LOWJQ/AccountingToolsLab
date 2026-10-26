@@ -16,6 +16,7 @@ const footerSections: Array<{ links: FooterLink[]; title: string }> = [
       toolLink("sst-calculator-malaysia"),
       toolLink("trial-balance-calculator"),
       toolLink("cash-flow-calculator"),
+      toolLink("bank-reconciliation"),
       { label: "All Tools", href: "/tools" }
     ]
   },

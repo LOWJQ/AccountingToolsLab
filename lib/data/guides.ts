@@ -77,7 +77,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/errors-not-revealed-by-a-trial-balance",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-19",
+    lastModified: "2026-10-27",
     readTime: 9
   },
   {
@@ -91,7 +91,7 @@ export const guides: Guide[] = [
     status: "available",
     href: "/guides/profitable-but-no-cash",
     datePublished: "2026-08-17",
-    lastModified: "2026-08-19",
+    lastModified: "2026-10-27",
     readTime: 10
   },
   {

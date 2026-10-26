@@ -74,8 +74,8 @@ const whenToUseItems = [
 
 const relatedTools = [
   {
-    href: "/tools/financial-ratio-calculator",
-    label: "Financial Ratio Calculator"
+    href: "/tools/prepayment-schedule-generator",
+    label: "Prepayment Schedule Generator"
   },
   {
     href: "/tools/trial-balance-calculator",

@@ -11,7 +11,7 @@ import {
   type InvoiceValidationDisplayOptions
 } from "@/lib/invoice/invoice-validation-display";
 import type { InvoiceData, InvoiceLineItem } from "@/lib/invoice/invoice-types";
-import { validateInvoiceWithSubtotal } from "@/lib/invoice/invoice-validation";
+import { getInvoiceExportErrors } from "@/lib/invoice/invoice-validation";
 
 function getFallbackLineItemError(
   item: InvoiceLineItem | undefined,
@@ -70,7 +70,7 @@ export function useInvoiceValidation(
   );
   const { calculation, lineItems: calculatedLineItems } = invoiceCalculation;
   const validationErrors = useMemo(
-    () => validateInvoiceWithSubtotal(invoiceData, calculation.subtotal),
+    () => getInvoiceExportErrors(invoiceData, calculation.subtotal),
     [calculation.subtotal, invoiceData]
   );
   const visibleValidationErrors = useMemo(
@@ -112,6 +112,7 @@ export function useInvoiceValidation(
       }
 
       if (shouldShowInvoiceValidationError(field, displayOptions)) {
+        if (!lineItems[index]?.[key].trim()) return "";
         const fallback = getFallbackLineItemError(lineItems[index], index, key);
 
         // Same rule as above: an empty line item is allowed to stay empty.
@@ -125,6 +126,7 @@ export function useInvoiceValidation(
 
   return {
     calculation,
+    exportErrors: validationErrors,
     getLineItemError,
     getValidationMessage,
     lineItemPreviewTotals,

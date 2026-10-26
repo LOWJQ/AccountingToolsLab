@@ -81,12 +81,12 @@ const relatedTools = [
     label: "Trial Balance Calculator"
   },
   {
-    href: "/tools/accounting-equation-calculator",
-    label: "Accounting Equation Calculator"
+    href: "/tools/prepayment-schedule-generator",
+    label: "Prepayment Schedule Generator"
   },
   {
-    href: "/tools/financial-ratio-calculator",
-    label: "Financial Ratio Calculator"
+    href: "/tools/bank-reconciliation",
+    label: "Bank Reconciliation Matcher"
   },
   {
     href: "/tools",

@@ -10,5 +10,6 @@ export function formatLineItemErrorForDisplay(
   error: string,
   field: InvoiceLineItemErrorField
 ) {
+  if (error.includes("2 decimal places")) return "Use up to 2 decimal places.";
   return error ? lineItemErrorMessages[field] : "";
 }

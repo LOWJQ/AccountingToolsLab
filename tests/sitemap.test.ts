@@ -101,7 +101,11 @@ test("every entry carries a real ISO lastmod date", () => {
 // A future date tells crawlers the page changed after today, which is either a
 // typo or a copied placeholder. Either way it is wrong when the sitemap ships.
 test("no entry claims a lastmod in the future", () => {
-  const today = new Date().toISOString().slice(0, 10);
+  // Editorial dates use the site's Malaysian calendar day, which can already
+  // be tomorrow in UTC during an evening CI run.
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kuala_Lumpur", year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(new Date());
 
   for (const entry of entries) {
     assert.ok(

@@ -148,6 +148,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
 
   const {
     calculation,
+    exportErrors,
     getLineItemError,
     getValidationMessage,
     lineItemPreviewTotals,
@@ -339,10 +340,10 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
   }
 
   function handleOpenSavedInvoice(id: string) {
+    setIsSavedInvoicesModalOpen(false);
     if (openSavedInvoice(id)) {
       returnToEditor();
       resetValidationDisplay();
-      setIsSavedInvoicesModalOpen(false);
       scrollInvoiceGeneratorToTop();
     }
   }
@@ -350,6 +351,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
   // A duplicate is for "same as last time, new month", so it takes a fresh
   // number and today's date rather than copying the original's.
   function handleDuplicateSavedInvoice(id: string) {
+    setIsSavedInvoicesModalOpen(false);
     const duplicated = duplicateSavedInvoice(id, {
       fallbackInvoiceNumber: getNextInvoiceNumberSuggestion() ?? DEFAULT_INVOICE_NUMBER,
       invoiceDate: todayIsoDate()
@@ -358,7 +360,6 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
     if (duplicated) {
       returnToEditor();
       resetValidationDisplay();
-      setIsSavedInvoicesModalOpen(false);
       scrollInvoiceGeneratorToTop();
     }
   }
@@ -426,17 +427,27 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
     });
   }
 
-  // The download is never blocked on completeness. Anything left blank simply
-  // prints as its placeholder, which is more useful than refusing to produce a
-  // draft the user can already see on screen.
-  function previewInvoice() {
+  // Keep drafts available, but focus an entered value that would make the PDF
+  // incorrect. Use the existing field errors rather than adding another notice.
+  function canExportInvoice() {
     clearPdfStatus();
+    const firstError = exportErrors[0];
+    if (!firstError) return true;
+    markInvoiceFieldTouched(firstError.field);
+    window.requestAnimationFrame(() => {
+      invoiceGeneratorTopRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    });
+    return false;
+  }
+
+  function previewInvoice() {
+    if (!canExportInvoice()) return;
     void prepareInvoicePdf();
   }
 
   function downloadInvoice() {
+    if (!canExportInvoice()) return;
     saveCurrentInvoice();
-    clearPdfStatus();
     void downloadInvoicePdf();
   }
 
@@ -450,7 +461,7 @@ export function InvoiceGenerator({ onCompletionChange }: { onCompletionChange?: 
    * has already been autosaved under its own id, so it stays in My invoices.
    */
   function startNewInvoice() {
-    saveCurrentInvoice();
+    if (!saveCurrentInvoice()) return;
     returnToEditor();
     clearAutosaveTimer();
     beginNewInvoice();

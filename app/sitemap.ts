@@ -13,8 +13,8 @@ type SitemapEntry = {
 // need a date recorded here.
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: SitemapEntry[] = [
-    { path: "", lastModified: "2026-07-05" },
-    { path: "/tools", lastModified: "2026-08-18" },
+    { path: "", lastModified: "2026-10-27" },
+    { path: "/tools", lastModified: "2026-10-27" },
     ...tools.map((tool) => ({ path: tool.href, lastModified: tool.lastModified })),
     { path: "/guides", lastModified: "2026-08-18" },
     ...indexableGuides.map((guide) => ({

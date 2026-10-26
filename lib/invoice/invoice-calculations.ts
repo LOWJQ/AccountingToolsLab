@@ -58,12 +58,34 @@ export function parseInvoicePercentage(value: string): number | null {
   return parseDecimalAmount(value, PERCENTAGE_AMOUNT_PATTERN);
 }
 
-export function roundMoney(value: number): number {
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
+function decimalParts(value: number): { units: bigint; scale: number } {
+  const [coefficient, exponent = "0"] = String(value).split("e");
+  const [whole, fraction = ""] = coefficient.split(".");
+  return { units: BigInt(whole + fraction), scale: fraction.length - Number(exponent) };
+}
 
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+/** Round decimal digits half away from zero, without a binary half-cent tie. */
+function roundedDecimalMoney(units: bigint, scale: number): number {
+  const negative = units < BigInt(0);
+  const magnitude = negative ? -units : units;
+  const divisor = BigInt(10) ** BigInt(Math.max(0, scale - 2));
+  const scaled = scale < 2 ? magnitude * BigInt(10) ** BigInt(2 - scale) : magnitude;
+  const cents = scaled / divisor + (scaled % divisor * BigInt(2) >= divisor ? BigInt(1) : BigInt(0));
+  const amount = Number(negative ? -cents : cents) / 100;
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+export function roundMoney(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  const { units, scale } = decimalParts(value);
+  return roundedDecimalMoney(units, scale);
+}
+
+/** Multiply the decimal inputs exactly; percentages add two denominator digits. */
+function multiplyMoney(left: number, right: number, percentage = false): number {
+  const a = decimalParts(left);
+  const b = decimalParts(right);
+  return roundedDecimalMoney(a.units * b.units, a.scale + b.scale + (percentage ? 2 : 0));
 }
 
 function toSafeMoneyAmount(value: string): number {
@@ -89,7 +111,7 @@ function calculateTaxLine(tax: InvoiceTax, taxableAmount: number): InvoiceTaxCal
     type: tax.type,
     value: safeTaxValue,
     amount: roundMoney(
-      tax.type === "fixed" ? safeTaxValue : taxableAmount * (safeTaxValue / 100)
+      tax.type === "fixed" ? safeTaxValue : multiplyMoney(taxableAmount, safeTaxValue, true)
     )
   };
 }
@@ -108,7 +130,7 @@ export function calculateInvoiceLineItems(
       description: item.description.trim() || "Item",
       quantity: safeQuantity,
       unitPrice: safeUnitPrice,
-      lineTotal: roundMoney(safeQuantity * safeUnitPrice)
+      lineTotal: multiplyMoney(safeQuantity, safeUnitPrice)
     };
   });
 }
@@ -127,7 +149,7 @@ function calculateInvoiceTotalsFromLineItems(
       : toSafeMoneyAmount(invoice.discount.value);
   const rawDiscountAmount = invoice.discount.enabled
     ? invoice.discount.type === "percentage"
-      ? subtotal * (discountValue / 100)
+      ? multiplyMoney(subtotal, discountValue, true)
       : discountValue
     : 0;
   const discountAmount = roundMoney(Math.min(Math.max(rawDiscountAmount, 0), subtotal));

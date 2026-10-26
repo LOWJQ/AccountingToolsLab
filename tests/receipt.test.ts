@@ -143,6 +143,11 @@ test("a receipt discount reduces the taxable amount", () => {
   assert.equal(totals.total, 972);
 });
 
+test("receipt totals preserve fractional-price decimal rounding", () => {
+  const receipt = createReceipt({ items: [{ id: "a", description: "Half hour", quantity: "0.5", unitPrice: "20.15" }] });
+  assert.equal(calculateInvoiceTotals(toInvoiceDocument(receipt)).total, 10.08);
+});
+
 // --- pdf labels -------------------------------------------------------------
 
 test("receipt PDF labels replace the invoice wording", () => {

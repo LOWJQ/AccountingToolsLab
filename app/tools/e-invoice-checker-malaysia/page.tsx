@@ -7,7 +7,10 @@ import { RelatedGuideCard } from "@/components/tools/RelatedGuideCard";
 import { ToolPageLayout } from "@/components/tools/ToolPageLayout";
 import {
   EINVOICE_EXEMPTION_THRESHOLD,
-  EINVOICE_PHASES
+  EINVOICE_PHASES,
+  EINVOICE_GUIDELINE_URL,
+  EINVOICE_SPECIFIC_GUIDELINE_URL,
+  EINVOICE_LAST_REVIEWED
 } from "@/lib/data/einvoice/phases";
 import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
@@ -18,7 +21,7 @@ import Link from "next/link";
 export const metadata = createMetadata({
   title: "e-Invoice Checker Malaysia | Do I Need to Issue e-Invoices?",
   description:
-    "Check whether your business must issue LHDN e-Invoices. Enter your annual turnover to see your phase, your start date, and the RM1 million exemption.",
+    "Check Malaysia e-Invoice scope using the RM3 million exemption, ownership exceptions, new-business start dates and Phase 4 relaxation through 2027.",
   path: "/tools/e-invoice-checker-malaysia"
 });
 
@@ -26,27 +29,27 @@ const einvoiceFaqs = [
   {
     question: "Am I required to issue e-Invoices in Malaysia?",
     answer:
-      "It depends on your annual turnover. Businesses with annual turnover above RM1 million are phased into the LHDN e-Invoice mandate, with the largest businesses starting first. Businesses at or below RM1 million are currently exempt. Enter your turnover in the checker above to see which phase applies to you."
+      "Turnover, business history and exemption conditions all matter. From 1 September 2026, businesses below RM3 million may qualify for the turnover exemption. Exactly RM3 million is not below the ceiling. Ownership or group links can exclude a business from the exemption, and new businesses have separate start-date rules."
   },
   {
     question: "What is the e-Invoice exemption threshold?",
     answer:
-      "Businesses with annual turnover at or below RM1 million are exempt. The threshold was raised from RM500,000 to RM1 million with effect from 1 January 2026. The originally planned final phase for businesses below that level was cancelled rather than postponed, so there is no later start date waiting for them."
+      "The ceiling is annual turnover or revenue below RM3 million, effective 1 September 2026. The exemption does not apply where a qualifying non-individual shareholder, holding company, related company or joint venture has annual revenue of at least RM3 million. Check General Guideline section 1.6.10 and any existing implementation obligation before relying on the exemption."
   },
   {
     question: "Which turnover figure does LHDN use to decide my phase?",
     answer:
-      "LHDN places a business into a phase using its FY2022 annual turnover, not what it earns today. If your current turnover differs from your FY2022 figure, check both, and confirm your position with LHDN if the two fall on different sides of a threshold."
+      "For the original rollout, use FY2022 audited turnover or YA2022 tax-return revenue, adjusted to 12 months if necessary. New businesses and businesses that later reach a threshold need their applicable rules instead. A fall in current revenue does not automatically change an established implementation obligation."
   },
   {
     question: "What is the relaxation period?",
     answer:
-      "Each phase has a six-month relaxation period after its start date. During relaxation LHDN does not impose penalties, and businesses may issue consolidated e-Invoices and use more flexible descriptions. The requirement itself still applies during relaxation, so it is a grace period on enforcement rather than a delay to the start date."
+      "The original first three phases had six-month windows. For taxpayers up to RM5 million with the 1 January or 1 July 2026 implementation date, the published relaxation runs through 31 December 2027. Relief under section 120 is conditional on following the consolidated e-Invoice and consolidated self-billed e-Invoice rules in Specific Guideline section 16; submissions are still required."
   },
   {
     question: "Is a PDF invoice an e-Invoice?",
     answer:
-      "No. An e-Invoice is structured data submitted to the MyInvois system and validated by LHDN before you give it to your customer. The validated document comes back with a unique identifier and a QR code. A PDF or a printed invoice on its own does not meet the requirement."
+      "A PDF alone is not a validated e-Invoice. MyInvois validation is required under the applicable individual or consolidated submission rules. Eligible taxpayers using interim relaxation may provide ordinary receipts or invoices while meeting their consolidated submission obligations."
   },
   {
     question: "Can I issue e-Invoices voluntarily if I am exempt?",
@@ -56,45 +59,45 @@ const einvoiceFaqs = [
   {
     question: "What happens if I do not comply after my phase starts?",
     answer:
-      "Once the relaxation period for your phase has ended, non-compliance can attract penalties. Fines have been reported in the range of RM200 to RM20,000 per offence. Confirm the current penalty position with LHDN or a qualified tax adviser, since enforcement details change."
+      "Check your applicable implementation date and any conditional relief with LHDN. Interim relaxation is not a blanket waiver for ignoring submissions. The Specific Guideline sets out the consolidated submission conditions for relief from prosecution under section 120."
   },
   {
     question: "Does this checker submit anything to LHDN?",
     answer:
-      "No. This tool runs entirely in your browser and does not connect to MyInvois. It compares the turnover you enter against LHDN's published phase thresholds and dates. It cannot confirm your registration status and is not a substitute for advice from LHDN or a qualified tax adviser."
+      "No. This tool runs in your browser. It uses the turnover, business history and ownership answers you supply to indicate a timetable or exemption. Uncertain or changed circumstances are flagged for confirmation; it cannot verify your registration or compliance status."
   }
 ];
 
 const benefits = [
   {
     description:
-      "Enter one figure and see whether the mandate applies to you, or whether you fall under the RM1 million exemption.",
-    title: "A straight answer on scope"
+      "Check the below-RM3-million ceiling together with business history and ownership exceptions.",
+    title: "Check scope and exceptions"
   },
   {
     description:
-      "See your phase, the date it became or becomes mandatory, and how many days sit between that date and today.",
-    title: "Know your actual deadline"
+      "See the original rollout or new-business timetable where your answers establish a start date.",
+    title: "Find your indicated start date"
   },
   {
     description:
-      "Check where the relaxation period sits, so you know whether you are in the penalty-free window or past it.",
-    title: "Understand the grace period"
+      "See the published relaxation end and the conditions that still require consolidated submissions.",
+    title: "Understand conditional relief"
   }
 ];
 
 const steps = [
-  "Enter your annual turnover in Malaysian ringgit.",
-  "Read your position: exempt, upcoming, or required now.",
-  "Check the phase and the mandatory start date shown beside it.",
+  "Choose your business history and enter the relevant annual revenue in Malaysian ringgit.",
+  "Below RM3 million, check whether an ownership or group exception applies.",
+  "Review the indicated start date, potential exemption or request for confirmation.",
   "Review the notes, then confirm your position with LHDN before acting."
 ];
 
 const readinessChecks = [
-  "Use your FY2022 turnover, since that is the figure LHDN phases businesses on.",
+  "Use FY2022 or YA2022 revenue for the original rollout, and the relevant first-year figure for a new business.",
   "If your turnover sits close to a threshold, confirm your position with LHDN rather than assuming.",
-  "Being exempt today does not lock in the position if your turnover later rises above RM1 million.",
-  "A validated e-Invoice must reach your buyer, not just your accounting system.",
+  "Reaching RM3 million later, an existing mandate or a change in ownership can require a separate check.",
+  "Follow the individual or consolidated submission rules that apply to your business.",
   "Treat this as a scope check, not confirmation that you are compliant."
 ];
 
@@ -106,13 +109,13 @@ const readinessChecks = [
 const officialResources = [
   {
     description: "Phases, thresholds, and the start date for each group of businesses.",
-    href: "https://www.hasil.gov.my/en/e-invois/pelaksanaan-e-invois-di-malaysia/",
-    label: "e-Invoice implementation in Malaysia"
+    href: EINVOICE_GUIDELINE_URL,
+    label: "General Guideline v4.8 — scope and exemptions"
   },
   {
-    description: "LHDN's main e-Invoice section, including guidelines and announcements.",
-    href: "https://www.hasil.gov.my/en/e-invois/",
-    label: "LHDN e-Invoice"
+    description: "Section 16 sets out relaxation periods and consolidated submission conditions.",
+    href: EINVOICE_SPECIFIC_GUIDELINE_URL,
+    label: "Specific Guideline v4.9 — interim relaxation"
   },
   {
     description: "The portal where e-Invoices are submitted and validated.",
@@ -149,12 +152,12 @@ function formatMyr(amount: number): string {
   return `RM${amount.toLocaleString("en-MY")}`;
 }
 
-function describeTurnoverRange(minTurnover: number, maxTurnover: number | null): string {
+function describeTurnoverRange(minTurnover: number, maxTurnover: number | null, minInclusive = false): string {
   if (maxTurnover === null) {
     return `Above ${formatMyr(minTurnover)}`;
   }
 
-  return `Above ${formatMyr(minTurnover)} up to ${formatMyr(maxTurnover)}`;
+  return `${minInclusive ? "From" : "Above"} ${formatMyr(minTurnover)} up to ${formatMyr(maxTurnover)}`;
 }
 
 export default function EInvoiceCheckerMalaysiaPage() {
@@ -214,25 +217,24 @@ export default function EInvoiceCheckerMalaysiaPage() {
           Do you need to issue e-Invoices in Malaysia?
         </h2>
         <p className="mt-3 text-base leading-7 text-black">
-          It depends on annual turnover. LHDN phases businesses into the e-Invoice mandate
-          largest first, and businesses with annual turnover at or below RM1 million are
-          exempt. That threshold was raised from RM500,000 to RM1 million with effect from 1
-          January 2026, and the phase that would have covered businesses below it was cancelled
-          rather than postponed, so there is no later start date waiting for them.
+          From 1 September 2026, annual turnover below RM3 million may qualify for the
+          small-business exemption. Exactly RM3 million does not qualify under that ceiling.
+          Ownership and group exceptions must also be checked; a turnover figure alone cannot
+          establish exemption.
         </p>
         <p className="mt-3 text-base leading-7 text-black">
-          LHDN places a business into a phase using its FY2022 annual turnover rather than what
-          it earns today, so check both figures if they fall on different sides of a threshold.
-          This checker compares the turnover you enter against the published phases and dates;
-          it cannot confirm your registration status, and it does not connect to MyInvois.
+          The original rollout uses FY2022 audited turnover or YA2022 tax-return revenue.
+          Businesses starting during 2023–2025 generally use 1 July 2026 where their relevant
+          revenue reaches RM3 million. For operations starting from 2026, the expected first-year
+          revenue and commencement date matter. Changed turnover bands need a separate review.
         </p>
       </section>
 
       <p className="text-base leading-7 text-black">
         LHDN phases businesses into the e-Invoice mandate by annual turnover, starting with the
-        largest. Businesses at or below {formatMyr(EINVOICE_EXEMPTION_THRESHOLD)} in annual turnover
-        are currently exempt. This checker compares the figure you enter against the published
-        thresholds and start dates so you can see where you stand.
+        largest. The current turnover exemption is below {formatMyr(EINVOICE_EXEMPTION_THRESHOLD)},
+        subject to eligibility. This page was checked on {formatLongDate(EINVOICE_LAST_REVIEWED)}
+        against General Guideline v4.8 and Specific Guideline v4.9.
       </p>
 
       <section className="border-t border-slate-200 pt-8">
@@ -267,16 +269,16 @@ export default function EInvoiceCheckerMalaysiaPage() {
           Malaysia e-Invoice implementation phases
         </h2>
         <p className="mt-3 max-w-5xl text-base leading-7 text-black">
-          Each phase has a start date and a six-month relaxation period during which LHDN does not
-          impose penalties. These dates and thresholds are set by LHDN, and the current position is
-          published on the{" "}
+          These are the original rollout dates with the current turnover scope. Phase 4 relaxation
+          now runs to 31 December 2027 for the published January/July 2026 groups. Relief depends
+          on meeting the consolidated submission conditions. Check the{" "}
           <a
             className="font-semibold underline-offset-4 hover:underline"
-            href="https://www.hasil.gov.my/en/e-invois/pelaksanaan-e-invois-di-malaysia/"
+            href={EINVOICE_GUIDELINE_URL}
             rel="noopener noreferrer"
             target="_blank"
           >
-            e-Invoice implementation page on the LHDN website
+            current LHDN General Guideline
           </a>
           .
         </p>
@@ -305,7 +307,7 @@ export default function EInvoiceCheckerMalaysiaPage() {
                     {phase.label}
                   </th>
                   <td className="px-4 py-3 font-medium text-black">
-                    {describeTurnoverRange(phase.minTurnover, phase.maxTurnover)}
+                    {describeTurnoverRange(phase.minTurnover, phase.maxTurnover, phase.minInclusive)}
                   </td>
                   <td className="px-4 py-3 font-medium text-black">
                     {formatLongDate(phase.mandatoryFrom)}
@@ -319,10 +321,10 @@ export default function EInvoiceCheckerMalaysiaPage() {
               ))}
               <tr className="bg-slate-50">
                 <th className="px-4 py-3 text-left font-semibold text-black" scope="row">
-                  Exempt
+                  Potential turnover exemption
                 </th>
                 <td className="px-4 py-3 font-semibold text-black">
-                  {formatMyr(EINVOICE_EXEMPTION_THRESHOLD)} and below
+                  Below {formatMyr(EINVOICE_EXEMPTION_THRESHOLD)}; eligibility conditions apply
                 </td>
                 <td className="px-4 py-3 font-semibold text-black">Not applicable</td>
                 <td className="px-4 py-3 font-semibold text-black">Not applicable</td>
@@ -330,6 +332,12 @@ export default function EInvoiceCheckerMalaysiaPage() {
             </tbody>
           </table>
         </div>
+        <p className="mt-4 text-sm leading-6 text-slate-600">
+          New-business dates and ownership exceptions can differ from this table. If a business
+          starting from 2026 expects first-year revenue below the ceiling and later reaches it,
+          the guideline provides a 1 January start in the second year after the threshold year.
+          Confirm the relevant year and any existing mandate with LHDN.
+        </p>
       </section>
 
       <section className="border-t border-slate-200 pt-8">

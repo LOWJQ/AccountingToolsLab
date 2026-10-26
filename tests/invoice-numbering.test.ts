@@ -76,3 +76,9 @@ test("new invoice suggestions skip numbers already in history", () => {
 test("unsupported duplicate numbers do not loop indefinitely", () => {
   assert.equal(getUnusedInvoiceNumber("ABC", ["ABC"]), null);
 });
+
+test("duplicating an older invoice skips all occupied numbers in its sequence", () => {
+  const next = getNextInvoiceNumber("INV-002");
+  assert.equal(getUnusedInvoiceNumber(next!, ["INV-002", "INV-003", "INV-004"]), "INV-005");
+  assert.equal(getUnusedInvoiceNumber(getNextInvoiceNumber("CLIENT-009")!, ["CLIENT-009", "CLIENT-010", "INV-011"]), "CLIENT-011");
+});

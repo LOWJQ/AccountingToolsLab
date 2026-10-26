@@ -521,6 +521,14 @@ export default function ErrorsNotRevealedByTrialBalanceGuidePage() {
                 ))}
               </ul>
               <p className="mt-5 text-base leading-7 text-slate-950">
+                For the bank transaction check, the{" "}
+                <Link className="font-semibold underline underline-offset-4" href="/tools/bank-reconciliation">
+                  Bank Reconciliation Matcher
+                </Link>{" "}
+                compares statement and cashbook Excel or CSV exports and highlights unmatched
+                records for review. Complete the closing-balance reconciliation separately.
+              </p>
+              <p className="mt-5 text-base leading-7 text-slate-950">
                 Comparing each balance against the previous period is the single most useful habit.
                 Compensating errors and errors of principle rarely look wrong on their own, but
                 they often look odd next to last period.

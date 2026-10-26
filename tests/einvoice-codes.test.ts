@@ -86,6 +86,7 @@ test("the lowest phase starts exactly at the exemption threshold", () => {
   const lowest = EINVOICE_PHASES[EINVOICE_PHASES.length - 1];
 
   assert.equal(lowest.minTurnover, EINVOICE_EXEMPTION_THRESHOLD);
+  assert.equal(lowest.minInclusive, true);
 });
 
 test("phase dates are ISO formatted", () => {

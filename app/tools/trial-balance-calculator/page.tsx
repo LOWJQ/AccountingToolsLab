@@ -80,6 +80,10 @@ const commonChecks = [
 
 const relatedTools = [
   {
+    href: "/tools/prepayment-schedule-generator",
+    label: "Prepayment Schedule Generator"
+  },
+  {
     href: "/tools/invoice-generator",
     label: "Invoice Generator"
   },
@@ -92,8 +96,8 @@ const relatedTools = [
     label: "Cash Flow Calculator"
   },
   {
-    href: "/tools",
-    label: "All Tools"
+    href: "/tools/bank-reconciliation",
+    label: "Bank Reconciliation Matcher"
   }
 ];
 

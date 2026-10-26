@@ -75,8 +75,8 @@ const relatedTools = [
     label: "Cash Flow Calculator"
   },
   {
-    href: "/tools/break-even-calculator",
-    label: "Break-even Calculator"
+    href: "/tools/bank-reconciliation",
+    label: "Bank Reconciliation Matcher"
   },
   {
     href: "/tools",
@@ -130,10 +130,8 @@ export default function InvoiceGeneratorPage() {
           Free Online Invoice Generator Malaysia
         </h1>
         <p className="mt-3 text-base leading-7 text-black">
-          Use this free invoice generator Malaysia tool to create a simple PDF invoice for
-          freelancers and small businesses. Add your business details, customer details, invoice
-          items, tax/SST, discounts, payment information, notes, logo, and payment QR image, then
-          download a clean invoice without signing up.
+          Create and download a PDF invoice with optional SST, discounts and payment details.
+          Free, with no sign-up.
         </p>
       </div>}>
 

@@ -577,33 +577,61 @@ export function importAllData(value: unknown): LibraryResult {
     return UNAVAILABLE;
   }
 
-  if (!isRecord(value) || value.version !== ATL_INVOICE_LIBRARY_VERSION) {
+  if (!isRecord(value) || value.version !== ATL_INVOICE_LIBRARY_VERSION || !Array.isArray(value.invoices)) {
     return { ok: false, reason: "error", error: "That file is not a valid invoice backup." };
   }
 
-  const rows = Array.isArray(value.invoices) ? value.invoices : [];
-
-  for (const row of rows) {
-    if (!isRecord(row)) {
-      continue;
-    }
-
-    const fields = normalizeFields(row.fields);
-
-    if (!fields) {
-      continue;
-    }
-
-    const result = saveInvoice(createInvoiceId(), fields);
-
-    if (!result.ok) {
-      return result;
-    }
+  const fields: SavedInvoiceFields[] = [];
+  for (const row of value.invoices) {
+    const normalized = isRecord(row) ? normalizeFields(row.fields) : null;
+    if (!normalized) return { ok: false, reason: "error", error: "That file contains an invalid invoice." };
+    fields.push(normalized);
+  }
+  const index = loadInvoiceIndex();
+  if (index.length + fields.length > ATL_MAX_SAVED_INVOICES) {
+    return { ok: false, reason: "limit", error: "Restoring this backup would exceed 50 invoices. Delete some saved invoices first." };
   }
 
-  if (isRecord(value.profile) && !loadBusinessProfile()) {
-    saveBusinessProfile(normalizeProfile(value.profile));
+  // Stage the complete import, then publish the index last. A failed write
+  // rolls back only these keys, leaving the existing library intact.
+  const previous = new Map<string, string | null>();
+  try {
+    const savedAt = new Date().toISOString();
+    const writes: Array<[string, string]> = [];
+    const nextIndex = [...index];
+    const usedIds = new Set(index.map((entry) => entry.id));
+    for (const invoice of fields) {
+      const baseId = createInvoiceId();
+      let id = baseId;
+      for (let suffix = 1; usedIds.has(id) || storage.getItem(invoiceKey(id)) !== null; suffix++) {
+        id = `${baseId}-${suffix}`;
+      }
+      usedIds.add(id);
+      const total = calculateInvoiceTotals(mergeInvoice(EMPTY_BUSINESS_PROFILE, invoice)).total;
+      writes.push([invoiceKey(id), JSON.stringify({ version: ATL_INVOICE_LIBRARY_VERSION, savedAt, invoice })]);
+      nextIndex.push({ id, invoiceNumber: invoice.invoiceNumber, customerName: invoice.customerName, currency: invoice.currency, total, updatedAt: savedAt });
+    }
+    if (isRecord(value.profile) && !loadBusinessProfile()) {
+      writes.push([ATL_BUSINESS_PROFILE_KEY, JSON.stringify({ version: ATL_INVOICE_LIBRARY_VERSION, savedAt, profile: normalizeProfile(value.profile) })]);
+    }
+    writes.push([ATL_INVOICE_INDEX_KEY, JSON.stringify({ version: ATL_INVOICE_LIBRARY_VERSION, invoices: nextIndex })]);
+    for (const [key, contents] of writes) {
+      previous.set(key, storage.getItem(key));
+      storage.setItem(key, contents);
+    }
+    return { ok: true };
+  } catch (error) {
+    // Remove staged bodies first to free space before restoring an old value.
+    for (const [key, contents] of previous) {
+      if (contents === null) {
+        try { storage.removeItem(key); } catch { /* Existing index still owns the visible records. */ }
+      }
+    }
+    for (const [key, contents] of previous) {
+      if (contents !== null) {
+        try { storage.setItem(key, contents); } catch { /* The index is committed only after all other writes. */ }
+      }
+    }
+    return failure(error, "The backup could not be restored. Try again.");
   }
-
-  return { ok: true };
 }

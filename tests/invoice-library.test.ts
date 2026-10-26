@@ -411,3 +411,63 @@ test("importAllData rejects a file that is not a backup", () => {
   assert.equal(result.ok, false);
   assert.equal(result.ok === false && result.reason, "error");
 });
+
+test("importAllData rejects an oversized restore before changing any saved data", () => {
+  const { entries, storage } = createStorage();
+  installStorage(storage);
+  for (let i = 0; i < ATL_MAX_SAVED_INVOICES - 1; i++) {
+    saveInvoice(`existing-${i}`, createFields());
+  }
+  const before = { ...entries };
+  const result = importAllData({
+    version: ATL_INVOICE_LIBRARY_VERSION,
+    profile: splitInvoice(createInvoiceData()).profile,
+    invoices: [{ fields: createFields() }, { fields: createFields() }]
+  });
+  assert.equal(result.ok === false && result.reason, "limit");
+  assert.deepEqual(entries, before);
+});
+
+test("importAllData validates the entire backup before writing invoices", () => {
+  const { entries, storage } = createStorage();
+  installStorage(storage);
+  saveInvoice("existing", createFields());
+  const before = { ...entries };
+  const result = importAllData({
+    version: ATL_INVOICE_LIBRARY_VERSION,
+    invoices: [{ fields: createFields() }, null]
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(entries, before);
+});
+
+for (const failingWrite of [2, 3, 4]) {
+  test(`importAllData rolls back a failure on staged write ${failingWrite}`, () => {
+    const { entries, storage } = createStorage();
+    installStorage(storage);
+    saveInvoice("existing", createFields());
+    const before = { ...entries };
+    let writes = 0;
+    installStorage({
+      ...storage,
+      setItem: (key, value) => {
+        writes++;
+        if (writes === failingWrite) {
+          const error = new Error("Storage is full");
+          error.name = "QuotaExceededError";
+          throw error;
+        }
+        storage.setItem(key, value);
+      }
+    });
+    const result = importAllData({
+      version: ATL_INVOICE_LIBRARY_VERSION,
+      profile: splitInvoice(createInvoiceData()).profile,
+      invoices: [{ fields: createFields() }, { fields: createFields() }]
+    });
+    assert.equal(result.ok === false && result.reason, "quota");
+    assert.deepEqual(entries, before);
+    assert.equal(listInvoices().length, 1);
+    assert.equal(loadBusinessProfile(), null);
+  });
+}

@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
 import {
   calculateInvoiceTotals,
+  calculateInvoiceLineItems,
   parseInvoiceMoneyAmount,
   parseInvoicePercentage,
-  parseInvoiceQuantity
+  parseInvoiceQuantity,
+  roundMoney
 } from "../lib/invoice/invoice-calculations";
 import { formatLineItemErrorForDisplay } from "../lib/invoice/invoice-line-item-error-display";
 import { INVOICE_TEXT_MAX_LENGTHS } from "../lib/invoice/invoice-limits";
 import type { InvoiceData } from "../lib/invoice/invoice-types";
 import { shouldShowInvoiceValidationError } from "../lib/invoice/invoice-validation-display";
-import { validateInvoiceWithSubtotal } from "../lib/invoice/invoice-validation";
+import { getInvoiceExportErrors, validateInvoiceWithSubtotal } from "../lib/invoice/invoice-validation";
 
 function test(name: string, run: () => void) {
   run();
@@ -274,6 +276,43 @@ test("calculates decimal quantity", () => {
   );
 
   assert.equal(result.subtotal, 200);
+});
+
+test("fractional invoice lines round exact decimal half-cents consistently", () => {
+  const lines = calculateInvoiceLineItems([
+    { id: "a", description: "Half hour", quantity: "0.5", unitPrice: "20.15" },
+    { id: "b", description: "Quarter hour", quantity: "0.25", unitPrice: "40.30" },
+    { id: "c", description: "Small quantity", quantity: "0.5", unitPrice: "2.01" }
+  ]);
+  assert.deepEqual(lines.map(line => line.lineTotal), [10.08, 10.08, 1.01]);
+  const result = calculateInvoiceTotals(createInvoice({ items: lines.map((line, index) => ({ id: line.id, description: line.description, quantity: ["0.5", "0.25", "0.5"][index], unitPrice: ["20.15", "40.30", "2.01"][index] })) }));
+  assert.equal(result.subtotal, 21.17);
+  assert.equal(result.total, 21.17);
+});
+
+test("percentage discounts and taxes use the same exact half-cent rule", () => {
+  const items = [{ id: "a", description: "Service", quantity: "1", unitPrice: "20.15" }];
+  const discounted = calculateInvoiceTotals(createInvoice({ items, discount: { enabled: true, type: "percentage", value: "50" } }));
+  assert.equal(discounted.discountAmount, 10.08);
+  assert.equal(discounted.total, 10.07);
+  const taxed = calculateInvoiceTotals(createInvoice({ items, tax: { enabled: true, type: "percentage", value: "50" } }));
+  assert.equal(taxed.taxAmount, 10.08);
+  assert.equal(taxed.total, 30.23);
+  assert.equal(roundMoney(10.075), 10.08);
+  assert.equal(roundMoney(-10.075), -10.08);
+  assert.equal(roundMoney(1e-7), 0);
+  assert.equal(roundMoney(Infinity), 0);
+});
+
+test("draft exports allow blanks while rejecting entered invalid values", () => {
+  const draft = createInvoice({ businessName: "", customerName: "", invoiceNumber: "", invoiceDate: "", items: [{ id: "a", description: "", quantity: "1", unitPrice: "" }] });
+  assert.deepEqual(getInvoiceExportErrors(draft, 0), []);
+  for (const unitPrice of ["1.234", "-1", "not money", "Infinity"]) {
+    const invoice = createInvoice({ items: [{ id: "a", description: "Service", quantity: "10", unitPrice }] });
+    assert.ok(getInvoiceExportErrors(invoice, 0).some(error => error.field === "items.0.unitPrice"));
+  }
+  const badDate = createInvoice({ dueDate: "2026-02-31" });
+  assert.ok(getInvoiceExportErrors(badDate, 200).some(error => error.field === "dueDate"));
 });
 
 test("calculates decimal unit price", () => {
@@ -695,8 +734,9 @@ test("money fields reject more than two decimal places", () => {
     })
   );
 
-  assert.ok(messages.includes("Line item 1 unit price must be a valid number."));
-  assert.ok(messages.includes("Discount value must be a valid number."));
+  assert.ok(messages.includes("Line item 1 unit price must use at most 2 decimal places."));
+  assert.ok(messages.includes("Discount value must use at most 2 decimal places."));
+  assert.equal(formatLineItemErrorForDisplay(messages[0], "unitPrice"), "Use up to 2 decimal places.");
 });
 
 test("quantity and percentage fields keep practical decimal support", () => {

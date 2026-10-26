@@ -33,7 +33,7 @@ export default function BankReconciliationPage() {
     <SoftwareApplicationJsonLd name="Bank Reconciliation Matcher" description={metadata.description as string} url={pageUrl} />
     <FAQJsonLd faqs={faqs} />
     <nav aria-label="Breadcrumb" className="text-sm text-slate-500"><ol className="flex flex-wrap items-center gap-2"><li><Link className="hover:text-slate-900" href="/">Home</Link></li><li aria-hidden="true">&gt;</li><li><Link className="hover:text-slate-900" href="/tools">Tools</Link></li><li aria-hidden="true">&gt;</li><li className="font-medium text-slate-700">Bank Reconciliation Matcher</li></ol></nav>
-    <ReconciliationWorkspace intro={<div className="max-w-4xl"><h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Bank Reconciliation Matcher</h1><p className="mt-3 text-base leading-7 text-black">Compare bank statement and cashbook Excel or CSV files. Find matching transactions, review differences, and download your working paper. Free, with no sign-up.</p></div>}>
+    <ReconciliationWorkspace intro={<div><h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Bank Reconciliation Matcher</h1><p className="mt-3 text-base leading-7 text-black">Compare bank statement and cashbook Excel or CSV files. Find matching transactions, review differences, and download your working paper. Free, with no sign-up.</p></div>}>
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">

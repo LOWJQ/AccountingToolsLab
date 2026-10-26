@@ -489,6 +489,14 @@ export default function ProfitableButNoCashGuidePage() {
                 returns the same RM 9,000 ending balance. One method explains the gap, the other
                 confirms the position.
               </p>
+              <p className="mt-4 text-base leading-7 text-slate-950">
+                To check the underlying cash records, use the{" "}
+                <Link className="font-semibold underline underline-offset-4" href="/tools/bank-reconciliation">
+                  Bank Reconciliation Matcher
+                </Link>{" "}
+                to compare a bank statement export with the cashbook. Review unmatched payments,
+                receipts and possible timing differences, then check closing balances separately.
+              </p>
             </section>
 
             <section className="mt-12">

@@ -11,6 +11,19 @@ export type InvoiceValidationError = {
   message: string;
 };
 
+/** Drafts may be incomplete; entered values must still be safe to export. */
+export function getInvoiceExportErrors(invoice: InvoiceData, subtotal: number): InvoiceValidationError[] {
+  return validateInvoiceWithSubtotal(invoice, subtotal).filter((error) => {
+    if (error.message.endsWith("is required.")) return false;
+    let value: unknown = invoice;
+    for (const part of error.field.split(".")) {
+      if (!value || typeof value !== "object") break;
+      value = (value as Record<string, unknown>)[part];
+    }
+    return typeof value !== "string" || value.trim() !== "";
+  });
+}
+
 function isBlank(value: string): boolean {
   return value.trim() === "";
 }
@@ -91,7 +104,9 @@ function parseRequiredFiniteNumber(
   if (parsedValue === null) {
     errors.push({
       field,
-      message: `${label} must be a valid number.`
+      message: parser === parseInvoiceMoneyAmount && /^[+-]?(?:\d+\.\d{3,}|\.\d{3,})$/.test(value.trim())
+        ? `${label} must use at most 2 decimal places.`
+        : `${label} must be a valid number.`
     });
     return null;
   }

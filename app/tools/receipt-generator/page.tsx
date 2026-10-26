@@ -102,8 +102,8 @@ const relatedTools = [
     label: "Cash Flow Calculator"
   },
   {
-    href: "/tools",
-    label: "All Tools"
+    href: "/tools/bank-reconciliation",
+    label: "Bank Reconciliation Matcher"
   }
 ];
 

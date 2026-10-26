@@ -21,7 +21,7 @@ import {
   type LibraryResult,
   type SavedInvoiceFields
 } from "@/lib/invoice/invoice-library";
-import { getNextInvoiceNumber } from "@/lib/invoice/invoice-numbering";
+import { getNextInvoiceNumber, getUnusedInvoiceNumber } from "@/lib/invoice/invoice-numbering";
 import { clearInvoiceDraft } from "@/lib/invoice/invoice-storage";
 import { downloadBlob } from "@/lib/utils/download-blob";
 import type { InvoiceData } from "@/lib/invoice/invoice-types";
@@ -53,6 +53,12 @@ function getSaveErrorMessage(result: Extract<LibraryResult, { ok: false }>): str
   return "Invoice could not be saved to this device. It is still available this session.";
 }
 
+function persistInvoice(id: string, invoice: InvoiceData): LibraryResult {
+  const { fields, profile } = splitInvoice(invoice);
+  const result = saveInvoice(id, fields);
+  return result.ok ? saveBusinessProfile(profile) : result;
+}
+
 export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoiceDraftInput) {
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
   const [autosaveError, setAutosaveError] = useState("");
@@ -64,6 +70,9 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
   const autosaveTimerRef = useRef<number | null>(null);
   /** Which saved invoice the autosave writes to. */
   const currentInvoiceIdRef = useRef("");
+  const pendingSaveRef = useRef(false);
+  const latestDraftRef = useRef({ invoiceData, isDraftHydrated });
+  latestDraftRef.current = { invoiceData, isDraftHydrated };
 
   const refreshSavedInvoices = useCallback(() => {
     setSavedInvoices(listInvoices());
@@ -92,13 +101,11 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
   const saveCurrentInvoice = useCallback(() => {
     if (!isDraftHydrated) return false;
     clearAutosaveTimer();
-    const { fields, profile } = splitInvoice(invoiceData);
-    const profileResult = saveBusinessProfile(profile);
-    const invoiceResult = saveInvoice(currentInvoiceIdRef.current, fields);
-    const failure = !profileResult.ok ? profileResult : !invoiceResult.ok ? invoiceResult : null;
-    setAutosaveError(failure ? getSaveErrorMessage(failure) : "");
+    const result = persistInvoice(currentInvoiceIdRef.current, invoiceData);
+    pendingSaveRef.current = !result.ok;
+    setAutosaveError(result.ok ? "" : getSaveErrorMessage(result));
     refreshSavedInvoices();
-    return !failure;
+    return result.ok;
   }, [invoiceData, isDraftHydrated, refreshSavedInvoices]);
 
   useEffect(() => {
@@ -143,9 +150,11 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
 
     if (skipNextAutosaveRef.current) {
       skipNextAutosaveRef.current = false;
+      pendingSaveRef.current = false;
       return;
     }
 
+    pendingSaveRef.current = true;
     const timer = window.setTimeout(saveCurrentInvoice, 1000);
 
     autosaveTimerRef.current = timer;
@@ -154,6 +163,28 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
       window.clearTimeout(timer);
     };
   }, [invoiceData, isDraftHydrated, saveCurrentInvoice]);
+
+  // Save the latest render, not the value captured when the listener mounted.
+  // Keep lifecycle persistence free of React state updates during unmount.
+  useEffect(() => {
+    function flush() {
+      const latest = latestDraftRef.current;
+      if (!latest.isDraftHydrated || !pendingSaveRef.current) return;
+      clearAutosaveTimer();
+      const result = persistInvoice(currentInvoiceIdRef.current, latest.invoiceData);
+      pendingSaveRef.current = !result.ok;
+    }
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden") flush();
+    }
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      flush();
+    };
+  }, []);
 
   /**
    * Points the autosave at a fresh record. The invoice on screen has already
@@ -166,6 +197,7 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
   /** Loads a saved invoice, keeping the business details already on screen. */
   const openSavedInvoice = useCallback(
     (id: string) => {
+      if (pendingSaveRef.current && !saveCurrentInvoice()) return false;
       const fields = loadInvoice(id);
 
       if (!fields) {
@@ -182,12 +214,13 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
       restoreInvoiceState(mergeInvoice(splitInvoice(invoiceData).profile, fields));
       return true;
     },
-    [invoiceData, refreshSavedInvoices, restoreInvoiceState, setCurrentId]
+    [invoiceData, refreshSavedInvoices, restoreInvoiceState, saveCurrentInvoice, setCurrentId]
   );
 
   /** Copies a saved invoice into a new one and opens it. */
   const duplicateSavedInvoice = useCallback(
     (id: string, overrides: DuplicateOverrides) => {
+      if (pendingSaveRef.current && !saveCurrentInvoice()) return false;
       const fields = loadInvoice(id);
 
       if (!fields) {
@@ -196,13 +229,19 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
         return false;
       }
 
-      // Counting up from the invoice being copied is what people expect:
-      // duplicating INV-0002 should give INV-0003, not restart the sequence.
+      const invoiceNumber = getUnusedInvoiceNumber(
+        getNextInvoiceNumber(fields.invoiceNumber) ?? overrides.fallbackInvoiceNumber,
+        listInvoices().map((entry) => entry.invoiceNumber)
+      );
+      if (!invoiceNumber) {
+        setAutosaveError("Enter a new invoice number before duplicating this invoice.");
+        return false;
+      }
+
       const copy: SavedInvoiceFields = {
         ...fields,
         invoiceDate: overrides.invoiceDate,
-        invoiceNumber:
-          getNextInvoiceNumber(fields.invoiceNumber) ?? overrides.fallbackInvoiceNumber,
+        invoiceNumber,
         dueDate: ""
       };
       const newId = createInvoiceId();
@@ -220,7 +259,7 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
       refreshSavedInvoices();
       return true;
     },
-    [invoiceData, refreshSavedInvoices, restoreInvoiceState, setCurrentId]
+    [invoiceData, refreshSavedInvoices, restoreInvoiceState, saveCurrentInvoice, setCurrentId]
   );
 
   /**
@@ -234,10 +273,12 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
 
       if (!result.ok && result.reason !== "not-found") {
         setAutosaveError(result.error);
+        return { wasCurrent: false };
       }
 
       if (wasCurrent) {
         clearAutosaveTimer();
+        pendingSaveRef.current = false;
         setCurrentId(createInvoiceId());
       }
 
@@ -295,13 +336,13 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
       const importedProfile = loadBusinessProfile();
 
       if (!hadProfileBefore && importedProfile) {
-        skipNextAutosave();
-        restoreInvoiceState(mergeInvoice(importedProfile, splitInvoice(invoiceData).fields));
+        if (!pendingSaveRef.current) skipNextAutosave();
+        restoreInvoiceState(mergeInvoice(importedProfile, splitInvoice(latestDraftRef.current.invoiceData).fields));
       }
 
       return { ok: true, message: "Backup imported. Your invoices are in the list above." };
     },
-    [invoiceData, refreshSavedInvoices, restoreInvoiceState]
+    [refreshSavedInvoices, restoreInvoiceState]
   );
 
   /**
@@ -309,6 +350,7 @@ export function useInvoiceDraft({ invoiceData, restoreInvoiceState }: UseInvoice
    * details, but deliberately leaves every other saved invoice alone.
    */
   const resetEverything = useCallback(() => {
+    pendingSaveRef.current = false;
     deleteInvoice(currentInvoiceIdRef.current);
     const cleared = clearBusinessProfile();
     setCurrentId(createInvoiceId());

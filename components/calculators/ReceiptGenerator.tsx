@@ -12,7 +12,7 @@ import { useInvoicePdf } from "@/hooks/useInvoicePdf";
 import { useInvoiceValidation } from "@/hooks/useInvoiceValidation";
 import { getCurrencyOption, isCurrencyCode } from "@/lib/currency";
 import { calculateInvoiceWithLineItems } from "@/lib/invoice/invoice-calculations";
-import { validateInvoiceWithSubtotal } from "@/lib/invoice/invoice-validation";
+import { getInvoiceExportErrors } from "@/lib/invoice/invoice-validation";
 import { INVOICE_TEXT_MAX_LENGTHS } from "@/lib/invoice/invoice-limits";
 import { DEFAULT_INVOICE_TAX } from "@/lib/invoice/invoice-types";
 import { createDefaultInvoiceLineItem } from "@/lib/invoice/invoice-defaults";
@@ -53,7 +53,7 @@ export function ReceiptGenerator({ onCompletionChange }: { onCompletionChange?: 
     window.scrollTo({ top: 0 });
   }
   function generate(action: "preview" | "download") {
-    const errors = validateInvoiceWithSubtotal(document, validation.calculation.subtotal).filter(item => !item.message.endsWith("is required."));
+    const errors = getInvoiceExportErrors(document, validation.calculation.subtotal);
     if (errors.length) {
       setTouchedFields(new Set(errors.map(item => item.field)));
       setActionError(receiptWording(errors[0].message));

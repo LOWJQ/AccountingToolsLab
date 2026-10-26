@@ -16,7 +16,7 @@ export const tools: Tool[] = [
     href: "/tools/invoice-generator",
     status: "mvp",
     category: "generator",
-    lastModified: "2026-10-13"
+    lastModified: "2026-10-27"
   },
   {
     slug: "receipt-generator",
@@ -28,7 +28,7 @@ export const tools: Tool[] = [
     href: "/tools/receipt-generator",
     status: "mvp",
     category: "generator",
-    lastModified: "2026-10-25"
+    lastModified: "2026-10-27"
   },
   {
     slug: "sst-calculator-malaysia",
@@ -57,12 +57,12 @@ export const tools: Tool[] = [
     name: "e-Invoice Checker Malaysia",
     menuTitle: "e-Invoice Checker",
     description:
-      "Check whether your business must issue LHDN e-Invoices, which implementation phase you fall into, and the date it becomes mandatory.",
+      "Check e-Invoice scope using the RM3 million ceiling, ownership exceptions, business history and current relaxation dates.",
     menuDescription: "Check if LHDN e-Invoice applies to your business.",
     href: "/tools/e-invoice-checker-malaysia",
     status: "mvp",
     category: "checker",
-    lastModified: "2026-10-25"
+    lastModified: "2026-10-27"
   },
   {
     slug: "e-invoice-code-lookup-malaysia",
@@ -117,7 +117,7 @@ export const tools: Tool[] = [
     href: "/tools/depreciation-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-10-25"
+    lastModified: "2026-10-27"
   },
   {
     slug: "trial-balance-calculator",
@@ -128,7 +128,7 @@ export const tools: Tool[] = [
     href: "/tools/trial-balance-calculator",
     status: "mvp",
     category: "calculator",
-    lastModified: "2026-10-13"
+    lastModified: "2026-10-27"
   },
   {
     slug: "journal-entry-checker",
@@ -138,7 +138,7 @@ export const tools: Tool[] = [
     href: "/tools/journal-entry-checker",
     status: "mvp",
     category: "checker",
-    lastModified: "2026-10-25"
+    lastModified: "2026-10-27"
   },
   {
     slug: "debit-credit-checker",
@@ -160,6 +160,16 @@ export const tools: Tool[] = [
     status: "mvp",
     category: "calculator",
     lastModified: "2026-10-13"
+  },
+  {
+    slug: "prepayment-schedule-generator",
+    name: "Prepayment Schedule Generator",
+    description: "Generate monthly prepaid expense schedules with partial months, remaining balances, journal entries and CSV export.",
+    menuDescription: "Spread prepaid costs across their coverage months.",
+    href: "/tools/prepayment-schedule-generator",
+    status: "mvp",
+    category: "generator",
+    lastModified: "2026-10-27"
   }
 ];
 
