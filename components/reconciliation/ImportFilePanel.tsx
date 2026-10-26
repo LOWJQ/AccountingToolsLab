@@ -6,8 +6,9 @@ import { inferMapping, mappingError, normalizeImport, tableFromDocument } from "
 import { MAX_HEADER_ROWS, type ColumnMapping, type CsvDocument, type Source } from "@/lib/reconciliation/types";
 import { toolButtonClass } from "@/components/tools/ToolWorkspace";
 import { SelectMenu } from "@/components/ui/SelectMenu";
+import { hasShortYear } from "@/lib/reconciliation/dates";
 
-export type ImportState = { name: string; document: CsvDocument | null; headerRow: number; mapping: ColumnMapping | null; error: string; loading: boolean };
+export type ImportState = { name: string; document: CsvDocument | null; headerRow: number; mapping: ColumnMapping | null; error: string; loading: boolean; workbook?: { bytes: ArrayBuffer; sheets: string[]; selected: string } };
 export const emptyImport = (): ImportState => ({ name: "", document: null, headerRow: 0, mapping: null, error: "", loading: false });
 
 export function MappingSelect({ id, label, value, options, onChange }: { id: string; label: string; value: string; options: Array<{ value: string; label: string }>; onChange: (value: string) => void }) {
@@ -19,11 +20,12 @@ export function MappingSelect({ id, label, value, options, onChange }: { id: str
   );
 }
 
-export function ImportFilePanel({ source, state, currency, onFile, onChange }: {
+export function ImportFilePanel({ source, state, currency, onFile, onSheet, onChange }: {
   source: Source;
   state: ImportState;
   currency: string;
   onFile: (file: File) => void;
+  onSheet: (sheet: string) => void;
   onChange: (state: ImportState) => void;
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
@@ -34,6 +36,7 @@ export function ImportFilePanel({ source, state, currency, onFile, onChange }: {
   const error = table && mapping ? mappingError(mapping, table) : "";
   const preview = useMemo(() => table && mapping && !error ? normalizeImport({ name: state.name, table: { ...table, records: table.records.slice(0, 3) }, mapping }, source, currency) : null, [table, mapping, error, source, currency, state.name]);
   const showColumns = columnsOpen || Boolean(error);
+  const shortYears = useMemo(() => table && mapping ? table.records.some(record => hasShortYear(record.cells[mapping.date] ?? "")) : false, [table, mapping]);
   const format = (cents: number) => new Intl.NumberFormat("en-MY", { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(cents / 100);
   function update<K extends keyof ColumnMapping>(key: K, value: ColumnMapping[K]) {
     if (mapping) {
@@ -48,15 +51,18 @@ export function ImportFilePanel({ source, state, currency, onFile, onChange }: {
   return (
     <section className="min-w-0" aria-labelledby={`${source}-heading`}>
       <h3 className="text-base font-semibold text-slate-950" id={`${source}-heading`}>{label}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{source === "bank" ? "Choose the transaction CSV exported by your bank." : "Choose entries for this bank account from your books."}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{source === "bank" ? "Choose your bank’s transaction export." : "Choose entries for this bank account from your books."}</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <input accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" className="hidden" id={`${source}-file`} onChange={event => { const file = event.target.files?.[0]; if (file) onFile(file); event.target.value = ""; }} ref={fileInput} type="file" />
-        <button className={toolButtonClass} disabled={state.loading} id={`${source}-choose`} onClick={() => fileInput.current?.click()} type="button"><FileUp aria-hidden="true" className="h-4 w-4" />{state.loading ? "Reading CSV…" : `${state.document ? "Replace" : "Choose"} ${source === "bank" ? "bank" : "cashbook"} CSV`}</button>
+        <input accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden" id={`${source}-file`} onChange={event => { const file = event.target.files?.[0]; if (file) onFile(file); event.target.value = ""; }} ref={fileInput} type="file" />
+        <button className={toolButtonClass} disabled={state.loading} id={`${source}-choose`} onClick={() => fileInput.current?.click()} type="button"><FileUp aria-hidden="true" className="h-4 w-4" />{state.loading ? "Reading file…" : `${state.document || state.workbook ? "Replace" : "Choose"} ${source === "bank" ? "bank" : "cashbook"} file`}</button>
       </div>
+      {!state.name ? <p className="mt-2 text-xs text-slate-500">CSV or Excel (.xlsx), up to 5 MB</p> : null}
       {state.error ? <p className="mt-3 text-sm font-medium leading-6 text-slate-900" role="alert">{state.error}</p> : null}
+      {state.name ? <p className="mt-4 break-words text-sm font-medium text-slate-900">{state.name}</p> : null}
+      {state.workbook && state.workbook.sheets.length > 1 ? <fieldset className="mt-4 min-w-0" disabled={state.loading}><legend className="sr-only">Worksheet selection</legend><MappingSelect id={`${source}-worksheet`} label="Worksheet" value={state.workbook.selected} options={state.workbook.sheets.map(sheet => ({ value: sheet, label: sheet }))} onChange={onSheet} /></fieldset> : null}
       {table && mapping ? <>
-        <p className="mt-4 break-words text-sm font-medium text-slate-900">{state.name}</p>
-        <p className="mt-1 text-sm text-slate-500">{table.records.length.toLocaleString("en-MY")} transaction rows</p>
+        <p className="mt-2 text-sm text-slate-500">{table.records.length.toLocaleString("en-MY")} transaction rows{state.document?.sheet && state.workbook?.sheets.length === 1 ? ` · ${state.document.sheet}` : ""}</p>
+        {state.document?.hasFormulas ? <p className="mt-2 text-xs leading-5 text-slate-500">Using saved formula values. Recalculate and save in Excel before importing.</p> : null}
         {error ? <p className="mt-3 text-sm leading-6 text-slate-900" role="alert">{error}</p> : null}
         <div className="mt-4 border-t border-slate-200 pt-4">
           <p className="text-sm font-medium text-slate-900">Preview · {table.records.length > 3 ? "first 3 rows" : `${table.records.length} ${table.records.length === 1 ? "row" : "rows"}`}</p>
@@ -65,20 +71,22 @@ export function ImportFilePanel({ source, state, currency, onFile, onChange }: {
               const transaction = preview?.transactions.find(row => row.line === record.line);
               const invalid = preview?.invalid.find(row => row.line === record.line);
               return <li className="grid min-w-0 gap-1 py-3 text-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-3" key={record.line}>
-                <div className="min-w-0"><p className="break-words text-slate-900">{record.cells[mapping.description] || record.cells[mapping.reference] || `CSV line ${record.line}`}</p><p className="mt-1 text-xs text-slate-500">{transaction?.date || record.cells[mapping.date] || "Date column not selected"}</p></div>
+                <div className="min-w-0"><p className="break-words text-slate-900">{record.cells[mapping.description] || record.cells[mapping.reference] || `source row ${record.line}`}</p><p className="mt-1 text-xs text-slate-500">{transaction?.date || record.cells[mapping.date] || "Date column not selected"}</p></div>
                 <div className="min-w-0 sm:text-right"><p className="break-words font-medium tabular-nums text-slate-900">{transaction ? format(Math.abs(transaction.cents)) : "—"}</p>{transaction ? <p className="mt-1 text-xs text-slate-500">{transaction.cents >= 0 ? "Money in" : "Money out"}</p> : null}</div>
                 {invalid ? <p className="mt-1 text-xs leading-5 text-slate-600 sm:col-span-2">Line {record.line}: {invalid.reason} Check the columns below.</p> : null}
               </li>;
             })}
           </ul>
         </div>
+        {shortYears ? <p className="mt-2 text-xs leading-5 text-slate-500">Two-digit years: {mapping.shortYearCentury ?? 2000}–{(mapping.shortYearCentury ?? 2000) + 99}. <button className="min-h-11 rounded px-1 underline underline-offset-2 focus-visible:outline focus-visible:outline-2" onClick={() => { setColumnsOpen(true); window.requestAnimationFrame(() => document.getElementById(`${source}-century`)?.focus()); }} type="button">Change</button></p> : null}
         <button aria-controls={`${source}-columns`} aria-expanded={showColumns} className="mt-2 inline-flex min-h-11 items-center gap-2 rounded text-sm font-medium text-slate-600 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" onClick={() => setColumnsOpen(value => !value)} type="button">
           {showColumns ? "Column settings" : "Check or change columns"}<ChevronDown aria-hidden="true" className={`h-4 w-4 shrink-0 ${showColumns ? "rotate-180" : ""}`} />
         </button>
         {showColumns ? <div className="mt-3 min-w-0" id={`${source}-columns`}>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           {column("date", "Date column")}
-          <MappingSelect id={`${source}-date-format`} label="Date format" value={mapping.dateFormat} onChange={value => update("dateFormat", value as ColumnMapping["dateFormat"])} options={[{ value: "", label: "Choose date format" }, { value: "iso", label: "YYYY-MM-DD" }, { value: "dmy", label: "DD/MM/YYYY" }, { value: "mdy", label: "MM/DD/YYYY" }]} />
+          <MappingSelect id={`${source}-date-format`} label="Date format" value={mapping.dateFormat} onChange={value => update("dateFormat", value as ColumnMapping["dateFormat"])} options={[{ value: "", label: "Choose date format" }, { value: "iso", label: "Year first (2026-05-05)" }, { value: "dmy", label: "Day first (DD/MM/YY or YYYY)" }, { value: "mdy", label: "Month first (MM/DD/YY or YYYY)" }, { value: "named", label: "Month names (05 May 26)" }]} />
+          {shortYears ? <MappingSelect id={`${source}-century`} label="Two-digit years" value={String(mapping.shortYearCentury ?? 2000)} options={[{ value: "2000", label: "2000–2099 (26 means 2026)" }, { value: "1900", label: "1900–1999 (95 means 1995)" }]} onChange={value => update("shortYearCentury", Number(value) as 1900 | 2000)} /> : null}
           <MappingSelect id={`${source}-amount-mode`} label="Amount layout" value={mapping.amountMode} onChange={value => update("amountMode", value as ColumnMapping["amountMode"])} options={[{ value: "signed", label: "One signed amount column" }, { value: "separate", label: "Separate money in / out" }]} />
           {mapping.amountMode === "signed" ? column("amount", "Amount column") : <>{column("moneyIn", "Money in column")}{column("moneyOut", "Money out column")}</>}
         </div>

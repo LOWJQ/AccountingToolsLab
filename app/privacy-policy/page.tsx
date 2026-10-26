@@ -27,7 +27,7 @@ const privacySections = [
       "If you use the contact form, AccountingToolsLab receives the name, email address, topic, subject, message, optional page or tool URL, and spam-check information needed to send and protect the message.",
       "When you use calculators, the numbers you enter are used to calculate results for that page. The general calculator pages are designed to work without creating an account or saving your entries on the server.",
       "The invoice generator processes your invoice details, business logo, and payment QR image in your browser to create previews and PDFs. The generator does not upload these details or images to an AccountingToolsLab server. They may be saved in your browser as explained below.",
-      "The bank reconciliation matcher reads bank statement and cashbook CSV files in this browser tab. Parsing, transaction matching, review decisions and CSV report creation run locally. There is no file-upload endpoint, bank connection or third-party AI service for this tool. Financial contents and file names are not sent to analytics or error-reporting services. Source files, matches and notes are not saved automatically in browser storage or on a server; leaving or clearing the page removes the in-memory comparison. Downloaded reports contain transaction information and should be kept private."
+      "The bank reconciliation matcher reads bank statement and cashbook CSV and Excel (.xlsx) files in this browser tab. Parsing, transaction matching, review decisions and Excel or CSV report creation run locally. There is no file-upload endpoint, bank connection or third-party AI service for this tool. Financial contents and file names are not sent to analytics or error-reporting services. Source files, matches and notes are not saved automatically in browser storage or on a server; leaving or clearing the page removes the in-memory comparison. Downloaded reports contain transaction information and should be kept private."
     ]
   },
   {
@@ -35,7 +35,7 @@ const privacySections = [
     content: [
       "The site may receive basic technical information through hosting and security logs, such as IP address, browser type, device type, requested pages, timestamps, and error information.",
       "AccountingToolsLab uses Vercel Analytics to understand aggregate page usage and Vercel Speed Insights to understand site performance. These tools help identify which pages are useful and where the website needs speed or usability improvements.",
-      "Page-view analytics and performance reporting are excluded for the bank reconciliation tool. Normal page and asset requests still reach the hosting service and may appear in technical hosting or security logs; those requests do not include your CSV contents.",
+      "Page-view analytics and performance reporting are excluded for the bank reconciliation tool. Normal page and asset requests still reach the hosting service and may appear in technical hosting or security logs; those requests do not include your imported file contents.",
       "The contact form may use technical signals such as IP address and user agent for rate limiting, spam prevention, and Cloudflare Turnstile verification."
     ]
   },

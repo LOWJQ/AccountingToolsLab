@@ -9,7 +9,7 @@ import { reconciliationPrimaryButton } from "./ReconciliationDownloadComplete";
 export type ReviewSection = "suggested" | "unmatched" | "matched" | "invalid";
 export const reconciliationTextButton = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-2 text-sm font-medium text-slate-600 hover:text-slate-950 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40";
 
-export function ReconciliationSummary({ result, bankMatched, ledgerMatched, suggested, unmatched, canUndo, stale, activeSection, children, onReview, onDownload, onNew, onEditFiles, onUndo }: {
+export function ReconciliationSummary({ result, bankMatched, ledgerMatched, suggested, unmatched, canUndo, stale, activeSection, children, onReview, onDownload, onDownloadCsv, onNew, onEditFiles, onUndo }: {
   result: Reconciliation;
   bankMatched: number;
   ledgerMatched: number;
@@ -21,6 +21,7 @@ export function ReconciliationSummary({ result, bankMatched, ledgerMatched, sugg
   children: ReactNode;
   onReview: (section: ReviewSection) => void;
   onDownload: () => void;
+  onDownloadCsv: () => void;
   onNew: () => void;
   onEditFiles: () => void;
   onUndo: () => void;
@@ -37,8 +38,9 @@ export function ReconciliationSummary({ result, bankMatched, ledgerMatched, sugg
     <h1 className="scroll-mt-28 text-2xl font-semibold tracking-tight text-slate-950 outline-none sm:text-3xl" id="reconciliation-results-title" tabIndex={-1}>Your comparison is ready</h1>
     <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600" aria-live="polite">{bankMatched} of {result.bank.transactions.length} bank transactions matched to {ledgerMatched} of {result.ledger.transactions.length} cashbook entries.</p>
     <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-      <button className={reconciliationPrimaryButton} onClick={onDownload} type="button"><Download aria-hidden="true" className="h-4 w-4" />{stale ? "Download previous report" : "Download report"}</button>
+      <button className={reconciliationPrimaryButton} onClick={onDownload} type="button"><Download aria-hidden="true" className="h-4 w-4" />{stale ? "Download previous Excel report" : "Download Excel report"}</button>
       <button className={toolButtonClass} onClick={onNew} type="button"><Plus aria-hidden="true" className="h-4 w-4" />New comparison</button>
+      <button className={reconciliationTextButton} onClick={onDownloadCsv} type="button">Download CSV</button>
     </div>
     <div className="mt-7 border-y border-slate-200">
       {!invalid && !suggested && !unmatched ? <p className="pt-5 text-sm leading-6 text-slate-700">All imported transactions are matched. Verify closing balances separately.</p> : null}

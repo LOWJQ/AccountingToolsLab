@@ -10,10 +10,10 @@ export function csvCell(value: string | number): string {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
-export function createReport(result: Reconciliation, matches: Match[], notes: Record<string, string>, openOnly = false): string {
+export function reportRows(result: Reconciliation, matches: Match[], notes: Record<string, string>, openOnly = false): Array<Array<string | number>> {
   const review = getReview(result, matches);
   const matchByRow = new Map(matches.filter(match => match.state !== "rejected").flatMap(match => [...match.bankIds, ...match.ledgerIds].map(id => [id, match] as const)));
-  const rows: Array<Array<string | number>> = [["Record type", "Source", "Source file", "CSV line", "Transaction ID", "Date", "Description", "Reference", "Amount", "Currency", "Status", "Match ID", "Method", "Reason / possible cause", "User note", "Original CSV cells"]];
+  const rows: Array<Array<string | number>> = [["Record type", "Source", "Source file", "Source row", "Transaction ID", "Date", "Description", "Reference", "Amount", "Currency", "Status", "Match ID", "Method", "Reason / possible cause", "User note", "Original cells"]];
   const info = (label: string, value: string | number) => rows.push(["Summary", label, "", "", "", "", "", "", value, result.options.currency]);
   info("Report scope", openOnly ? "Open items, including unaccepted suggestions and invalid rows" : "All imported transactions and invalid rows");
   info("Bank net movement (valid rows)", result.bank.totalCents / 100);
@@ -37,5 +37,9 @@ export function createReport(result: Reconciliation, matches: Match[], notes: Re
     }
     for (const row of input.invalid) rows.push(["Invalid row", input.source === "bank" ? "Bank" : "Cashbook", input.name, row.line, row.id, "", "", "", "", result.options.currency, "invalid", "", "", row.reason, notes[row.id] ?? "", JSON.stringify(row.cells)]);
   }
-  return "\uFEFF" + rows.map(row => Array.from({ length: 16 }, (_, index) => csvCell(row[index] ?? "")).join(",")).join("\r\n");
+  return rows;
+}
+
+export function createReport(result: Reconciliation, matches: Match[], notes: Record<string, string>, openOnly = false): string {
+  return "\uFEFF" + reportRows(result, matches, notes, openOnly).map(row => Array.from({ length: 16 }, (_, index) => csvCell(row[index] ?? "")).join(",")).join("\r\n");
 }

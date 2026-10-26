@@ -1,4 +1,6 @@
-import { MAX_CSV_BYTES, MAX_HEADER_ROWS, MAX_TRANSACTIONS, type ColumnMapping, type CsvDocument, type CsvRecord, type CsvTable, type DateFormat, type ImportInput, type NormalizedImport, type Source } from "./types";
+import { inferDateFormat, parseDate } from "./dates";
+export { parseDate } from "./dates";
+import { MAX_CSV_BYTES, MAX_HEADER_ROWS, MAX_TRANSACTIONS, type ColumnMapping, type CsvDocument, type CsvRecord, type CsvTable, type ImportInput, type NormalizedImport, type Source } from "./types";
 
 function detectDelimiter(text: string): string {
   const counts = [0, 0, 0];
@@ -96,29 +98,8 @@ export function inferMapping(table: CsvTable, source: Source): ColumnMapping {
   const moneyOut = find(["moneyout", "withdrawal", "withdrawals", "payment", "payments", "paidout", source === "bank" ? "debit" : "credit"]);
   const date = find(["date", "transactiondate", "postingdate", "valuedate"]);
   const dates = table.records.slice(0, 100).map(row => row.cells[date]?.trim() ?? "").filter(Boolean);
-  let dateFormat: DateFormat = dates.length && dates.every(value => /^\d{4}[-/]\d{2}[-/]\d{2}$/.test(value)) ? "iso" : "";
-  if (!dateFormat) {
-    const parts = dates.map(value => value.match(/^(\d{1,2})[-/](\d{1,2})[-/]\d{4}$/));
-    const dayFirst = parts.some(part => part && Number(part[1]) > 12);
-    const monthFirst = parts.some(part => part && Number(part[2]) > 12);
-    if (dayFirst && !monthFirst) dateFormat = "dmy";
-    if (monthFirst && !dayFirst) dateFormat = "mdy";
-  }
-  return { date, description: find(["description", "details", "narration", "particulars", "payee", "transactiondescription"]), reference: find(["reference", "ref", "transactionreference", "chequenumber", "chequeno", "invoicenumber"]), currency: find(["currency", "currencycode", "ccy"]), amountMode: amount >= 0 ? "signed" : "separate", amount, moneyIn, moneyOut, invert: false, dateFormat, numberFormat: "dot" };
-}
-
-export function parseDate(value: string, format: DateFormat): { iso: string; day: number } | null {
-  const text = value.trim();
-  const parts = format === "iso" ? text.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/) : text.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
-  if (!parts || !format) return null;
-  const year = Number(parts[format === "iso" ? 1 : 3]);
-  const month = Number(parts[format === "iso" ? 2 : format === "dmy" ? 2 : 1]);
-  const date = Number(parts[format === "iso" ? 3 : format === "dmy" ? 1 : 2]);
-  if (year < 1900 || year > 2200 || month < 1 || month > 12 || date < 1 || date > 31) return null;
-  const timestamp = Date.UTC(year, month - 1, date);
-  const parsed = new Date(timestamp);
-  if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== date) return null;
-  return { iso: parsed.toISOString().slice(0, 10), day: timestamp / 86_400_000 };
+  const dateFormat = inferDateFormat(dates);
+  return { date, description: find(["description", "details", "narration", "particulars", "payee", "transactiondescription"]), reference: find(["reference", "ref", "transactionreference", "chequenumber", "chequeno", "invoicenumber"]), currency: find(["currency", "currencycode", "ccy"]), amountMode: amount >= 0 ? "signed" : "separate", amount, moneyIn, moneyOut, invert: false, dateFormat, numberFormat: "dot", shortYearCentury: 2000 };
 }
 
 /** Convert to whole hundredths without binary-decimal rounding. Reject rather
@@ -169,7 +150,7 @@ export function normalizeImport(input: ImportInput, source: Source, currency: st
   for (const record of input.table.records) {
     const id = `${source}:${record.line}`;
     const get = (column: number) => record.cells[column]?.trim() ?? "";
-    const date = parseDate(get(mapping.date), mapping.dateFormat);
+    const date = parseDate(get(mapping.date), mapping.dateFormat, mapping.shortYearCentury);
     let cents: number | null;
     if (mapping.amountMode === "signed") cents = parseMoney(get(mapping.amount), mapping.numberFormat, currency);
     else {
@@ -180,13 +161,13 @@ export function normalizeImport(input: ImportInput, source: Source, currency: st
     const rawCurrency = get(mapping.currency).toUpperCase();
     const rowCurrency = rawCurrency === "RM" ? "MYR" : rawCurrency;
     const reason = record.cells.length !== input.table.headers.length ? `Expected ${input.table.headers.length} columns; found ${record.cells.length}. Check the CSV export.` : !date ? "The date does not fit the selected format or is not a real date." : rowCurrency && rowCurrency !== currency ? `Currency ${rowCurrency} does not match ${currency}. Use one currency per run.` : cents === null ? "The amount is invalid. Check separators, two-decimal precision, and money-in/out columns." : cents === 0 ? "Zero amount: this row has no cash movement." : "";
-    if (reason || !date || cents === null) result.invalid.push({ id, source, line: record.line, cells: record.cells, reason });
+    if (reason || !date || cents === null) result.invalid.push({ id, source, line: record.line, cells: record.originalCells ?? record.cells, reason });
     else {
       if (mapping.invert) cents = -cents;
       result.totalCents += cents;
       grossCents += Math.abs(cents);
       if (!Number.isSafeInteger(result.totalCents) || !Number.isSafeInteger(grossCents)) throw new Error("The total is too large to compare safely. Use a shorter period.");
-      result.transactions.push({ id, source, line: record.line, date: date.iso, day: date.day, description: get(mapping.description), reference: get(mapping.reference), cents, originalCells: record.cells });
+      result.transactions.push({ id, source, line: record.line, date: date.iso, day: date.day, description: get(mapping.description), reference: get(mapping.reference), cents, originalCells: record.originalCells ?? record.cells });
     }
   }
   return result;

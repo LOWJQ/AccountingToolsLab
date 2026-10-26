@@ -3,10 +3,10 @@ export const MAX_TRANSACTIONS = 10_000;
 export const MAX_HEADER_ROWS = 50;
 
 export type Source = "bank" | "ledger";
-export type CsvRecord = { line: number; cells: string[] };
-export type CsvDocument = { records: CsvRecord[]; delimiter: string };
+export type CsvRecord = { line: number; cells: string[]; originalCells?: string[] };
+export type CsvDocument = { records: CsvRecord[]; delimiter: string; sheet?: string; hasFormulas?: boolean };
 export type CsvTable = { headers: string[]; records: CsvRecord[] };
-export type DateFormat = "iso" | "dmy" | "mdy" | "";
+export type DateFormat = "iso" | "dmy" | "mdy" | "named" | "";
 export type ColumnMapping = {
   date: number;
   description: number;
@@ -19,6 +19,7 @@ export type ColumnMapping = {
   invert: boolean;
   dateFormat: DateFormat;
   numberFormat: "dot" | "comma";
+  shortYearCentury?: 1900 | 2000;
 };
 export type ImportInput = { name: string; table: CsvTable; mapping: ColumnMapping };
 export type Transaction = {
@@ -44,9 +45,13 @@ export type Reconciliation = { bank: NormalizedImport; ledger: NormalizedImport;
 
 export type WorkerRequest =
   | { id: number; type: "parse"; text: string }
+  | { id: number; type: "excel"; bytes: ArrayBuffer; sheet?: string }
+  | { id: number; type: "report"; result: Reconciliation; matches: Match[]; notes: Record<string, string> }
   | { id: number; type: "match"; bank: ImportInput; ledger: ImportInput; options: MatchOptions };
 export type WorkerResponse =
   | { id: number; type: "parsed"; document: CsvDocument }
+  | { id: number; type: "workbook"; document: CsvDocument; sheets: string[] }
+  | { id: number; type: "report"; bytes: ArrayBuffer }
   | { id: number; type: "matched"; result: Reconciliation }
   | { id: number; type: "progress"; message: string }
   | { id: number; type: "error"; message: string };

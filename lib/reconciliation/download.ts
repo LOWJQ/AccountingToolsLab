@@ -1,6 +1,10 @@
 /** Creates a local download; no transaction data is sent to a server. */
 export function downloadCsv(content: string, name: string) {
-  const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
+  downloadBlob(new Blob([content], { type: "text/csv;charset=utf-8" }), name);
+}
+
+export function downloadBlob(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = name;

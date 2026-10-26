@@ -6,7 +6,7 @@ import { useCurrency } from "@/components/currency/CurrencyProvider";
 import { ImportFilePanel, emptyImport, type ImportState } from "./ImportFilePanel";
 import { ReconciliationResults } from "./ReconciliationResults";
 import { ReconciliationDownloadComplete, reconciliationPrimaryButton } from "./ReconciliationDownloadComplete";
-import { downloadCsv } from "@/lib/reconciliation/download";
+import { downloadBlob, downloadCsv } from "@/lib/reconciliation/download";
 import { createReport } from "@/lib/reconciliation/report";
 import { getReview } from "@/lib/reconciliation/review";
 import { toolButtonClass, toolInputClass } from "@/components/tools/ToolWorkspace";
@@ -19,8 +19,8 @@ function createImport(document: CsvDocument, name: string, source: Source): Impo
   return { name, document, headerRow, mapping: inferMapping(tableFromDocument(document, headerRow), source), error: "", loading: false };
 }
 function importInput(state: ImportState): ImportInput {
-  if (!state.document || !state.mapping) throw new Error("Choose both CSV files first.");
-  return { name: state.name, table: tableFromDocument(state.document, state.headerRow), mapping: state.mapping };
+  if (!state.document || !state.mapping) throw new Error("Choose both files first.");
+  return { name: state.document.sheet ? `${state.name} — ${state.document.sheet}` : state.name, table: tableFromDocument(state.document, state.headerRow), mapping: state.mapping };
 }
 function decodeFile(bytes: ArrayBuffer): string {
   const prefix = new Uint8Array(bytes, 0, Math.min(3, bytes.byteLength));
@@ -41,6 +41,8 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
   const [statementEnd, setStatementEnd] = useState("");
   const { currency } = useCurrency();
   const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [reportFormat, setReportFormat] = useState<"Excel" | "CSV">("Excel");
   const [result, setResult] = useState<Reconciliation | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -84,17 +86,29 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
   async function loadFile(source: Source, file: File) {
     const setter = source === "bank" ? setBank : setLedger;
     const readVersion = ++readVersions.current[source];
+    if (!/\.(xlsx|csv|tsv|txt)$/i.test(file.name) || file.size > MAX_CSV_BYTES) {
+      setter(current => ({ ...current, loading: false, error: file.size > MAX_CSV_BYTES ? "Choose a file up to 5 MB." : "Choose CSV or Excel (.xlsx). PDF and older .xls files are not supported." }));
+      return;
+    }
     setter(current => ({ ...current, loading: true, error: "" }));
     try {
-      if (!/\.(csv|tsv|txt)$/i.test(file.name)) throw new Error("Choose a CSV or tab-separated file. Export spreadsheets or PDFs as CSV first.");
-      if (file.size > MAX_CSV_BYTES) throw new Error("Choose a CSV up to 5 MB. Export a shorter period and try again.");
-      const response = await request({ type: "parse", text: decodeFile(await file.arrayBuffer()) });
-      if (response.type !== "parsed" || readVersions.current[source] !== readVersion) return;
-      setter(createImport(response.document, file.name, source));
+      const bytes = await file.arrayBuffer();
+      if (readVersions.current[source] === readVersion) await readFile(source, file.name, bytes, undefined, readVersion);
+    } catch { if (readVersions.current[source] === readVersion) setter(current => ({ ...current, loading: false, error: "The file could not be read. Choose it again." })); }
+  }
+  async function readFile(source: Source, name: string, bytes: ArrayBuffer, sheet?: string, expectedVersion?: number) {
+    const setter = source === "bank" ? setBank : setLedger;
+    const readVersion = expectedVersion ?? ++readVersions.current[source];
+    setter(current => ({ ...current, loading: true, error: "" }));
+    try {
+      const response = /\.xlsx$/i.test(name) ? await request({ type: "excel", bytes, sheet }) : await request({ type: "parse", text: decodeFile(bytes) });
+      if ((response.type !== "parsed" && response.type !== "workbook") || readVersions.current[source] !== readVersion) return;
+      const imported = response.document.records.length < 2 ? { ...emptyImport(), name, error: "This worksheet needs a header and at least one transaction. Choose another worksheet." } : createImport(response.document, name, source);
+      setter(response.type === "workbook" ? { ...imported, workbook: { bytes, sheets: response.sheets, selected: response.document.sheet! } } : imported);
       setDirty(Boolean(result));
       setError("");
     } catch (cause) {
-      if (readVersions.current[source] === readVersion) setter(current => ({ ...current, loading: false, error: cause instanceof Error ? cause.message : "The CSV could not be read." }));
+      if (readVersions.current[source] === readVersion) setter(current => ({ ...current, loading: false, error: cause instanceof Error ? cause.message : "The file could not be read." }));
     }
   }
 
@@ -122,10 +136,10 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
   }
   function compare() {
     try {
-      if (bank.loading || ledger.loading) throw new Error("Wait for the CSV files to finish loading.");
+      if (bank.loading || ledger.loading) throw new Error("Wait for the files to finish loading.");
       if (!bank.document || !ledger.document) {
         document.getElementById(!bank.document ? "bank-choose" : "ledger-choose")?.focus();
-        throw new Error("Choose a bank statement CSV and a cashbook CSV first.");
+        throw new Error("Choose a bank statement and cashbook file first.");
       }
       const inputs = { bank: importInput(bank), ledger: importInput(ledger) };
       for (const source of ["bank", "ledger"] as const) {
@@ -160,6 +174,7 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
     setStage("files");
     setUnsaved(false);
     setBusy(false);
+    setExporting(false);
   }
   const note = useCallback((id: string, value: string) => { setNotes(current => ({ ...current, [id]: value })); setUnsaved(true); }, []);
   function updateMatches(next: Match[]) { setHistory(current => [...current.slice(-19), matches]); setMatches(next); setUnsaved(true); }
@@ -168,10 +183,25 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
     if (!result) return;
     try {
       downloadCsv(createReport(result, matches, notes, openOnly), openOnly ? "bank-reconciliation-open-items.csv" : "bank-reconciliation-report.csv");
-      if (!openOnly) { setUnsaved(false); setStage("download"); }
+      if (!openOnly) { setReportFormat("CSV"); setUnsaved(false); setStage("download"); }
       setError("");
       return true;
     } catch { setError("The report could not be downloaded. Try again in this browser."); return false; }
+  }
+  async function downloadExcel() {
+    if (!result || exporting) return;
+    const runVersion = version.current;
+    setExporting(true);
+    setError("");
+    try {
+      const response = await request({ type: "report", result, matches, notes });
+      if (response.type !== "report" || runVersion !== version.current) return;
+      downloadBlob(new Blob([response.bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "bank-reconciliation-working-paper.xlsx");
+      setReportFormat("Excel");
+      setUnsaved(false);
+      setStage("download");
+    } catch (cause) { if (runVersion === version.current) setError(cause instanceof Error ? cause.message : "The Excel report could not be created. Try CSV instead."); }
+    finally { if (runVersion === version.current) setExporting(false); }
   }
 
   return <div className="min-w-0 scroll-mt-24" id="reconciliation-workflow">
@@ -185,8 +215,8 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
         <fieldset className="min-w-0" disabled={busy}>
           <legend className="sr-only">Choose files and matching settings</legend>
           <div className="grid min-w-0 lg:grid-cols-2">
-            <div className="min-w-0 p-5 sm:p-6 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setBank(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("bank", file)} source="bank" state={bank} /></div>
-            <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setLedger(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("ledger", file)} source="ledger" state={ledger} /></div>
+            <div className="min-w-0 p-5 sm:p-6 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setBank(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("bank", file)} onSheet={sheet => { if (bank.workbook) void readFile("bank", bank.name, bank.workbook.bytes, sheet); }} source="bank" state={bank} /></div>
+            <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setLedger(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("ledger", file)} onSheet={sheet => { if (ledger.workbook) void readFile("ledger", ledger.name, ledger.workbook.bytes, sheet); }} source="ledger" state={ledger} /></div>
           </div>
           <div className="border-t border-slate-200 px-5 py-5 sm:px-6 lg:px-8">
             <details ref={settings}>
@@ -220,12 +250,12 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
     </> : null}
     {stage === "review" && result ? <>
       {stale ? <p className="mb-5 border-l-2 border-slate-300 pl-4 text-sm leading-6 text-slate-700" role="status">These results use the previous files and settings. <button className="min-h-11 font-medium underline underline-offset-4 focus-visible:outline focus-visible:outline-2" onClick={() => setStage("files")} type="button">Return to files</button> to compare again.</p> : null}
-      <ReconciliationResults canUndo={history.length > 0} key={comparisonId} matches={matches} notes={notes} onChange={updateMatches} onDownload={downloadReport} onNew={() => setConfirm("clear")} onEditFiles={() => setStage("files")} onNote={note} onUndo={() => { const previous = history[history.length - 1]; if (previous) { setMatches(previous); setHistory(current => current.slice(0, -1)); setUnsaved(true); } }} result={result} stale={stale} />
+      <fieldset className="min-w-0" disabled={exporting} aria-busy={exporting}><legend className="sr-only">Comparison results</legend>{exporting ? <p role="status" className="mb-4 text-sm text-slate-600">Preparing Excel working paper…</p> : null}<ReconciliationResults onDownloadExcel={() => void downloadExcel()} canUndo={history.length > 0} key={comparisonId} matches={matches} notes={notes} onChange={updateMatches} onDownload={downloadReport} onNew={() => setConfirm("clear")} onEditFiles={() => setStage("files")} onNote={note} onUndo={() => { const previous = history[history.length - 1]; if (previous) { setMatches(previous); setHistory(current => current.slice(0, -1)); setUnsaved(true); } }} result={result} stale={stale} /></fieldset>
     </> : null}
-    {stage === "download" && result ? <ReconciliationDownloadComplete result={result} openCount={getReview(result, matches).open.length} onEdit={() => setStage("review")} onNew={clear} onDownload={() => downloadReport(false)} /> : null}
+    {stage === "download" && result ? <ReconciliationDownloadComplete downloading={exporting} format={reportFormat} result={result} openCount={getReview(result, matches).open.length} onEdit={() => setStage("review")} onNew={clear} onDownload={() => reportFormat === "Excel" ? void downloadExcel() : downloadReport(false)} /> : null}
     <dialog aria-labelledby="reconciliation-confirm-title" className="max-h-[85dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white p-6 text-slate-950 backdrop:bg-slate-950/35" onCancel={() => setConfirm(null)} ref={dialog}>
       <h2 className="text-xl font-semibold" id="reconciliation-confirm-title">{confirm === "clear" ? "Start a new comparison?" : "Replace this comparison?"}</h2>
-      <p className="mt-3 text-sm leading-6 text-slate-600">Download your current report first if you need to keep it. Your original CSV files stay on your device.</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">Download your current report first if you need to keep it. Your original files stay on your device.</p>
       <div className="mt-6 flex flex-wrap justify-end gap-3"><button className={toolButtonClass} onClick={() => setConfirm(null)} ref={cancelButton} type="button">Keep this comparison</button><button className={toolButtonClass} onClick={() => { const action = confirm; setConfirm(null); if (action === "clear") clear(); else compare(); }} type="button">{confirm === "clear" ? "Choose new files" : "Replace comparison"}</button></div>
     </dialog>
   </div>;

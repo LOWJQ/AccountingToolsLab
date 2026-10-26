@@ -22,13 +22,16 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.0",
+    "fflate": "0.8.3",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.468.0",
     "next": "14.2.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "read-excel-file": "9.3.12",
     "tailwind-merge": "^2.2.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "write-excel-file": "4.1.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.18",

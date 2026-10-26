@@ -10,20 +10,20 @@ import { createMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/seo/site";
 
 export const metadata = createMetadata({
-  title: "Free Bank Reconciliation Tool | CSV Transaction Matcher",
-  description: "Match bank statement and cashbook CSV transactions in your browser. Review unmatched items, possible duplicates, bank fees and combined payments. Free, no sign-up.",
+  title: "Free Bank Reconciliation Tool | Excel & CSV Matcher",
+  description: "Match bank statement and cashbook Excel or CSV files in your browser. Review unmatched items, possible duplicates, bank fees and combined payments. Free, no sign-up.",
   path: "/tools/bank-reconciliation"
 });
 
 const faqs = [
-  { question: "Will this work with different banks?", answer: "It supports common CSV layouts through column mapping, rather than a connection to a specific bank. Match your file’s date and amount columns and check the preview, including money direction. Use a signed amount or separate money-in and money-out columns. Running balances alone, PDF statements and Excel workbooks are not supported. This version needs a header row and numeric dates with a four-digit year; unusual exports may need to be reformatted. Compatibility has not been verified against every bank." },
-  { question: "Are my bank statement and cashbook files uploaded?", answer: "No. CSV parsing, transaction matching and report creation happen in this browser tab. The tool has no file-upload endpoint, bank connection or AI service. Files and review decisions are not saved automatically. Download your report before closing the tab. Normal page requests still reach the website hosting service." },
-  { question: "Which CSV formats does the bank reconciliation matcher support?", answer: "Choose CSV or TSV files with a header row, a date column and either one signed amount column or separate money-in and money-out columns. Description, reference and currency columns are optional. Each file can contain up to 10,000 transaction rows and be up to 5 MB. Amounts support up to two decimal places. Select the date and number formats and confirm the money direction in the preview." },
+  { question: "Will this work with different banks?", answer: "It supports CSV, TSV and Excel (.xlsx) transaction exports through column mapping. Check the preview to confirm dates and money direction. A header row and transaction amounts are required; running balances alone and PDFs are not supported. Compatibility has not been verified against every bank or export channel." },
+  { question: "Are my bank statement and cashbook files uploaded?", answer: "No. Excel and CSV parsing, transaction matching and report creation happen in this browser tab. The tool has no file-upload endpoint, bank connection or AI service. Files and review decisions are not saved automatically. Download your report before closing the tab. Normal page requests still reach the website hosting service." },
+  { question: "Which file and date formats are supported?", answer: "Choose CSV, TSV or .xlsx files up to 5 MB, with up to 10,000 transaction rows. Excel files can have up to 30 worksheets; choose the one to compare. A header, date and signed amount or money-in/out columns are required. Dates support Excel date cells, year-first dates, day-first or month-first numeric dates, and English or Malay month names. Two-digit years use 2000–2099 unless you select 1900–1999. Confirm ambiguous dates in the preview. Amounts support up to two decimals. Password-protected and older .xls files are not supported. Excel formulas use saved values; recalculate and save the workbook before importing." },
   { question: "Can one bank deposit match several cashbook entries?", answer: "Yes. The tool suggests groups of two or three transactions in the same money direction whose amounts add up exactly within your date window. Combined suggestions need your approval. When several combinations could work, the rows stay unmatched for manual review. Large candidate pools and the total search effort are bounded to keep the browser responsive; any search limits are shown with the results." },
   { question: "Does an unmatched item mean there is an accounting error?", answer: "No. It may be a timing difference, an unrecorded fee, a duplicate export, a different reference or a missing transaction. The tool labels possible causes as clues, not confirmed facts. Check the original records and subsequent statement before making an accounting adjustment." },
   { question: "Does matching every transaction prove the bank account reconciles?", answer: "No. This tool compares exported transactions. A complete bank reconciliation also checks the statement and cashbook closing balances, previous outstanding items, the statement period and any required accounting adjustments. The net movement difference shown here is not a closing balance difference." },
-  { question: "Can I change a match and download the results?", answer: "Yes. Accept or reject suggestions, unmatch an automatic match, or select equal-value bank and cashbook transactions to match manually. Undo restores recent match changes. Download a CSV report with source file names, original line numbers, amounts, match reasons, review status, notes and invalid rows." },
-  { question: "Can I compare different currencies or import a PDF bank statement?", answer: "Use one bank account and one currency per comparison. The currency selection labels amounts and does not convert them. If your files include a currency column, conflicting currencies are flagged as invalid. This version accepts transaction CSV or TSV exports; it does not read PDFs or Excel workbooks." }
+  { question: "Can I change a match and download the results?", answer: "Yes. Accept or reject suggestions, unmatch an automatic match, or select equal-value bank and cashbook transactions to match manually. Undo restores recent match changes. Download an Excel working paper with a summary, matched items, items needing review, reviewer notes and any excluded rows. CSV reports remain available. Both retain source file names, worksheet names for Excel imports, source row numbers, amounts and review decisions." },
+  { question: "Can I compare different currencies or import a PDF bank statement?", answer: "Use one bank account and one currency per comparison. The currency selection labels amounts and does not convert them. If your files include a currency column, conflicting currencies are flagged as invalid. This version accepts transaction CSV, TSV and Excel (.xlsx) files. It does not read PDFs or older .xls workbooks." }
 ];
 
 export default function BankReconciliationPage() {
@@ -33,7 +33,7 @@ export default function BankReconciliationPage() {
     <SoftwareApplicationJsonLd name="Bank Reconciliation Matcher" description={metadata.description as string} url={pageUrl} />
     <FAQJsonLd faqs={faqs} />
     <nav aria-label="Breadcrumb" className="text-sm text-slate-500"><ol className="flex flex-wrap items-center gap-2"><li><Link className="hover:text-slate-900" href="/">Home</Link></li><li aria-hidden="true">&gt;</li><li><Link className="hover:text-slate-900" href="/tools">Tools</Link></li><li aria-hidden="true">&gt;</li><li className="font-medium text-slate-700">Bank Reconciliation Matcher</li></ol></nav>
-    <ReconciliationWorkspace intro={<div className="max-w-4xl"><h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Bank Reconciliation Matcher</h1><p className="mt-3 text-base leading-7 text-black">Compare a bank statement and cashbook CSV. Find matching transactions, review differences, and download your working paper. Free, with no sign-up.</p></div>}>
+    <ReconciliationWorkspace intro={<div className="max-w-4xl"><h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Bank Reconciliation Matcher</h1><p className="mt-3 text-base leading-7 text-black">Compare bank statement and cashbook Excel or CSV files. Find matching transactions, review differences, and download your working paper. Free, with no sign-up.</p></div>}>
       <section className="grid gap-8 border-t border-slate-200 pt-8 lg:grid-cols-2">
         <div className="lg:pr-10">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
@@ -41,7 +41,7 @@ export default function BankReconciliationPage() {
           </h2>
           <ol className="mt-5 list-decimal space-y-3 pl-5 text-base leading-7 text-black marker:text-black">
             <li className="pl-2">
-              Choose the bank statement and the cashbook or ledger CSV for the same bank account
+              Choose the bank statement and the cashbook or ledger file for the same bank account
               and period.
             </li>
             <li className="pl-2">
@@ -53,7 +53,7 @@ export default function BankReconciliationPage() {
               items, possible duplicates and amount typos.
             </li>
             <li className="pl-2">
-              Download your CSV report with source lines and review decisions. Complete the
+              Download your Excel or CSV report with source rows and review decisions. Complete the
               balance checks in your normal reconciliation process.
             </li>
           </ol>
