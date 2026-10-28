@@ -298,13 +298,13 @@ export function SstCalculatorMalaysia() {
   return (
     <section
       aria-labelledby="sst-calculator-heading"
-      className="w-full overflow-visible rounded-lg border border-slate-200 bg-white"
+      className="w-full overflow-visible border-y border-slate-200 bg-white sm:rounded-lg sm:border"
     >
       <h2 className="sr-only" id="sst-calculator-heading">
         SST calculator inputs and results
       </h2>
 
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 px-5 py-3 md:px-8" role="group" aria-label="Calculator input mode">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 py-3 sm:px-5 md:px-8" role="group" aria-label="Calculator input mode">
         {([false, true] as const).map((useMultiple) => (
           <button
             aria-pressed={multipleItems === useMultiple}
@@ -319,7 +319,7 @@ export function SstCalculatorMalaysia() {
       </div>
 
       {requiresMyr ? (
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 md:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 py-4 sm:px-5 md:px-6">
           <p className="max-w-3xl text-sm leading-6 text-slate-700" role="status">
             The fixed RM25 option requires MYR. Enter prices in Malaysian ringgit.
             Switching currency keeps your entered numbers and does not convert them.
@@ -337,7 +337,7 @@ export function SstCalculatorMalaysia() {
 
       <div className={multipleItems ? "" : "grid md:grid-cols-2"}>
       {multipleItems ? (
-        <div className="p-5 md:p-6">
+        <div className="py-5 sm:p-5 md:p-6">
           <div className="grid gap-4 md:grid-cols-2 md:items-end">
             <ModeSelect mode={mode} onModeChange={(value) => { setMode(value); setHasAttemptedExport(false); }} />
             <p className="text-sm leading-6 text-slate-600">
@@ -368,7 +368,7 @@ export function SstCalculatorMalaysia() {
           </button>
         </div>
       ) : (
-      <div className="grid content-start gap-7 p-5 md:p-8">
+      <div className="grid content-start gap-7 py-5 sm:p-5 md:p-8">
         <label className="grid min-w-0 gap-2" htmlFor="sst-amount">
           <span className="text-sm font-semibold text-slate-950" id="sst-amount-label">
             1. Enter amount
@@ -420,7 +420,7 @@ export function SstCalculatorMalaysia() {
 
       <div
         aria-live="polite"
-        className={multipleItems ? "border-t border-slate-200 p-5 md:p-6" : "min-w-0 border-t border-slate-200 p-5 md:border-l md:border-t-0 md:p-8"}
+        className={multipleItems ? "border-t border-slate-200 py-5 sm:p-5 md:p-6" : "min-w-0 border-t border-slate-200 py-5 sm:p-5 md:border-l md:border-t-0 md:p-8"}
       >
         {!multipleItems ? <h3 className="mb-6 text-base font-semibold text-slate-950">Your result</h3> : null}
         {incompleteCount > 0 ? (
@@ -852,7 +852,7 @@ function DropdownSelect<T extends string>({
                 return (
                   <button
                     aria-selected={isSelected}
-                    className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition ${
+                    className={`flex min-h-11 w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition sm:min-h-0 ${
                       isSelected
                         ? "bg-slate-50 font-semibold text-slate-900"
                         : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-950"

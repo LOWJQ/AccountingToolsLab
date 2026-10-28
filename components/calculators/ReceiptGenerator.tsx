@@ -74,12 +74,12 @@ export function ReceiptGenerator({ onCompletionChange }: { onCompletionChange?: 
       invoiceNumber={pdf.completedPdf.invoiceNumber} customerName={pdf.completedPdf.customerName} total={pdf.completedPdf.total}
       autosaveError={draft.saveError} pdfStatus={pdf.pdfStatus} onDownload={pdf.downloadCompletedPdf} onEdit={pdf.returnToEditor}
       onNewInvoice={() => beginNew()} onHistory={() => setHistoryOpen(true)} /> :
-    <div className="relative min-w-0 rounded-lg border border-slate-200 bg-white [&_button]:min-h-11 [&_input]:text-base [&_textarea]:text-base sm:[&_input]:text-sm sm:[&_textarea]:text-sm" ref={editorRef}>
+    <div className="relative min-w-0 border-y border-slate-200 bg-white sm:rounded-lg sm:border [&_button]:min-h-11 [&_input]:text-base [&_textarea]:text-base sm:[&_input]:text-sm sm:[&_textarea]:text-sm" ref={editorRef}>
       <EditableInvoiceActions documentKind="receipt" calculation={validation.calculation} formatCurrency={formatCurrency} savedInvoiceCount={library.receipts.length}
         isGeneratingPdf={pdf.isGeneratingPdf} onClearEverything={() => setResetOpen(true)} onDownloadInvoice={() => generate("download")}
         onPreviewInvoice={() => generate("preview")} onOpenSavedInvoices={() => setHistoryOpen(true)} />
       {actionError || pdf.pdfStatus || draft.saveError ? <p className="mx-5 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-900" role="status">{actionError || pdf.pdfStatus?.message || draft.saveError}</p> : null}
-      <div className="min-w-0 p-5 sm:p-7 lg:p-8">
+      <div className="min-w-0 py-5 sm:p-7 lg:p-8">
         <header className="grid gap-6 border-b border-slate-200 pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.78fr)]">
           <div className="min-w-0"><h2 className="mb-3 text-sm font-semibold text-slate-950">Business information</h2><div className="grid gap-3">
             {field("businessName", "Business name", "Your business name", 120)}

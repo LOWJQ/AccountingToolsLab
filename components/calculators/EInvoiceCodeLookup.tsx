@@ -141,14 +141,14 @@ export function EInvoiceCodeLookup() {
   return (
     <section
       aria-labelledby="e-invoice-code-lookup-heading"
-      className="w-full min-w-0 scroll-mt-24 rounded-lg border border-slate-200 bg-white"
+      className="w-full min-w-0 scroll-mt-24 border-y border-slate-200 bg-white sm:rounded-lg sm:border"
       ref={sectionRef}
     >
       <h2 className="sr-only" id="e-invoice-code-lookup-heading">
         e-Invoice code lookup
       </h2>
 
-      <div className="border-b border-slate-200 px-5 pt-3 sm:px-6 lg:px-8">
+      <div className="border-b border-slate-200 pt-3 sm:px-6 lg:px-8">
         <div aria-label="Code list" className="flex gap-4 sm:gap-6" role="tablist">
           {tabs.map((tab, tabIndex) => {
             const isActive = tab.id === activeTab;
@@ -188,7 +188,7 @@ export function EInvoiceCodeLookup() {
         </div>
       </div>
       <div role="tabpanel" aria-labelledby={`${tabId}-${activeTab}`} id={`${tabId}-panel`} className="min-w-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-400" tabIndex={0}>
-      <div className="p-5 sm:p-6 lg:px-8">
+      <div className="py-5 sm:p-6 lg:px-8">
         <p className="text-sm leading-6 text-slate-600">
           {tabs.find((tab) => tab.id === activeTab)?.description}
         </p>
@@ -219,7 +219,7 @@ export function EInvoiceCodeLookup() {
         </label>
       </div>
 
-      <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:px-8">
+      <div className="min-w-0 border-t border-slate-200 py-5 sm:p-6 lg:px-8">
         <h3 className="text-base font-semibold text-slate-950">Search results</h3>
         <p aria-live="polite" className="mt-2 text-sm leading-6 text-slate-600">
           {loadError && activeTab === "msic" ? loadError : isLoadingMsic

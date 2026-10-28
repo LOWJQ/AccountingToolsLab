@@ -217,9 +217,9 @@ export function TrialBalanceCalculator() {
   }, []);
 
   return (
-    <section aria-labelledby="trial-balance-calculator-heading" className="grid min-w-0 rounded-lg border border-slate-200 bg-white lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+    <section aria-labelledby="trial-balance-calculator-heading" className="grid min-w-0 border-y border-slate-200 bg-white sm:rounded-lg sm:border lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
       <h2 className="sr-only" id="trial-balance-calculator-heading">Trial balance entries and result</h2>
-      <div className="min-w-0 p-5 sm:p-6">
+      <div className="min-w-0 py-5 sm:p-6">
         <h3 className="text-base font-semibold text-slate-950">Account balances</h3>
         <p className="mt-2 text-sm leading-6 text-slate-600">Enter each account balance in either Debit or Credit.</p>
         <div className="mt-6 space-y-4">
@@ -261,7 +261,7 @@ export function TrialBalanceCalculator() {
         ) : null}
 
       </div>
-      <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0">
+      <div className="min-w-0 border-t border-slate-200 py-5 sm:p-6 lg:border-l lg:border-t-0">
         <div className="lg:sticky lg:top-24" aria-live="polite" aria-atomic="true">
           <h3 className="text-base font-semibold text-slate-950">Your result</h3>
           <p className="mt-6 flex items-center gap-2 text-base font-semibold text-slate-950">

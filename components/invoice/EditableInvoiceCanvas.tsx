@@ -286,8 +286,43 @@ export function EditableInvoiceActions({
   | "formatCurrency"
   | "savedInvoiceCount"
 > & { documentKind?: "invoice" | "receipt" }) {
+  const mobileActionsRef = useRef<HTMLDetailsElement>(null);
+
+  function closeMobileActions() {
+    if (mobileActionsRef.current) mobileActionsRef.current.open = false;
+  }
+
+  useEffect(() => {
+    function handleOutsidePointer(event: PointerEvent) {
+      if (!mobileActionsRef.current?.contains(event.target as Node)) closeMobileActions();
+    }
+    document.addEventListener("pointerdown", handleOutsidePointer);
+    return () => document.removeEventListener("pointerdown", handleOutsidePointer);
+  }, []);
+
   return (
-    <div className="sticky z-30 flex min-w-0 items-center justify-between gap-2 rounded-t-lg border-b border-slate-200 bg-white p-3 transition-[top] duration-300 ease-out sm:gap-4 sm:px-4" style={{ top: "var(--site-header-visible-height, 4rem)" }}>
+    <>
+    <div className="sticky z-30 flex items-center justify-between gap-3 border-b border-slate-200 bg-white py-3 sm:hidden" style={{ top: "var(--site-header-visible-height, 4rem)" }}>
+      <details ref={mobileActionsRef} className="relative" onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeMobileActions();
+      }} onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          closeMobileActions();
+          mobileActionsRef.current?.querySelector("summary")?.focus();
+        }
+      }}>
+        <summary aria-label={`More ${documentKind} actions`} className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 [&::-webkit-details-marker]:hidden">
+          More <ChevronDown aria-hidden="true" className="h-4 w-4" />
+        </summary>
+        <div className="absolute left-0 top-full z-40 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+          <button className="flex min-h-11 w-full items-center gap-3 rounded px-3 text-left text-sm text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500 disabled:opacity-50" disabled={isGeneratingPdf} onClick={() => { closeMobileActions(); onOpenSavedInvoices(); }} type="button"><FolderOpen aria-hidden="true" className="h-4 w-4" />My {documentKind}s{savedInvoiceCount > 0 ? <span className="ml-auto text-slate-500">{savedInvoiceCount}</span> : null}</button>
+          <button aria-label="Preview PDF (opens in a new tab)" className="flex min-h-11 w-full items-center gap-3 rounded px-3 text-left text-sm text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500 disabled:opacity-50" disabled={isGeneratingPdf} onClick={() => { closeMobileActions(); onPreviewInvoice(); }} type="button"><ExternalLink aria-hidden="true" className="h-4 w-4" />Preview PDF</button>
+          <button className="flex min-h-11 w-full items-center gap-3 rounded px-3 text-left text-sm text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500 disabled:opacity-50" disabled={isGeneratingPdf} onClick={() => { closeMobileActions(); onClearEverything(); }} type="button"><RotateCcw aria-hidden="true" className="h-4 w-4" />Reset {documentKind}</button>
+        </div>
+      </details>
+      <button aria-label={isGeneratingPdf ? "Preparing PDF" : "Download PDF"} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 text-sm font-semibold text-white hover:bg-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 disabled:cursor-wait disabled:opacity-70" disabled={isGeneratingPdf} onClick={() => { closeMobileActions(); onDownloadInvoice(); }} type="button"><Download aria-hidden="true" className="h-4 w-4" />{isGeneratingPdf ? "Preparing PDF…" : "Download PDF"}</button>
+    </div>
+    <div className="sticky z-30 hidden min-w-0 items-center justify-between gap-2 rounded-t-lg border-b border-slate-200 bg-white p-3 transition-[top] duration-300 ease-out sm:flex sm:gap-4 sm:px-4" style={{ top: "var(--site-header-visible-height, 4rem)" }}>
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <button
           className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
@@ -327,6 +362,7 @@ export function EditableInvoiceActions({
       </button>
       </div>
     </div>
+    </>
   );
 }
 
@@ -620,14 +656,14 @@ const EditableInvoiceLineItemRow = memo(function EditableInvoiceLineItemRow({
   unitPriceError: string;
 }) {
   return (
-    <div className="group grid min-w-0 gap-3 bg-white px-3 py-3 text-sm sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:items-start sm:gap-3 sm:px-4">
-      <div className="pt-2 tabular-nums text-slate-600">
+    <div className="group grid min-w-0 grid-cols-2 gap-3 bg-white py-3 text-sm sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:items-start sm:gap-3 sm:px-4">
+      <div className="col-span-2 pt-2 tabular-nums text-slate-600 sm:col-span-1">
         <span className="mr-2 text-xs font-semibold uppercase tracking-wide sm:hidden">
           No
         </span>
         {index + 1}
       </div>
-      <div className="min-w-0">
+      <div className="col-span-2 min-w-0 sm:col-span-1">
         <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 sm:hidden">
           Description
         </span>
@@ -683,12 +719,13 @@ const EditableInvoiceLineItemRow = memo(function EditableInvoiceLineItemRow({
       </div>
       <button
         aria-label={`Remove line item ${index + 1}`}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 opacity-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-30 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+        className="inline-flex min-h-11 items-center justify-center gap-2 justify-self-end rounded-md px-2 text-slate-500 opacity-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-30 sm:h-8 sm:min-h-0 sm:w-8 sm:gap-0 sm:justify-self-auto sm:px-0 sm:text-slate-400 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
         disabled={!canRemove}
         onClick={() => onRemoveLineItem(item.id)}
         type="button"
       >
         <Trash2 aria-hidden="true" className="h-4 w-4" />
+        <span className="sm:hidden">Remove</span>
       </button>
     </div>
   );
@@ -720,7 +757,7 @@ export function EditableInvoiceLineItems({
   return (
     <section className="mt-7">
       <h3 className="mb-3 text-sm font-semibold text-slate-950">{title}</h3>
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
+      <div className="overflow-x-auto border-y border-slate-200 sm:rounded-lg sm:border">
         <div className="hidden min-w-[720px] border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 sm:grid sm:grid-cols-[3rem_minmax(0,1.6fr)_7rem_5rem_7rem_2rem] sm:gap-3 sm:px-4">
           <span>No</span>
           <span>Description</span>
@@ -847,7 +884,7 @@ function EditableTaxRow({
         </div>
       ) : (
         <div className="min-w-0">
-          <div className="flex h-10 min-w-0 items-stretch overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
+          <div className="flex h-11 min-w-0 items-stretch overflow-hidden sm:h-10 rounded-lg border border-slate-200 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
             <span className="inline-flex shrink-0 items-center px-3 text-sm font-semibold text-slate-600">
               {currencySymbol}
             </span>
@@ -988,7 +1025,7 @@ export function EditableInvoiceTotals(props: Pick<EditableInvoiceCanvasProps, "c
               </div>
             ) : (
               <div className="min-w-0">
-                <div className="flex h-10 min-w-0 items-stretch overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
+                <div className="flex h-11 min-w-0 items-stretch overflow-hidden sm:h-10 rounded-lg border border-slate-200 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
                   <span className="inline-flex shrink-0 items-center px-3 text-sm font-semibold text-slate-600">
                     {props.currencySymbol}
                   </span>
@@ -1054,7 +1091,7 @@ export function EditableInvoiceTotals(props: Pick<EditableInvoiceCanvasProps, "c
               />
             </div>
             <div className="min-w-0">
-              <div className="flex h-10 min-w-0 items-stretch overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
+              <div className="flex h-11 min-w-0 items-stretch overflow-hidden sm:h-10 rounded-lg border border-slate-200 bg-white focus-within:border-slate-500 focus-within:ring-4 focus-within:ring-slate-100">
                 <span className="inline-flex shrink-0 items-center px-3 text-sm font-semibold text-slate-600">
                   {props.currencySymbol}
                 </span>
@@ -1356,7 +1393,7 @@ function EditableInvoiceNotesAndTerms(props: EditableInvoiceCanvasProps) {
 
 export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
   return (
-    <div className="relative rounded-lg border border-slate-200 bg-white">
+    <div className="relative border-y border-slate-200 bg-white sm:rounded-lg sm:border">
       <EditableInvoiceActions
         calculation={props.calculation}
         formatCurrency={props.formatCurrency}
@@ -1387,7 +1424,7 @@ export function EditableInvoiceCanvas(props: EditableInvoiceCanvasProps) {
       ) : null}
 
       <div
-        className="invoice-print-area min-w-0 bg-white p-5 sm:p-7 lg:p-8"
+        className="invoice-print-area min-w-0 bg-white py-5 sm:p-7 lg:p-8"
         id="invoice-print-area"
       >
         <EditableInvoiceHeader {...props} />

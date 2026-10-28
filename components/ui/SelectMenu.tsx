@@ -133,7 +133,7 @@ export function SelectMenu<T extends string>({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
-        className="inline-flex h-10 w-full min-w-0 items-center justify-between gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-950 transition hover:border-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className="inline-flex h-11 w-full min-w-0 items-center justify-between gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-950 transition hover:border-slate-400 focus:outline-none focus:ring-4 focus:ring-slate-100 sm:h-10"
         id={id}
         onClick={() => {
           setActiveIndex(selectedIndex);
@@ -162,7 +162,7 @@ export function SelectMenu<T extends string>({
             return (
               <button
                 aria-selected={isSelected}
-                className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition ${
+                className={`flex min-h-11 w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition sm:min-h-0 ${
                   isSelected
                     ? "bg-slate-50 font-semibold text-slate-900"
                     : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-950"

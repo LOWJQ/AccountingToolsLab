@@ -248,7 +248,7 @@ function CurrencySelector() {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label="Select currency"
-        className="inline-flex h-10 w-32 items-center justify-between gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100"
+        className="inline-flex h-11 w-32 items-center justify-between gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-slate-100 md:h-10"
         onClick={() => {
           if (isOpen) {
             closeSelector();
@@ -271,7 +271,7 @@ function CurrencySelector() {
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60 sm:left-auto sm:right-0">
+        <div className="absolute right-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/60 sm:left-auto sm:right-0">
           <div className="border-b border-stone-100 p-3">
             <label className="relative block" htmlFor={searchInputId}>
               <Search
@@ -284,7 +284,7 @@ function CurrencySelector() {
                 aria-expanded={isOpen}
                 aria-label="Search currencies"
                 autoComplete="off"
-                className="h-10 w-full rounded-xl border border-stone-200 bg-stone-50 py-2 pl-9 pr-3 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                className="h-11 w-full rounded-xl border border-stone-200 bg-stone-50 py-2 pl-9 pr-3 text-base text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100 md:h-10 sm:text-sm"
                 id={searchInputId}
                 onChange={(event) => {
                   setSearchQuery(event.target.value);
@@ -299,7 +299,7 @@ function CurrencySelector() {
             </label>
           </div>
 
-          <div className="max-h-80 overflow-y-auto py-1.5" id={listboxId} role="listbox">
+          <div className="max-h-[min(20rem,calc(100dvh-13rem))] overflow-y-auto overscroll-contain py-1.5 md:max-h-80" id={listboxId} role="listbox">
             {filteredCurrencies.length > 0 ? (
               filteredCurrencies.map((option, index) => {
                 const isActive = activeIndex === index;
@@ -432,12 +432,25 @@ export function Header() {
   const desktopMenuOverlayRef = useRef<HTMLButtonElement>(null);
   const toolsButtonRef = useRef<HTMLButtonElement>(null);
   const guidesButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuId = useId();
 
   function closeAllMenus() {
     setDesktopMenu(null);
     setIsMobileMenuOpen(false);
     setMobileExpandedSection(null);
   }
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 768px)");
+    function handleBreakpointChange() {
+      setDesktopMenu(null);
+      setIsMobileMenuOpen(false);
+      setMobileExpandedSection(null);
+    }
+    desktopQuery.addEventListener("change", handleBreakpointChange);
+    return () => desktopQuery.removeEventListener("change", handleBreakpointChange);
+  }, []);
 
   function openDesktopMenu(menu: DesktopMenuKey) {
     setDesktopMenu(menu);
@@ -469,6 +482,7 @@ export function Header() {
     function handleKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key === "Escape") {
         closeAllMenus();
+        if (isMobileMenuOpen) mobileMenuButtonRef.current?.focus();
       }
     }
 
@@ -569,6 +583,14 @@ export function Header() {
       const currentScrollY = window.scrollY;
       const headerHeight = header?.offsetHeight ?? 0;
 
+      // Keep mobile navigation and tool actions stable while reading or typing.
+      // The original scroll-away behavior stays in place at desktop widths.
+      if (header && window.matchMedia("(max-width: 767px)").matches) {
+        previousScrollY = currentScrollY;
+        applyHeaderOffset(header, headerHeight, 0);
+        return;
+      }
+
       if (!header || currentScrollY <= 0 || headerHeight <= 0) {
         previousScrollY = 0;
         if (header) {
@@ -620,7 +642,7 @@ export function Header() {
       {desktopMenu ? (
         <button
           aria-label="Close navigation menu"
-          className="fixed inset-x-0 bottom-0 top-16 z-40 hidden cursor-default bg-black/25 backdrop-blur-sm sm:block"
+          className="fixed inset-x-0 bottom-0 top-16 z-40 hidden cursor-default bg-black/25 backdrop-blur-sm md:block"
           onClick={() => setDesktopMenu(null)}
           ref={desktopMenuOverlayRef}
           type="button"
@@ -628,18 +650,18 @@ export function Header() {
       ) : null}
 
       <header
-        className="sticky top-0 z-50 border-b border-stone-200 bg-white transition-[transform,opacity] duration-300 ease-out will-change-transform"
+        className="site-header sticky top-0 z-50 border-b border-stone-200 bg-white transition-[transform,opacity] duration-300 ease-out will-change-transform"
         ref={headerRef}
         style={{
           opacity: "var(--header-visibility, 1)",
           transform: "translateY(calc(-1 * var(--header-offset, 0px)))"
         }}
       >
-      <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-4 px-3 sm:px-5 lg:px-6">
+      <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-3 px-4 sm:gap-4 sm:px-5 lg:px-6">
         <Link className="flex shrink-0 items-center" href="/" aria-label="AccountingToolsLab home">
           <Image
             alt="AccountingToolsLab"
-            className="h-auto w-[185px] sm:w-[220px]"
+            className="h-auto w-[170px] sm:w-[220px]"
             height={52}
             priority
             src="/logo-optimized.png"
@@ -648,7 +670,7 @@ export function Header() {
         </Link>
 
         <div
-          className="hidden flex-1 sm:block"
+          className="hidden flex-1 md:block"
           onBlurCapture={handleDesktopBlur}
           ref={desktopNavRef}
         >
@@ -715,29 +737,33 @@ export function Header() {
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <CurrencySelector />
           </div>
 
           <button
             aria-expanded={isMobileMenuOpen}
-            aria-label="Toggle navigation menu"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 text-stone-700 transition hover:border-stone-300 hover:text-stone-950 sm:hidden"
+            aria-controls={isMobileMenuOpen ? mobileMenuId : undefined}
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 hover:text-stone-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 md:hidden"
             onClick={() => {
               setIsMobileMenuOpen((current) => !current);
               setDesktopMenu(null);
             }}
+            ref={mobileMenuButtonRef}
             type="button"
           >
             {isMobileMenuOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
+            <span>{isMobileMenuOpen ? "Close" : "Menu"}</span>
           </button>
         </div>
       </div>
 
       {isMobileMenuOpen ? (
-        <nav className="absolute inset-x-0 top-16 z-20 border-b border-stone-200 bg-white px-4 py-3 shadow-sm sm:hidden">
-          <div className="mx-auto flex max-w-[1240px] flex-col rounded-3xl border border-stone-200 bg-white p-2 text-sm text-stone-600 shadow-lg shadow-stone-200/50">
-            <div className="border-b border-stone-100 p-2 pb-4">
+        <nav aria-label="Mobile navigation" id={mobileMenuId} className="absolute inset-x-0 top-16 z-20 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-b border-stone-200 bg-white px-4 pb-4 shadow-lg shadow-stone-200/40 md:hidden">
+          <div className="flex flex-col text-base text-stone-600">
+            <div className="flex min-h-16 items-center justify-between gap-3 border-b border-stone-200 py-3">
+              <span className="text-sm font-medium text-stone-600">Currency</span>
               <CurrencySelector />
             </div>
 
@@ -749,7 +775,8 @@ export function Header() {
                 <div className="border-b border-stone-100 last:border-b-0" key={sectionKey}>
                   <button
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-between px-2 py-4 text-left text-sm font-semibold text-stone-900"
+                    aria-controls={isExpanded ? `${mobileMenuId}-${sectionKey}` : undefined}
+                    className="flex min-h-12 w-full items-center justify-between py-4 text-left text-base font-semibold text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500"
                     onClick={() =>
                       setMobileExpandedSection((current) =>
                         current === sectionKey ? null : sectionKey
@@ -767,25 +794,18 @@ export function Header() {
                   </button>
 
                   {isExpanded ? (
-                    <div className="grid gap-1 px-2 pb-4">
+                    <div className="grid pb-3" id={`${mobileMenuId}-${sectionKey}`}>
+                      <Link className="flex min-h-11 items-center rounded px-3 text-sm font-semibold text-teal-700 hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-700" href={menu.viewAllHref} onClick={() => closeAllMenus()}>{menu.viewAllLabel}<ChevronRight aria-hidden="true" className="ml-auto h-4 w-4" /></Link>
                       {menu.items.map((item) => (
                         <Link
-                          className="rounded-2xl px-3 py-3 transition hover:bg-stone-50"
+                          className="flex min-h-11 items-center rounded px-3 py-2 text-sm transition hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500"
                           href={item.href}
                           key={item.href}
                           onClick={() => closeAllMenus()}
                         >
-                          <p className="font-semibold text-stone-900">{item.label}</p>
-                          <p className="mt-1 text-sm leading-6 text-stone-500">{item.description}</p>
+                          <span className="font-medium text-stone-900">{item.label}</span>
                         </Link>
                       ))}
-                      <Link
-                        className="px-3 pt-2 text-sm font-semibold text-teal-700"
-                        href={menu.viewAllHref}
-                        onClick={() => closeAllMenus()}
-                      >
-                        {menu.viewAllLabel}
-                      </Link>
                     </div>
                   ) : null}
                 </div>
@@ -793,7 +813,7 @@ export function Header() {
             })}
 
             <Link
-              className="px-4 py-4 text-sm font-semibold text-stone-900 transition hover:text-stone-950"
+              className="flex min-h-12 items-center py-4 text-base font-semibold text-stone-900 transition hover:text-stone-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500"
               href="/about"
               onClick={() => closeAllMenus()}
             >

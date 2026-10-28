@@ -211,14 +211,14 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
     {error ? <p className="mb-5 text-sm font-medium leading-6 text-slate-900" role="alert">{error}</p> : null}
     {stage === "files" ? <>
       {result ? <button className={`${toolButtonClass} mb-5`} disabled={busy} onClick={() => setStage("review")} type="button">{stale ? "View previous results" : "Back to results"}</button> : null}
-      <div className="rounded-lg border border-slate-200 bg-white">
+      <div className="border-y border-slate-200 bg-white sm:rounded-lg sm:border">
         <fieldset className="min-w-0" disabled={busy}>
           <legend className="sr-only">Choose files and matching settings</legend>
           <div className="grid min-w-0 lg:grid-cols-2">
-            <div className="min-w-0 p-5 sm:p-6 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setBank(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("bank", file)} onSheet={sheet => { if (bank.workbook) void readFile("bank", bank.name, bank.workbook.bytes, sheet); }} source="bank" state={bank} /></div>
-            <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setLedger(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("ledger", file)} onSheet={sheet => { if (ledger.workbook) void readFile("ledger", ledger.name, ledger.workbook.bytes, sheet); }} source="ledger" state={ledger} /></div>
+            <div className="min-w-0 py-5 sm:p-6 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setBank(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("bank", file)} onSheet={sheet => { if (bank.workbook) void readFile("bank", bank.name, bank.workbook.bytes, sheet); }} source="bank" state={bank} /></div>
+            <div className="min-w-0 border-t border-slate-200 py-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8"><ImportFilePanel currency={currency} onChange={state => { setLedger(state); setDirty(Boolean(result)); }} onFile={file => void loadFile("ledger", file)} onSheet={sheet => { if (ledger.workbook) void readFile("ledger", ledger.name, ledger.workbook.bytes, sheet); }} source="ledger" state={ledger} /></div>
           </div>
-          <div className="border-t border-slate-200 px-5 py-5 sm:px-6 lg:px-8">
+          <div className="border-t border-slate-200 py-5 sm:px-6 lg:px-8">
             <details ref={settings}>
               <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                 Matching settings (optional)
@@ -242,7 +242,7 @@ export function BankReconciliationMatcher({ onStageChange }: { onStageChange?: (
             </details>
           </div>
         </fieldset>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 py-4 sm:px-6 lg:px-8">
           <p className="max-w-xl text-xs leading-5 text-slate-500">{busy ? "Comparing locally. Your transaction data is not uploaded." : "Check dates and money direction in the previews, then compare."}</p>
           <div className="flex flex-wrap gap-3">{busy ? <button className={toolButtonClass} onClick={() => { version.current++; cancel(); setBusy(false); setError("Comparison cancelled. Your selected files are still available."); }} type="button">Cancel</button> : null}<button className={reconciliationPrimaryButton} disabled={busy || bank.loading || ledger.loading} onClick={() => unsaved ? setConfirm("compare") : compare()} type="button">{busy ? "Comparing…" : "Compare transactions"}<ArrowRight aria-hidden="true" className="h-4 w-4" /></button></div>
         </div>

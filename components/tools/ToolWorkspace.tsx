@@ -14,12 +14,12 @@ export function ToolWorkspace({ children, inputs, title, wide = false }: {
 }) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className={`grid min-w-0 rounded-lg border border-slate-200 bg-white ${wide ? "lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"}`}>
-      <div className="min-w-0 p-5 sm:p-6 lg:p-8">
+    <section aria-labelledby={headingId} className={`grid min-w-0 border-y border-slate-200 bg-white sm:rounded-lg sm:border ${wide ? "lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"}`}>
+      <div className="min-w-0 py-5 sm:p-6 lg:p-8">
         <h2 className="text-base font-semibold text-slate-950" id={headingId}>{title}</h2>
         <div className="mt-5 grid min-w-0 gap-5">{inputs}</div>
       </div>
-      <div className="min-w-0 border-t border-slate-200 p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8">
+      <div className="min-w-0 border-t border-slate-200 py-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-8">
         <h3 className="text-base font-semibold text-slate-950">Your result</h3>
         <div aria-live="polite" aria-atomic="true" className="mt-6 min-w-0">{children}</div>
       </div>

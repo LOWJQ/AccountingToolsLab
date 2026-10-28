@@ -17,3 +17,18 @@ body {
 .font-display {
   font-family: var(--font-playfair), Georgia, serif;
 }
+
+@media (max-width: 639px) {
+  .tool-page h1 {
+    font-size: 1.625rem;
+    line-height: 1.25;
+  }
+
+  /* Keep editable text readable and avoid automatic zoom on iOS. */
+  .tool-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .tool-page select,
+  .tool-page textarea {
+    font-size: 1rem;
+    min-height: 2.75rem;
+  }
+}
